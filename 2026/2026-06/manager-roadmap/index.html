@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дорожная карта менеджера — SALE 100.0</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Что мы ждём от менеджера-клоузера с первого дня: цель, правила, лестница звонка, сроки и оценка.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2E9; --card:#FFFFFF; --ink:#191713; --muted:#615B50;
+    --green:#0E5C46; --green-deep:#0A3D2E; --amber:#C2790F; --red:#9A2D22;
+    --line:rgba(25,23,19,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:"Golos Text",sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:0 22px}
+  h1,h2,.num,.kicker{font-family:"Unbounded",sans-serif}
+
+  /* hero */
+  header{padding:72px 0 30px}
+  .kicker{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);font-weight:700}
+  h1{font-size:clamp(40px,8vw,76px);line-height:.98;font-weight:800;letter-spacing:-.02em;margin:18px 0 0}
+  h1 .hl{color:var(--green)}
+  .lead{font-size:clamp(17px,2.4vw,21px);color:var(--muted);max-width:640px;margin:22px 0 0;font-weight:500}
+  .promise{margin:30px 0 0;padding:20px 24px;background:var(--green-deep);color:#F6F2E9;border-radius:16px;font-size:clamp(17px,2.5vw,22px);font-weight:600;line-height:1.35}
+  .promise b{color:#F4C775}
+
+  /* stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:30px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 16px}
+  .stat .big{font-family:"Unbounded";font-weight:800;font-size:clamp(28px,5vw,40px);color:var(--green);line-height:1;letter-spacing:-.02em}
+  .stat .cap{color:var(--muted);font-size:13.5px;margin-top:10px;line-height:1.35}
+  @media (max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+  /* steps */
+  main{padding:18px 0 40px}
+  .step{display:grid;grid-template-columns:78px 1fr;gap:18px;padding:30px 0;border-top:1px solid var(--line);opacity:0;transform:translateY(16px);animation:rise .6s cubic-bezier(.2,.7,.2,1) forwards}
+  .num{font-size:30px;font-weight:700;color:var(--amber);line-height:1}
+  .step h2{font-size:clamp(21px,3.2vw,27px);font-weight:700;letter-spacing:-.01em;line-height:1.08}
+  .step p{color:var(--muted);margin-top:10px;font-size:16.5px}
+  ul{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:9px}
+  li{position:relative;padding-left:26px;font-size:16.5px}
+  li::before{content:"";position:absolute;left:2px;top:9px;width:9px;height:9px;border-radius:50%;background:var(--green)}
+  li b{color:var(--ink)}
+
+  /* ladder */
+  .ladder{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+  .rung{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;gap:14px;align-items:flex-start}
+  .rung .lvl{font-family:"Unbounded";font-weight:700;font-size:14px;color:#fff;background:var(--green);min-width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+  .rung:nth-child(2) .lvl{background:var(--amber)}
+  .rung:nth-child(3) .lvl{background:#7C756A}
+  .rung b{font-size:16.5px}
+  .rung span{color:var(--muted);font-size:15px;display:block;margin-top:2px}
+
+  /* time chips */
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .chip{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-size:15px;font-weight:500}
+  .chip b{font-family:"Unbounded";font-weight:700;color:var(--green);font-size:15px}
+
+  /* stop list */
+  .stop{background:#FBEDEB;border:1px solid rgba(154,45,34,.22);border-radius:16px;padding:18px 20px;margin-top:16px}
+  .stop li::before{background:var(--red)}
+  .stop b{color:var(--red)}
+
+  footer{padding:46px 0 70px;border-top:1px solid var(--line);margin-top:10px}
+  .close{font-family:"Unbounded";font-weight:700;font-size:clamp(24px,4.5vw,40px);letter-spacing:-.02em;line-height:1.05}
+  .close .hl{color:var(--green)}
+  .sig{color:var(--muted);margin-top:14px;font-size:14px}
+
+  @keyframes rise{to{opacity:1;transform:none}}
+  .step:nth-child(1){animation-delay:.05s}.step:nth-child(2){animation-delay:.1s}.step:nth-child(3){animation-delay:.15s}
+  .step:nth-child(4){animation-delay:.2s}.step:nth-child(5){animation-delay:.25s}.step:nth-child(6){animation-delay:.3s}
+  .step:nth-child(7){animation-delay:.35s}.step:nth-child(8){animation-delay:.4s}
+  @media (max-width:560px){.step{grid-template-columns:1fr;gap:6px}.num{font-size:24px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="kicker">SALE 100.0 · Банкротство и РДГ</div>
+  <h1>Дорожная карта <span class="hl">менеджера</span></h1>
+  <p class="lead">Коротко и по делу — что мы ждём от тебя с первого дня. Прочитай один раз, держи в голове всегда.</p>
+  <div class="promise">Тебе не надо думать, за кого взяться — <b>система сама даёт следующего клиента и говорит, что сделать</b>. Твоё дело — <b>позвонить и довести до оплаты</b>. Делаешь так каждый день — будут договоры.</div>
+</div></header>
+
+<section class="wrap stats">
+  <div class="stat"><div class="big">5–6</div><div class="cap">новых лидов в день — пока держишь текущих в порядке</div></div>
+  <div class="stat"><div class="big">20%</div><div class="cap">конверсия в договор — норма, которую мы ждём</div></div>
+  <div class="stat"><div class="big">20</div><div class="cap">договоров со 100 лидов — это и есть 20%</div></div>
+  <div class="stat"><div class="big">12+</div><div class="cap">договоров в месяц — твой минимум</div></div>
+</section>
+
+<main class="wrap">
+
+  <div class="step">
+    <div class="num">01</div>
+    <div>
+      <h2>Твоя роль и цель</h2>
+      <p>Ты клоузер. Твоя задача — довести клиента до оплаты, а не «просто поговорить».</p>
+      <ul>
+        <li>Минимум — <b>12 договоров в месяц</b>. Хорошо — 17 и выше.</li>
+        <li>Сделка засчитывается, когда клиент внёс <b>реальный платёж (12–15 000 ₽)</b> — не просто оставил заявку.</li>
+        <li>Полное сопровождение банкротства — это деньги клиента на месяцы вперёд. Ты открываешь эту дверь.</li>
+        <li>Поток новых лидов открыт, <b>пока держишь текущих клиентов в порядке</b>. Чисто у тебя — даём ещё.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">02</div>
+    <div>
+      <h2>Главное правило: лид в аренде</h2>
+      <p>Клиент принадлежит системе, а не тебе лично.</p>
+      <ul>
+        <li>Пока ты <b>на линии и работаешь</b> с лидом — он твой.</li>
+        <li>Не отработал в срок — лид уходит другому менеджеру. Это честно: <b>работаешь — держишь</b>.</li>
+        <li>Хочешь больше новых лидов — держи текущих в порядке.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">03</div>
+    <div>
+      <h2>Цель каждого звонка — лестница</h2>
+      <p>Спускайся по ступеням, но не уходи с пустыми руками.</p>
+      <div class="ladder">
+        <div class="rung"><div class="lvl">1</div><div><b>Полная оплата / 15 000 ₽</b><span>Лучший исход — ведём клиента в сопровождение.</span></div></div>
+        <div class="rung"><div class="lvl">2</div><div><b>Не готов? Возьми 990 ₽</b><span>Минимальный платёж закрепляет лид за тобой.</span></div></div>
+        <div class="rung"><div class="lvl">3</div><div><b>Не платит? Договор + паспорт + дата оплаты</b><span>И понятная причина, почему пока без денег.</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">04</div>
+    <div>
+      <h2>Твой рабочий день</h2>
+      <ul>
+        <li>Пришёл → нажал <b>«Я на линии»</b>.</li>
+        <li>Система сама даёт тебе задачи — <b>по деньгам</b>, самое важное сверху.</li>
+        <li>Нет срочных задач → падают <b>новые лиды</b> (входящие звонки).</li>
+        <li>Ты не выбираешь из списка — жмёшь <b>«Следующая задача»</b>, система решает за тебя.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">05</div>
+    <div>
+      <h2>Сроки, которые система от тебя ждёт</h2>
+      <p>Не успел — лид уходит. Успел — деньги остаются у тебя.</p>
+      <div class="chips">
+        <div class="chip">Договор — <b>за 24 часа</b></div>
+        <div class="chip">990 ₽ — <b>за 48 часов</b> после договора</div>
+        <div class="chip">Реальный платёж — <b>за 14 дней</b></div>
+        <div class="chip">Ответ на сообщение — <b>за 5 минут</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">06</div>
+    <div>
+      <h2>Как тебя оценивают</h2>
+      <p>После каждого звонка ИИ слушает разговор и даёт тебе обратную связь.</p>
+      <ul>
+        <li>Смотрим: выяснил ситуацию → объяснил ценность → отработал возражения → <b>попытался закрыть</b>.</li>
+        <li>Один трудный звонок — не проблема. Важен <b>тренд и усилие</b>, а не один результат.</li>
+        <li>«Слил» (не пытался закрыть, бросил клиента) — разберём вместе и подтянем на тренажёре.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">07</div>
+    <div>
+      <h2>Так нельзя — стоп-лист</h2>
+      <ul class="stop">
+        <li>Не обещай <b>«спишем 100%»</b> — это незаконно и убивает доверие.</li>
+        <li>Не сливай тяжёлых клиентов, чтобы хватать лёгких — это <b>видно и считается</b>.</li>
+        <li>Не паркуй клиента в «подумает» <b>без конкретной даты</b>.</li>
+        <li>Не груби. Никогда.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="num">08</div>
+    <div>
+      <h2>Как расти</h2>
+      <ul>
+        <li>После каждого звонка — <b>конкретный фидбек</b>, что улучшить.</li>
+        <li>Тренажёр звонков и обучение под <b>твои слабые места</b>.</li>
+        <li>Держишь текущих клиентов в порядке → <b>получаешь больше новых лидов</b>.</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+
+<footer><div class="wrap">
+  <div class="close">Делай действия — <span class="hl">система сделает результат.</span></div>
+  <div class="sig">SALE 100.0 · Дорожная карта менеджера-клоузера</div>
+</div></footer>
+</body>
+</html>
