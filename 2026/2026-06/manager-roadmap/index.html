@@ -70,6 +70,19 @@
 
   .note{margin-top:14px;font-weight:600;color:var(--green-deep)}
 
+  /* weights */
+  .wh{font-weight:600;margin-top:20px;font-size:16px}
+  .weights{margin-top:14px;display:flex;flex-direction:column;gap:15px}
+  .wtop{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .wl{font-weight:600;font-size:16px}
+  .wp{font-family:"Unbounded";font-weight:700;color:var(--green);font-size:16px;flex:0 0 auto}
+  .wd{color:var(--muted);font-size:14px;margin-top:3px}
+  .wbar{height:8px;background:rgba(14,92,70,.12);border-radius:6px;overflow:hidden;margin-top:7px}
+  .wbar i{display:block;height:100%;background:var(--green);border-radius:6px}
+  .wrow.key .wp{color:var(--amber)}
+  .wrow.key .wbar i{background:var(--amber)}
+  .wsum{margin-top:16px;font-weight:600;color:var(--green-deep);font-size:16px}
+
   footer{padding:46px 0 70px;border-top:1px solid var(--line);margin-top:10px}
   .close{font-family:"Unbounded";font-weight:700;font-size:clamp(24px,4.5vw,40px);letter-spacing:-.02em;line-height:1.05}
   .close .hl{color:var(--green)}
@@ -180,6 +193,41 @@
         <li><b>Оценивают не по одному звонку, а по 20–30</b> — по тому, как ты работаешь в целом. Один трудный звонок тебя не утопит.</li>
         <li><b>«Слил»</b> (даже не попытался закрыть, бросил клиента) — разберём вместе и подтянем на тренажёре.</li>
       </ul>
+
+      <p class="wh">Из чего складывается балл звонка:</p>
+      <div class="weights">
+        <div class="wrow key">
+          <div class="wtop"><span class="wl">Закрытие по лестнице</span><span class="wp">35%</span></div>
+          <div class="wd">Пытался довести до оплаты: 15 000 → 990 → договор + дата.</div>
+          <div class="wbar"><i style="width:35%"></i></div>
+        </div>
+        <div class="wrow key">
+          <div class="wtop"><span class="wl">Отработка возражений</span><span class="wp">25%</span></div>
+          <div class="wd">Не сдался после первого «нет»: «дорого», «подумаю», «не верю».</div>
+          <div class="wbar"><i style="width:25%"></i></div>
+        </div>
+        <div class="wrow">
+          <div class="wtop"><span class="wl">Диагностика</span><span class="wp">15%</span></div>
+          <div class="wd">Выяснил долги, приставов, имущество, доход — до того как назвать цену.</div>
+          <div class="wbar"><i style="width:15%"></i></div>
+        </div>
+        <div class="wrow">
+          <div class="wtop"><span class="wl">Объяснил ценность</span><span class="wp">12%</span></div>
+          <div class="wd">Как банкротство решит проблему: списание долгов, защита от приставов, законно.</div>
+          <div class="wbar"><i style="width:12%"></i></div>
+        </div>
+        <div class="wrow">
+          <div class="wtop"><span class="wl">Открытие и контроль</span><span class="wp">8%</span></div>
+          <div class="wd">Представился, задал рамку разговора, вёл его сам.</div>
+          <div class="wbar"><i style="width:8%"></i></div>
+        </div>
+        <div class="wrow">
+          <div class="wtop"><span class="wl">Тон и честность</span><span class="wp">5%</span></div>
+          <div class="wd">Слушал, не перебивал, не грубил, не обещал лишнего.</div>
+          <div class="wbar"><i style="width:5%"></i></div>
+        </div>
+      </div>
+      <p class="wsum">Закрытие + возражения = 60% оценки. Это главное, на что смотрит ИИ.</p>
     </div>
   </div>
 
