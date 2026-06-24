@@ -193,6 +193,9 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
 .seg{display:flex;gap:7px;background:var(--surface2);border:1px solid var(--line);border-radius:13px;padding:4px;margin-bottom:14px}
 .seg button{flex:1;border:0;background:transparent;font-family:"Golos Text";font-weight:600;font-size:13px;color:var(--muted);padding:9px;border-radius:9px;cursor:pointer;transition:.2s}
 .seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow-sm)}
+.seg button small{display:block;font-weight:400;font-size:10.5px;opacity:.7;margin-top:1px}
+.seg button.on small{opacity:.85}
+.seg-label{font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:8px}
 .filler-note{font-size:12.5px;color:var(--muted);margin:-6px 0 13px;line-height:1.4}
 .fieldset{display:grid;gap:11px;animation:rise .35s}
 .field label{display:block;font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
@@ -607,12 +610,18 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
 
   <!-- ЭКРАН 3 — СБОР ДАННЫХ (без паспорта, подпись по СМС через ОКИ ДОКИ) -->
   <div class="scr" data-screen="3">
-    <div class="eyebrow">📝 оформление · 1 минута · без паспорта</div>
-    <h1>Оформим договор <span class="hl">без паспорта</span></h1>
-    <p class="lead">Менеджер спросит ФИО, дату рождения и номер телефона, куда придёт подпись по СМС. Эта электронная подпись <b>юридически заменяет паспорт</b>.</p>
+    <div class="eyebrow">📝 оформление · 1 минута</div>
+    <h1>Оформить <span class="hl">договор</span></h1>
+    <p class="lead">Менеджер спросит данные. Подпись — по СМС-коду (ОКИ ДОКИ), это электронная подпись и она <b>юридически заменяет паспорт</b>. Или с паспортом — кому так спокойнее.</p>
 
     <div class="form">
-      <!-- основное: ФИО + дата рождения + телефон -->
+      <div class="seg-label">Как подписываем?</div>
+      <div class="seg">
+        <button class="on" onclick="setMode('sms')" id="mSms">Подпись по СМС<small>без паспорта</small></button>
+        <button onclick="setMode('pass')" id="mPass">С паспортом<small>больше доверия</small></button>
+      </div>
+
+      <!-- СМС: ФИО + дата рождения + телефон -->
       <div class="fieldset" id="fsSms">
         <div class="field"><label>Фамилия Имя Отчество</label><input placeholder="Иванов Иван Иванович"></div>
         <div class="row2">
@@ -620,10 +629,9 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
           <div class="field"><label>Телефон для подписи (СМС)</label><input placeholder="+7 999 123-45-67" inputmode="tel"></div>
         </div>
         <div class="sms-hint"><span>🔏</span><div>На этот номер придёт <b>СМС-код для подписи</b> через сервис <b>ОКИ ДОКИ</b>. Это простая электронная подпись — она заменяет паспорт, договор подписываете прямо сейчас.</div></div>
-        <div class="nopass"><a onclick="setMode('pass')">Подписать с паспортом (больше доверия) →</a></div>
       </div>
 
-      <!-- альтернатива: с паспортом -->
+      <!-- с паспортом -->
       <div class="fieldset" id="fsPass" style="display:none">
         <div class="field"><label>Фамилия Имя Отчество</label><input placeholder="Иванов Иван Иванович"></div>
         <div class="row2">
@@ -632,7 +640,7 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
         </div>
         <div class="field"><label>Кем и когда выдан</label><input placeholder="ГУ МВД… · 12.05.2018"></div>
         <div class="field"><label>Адрес прописки</label><input placeholder="г. Санкт-Петербург, …"></div>
-        <div class="nopass"><a onclick="setMode('sms')">← Без паспорта, по СМС (ОКИ ДОКИ)</a></div>
+        <div class="sms-hint"><span>🔏</span><div>Подпись всё равно по <b>СМС-коду</b> на телефон (ОКИ ДОКИ) — паспорт добавляет доверия к договору.</div></div>
       </div>
     </div>
   </div>
@@ -820,7 +828,7 @@ function setDoc(total, first, graf, firstLbl){
 
 /* форма */
 function setFiller(f){filler=f;document.getElementById('fMgr').classList.toggle('on',f==='mgr');document.getElementById('fSelf').classList.toggle('on',f==='self');var n=document.getElementById('fillerNote'); if(n) n.textContent = f==='mgr' ? 'Менеджер заполнит за вас — просто продиктуйте данные.' : 'Заполните поля сами — это займёт минуту, менеджер на связи и поможет.';}
-function setMode(m){mode=m;document.getElementById('fsPass').style.display=m==='pass'?'':'none';document.getElementById('fsSms').style.display=m==='sms'?'':'none';}
+function setMode(m){mode=m;document.getElementById('fsPass').style.display=m==='pass'?'':'none';document.getElementById('fsSms').style.display=m==='sms'?'':'none';var s=document.getElementById('mSms'),p=document.getElementById('mPass');if(s)s.classList.toggle('on',m==='sms');if(p)p.classList.toggle('on',m==='pass');}
 function toggleQR(){const w=document.getElementById('qrwrap'),l=document.getElementById('qrLbl');const sh=w.style.display==='none';w.style.display=sh?'flex':'none';l.textContent=sh?'Скрыть QR':'Показать QR';}
 function copyLink(){const l=document.getElementById('copyLbl');l.textContent='Ссылка скопирована ✓';setTimeout(()=>{l.textContent='Скопировать ссылку СБП';},1800);}
 function setKD(v){kd=v;document.querySelectorAll('.kd-opt').forEach(b=>b.classList.toggle('on',b.dataset.kd===String(v)));recalc();}
