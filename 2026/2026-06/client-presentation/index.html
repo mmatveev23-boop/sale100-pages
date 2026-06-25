@@ -26,29 +26,57 @@
 html,body{height:100%}
 body{
   font-family:"Golos Text",system-ui,sans-serif;
-  background:
-    radial-gradient(1200px 600px at 80% -10%, #fff6e3 0%, transparent 55%),
-    radial-gradient(900px 500px at -10% 10%, #e7f1ea 0%, transparent 50%),
-    var(--paper);
+  background:var(--surface);
   color:var(--ink);
-  display:flex; justify-content:center; align-items:flex-start;
-  padding:26px 16px 60px;
+  margin:0;
   -webkit-font-smoothing:antialiased;
 }
-.demo-note{position:fixed;left:14px;top:12px;font-size:11px;color:var(--faint);letter-spacing:.04em;text-transform:uppercase;z-index:50}
 
-/* phone shell */
+/* ===== АДАПТИВНАЯ ОБОЛОЧКА ===== */
+.shell{min-height:100dvh;display:flex}
+.brand-panel{display:none}
+
+/* МОБАЙЛ (база): приложение на весь экран, edge-to-edge, safe-area */
 .app{
-  width:100%; max-width:430px; background:var(--surface);
-  border-radius:34px; box-shadow:var(--shadow);
-  overflow:hidden; position:relative; border:1px solid var(--line);
-  height:min(880px, calc(100dvh - 48px)); display:flex; flex-direction:column;
+  flex:1 1 auto; width:100%; background:var(--surface);
+  display:flex; flex-direction:column; overflow:hidden; position:relative;
+  height:100dvh;
 }
 .screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
+/* ПЛАНШЕТ и выше: карточка по центру на фирменном фоне */
+@media (min-width:680px){
+  body{background:
+    radial-gradient(1100px 600px at 85% -10%, #fff6e3 0%, transparent 55%),
+    radial-gradient(900px 520px at -10% 10%, #e7f1ea 0%, transparent 50%),
+    var(--paper);}
+  .shell{align-items:center;justify-content:center;padding:28px;gap:48px}
+  .app{flex:0 0 auto;max-width:440px;height:min(920px, calc(100dvh - 56px));
+    border-radius:36px;box-shadow:var(--shadow);border:1px solid var(--line)}
+  .hdr{padding-top:16px}
+  .foot{padding-bottom:15px}
+}
+
+/* ДЕСКТОП: две колонки — бренд-панель + флоу */
+@media (min-width:1080px){
+  body{background:
+    radial-gradient(720px 520px at 8% 14%, #1d5a47 0%, transparent 60%),
+    linear-gradient(155deg,#143a2e,#0c211b);}
+  .shell{gap:60px;padding:48px}
+  .app{height:min(880px, calc(100dvh - 96px))}
+  .brand-panel{display:flex;flex-direction:column;max-width:400px;color:#eef5f0}
+  .bp-logo{font-family:"Unbounded";font-weight:800;font-size:30px;letter-spacing:.02em;line-height:1;display:flex;flex-direction:column;gap:4px;margin-bottom:26px}
+  .bp-logo span{font-family:"Golos Text";font-weight:600;font-size:11px;letter-spacing:.22em;color:#9fc0b1}
+  .bp-title{font-family:"Unbounded";font-weight:700;font-size:34px;line-height:1.14;margin:0 0 16px}
+  .bp-title em{font-style:normal;color:#bfe3c2}
+  .bp-sub{font-size:15px;line-height:1.55;color:#cfe0d6;margin:0 0 26px;max-width:360px}
+  .bp-trust{list-style:none;padding:0;margin:0;display:grid;gap:13px}
+  .bp-trust li{display:flex;align-items:center;gap:11px;font-size:14.5px;font-weight:500}
+}
+
 /* header */
 .hdr{
-  position:relative; color:#F3EEE2; padding:16px 18px 15px;
+  position:relative; color:#F3EEE2; padding:calc(16px + env(safe-area-inset-top)) 18px 15px;
   background:
     radial-gradient(420px 180px at 100% 0%, #1d5a47 0%, transparent 70%),
     linear-gradient(160deg,var(--pine2),var(--pine));
@@ -347,7 +375,18 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
 </style>
 </head>
 <body>
-<div class="demo-note">Демо · экран клиента</div>
+<div class="shell">
+  <aside class="brand-panel">
+    <div class="bp-logo">ДОНУЛЯ<span>СПИСАНИЕ ДОЛГОВ</span></div>
+    <h2 class="bp-title">Спишем ваши долги <em>законно</em> по 127-ФЗ</h2>
+    <p class="bp-sub">Банкротство физлиц под ключ. Юрист ведёт всё — от заявления в суд до списания долгов. Договор оформляете онлайн вместе с менеджером.</p>
+    <ul class="bp-trust">
+      <li>🛡️ Гарантия возврата 100%</li>
+      <li>🏛️ Товарный знак в Роспатенте</li>
+      <li>🏦 Счёт в Сбербанке</li>
+      <li>✍️ Подпись по СМС — без паспорта</li>
+    </ul>
+  </aside>
 
 <div class="app">
   <!-- HEADER -->
@@ -733,6 +772,7 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
     <div class="reassure" id="reassure">Подписание ни к чему не обязывает оплату прямо сейчас — платёж по выбранному графику.</div>
   </div>
 </div>
+</div><!-- /.shell -->
 
 <script>
 /* ---------- данные процедур ---------- */
