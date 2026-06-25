@@ -42,7 +42,7 @@ body{
   display:flex; flex-direction:column; overflow:hidden; position:relative;
   height:100dvh;
 }
-.screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:96px}
+.screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:150px}
 
 /* ПЛАНШЕТ и выше: карточка по центру на фирменном фоне */
 @media (min-width:680px){
@@ -910,8 +910,8 @@ const REASSURE=[
 function updateFoot(){
   const sc=document.querySelector('.screens'), app=document.querySelector('.app');
   if(!sc||!app) return;
-  const max=sc.scrollHeight - sc.clientHeight;
-  const show = (max < 60) ? true : (sc.scrollTop/max) >= 0.5;
+  const realMax = sc.scrollHeight - sc.clientHeight - 150; // прокрутка реального контента (без нижнего отступа под футер)
+  const show = (realMax < 24) ? true : (sc.scrollTop/realMax) >= 0.5;
   app.classList.toggle('foot-on', show);
 }
 
