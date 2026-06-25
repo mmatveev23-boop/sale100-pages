@@ -42,7 +42,7 @@ body{
   display:flex; flex-direction:column; overflow:hidden; position:relative;
   height:100dvh;
 }
-.screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:96px}
 
 /* ПЛАНШЕТ и выше: карточка по центру на фирменном фоне */
 @media (min-width:680px){
@@ -298,6 +298,8 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
 .pay-amt2{font-family:"Unbounded";font-weight:800;font-size:25px;white-space:nowrap}
 .sbp-line{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:13px;padding-top:13px;border-top:1px solid var(--line)}
 .sbp-note{font-size:12px;color:var(--green-ink);font-weight:600}
+.pay-exact{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--green-ink);text-align:center}
+.pay-exact b{color:var(--green-ink)}
 .alt{margin-top:12px;display:grid;gap:9px}
 .alt-btn{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;font-family:"Golos Text";font-weight:600;font-size:14px;color:var(--ink);cursor:pointer;transition:.15s;line-height:1.2}
 .alt-btn:hover{border-color:var(--green)}
@@ -365,7 +367,8 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
 .sim-opt.on .rad{border-color:var(--green);background:var(--green);box-shadow:inset 0 0 0 3px var(--green-soft)}
 
 /* footer cta */
-.foot{padding:13px 18px calc(15px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--surface)}
+.foot{position:absolute;left:0;right:0;bottom:0;z-index:6;padding:13px 18px calc(15px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--surface);box-shadow:0 -8px 22px -10px rgba(20,40,30,.22);transform:translateY(115%);transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+.app.foot-on .foot{transform:translateY(0)}
 .cta{display:block;width:100%;border:0;cursor:pointer;font-family:"Unbounded";font-weight:600;font-size:16px;letter-spacing:.01em;color:#fff;background:linear-gradient(150deg,#159a64,#0c5238);padding:16px;border-radius:16px;box-shadow:0 12px 26px -12px rgba(12,82,56,.7);transition:.18s}
 .cta:active{transform:translateY(1px)}
 .cta.gold{background:linear-gradient(150deg,#e7b24f,#cf8f24);color:#3a2a06;box-shadow:0 12px 26px -12px rgba(176,122,20,.6)}
@@ -450,7 +453,6 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
       <div class="sub" id="pSub">14 платежей · стоимость услуг 189 000 ₽</div>
       <div class="tariff">
         <button class="on" data-t="rassrochka" onclick="setTariff('rassrochka')"><div><div class="tn">Рассрочка</div><small>комфортный вход · стартуем сразу</small></div><span class="rad"></span></button>
-        <button data-t="bystry" onclick="setTariff('bystry')"><div><div class="tn">⚡ Быстрый старт<span class="rec2">рекомендуем</span></div><small>подача за 7 дней · давление прекращается сразу</small></div><span class="rad"></span></button>
         <button data-t="odnim" onclick="setTariff('odnim')"><div><div class="tn">Оплата сразу · VIP</div><small>169 000 ₽ — скидка 20 000 ₽</small></div><span class="rad"></span></button>
       </div>
       <div class="term" id="termWrap">
@@ -691,7 +693,7 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
       <h1>Проверьте и <span class="hl">подпишите</span></h1>
       <div class="doc">
         <div class="doc-top">
-          <div class="num">Договор № 2026-04821 · 24.06.2026</div>
+          <div class="num">Договор № ДН-2026-00124 · 24.06.2026</div>
           <div class="who">Иванов Иван Иванович<small>📅 01.01.1980</small><small id="docProc">Реализация имущества (РИ) · 127-ФЗ</small></div>
         </div>
         <div class="doc-rows">
@@ -739,6 +741,7 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
         <div class="pay-amt2"><span id="payAmount">13 500</span> ₽</div>
       </div>
       <div class="sbp-line"><span class="sbp">СБП</span> <span class="sbp-note">моментально и без комиссии · 10–15 сек</span></div>
+      <div class="pay-exact">Спишется <b>ровно <span id="payExact">13 500</span> ₽</b> — больше ничего не уйдёт</div>
     </div>
 
     <div class="sber-strip">
@@ -911,6 +914,15 @@ const REASSURE=[
   ''
 ];
 
+/* футер закрепляется не сразу, а после ~50% прокрутки экрана (или сразу, если контент влезает) */
+function updateFoot(){
+  const sc=document.querySelector('.screens'), app=document.querySelector('.app');
+  if(!sc||!app) return;
+  const max=sc.scrollHeight - sc.clientHeight;
+  const show = (max < 60) ? true : (sc.scrollTop/max) >= 0.5;
+  app.classList.toggle('foot-on', show);
+}
+
 function paint(){
   document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('active',+s.dataset.screen===step));
   document.querySelectorAll('.steps i').forEach(i=>{const n=+i.dataset.st;i.className='';if(n<step)i.classList.add('done');if(n===step)i.classList.add('cur');});
@@ -920,8 +932,8 @@ function paint(){
   document.getElementById('ghost').style.display = (step>0 && step<6) ? '' : 'none';
   document.getElementById('reassure').textContent=REASSURE[step]||'';
   if(step===4){document.getElementById('readyView').style.display='';document.getElementById('smsView').style.display='none';}
-  if(step===5){document.getElementById('payAmount').textContent=document.getElementById('dFirst').textContent;document.getElementById('payTitle').textContent=document.getElementById('dFirstLbl').textContent;}
-  const sc=document.querySelector('.screens'); if(sc) sc.scrollTo({top:0,behavior:'smooth'});
+  if(step===5){const v=document.getElementById('dFirst').textContent;document.getElementById('payAmount').textContent=v;var pe=document.getElementById('payExact');if(pe)pe.textContent=v;document.getElementById('payTitle').textContent=document.getElementById('dFirstLbl').textContent;}
+  const sc=document.querySelector('.screens'); if(sc) sc.scrollTop=0; updateFoot();
 }
 function next(){
   if(step===4){ // экран договора: первая кнопка ведёт к СМС, потом к оплате
@@ -964,6 +976,8 @@ function startSimTimer(){
   const tick=()=>{const m=Math.floor(total/60), s=total%60; el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'); if(total>0) total--;};
   tick(); setInterval(tick,1000);
 }
+document.querySelector('.screens').addEventListener('scroll', updateFoot, {passive:true});
+window.addEventListener('resize', updateFoot);
 startSimTimer();
 setProc('ri'); paint();
 </script>
