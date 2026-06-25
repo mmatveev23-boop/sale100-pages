@@ -98,10 +98,8 @@ body{
 .proc button.on small{opacity:.85;color:#5a4209}
 
 /* progress */
-.steps{display:flex;gap:5px;padding:11px 18px 0;background:var(--surface)}
-.steps i{height:3px;flex:1;border-radius:3px;background:var(--line);transition:.3s}
-.steps i.done{background:var(--green)}
-.steps i.cur{background:var(--gold)}
+.steps{height:3px;margin:9px 18px 0;border-radius:3px;background:var(--line);overflow:hidden}
+.steps .bar{display:block;height:100%;background:var(--gold);border-radius:3px;width:0;transition:width .4s cubic-bezier(.3,.7,.2,1)}
 
 /* screen area */
 .scr{padding:18px 18px 14px;flex:1;display:none;animation:rise .42s cubic-bezier(.2,.7,.2,1)}
@@ -416,15 +414,9 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
 </svg></div>
       <div class="rospatent">🏛 <span><b>Товарный знак</b><br>в Роспатенте</span></div>
     </div>
-    <div class="proc">
-      <button data-proc="ri" class="on" onclick="setProc('ri')">Реализация имущества<small>списание долгов</small></button>
-      <button data-proc="rdg" onclick="setProc('rdg')">Реструктуризация<small>без статуса банкрота</small></button>
-    </div>
   </div>
 
-  <div class="steps">
-    <i data-st="0"></i><i data-st="1"></i><i data-st="2"></i><i data-st="3"></i><i data-st="4"></i><i data-st="5"></i>
-  </div>
+  <div class="steps"><span class="bar" id="progbar"></span></div>
 
   <div class="screens">
 
@@ -925,7 +917,7 @@ function updateFoot(){
 
 function paint(){
   document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('active',+s.dataset.screen===step));
-  document.querySelectorAll('.steps i').forEach(i=>{const n=+i.dataset.st;i.className='';if(n<step)i.classList.add('done');if(n===step)i.classList.add('cur');});
+  const pb=document.getElementById('progbar'); if(pb) pb.style.width=Math.round((step+1)/7*100)+'%';
   const cta=document.getElementById('cta');
   if(step<6){cta.style.display='';cta.className='cta '+(CTA[step].cls);cta.textContent=CTA[step].label;}
   else cta.style.display='none';
