@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Воронка клоузера — SALE 100.0</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Воронка менеджера-клоузера: 9 статусов, что в каждом, таймеры, AI-контроль каждого статуса, все сценарии и горячая очередь.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2E9; --card:#FFFFFF; --ink:#191713; --muted:#615B50;
+    --green:#0E5C46; --green-deep:#0A3D2E; --amber:#C2790F; --red:#9A2D22;
+    --grey:#7C756A; --gold:#C99A33;
+    --line:rgba(25,23,19,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:"Golos Text",sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+  h1,h2,h3,.num,.kicker,.tag{font-family:"Unbounded",sans-serif}
+  a{color:inherit}
+
+  header{padding:64px 0 26px}
+  .kicker{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);font-weight:700}
+  h1{font-size:clamp(38px,7.5vw,72px);line-height:.98;font-weight:800;letter-spacing:-.02em;margin:16px 0 0}
+  h1 .hl{color:var(--green)}
+  .lead{font-size:clamp(16px,2.3vw,20px);color:var(--muted);max-width:680px;margin:20px 0 0;font-weight:500}
+  .promise{margin:26px 0 0;padding:20px 24px;background:var(--green-deep);color:#F6F2E9;border-radius:16px;font-size:clamp(16px,2.4vw,21px);font-weight:600;line-height:1.4}
+  .promise b{color:#F4C775}
+
+  /* principles */
+  .princ{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:22px}
+  .pr{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .pr .pn{font-family:"Unbounded";font-weight:700;color:var(--amber);font-size:13px;letter-spacing:.04em}
+  .pr h4{margin:8px 0 4px;font-size:16px;font-family:"Unbounded";font-weight:700}
+  .pr p{color:var(--muted);font-size:14.5px}
+  @media (max-width:720px){.princ{grid-template-columns:1fr}}
+
+  h2.sec{font-size:clamp(22px,3.4vw,30px);font-weight:800;letter-spacing:-.01em;margin:54px 0 6px}
+  .sub{color:var(--muted);font-size:15.5px;margin-bottom:20px;max-width:720px}
+
+  /* money legend */
+  .money{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 0}
+  .mcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:14.5px}
+  .mcard b{font-family:"Unbounded";font-weight:700}
+  .mcard.green b{color:var(--green)} .mcard.amber b{color:var(--amber)} .mcard.grey b{color:var(--grey)}
+
+  /* flow map */
+  .map{margin-top:10px;position:relative;padding-left:8px}
+  .node{position:relative;display:grid;grid-template-columns:42px 1fr;gap:14px;padding:10px 0}
+  .node::before{content:"";position:absolute;left:20px;top:34px;bottom:-10px;width:2px;background:var(--line)}
+  .node:last-child::before{display:none}
+  .dot{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:"Unbounded";font-weight:800;font-size:17px;color:#fff;z-index:1}
+  .d-neu{background:var(--grey)} .d-amber{background:var(--amber)} .d-green{background:var(--green)} .d-win{background:var(--green-deep)} .d-grey{background:#9A938680}
+  .nbody{padding-top:5px}
+  .nbody .nt{font-family:"Unbounded";font-weight:700;font-size:16px}
+  .nbody .nd{color:var(--muted);font-size:14px;margin-top:1px}
+
+  /* status cards */
+  .grid{display:flex;flex-direction:column;gap:14px;margin-top:8px}
+  .st{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--grey);border-radius:16px;padding:20px 22px;scroll-margin-top:16px}
+  .st.t-amber{border-left-color:var(--amber)} .st.t-green{border-left-color:var(--green)} .st.t-win{border-left-color:var(--gold)} .st.t-neu{border-left-color:var(--grey)}
+  .st-h{display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+  .st-n{font-family:"Unbounded";font-weight:800;font-size:15px;color:#fff;background:var(--grey);min-width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+  .st.t-amber .st-n{background:var(--amber)} .st.t-green .st-n{background:var(--green)} .st.t-win .st-n{background:var(--green-deep)}
+  .st-h h3{font-size:clamp(18px,2.6vw,22px);font-weight:700;letter-spacing:-.01em}
+  .st-timer{margin-left:auto;font-family:"Unbounded";font-weight:700;font-size:12.5px;color:var(--amber);background:rgba(194,121,15,.1);border:1px solid rgba(194,121,15,.25);padding:5px 11px;border-radius:999px;white-space:nowrap}
+  .st-timer.ok{color:var(--green);background:rgba(14,92,70,.08);border-color:rgba(14,92,70,.22)}
+  .st-what{font-size:16px;margin-top:11px}
+  .st-rows{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;margin-top:14px}
+  .st-rows>div{font-size:14.5px;color:var(--muted)}
+  .st-rows b{display:block;color:var(--ink);font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:2px}
+  @media (max-width:620px){.st-rows{grid-template-columns:1fr}}
+  .st-ai{margin-top:14px;background:#F3EFE4;border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-size:14.5px}
+  .st-ai b{color:var(--green-deep);font-family:"Unbounded";font-weight:700;font-size:12.5px;letter-spacing:.03em}
+  .st-out{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .st-out .ol{font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;color:var(--muted);margin-right:2px}
+  .pill{font-size:13.5px;border-radius:999px;padding:5px 12px;background:#fff;border:1px solid var(--line);font-weight:500}
+  .pill.g{background:rgba(14,92,70,.08);border-color:rgba(14,92,70,.25);color:var(--green-deep)}
+  .pill.a{background:rgba(194,121,15,.1);border-color:rgba(194,121,15,.3);color:#8a560a}
+  .pill.r{background:rgba(154,45,34,.08);border-color:rgba(154,45,34,.25);color:var(--red)}
+
+  /* cross-cutting */
+  .cross{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  @media (max-width:720px){.cross{grid-template-columns:1fr}}
+  .cc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 20px}
+  .cc.hot{background:#FBF2E8;border-color:rgba(194,121,15,.3)}
+  .cc.dq{background:#FBEDEB;border-color:rgba(154,45,34,.22)}
+  .cc h3{font-size:18px;font-weight:700;display:flex;align-items:center;gap:9px}
+  .cc .ico{width:24px;height:24px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-family:"Unbounded";font-weight:700}
+  .cc.hot .ico{background:var(--amber)} .cc.dq .ico{background:var(--red)} .cc.neu .ico{background:var(--grey)} .cc.pool .ico{background:#9A9386}
+  .cc ul{list-style:none;margin-top:11px;display:flex;flex-direction:column;gap:8px}
+  .cc li{position:relative;padding-left:22px;font-size:14.5px;color:var(--muted)}
+  .cc li::before{content:"";position:absolute;left:2px;top:8px;width:7px;height:7px;border-radius:50%;background:var(--green)}
+  .cc.dq li::before{background:var(--red)} .cc.hot li::before{background:var(--amber)}
+  .cc li b{color:var(--ink)}
+
+  /* AI principle */
+  .aibox{background:var(--green-deep);color:#F1ECE0;border-radius:18px;padding:24px 26px;margin-top:8px}
+  .aibox .q{font-size:clamp(17px,2.6vw,22px);font-weight:600;line-height:1.4}
+  .aibox .q b{color:#F4C775}
+  .gates{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:18px}
+  @media (max-width:620px){.gates{grid-template-columns:1fr}}
+  .gate{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px 14px;font-size:14px}
+  .gate b{font-family:"Unbounded";font-weight:700;color:#fff;font-size:13.5px;display:block;margin-bottom:3px}
+
+  /* why 30 */
+  .why{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px}
+  @media (max-width:720px){.why{grid-template-columns:1fr}}
+  .wc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .wc .big{font-family:"Unbounded";font-weight:800;font-size:30px;color:var(--green);line-height:1}
+  .wc p{color:var(--muted);font-size:14.5px;margin-top:9px}
+  .wc p b{color:var(--ink)}
+
+  footer{padding:48px 0 70px;border-top:1px solid var(--line);margin-top:56px}
+  .close{font-family:"Unbounded";font-weight:700;font-size:clamp(22px,4vw,36px);letter-spacing:-.02em;line-height:1.08}
+  .close .hl{color:var(--green)}
+  .sig{color:var(--muted);margin-top:13px;font-size:14px}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <div class="kicker">SALE 100.0 · Банкротство и РДГ</div>
+  <h1>Воронка <span class="hl">клоузера</span></h1>
+  <p class="lead">9 статусов от «передан охотником» до «передан в сопровождение». Что значит каждый статус, какой у него таймер, что считается движением и что в нём проверяет ИИ.</p>
+  <div class="promise">Лид движется по воронке <b>только по реальному артефакту</b> — договор, платёж, датированный контакт с записью. Не по клику. Каждый статус — это обещание, и ИИ проверяет: <b>правильно ли лид сюда попал и не спрятан ли он, чтобы протухнуть.</b></div>
+
+  <div class="princ">
+    <div class="pr"><div class="pn">ПРИНЦИП 1</div><h4>Аренда, не собственность</h4><p>Клиент твой, пока ты на линии и ведёшь его к деньгам в срок. Не успел — система отдаёт другому.</p></div>
+    <div class="pr"><div class="pn">ПРИНЦИП 2</div><h4>Движение = артефакт</h4><p>Реальный платёж — полный кредит. Договор/990/дата — частичный, подтверждается записью звонка.</p></div>
+    <div class="pr"><div class="pn">ПРИНЦИП 3</div><h4>ИИ на каждом статусе</h4><p>Не только звонки — каждый статус получает оценку: верный ли он и не «серая зона» ли это.</p></div>
+  </div>
+</div></header>
+
+<main class="wrap">
+
+  <!-- MONEY -->
+  <section>
+    <h2 class="sec">Деньги — три разные вещи</h2>
+    <p class="sub">Самая частая ошибка — путать их в воронке. Цель звонка: подписать договор и взять 13 500 ₽. Нет 13 500 → взять 990 ₽ (клиент получает SIM бесплатно на год).</p>
+    <div class="money">
+      <div class="mcard grey"><b>990 ₽</b> — депозит-якорь, удержание + SIM. <b>Не сделка.</b></div>
+      <div class="mcard green"><b>13 500 ₽</b> — первый платёж рассрочки = <b>сделка (WON)</b>, передача в сопровождение.</div>
+      <div class="mcard amber"><b>189 000 ₽</b> — полный контракт. Отдельная метрика, не цель звонка.</div>
+    </div>
+  </section>
+
+  <!-- FLOW MAP -->
+  <section>
+    <h2 class="sec">Карта потока</h2>
+    <p class="sub">Сверху вниз — путь к сделке. Цвет = тип статуса: <b style="color:var(--grey)">серый</b> контакт · <b style="color:var(--amber)">янтарь</b> время/договор горит · <b style="color:var(--green)">зелёный</b> деньги/удержание · <b style="color:var(--green-deep)">тёмный</b> сделка.</p>
+    <div class="map">
+      <div class="node"><div class="dot d-neu">1</div><div class="nbody"><div class="nt">Новый — назначен</div><div class="nd">Speed-to-lead. Не дозвонился 3 раза → охотнику.</div></div></div>
+      <div class="node"><div class="dot d-neu">2</div><div class="nbody"><div class="nt">На связи</div><div class="nd">Диагностика → ценность → лестница закрытия.</div></div></div>
+      <div class="node"><div class="dot d-amber">3</div><div class="nbody"><div class="nt">Дожим сегодня 🔥</div><div class="nd">Горячий, закроем сегодня. Не «думает».</div></div></div>
+      <div class="node"><div class="dot d-amber">4</div><div class="nbody"><div class="nt">Счёт → договор</div><div class="nd">Назвал дату → счёт → договор за час. Правило 30 минут.</div></div></div>
+      <div class="node"><div class="dot d-amber">5</div><div class="nbody"><div class="nt">Договор подписан — ждём деньги</div><div class="nd">48 часов, дробление платежа.</div></div></div>
+      <div class="node"><div class="dot d-green">6</div><div class="nbody"><div class="nt">Депозит / частичка — дожим до 13 500</div><div class="nd">990 (+SIM) или частичка. 14 дней.</div></div></div>
+      <div class="node"><div class="dot d-grey">7</div><div class="nbody"><div class="nt">Запланированный контакт</div><div class="nd">Дата ≤3 дн + намерение. Единственная парковка «подумаю».</div></div></div>
+      <div class="node"><div class="dot d-green">8</div><div class="nbody"><div class="nt">Оплата инициирована</div><div class="nd">Ждём платёжный вебхук. СБП-фейл ≠ потеря.</div></div></div>
+      <div class="node"><div class="dot d-win">9</div><div class="nbody"><div class="nt">WON → сопровождение</div><div class="nd">13 500 зачислено + декларация + принят сопровождением.</div></div></div>
+    </div>
+  </section>
+
+  <!-- STATUS DETAIL -->
+  <section>
+    <h2 class="sec">Что в каждом статусе</h2>
+    <p class="sub">Для каждого: что это значит · вход · таймер · что считается движением · что проверяет ИИ · куда ведут выходы.</p>
+    <div class="grid">
+
+      <div class="st t-neu" id="s1">
+        <div class="st-h"><span class="st-n">1</span><h3>Новый — назначен</h3><span class="st-timer">минуты (speed-to-lead)</span></div>
+        <p class="st-what">Лид от охотника (квалифицирован, дозвонился) или входящий звонок упал на тебя. Задача — соединиться как можно быстрее, пока горячо.</p>
+        <div class="st-rows">
+          <div><b>Вход</b> Долг ≥300К, дозвон есть; либо входящий</div>
+          <div><b>Движение засчитано</b> Состоявшийся разговор</div>
+        </div>
+        <div class="st-ai"><b>ИИ ПРОВЕРЯЕТ</b> Квалификацию подтвердил охотник (есть сумма долга, кредиторы, источник). Входящий без квалификации → экспресс-квал клоузером. НДЗ помечается только по событиям телефонии — фейковый «не дозвонился» виден.</div>
+        <div class="st-out"><span class="ol">Выходы</span><span class="pill g">соединились → 2</span><span class="pill a">3 недозвона → охотнику</span><span class="pill r">не наш → дисквал</span></div>
+      </div>
+
+      <div class="st t-neu" id="s2">
+        <div class="st-h"><span class="st-n">2</span><h3>На связи</h3><span class="st-timer ok">длительность звонка</span></div>
+        <p class="st-what">Живой разговор: расположил человека → диагностика долга → объяснил, как банкротство решает проблему → лестница закрытия. Не «поболтать», а вести к деньгам.</p>
+        <div class="st-rows">
+          <div><b>Вход</b> Клиент на линии</div>
+          <div><b>Движение засчитано</b> Любой исход-артефакт ниже</div>
+        </div>
+        <div class="st-ai"><b>ИИ ПРОВЕРЯЕТ</b> Scorecard: 12 пунктов диагностики до цены · была попытка закрытия (главный вес) · отработал возражения, а не сдался на первом «нет» · без «спишем 100%». Подтвердил сумму долга и процедуру (РИ/РДГ).</div>
+        <div class="st-out"><span class="ol">Выходы</span><span class="pill g">деньги → 4/8</span><span class="pill a">готов сегодня → 3</span><span class="pill">не сегодня → 7</span><span class="pill">ноль обязательств → окно касаний</span><span class="pill r">отказ → дисквал</span></div>
+      </div>
+
+      <div class="st t-amber" id="s3">
+        <div class="st-h"><span class="st-n">3</span><h3>Дожим сегодня 🔥</h3><span class="st-timer">до конца дня</span></div>
+        <p class="st-what">Горячий клиент, которого реально закрываем сегодня. Держишь сам, перезваниваешь, дожимаешь — это <b>не</b> «подумает». Срочность растёт к концу дня.</p>
+        <div class="st-rows">
+          <div><b>Вход</b> Готов закрыться сегодня, но ещё не подписал</div>
+          <div><b>Движение засчитано</b> Переход к счёту/договору</div>
+        </div>
+        <div class="st-ai"><b>ИИ ПРОВЕРЯЕТ</b> Что горячего не «припарковали» в статус 7 (это засоряет метрику думающих). Здесь живёт момент — отпустишь, остынет.</div>
+        <div class="st-out"><span class="ol">Выходы</span><span class="pill a">подписываем → 4</span><span class="pill">ушёл на завтра → 7</span></div>
+      </div>
+
+      <div class="st t-amber" id="s4">
+        <div class="st-h"><span class="st-n">4</span><h3>Счёт → договор</h3><span class="st-timer">1 час</span></div>
+        <p class="st-what">Клиент назвал дату оплаты (полная / частичка / конкретная дата) → выставляешь счёт → в течение часа подписываем договор. Рейм: «сначала договор — он вас фиксирует, платить будете только после него».</p>
+        <div class="st-rows">
+          <div><b>Вход</b> Клиент назвал дату оплаты</div>
+          <div><b>Движение засчитано</b> Подписанный договор</div>
+        </div>
+        <div class="st-ai"><b>ИИ ПРОВЕРЯЕТ</b> Дату/сумму озвучил <b>клиент</b> (по записи), а не менеджер вписал. Счёт без договора за час = флаг «счёт на шару». Часовой таймер ведёт движок, не оценка звонка.</div>
+        <div class="st-out"><span class="ol">Выходы</span><span class="pill g">подписал → 5</span><span class="pill a">30 мин без подписи → горячий перезвон</span><span class="pill">час истёк → напоминание + рейтинг</span></div>
+      </div>
+
+      <div class="st t-amber" id="s5">
+        <div class="st-h"><span class="st-n">5</span><h3>Договор подписан — ждём деньги</h3><span class="st-timer">48 часов</span></div>
+        <p class="st-what">Договор подписан (СМС / ОКИ ДОКИ), денег пока нет. Дробишь платёж («1000 сегодня, ещё завтра»), контактируешь ежедневно — не ждёшь месяц.</p>
+        <div class="st-rows">
+          <div><b>Вход</b> Договор есть + согласована сумма и дата платежа</div>
+          <div><b>Движение засчитано</b> Реальный платёж (частичный кредит за подпись)</div>
+        </div>
+        <div class="st-ai"><b>ИИ ПРОВЕРЯЕТ</b> Договор без согласованной даты платежа = серая зона (подпись-пустышка ради +48 ч). Контакт засчитан только двусторонний (клиент ответил), не пропущенный гудок. Ноль усилия за 48 ч → слив-флаг.</div>
+        <div class="st-out"><span class="ol">Выходы</span><span class="pill g">любой платёж → 6</span><span class="pill g">13 500 → 8</span><span class="pill r">48 ч без денег → пул «договор без оплаты»</span></div>
+      </div>
+
+      <div class="st t-green" id="s6">
+        <div class="st-h"><span class="st-n">6</span><h3>Депозит / частичка — дожим до 13 500</h3><span class="st-timer">14 дней</span></div>
+        <p class="st-what">Взято 990 (SIM активирована) или частичка. Клиент удержан — таймеры удержания off. Системно дожимаешь до полного первого платежа.</p>
+        <div class="st-rows">
+          <div><b>Вход</b> 990 или любой реальный платёж</div>
+          <div><b>Движение засчитано</b> Только реальный платёж 13 500 = полный кредит</div>
+        </div>
+        <div class="st-ai"><b>ИИ ПРОВЕРЯЕТ</b> Анти-фарм-990 по <b>тренду менеджера</b> (ratio депозит→полная), не по одному лиду. Была ли попытка взять 13 500 до прыжка на 990. 990 не красит рейтинг как полноценное движение.</div>
+        <div class="st-out"><span class="ol">Выходы</span><span class="pill g">13 500 → 8</span><span class="pill">живой платёж/частичка → продлеваем по артефакту</span><span class="pill a">14 дн ноль движения → РОП «застрявшие депозиты»</span></div>
+      </div>
+
+      <div class="st t-neu" id="s7">
+        <div class="st-h"><span class="st-n">7</span><h3>Запланированный контакт</h3><span class="st-timer">до даты (≤3 дн)</span></div>
+        <p class="st-what">Единственная легальная парковка «подумаю» — и только если есть конкретная дата ≤3 дней <b>и</b> квалификация намерения: «если посоветуетесь и будет нет — всё равно идёте?». Нет даты → парковать нечего.</p>
+        <div class="st-rows">
+          <div><b>Вход</b> Дата ≤3 дн + проверенное намерение</div>
+          <div><b>Движение засчитано</b> Боковое удержание (частичный кредит)</div>
+        </div>
+        <div class="st-ai"><b>ИИ ПРОВЕРЯЕТ</b> Дата и фраза «всё равно идёте?» <b>звучат в записи</b>, а не в заметке. Сначала была попытка подписать договор сегодня. <b>Лимит переносов 1–2 / кап 7 дней</b> — иначе вечный «думаю» в обход запрета. Когорта «дошли до счёта» vs бенч топа ~35%.</div>
+        <div class="st-out"><span class="ol">Выходы</span><span class="pill">в дату → 2</span><span class="pill a">конверсия → 4 (через счёт!)</span><span class="pill r">лимит/пусто → пул или дисквал</span></div>
+      </div>
+
+      <div class="st t-green" id="s8">
+        <div class="st-h"><span class="st-n">8</span><h3>Оплата инициирована</h3><span class="st-timer ok">минуты</span></div>
+        <p class="st-what">Клиент нажал «Оплатить через СБП», ждём зачисление. Деньги ещё не пришли — это не сделка и не потеря.</p>
+        <div class="st-rows">
+          <div><b>Вход</b> Запущена оплата</div>
+          <div><b>Движение засчитано</b> Платёжный вебхук (зачисление)</div>
+        </div>
+        <div class="st-ai"><b>ИИ ПРОВЕРЯЕТ</b> WON засчитывается <b>только по платёжному вебхуку</b>, не по клику. СБП не прошёл → горячая задача «помочь оплатить» (клиент горячий), а не сброс в пул.</div>
+        <div class="st-out"><span class="ol">Выходы</span><span class="pill g">вебхук → 9</span><span class="pill a">СБП-фейл → горячая «помочь оплатить»</span></div>
+      </div>
+
+      <div class="st t-win" id="s9">
+        <div class="st-h"><span class="st-n">9</span><h3>WON → передан в сопровождение</h3><span class="st-timer ok">сделка</span></div>
+        <p class="st-what">Деньги твои. Засчитывается, когда выполнены все три: 13 500 зачислено + клиент подписал декларацию + сопровождение приняло пакет.</p>
+        <div class="st-rows">
+          <div><b>Вход</b> Платёж подтверждён вебхуком</div>
+          <div><b>Движение засчитано</b> Полный кредит + сделка в KPI</div>
+        </div>
+        <div class="st-ai"><b>ИИ ПРОВЕРЯЕТ</b> Полноту передачи: декларация, КИ, паспорт/ИНН/СНИЛС. Пока не все три условия — лид в под-состоянии «передача» за тобой, чтобы проблема не всплыла в сопровождении.</div>
+        <div class="st-out"><span class="ol">Итог</span><span class="pill g">засчитанная сделка · флор 12+/мес</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CROSS-CUTTING -->
+  <section>
+    <h2 class="sec">Сквозные контуры</h2>
+    <p class="sub">Работают поверх статусов 1–9.</p>
+    <div class="cross">
+      <div class="cc hot">
+        <h3><span class="ico">🔥</span>Горячая очередь</h3>
+        <ul>
+          <li><b>Денежный интент</b> («куда платить / готов») — перебивает всё, даже новых лидов.</li>
+          <li><b>Реактивация</b> — лид ответил на автодозвон / перезвонил — top-priority за 5 минут.</li>
+          <li>Маршрут: владельцу если Ready, иначе ближайшему свободному. WON засчитывается <b>владельцу</b>.</li>
+          <li>Анти-абьюз: ушёл в NotReady ровно в момент своего горячего → флаг.</li>
+        </ul>
+      </div>
+      <div class="cc neu">
+        <h3><span class="ico">⏳</span>Окно касаний (no-commit)</h3>
+        <ul>
+          <li>«Дозвонились, ноль обязательств» <b>не падает мгновенно в пул</b>.</li>
+          <li>24–48 ч + 2–3 касания, потом пул.</li>
+          <li>Именно здесь — разница между 20% и 30%: 5–12 касаний на вторичке.</li>
+        </ul>
+      </div>
+      <div class="cc pool">
+        <h3><span class="ico">♻︎</span>Пул / рецикл</h3>
+        <ul>
+          <li>Теги причины: <b>no-answer · no-commit · договор-без-оплаты · долг&lt;300К</b> — разный скрипт редайла.</li>
+          <li>Возврат: есть артефакт (деньги/договор) → новому свободному; пусто → исходному при выходе на линию.</li>
+          <li>Лимит реклеймов на лид — анти-уклонение от сроков.</li>
+        </ul>
+      </div>
+      <div class="cc dq">
+        <h3><span class="ico">✕</span>Дисквал</h3>
+        <ul>
+          <li><b>DNC</b> — «не звоните» / жёсткий отказ — real-time кнопкой, из редайла.</li>
+          <li><b>Неквалификация</b> — уже банкрот / через МФЦ / долг &lt;300К — сигнал в метрику охотника, <b>не в минус конверсии клоузера</b>.</li>
+          <li>Дубль-лид — дедуп по телефону до назначения; владелец — у кого артефакт.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI PRINCIPLE -->
+  <section>
+    <h2 class="sec">Как ИИ держит каждый статус честным</h2>
+    <p class="sub">Главный вывод адверсариал-критики: анти-гейминг должен ловить не только вход в статус, но и имитацию внутри.</p>
+    <div class="aibox">
+      <div class="q">Кредит «движения» (= право на новых лидов) даёт <b>только реальный платёж</b> (по вебхуку). Договор без денег, 990, датированный контакт — дают лишь <b>условный кредит</b>, подтверждаемый записью звонка (клиент сам озвучил дату/сумму/согласие) и конверсионным ratio менеджера.</div>
+      <div class="gates">
+        <div class="gate"><b>invoice → contract</b>Серия счетов без договоров = фарм активности.</div>
+        <div class="gate"><b>signed → paid</b>Штамповка СМС-подписей ради +48 ч.</div>
+        <div class="gate"><b>deposit → full</b>Фарм-990 у заведомо неплатёжеспособных.</div>
+        <div class="gate"><b>pool-dump rate (× сложность)</b>Чтобы «ноль обязательств → пул» не стал мусоркой для тяжёлых.</div>
+        <div class="gate"><b>effort-symmetry</b>Попытки и длительность по сложности — анти-cherry-picking лёгких.</div>
+        <div class="gate"><b>S7 → счёт когортно</b>vs бенч топа ~35%; заниженный = «даты» фиктивны.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY 30 -->
+  <section>
+    <h2 class="sec">Почему эта воронка даёт 30%</h2>
+    <p class="sub">30% — планка топа (норма 20%, потолок ~30%). Достигается экономией времени клоузера, а не лозунгом.</p>
+    <div class="why">
+      <div class="wc"><div class="big">~83</div><p>лида на клоузера — <b>рабочая нагрузка</b> (18 на 1500), а не 95 (это порог насыщения, работа на краю).</p></div>
+      <div class="wc"><div class="big">0</div><p>времени на недозвоны — <b>НДЗ уходит охотнику</b>, клоузер только на связавшихся.</p></div>
+      <div class="wc"><div class="big">PULL</div><p>money-first очередь, самое денежное сверху. Менеджер не выбирает — жмёт «следующая задача».</p></div>
+      <div class="wc"><div class="big">0</div><p>парковок без даты + лимит переносов в статусе 7 — лиды <b>не гниют</b> в «думаю».</p></div>
+      <div class="wc"><div class="big">2–3</div><p>касания в окне no-commit вместо мгновенного пула — <b>здесь</b> разница 20→30%.</p></div>
+      <div class="wc"><div class="big">🔥</div><p>«Дожим сегодня» как отдельное состояние — горячих не теряют, момент не остывает.</p></div>
+    </div>
+  </section>
+
+</main>
+
+<footer><div class="wrap">
+  <div class="close">Двигай по артефакту, не теряй горячих — <span class="hl">получай свои деньги.</span></div>
+  <div class="sig">SALE 100.0 · Воронка менеджера-клоузера · черновик v1 (9 статусов + сквозные контуры)</div>
+</div></footer>
+
+</body>
+</html>
