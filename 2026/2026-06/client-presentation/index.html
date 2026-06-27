@@ -373,6 +373,16 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
 .cta[disabled]{filter:grayscale(.5);opacity:.55}
 .ghost{display:block;width:100%;text-align:center;margin-top:10px;background:none;border:0;color:var(--muted);font-family:"Golos Text";font-size:13px;cursor:pointer;font-weight:500}
 .foot .reassure{text-align:center;font-size:11.5px;color:var(--faint);margin-top:10px;line-height:1.4}
+
+/* стартовый гейт — клиент ждёт менеджера, не листает оффер до перезвона */
+.gate{position:absolute;inset:0;z-index:20;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:34px 28px calc(34px + env(safe-area-inset-bottom));background:radial-gradient(520px 300px at 50% 12%,#1d5a47 0%,transparent 60%),linear-gradient(160deg,var(--pine2),var(--pine));color:#F3EEE2}
+.gate.off{display:none}
+.gate-ic{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;font-size:30px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);margin-bottom:20px}
+.gate h2{font-family:"Unbounded";font-weight:700;font-size:24px;line-height:1.16;margin-bottom:12px}
+.gate p{font-size:14.5px;color:#cfe0d6;line-height:1.55;max-width:330px;margin-bottom:8px}
+.gate .ghint{font-size:12.5px;color:#9fc0b1;margin-top:8px;display:flex;align-items:center;gap:7px}
+.gate-cta{margin-top:26px;width:100%;max-width:330px;border:0;cursor:pointer;font-family:"Unbounded";font-weight:600;font-size:15.5px;color:#3a2a06;background:linear-gradient(150deg,#e7b24f,#cf8f24);padding:15px;border-radius:15px;box-shadow:0 12px 26px -12px rgba(176,122,20,.6)}
+.gate-cta:active{transform:translateY(1px)}
 </style>
 </head>
 <body>
@@ -765,6 +775,16 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
     <button class="cta" id="cta" onclick="next()">Посмотреть условия</button>
     <button class="ghost" id="ghost" style="display:none" onclick="back()">← Назад</button>
     <div class="reassure" id="reassure">Подписание ни к чему не обязывает оплату прямо сейчас — платёж по выбранному графику.</div>
+  </div>
+
+  <!-- СТАРТОВЫЙ ГЕЙТ: клиент ждёт менеджера, не листает оффер до перезвона -->
+  <div class="gate" id="gate">
+    <div class="gate-ic">📞</div>
+    <h2>Подождите менеджера</h2>
+    <p>Сейчас менеджер проведёт вас по условиям договора — шаг за шагом, с пояснениями.</p>
+    <p>Пожалуйста, не листайте сами: менеджер подскажет, когда двигаться дальше.</p>
+    <div class="ghint">🔒 Это ваша персональная страница договора</div>
+    <button class="gate-cta" id="gateBtn" onclick="document.getElementById('gate').classList.add('off')">Менеджер на связи — начать</button>
   </div>
 </div>
 </div><!-- /.shell -->
