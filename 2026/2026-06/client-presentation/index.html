@@ -939,7 +939,7 @@ function paint(){
   document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('active',+s.dataset.screen===step));
   const pb=document.getElementById('progbar'); if(pb) pb.style.width=Math.round((step+1)/7*100)+'%';
   const cta=document.getElementById('cta');
-  if(step<6){cta.style.display='';cta.className='cta '+(CTA[step].cls);cta.textContent=CTA[step].label;}
+  if(step<6){cta.style.display='';cta.className='cta '+(CTA[step].cls);cta.textContent=CTA[step].label; if(step===5){cta.innerHTML='<span style="display:inline-flex;align-items:center;background:#fff;border-radius:5px;padding:2px 4px;margin-right:10px;vertical-align:middle"><img src="img/sbp-icon.svg" alt="" style="height:18px;width:auto;display:block"></span>Оплатить через СБП';}}
   else cta.style.display='none';
   document.getElementById('ghost').style.display = (step>0 && step<6) ? '' : 'none';
   document.getElementById('reassure').textContent=REASSURE[step]||'';
