@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>«Сейчас делай» в карточке сделки — SALE 100.0</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2E9; --card:#FFFFFF; --ink:#191713; --muted:#615B50; --faint:#8A938A;
+    --green:#0E5C46; --green-deep:#0A3D2E; --amber:#C2790F; --red:#9A2D22; --gold:#C99A33;
+    --line:rgba(25,23,19,.12);
+    --amo-side:#20304a; --amo-top:#26395a; --amo-bg:#eceff3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Golos Text",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;background:var(--amo-bg)}
+  .amo{display:flex;min-height:100vh}
+  .side{width:84px;background:var(--amo-side);flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px}
+  .acc{width:40px;height:40px;border-radius:50%;background:#34507a;margin-bottom:10px;display:grid;place-items:center;font-size:17px}
+  .si{width:100%;padding:9px 4px;text-align:center;color:#8ea4c4;font-size:9.5px;line-height:1.2;cursor:pointer;position:relative}
+  .si .g{font-size:19px;display:block;margin-bottom:3px}
+  .si.active{color:#fff;background:rgba(255,255,255,.06)}
+  .si.active::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:0 3px 3px 0;background:var(--gold)}
+  .badge{position:absolute;top:5px;right:18px;background:#e8533f;color:#fff;font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:9px}
+
+  .work{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{background:var(--amo-top);color:#dfe8f5;height:54px;display:flex;align-items:center;gap:16px;padding:0 20px;flex-shrink:0}
+  .topbar .tt{font-family:"Unbounded";font-weight:700;font-size:16px;color:#fff}
+  .topbar .spacer{flex:1}
+  .topbar .ub{background:rgba(255,255,255,.1);border-radius:7px;padding:7px 12px;font-size:12.5px;font-weight:500}
+
+  /* pipeline strip */
+  .pipe{display:flex;background:#dfe4ea;padding:0;overflow:hidden;flex-shrink:0}
+  .pst{flex:1;padding:9px 6px 9px 20px;font-size:10.5px;font-weight:600;color:#7a8aa0;background:#e7ebf0;position:relative;text-align:left;white-space:nowrap;clip-path:polygon(0 0,calc(100% - 11px) 0,100% 50%,calc(100% - 11px) 100%,0 100%,11px 50%)}
+  .pst:first-child{clip-path:polygon(0 0,calc(100% - 11px) 0,100% 50%,calc(100% - 11px) 100%,0 100%)}
+  .pst.done{background:#cfe0d6;color:#3b6d56}
+  .pst.active{background:var(--green);color:#fff}
+
+  .deal{display:flex;flex:1;min-height:0}
+  .main{flex:1;padding:20px 24px;min-width:0;overflow-y:auto}
+  .dh{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px}
+  .dh h1{font-family:"Unbounded";font-weight:700;font-size:22px;color:#33475b}
+  .dh .num{font-size:13px;color:#8295a8}
+  .dh .sum{font-family:"Unbounded";font-weight:700;font-size:18px;color:var(--green);margin-left:auto}
+  .dtags{display:flex;gap:7px;margin:10px 0 18px}
+  .dtag{background:#fff;border:1px solid var(--line);border-radius:7px;padding:4px 10px;font-size:12px;color:var(--muted)}
+  .fields{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 16px;margin-bottom:16px}
+  .fr{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;gap:12px}
+  .fr:last-child{border-bottom:0}
+  .fr span{color:var(--muted)} .fr b{font-weight:600}
+  .feed-h{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600;margin-bottom:10px}
+  .note{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:13.5px;color:var(--muted);line-height:1.5}
+  .note b{color:var(--ink)}
+
+  /* RIGHT PANEL with our widget */
+  .panel{width:380px;flex-shrink:0;background:#f4f6f8;border-left:1px solid #dbe1e8;padding:18px 16px;overflow-y:auto}
+  .panel-tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:7px;margin-bottom:9px}
+  .panel-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold)}
+
+  .mb{background:linear-gradient(165deg,#11362a,#0c241d);color:#EAF2EC;border-radius:16px;padding:16px;box-shadow:0 14px 34px -18px rgba(12,40,28,.6)}
+  .mb-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .mb-label{font-family:"Unbounded";font-weight:800;font-size:11.5px;letter-spacing:.05em;color:#F4C775}
+  .mb-timer{font-family:"Unbounded";font-weight:700;font-size:11px;background:rgba(194,121,15,.25);border:1px solid rgba(244,199,117,.4);color:#F4C775;padding:5px 10px;border-radius:999px}
+  .mb-task{font-family:"Unbounded";font-weight:700;font-size:16px;margin:11px 0 12px;line-height:1.2}
+  .mb-status{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:11px;padding:11px 13px;font-size:13px;line-height:1.5}
+  .mb-status .r{display:flex;gap:8px}
+  .mb-status .r+.r{margin-top:5px}
+  .mb-status .l{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#9fc0b1;font-weight:700;min-width:38px;flex-shrink:0;padding-top:2px}
+  .mb-status b{color:#F4C775}
+  .mb-status .risk{color:#f3b6a8} .mb-status .risk .l{color:#e79683}
+  .mb-phrase{margin-top:11px;background:rgba(255,255,255,.05);border-left:2px solid rgba(244,199,117,.5);border-radius:0 10px 10px 0;padding:10px 12px;font-size:12.5px;font-style:italic;color:#dfeee6;line-height:1.45}
+  .mb-go{border:0;cursor:pointer;width:100%;font-family:"Unbounded";font-weight:700;font-size:14px;color:#3a2a06;background:linear-gradient(150deg,#e7b24f,#cf8f24);padding:13px;border-radius:11px;margin-top:13px;display:flex;align-items:center;justify-content:center;gap:8px}
+  .mb-row{display:flex;gap:7px;margin-top:8px}
+  .mb-2{flex:1;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#EAF2EC;cursor:pointer;font-family:"Golos Text";font-weight:600;font-size:12.5px;padding:11px 6px;border-radius:10px;text-align:center}
+  .mb-done{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12)}
+  .mb-doneb{width:100%;border:1px solid rgba(79,208,138,.5);background:rgba(79,208,138,.12);color:#bff0d4;cursor:pointer;font-family:"Golos Text";font-weight:700;font-size:13.5px;padding:11px;border-radius:10px}
+  .mb-note{font-size:11px;color:#9fc0b1;line-height:1.4;margin-top:8px}
+  .mb-note b{color:#cfe6da}
+
+  .contact{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:16px}
+  .contact .cn{font-weight:600;font-size:15px}
+  .contact .cp{color:var(--muted);font-size:13.5px;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="amo">
+  <div class="side">
+    <div class="acc">👤</div>
+    <div class="si"><span class="g">🧭</span>Рабочий<br>стол</div>
+    <div class="si"><span class="g">⚡</span>Моя<br>смена</div>
+    <div class="si active"><span class="g">💼</span>Сделки</div>
+    <div class="si"><span class="g">💬</span>imBox<span class="badge">99</span></div>
+    <div class="si"><span class="g">✅</span>Задачи<span class="badge">33</span></div>
+    <div class="si"><span class="g">📋</span>Списки</div>
+    <div class="si"><span class="g">✉️</span>Почта</div>
+  </div>
+
+  <div class="work">
+    <div class="topbar">
+      <span class="tt">Сделка · Анна Владимировна</span>
+      <span class="spacer"></span>
+      <span class="ub">⋯</span>
+      <span class="ub">ЗАКРЫТЬ И ОТМЕНИТЬ</span>
+    </div>
+
+    <div class="pipe">
+      <div class="pst done">Новый лид</div>
+      <div class="pst done">В работе</div>
+      <div class="pst done">Принимает решение</div>
+      <div class="pst done">Договор на подписи</div>
+      <div class="pst done">Подписан — платёж</div>
+      <div class="pst active">Оплачено 990 — дожим</div>
+      <div class="pst">Полная продажа</div>
+    </div>
+
+    <div class="deal">
+      <div class="main">
+        <div class="dh">
+          <h1>Анна Владимировна</h1>
+          <span class="num">Сделка #25693690</span>
+          <span class="sum">13 500 ₽</span>
+        </div>
+        <div class="dtags">
+          <span class="dtag">Рефинансирование</span>
+          <span class="dtag">Оплатил 990 ₽</span>
+        </div>
+
+        <div class="fields">
+          <div class="fr"><span>Телефон</span><b>+7 950 22 21 61</b></div>
+          <div class="fr"><span>Сумма долга</span><b>1 200 000 ₽</b></div>
+          <div class="fr"><span>Договор подписан</span><b>23.06.2026 · ОКИ ДОКИ</b></div>
+          <div class="fr"><span>Внесено</span><b>990 ₽ (старт зафиксирован)</b></div>
+          <div class="fr"><span>Кредитная история</span><b>запрошена, ждём</b></div>
+        </div>
+
+        <div class="feed-h">Лента</div>
+        <div class="note">Вчера 17:40 · звонок 4:12 — клиент подтвердил намерение, обещал внести первый платёж сегодня до вечера. <b>Следующий шаг: добрать 13 500 ₽ + получить КИ.</b></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-tag">SALE 100.0 · виджет</div>
+        <div class="mb">
+          <div class="mb-top">
+            <span class="mb-label">⚡ СЕЙЧАС ДЕЛАЙ</span>
+            <span class="mb-timer">⏱ до 18:00 · ~3 ч</span>
+          </div>
+          <div class="mb-task">Добери оплату 13 500 ₽</div>
+          <div class="mb-status">
+            <div class="r"><span class="l">Этап</span><span>990 ₽ оплачены</span></div>
+            <div class="r"><span class="l">Цель</span><span>первый платёж <b>13 500 ₽</b> сегодня</span></div>
+            <div class="r risk"><span class="l">Риск</span><span>в пул в 18:00 — комиссия уйдёт</span></div>
+          </div>
+          <div class="mb-phrase">«Анна, вы внесли 990 ₽, старт зафиксирован. Следующий шаг — первый платёж 13 500 ₽, чтобы начать работу. Сейчас отправлю ссылку, оплатите через СБП.»</div>
+          <button class="mb-go">📲 Отправить СБП 13 500 ₽</button>
+          <div class="mb-row">
+            <button class="mb-2">📞 Позвонить</button>
+            <button class="mb-2">✍️ Написать</button>
+            <button class="mb-2">Не отвечает</button>
+          </div>
+          <div class="mb-done">
+            <button class="mb-doneb">✓ Касание выполнено</button>
+            <div class="mb-note">Система проверит: <b>звонок · сообщение · ссылка · следующий шаг</b>. Нет факта — задача не закроется.</div>
+          </div>
+        </div>
+
+        <div class="contact">
+          <div class="cn">Анна Владимировна</div>
+          <div class="cp">+7 950 22 21 61 · Telegram</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

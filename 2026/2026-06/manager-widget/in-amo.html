@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Пульт менеджера в amoCRM — SALE 100.0</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2E9; --card:#FFFFFF; --ink:#191713; --muted:#615B50; --faint:#8A938A;
+    --green:#0E5C46; --green-deep:#0A3D2E; --amber:#C2790F; --red:#9A2D22; --gold:#C99A33;
+    --line:rgba(25,23,19,.12);
+    --amo-side:#20304a; --amo-top:#26395a; --amo-bg:#eceff3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Golos Text",sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;background:var(--amo-bg)}
+  a{color:inherit;text-decoration:none}
+  .amo{display:flex;min-height:100vh}
+
+  .side{width:84px;background:var(--amo-side);flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px}
+  .acc{width:40px;height:40px;border-radius:50%;background:#34507a;margin-bottom:10px;display:grid;place-items:center;font-size:17px}
+  .si{width:100%;padding:9px 4px;text-align:center;color:#8ea4c4;font-size:9.5px;line-height:1.2;cursor:pointer;position:relative}
+  .si .g{font-size:19px;display:block;margin-bottom:3px}
+  .si:hover{color:#cfe0f4}
+  .si.active{color:#fff;background:rgba(255,255,255,.06)}
+  .si.active::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:0 3px 3px 0;background:var(--gold)}
+  .si.brand .g{color:#F4C775}
+  .badge{position:absolute;top:5px;right:18px;background:#e8533f;color:#fff;font-size:8.5px;font-weight:700;padding:1px 5px;border-radius:9px}
+
+  .work{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{background:var(--amo-top);color:#dfe8f5;height:54px;display:flex;align-items:center;gap:16px;padding:0 20px;flex-shrink:0}
+  .topbar .tt{font-family:"Unbounded";font-weight:700;font-size:16px;color:#fff}
+  .topbar .search{flex:1;max-width:380px;background:rgba(255,255,255,.08);border-radius:8px;height:32px;display:flex;align-items:center;padding:0 12px;color:#9fb3d0;font-size:13px;gap:8px}
+  .topbar .spacer{flex:1}
+  .topbar .ub{background:rgba(255,255,255,.1);border-radius:7px;padding:7px 12px;font-size:12.5px;font-weight:500}
+
+  .content{padding:22px 26px}
+  .page-h{font-family:"Unbounded";font-weight:700;font-size:18px;color:#33475b;margin-bottom:4px}
+  .page-s{font-size:13px;color:#62788f;margin-bottom:18px}
+  .cockpit{max-width:900px}
+
+  .ctx{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;color:var(--muted);font-weight:500}
+  .pill b{font-family:"Unbounded";font-weight:700;color:var(--ink);font-size:13px}
+  .pill.live{color:var(--green-deep)} .pill.live i{color:#1aa06a;font-style:normal}
+  .pill.pause{background:#FBEDEB;border-color:rgba(154,45,34,.3);color:var(--red);font-weight:600}
+  .pill.pause b{color:var(--red)}
+  .pill.rate{background:var(--green-deep);border-color:var(--green-deep);color:#F1ECE0}
+  .pill.rate b{color:#F4C775}
+  .ctx .spacer{flex:1}
+
+  .now{background:linear-gradient(165deg,#11362a,#0c241d);color:#EAF2EC;border-radius:20px;padding:22px 24px;box-shadow:0 18px 42px -20px rgba(12,40,28,.6);position:relative;overflow:hidden}
+  .now::after{content:"";position:absolute;right:-40px;top:-40px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle,rgba(215,163,59,.2),transparent 65%)}
+  .now-top{display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;flex-wrap:wrap}
+  .now-label{font-family:"Unbounded";font-weight:800;font-size:13px;letter-spacing:.06em;color:#F4C775}
+  .now-timer{font-family:"Unbounded";font-weight:700;font-size:13px;background:rgba(194,121,15,.25);border:1px solid rgba(244,199,117,.4);color:#F4C775;padding:6px 13px;border-radius:999px}
+  .now-name{font-family:"Unbounded";font-weight:800;font-size:clamp(22px,2.8vw,28px);line-height:1.1;margin:12px 0 0;position:relative}
+  .now-body{display:grid;grid-template-columns:1.05fr .95fr;gap:14px;margin-top:16px;position:relative}
+  @media (max-width:720px){.now-body{grid-template-columns:1fr}}
+  .nb,.steps,.phrase{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:14px 16px}
+  .nbr{font-size:14.5px;line-height:1.5;display:flex;gap:9px;align-items:baseline}
+  .nbr+.nbr{margin-top:7px}
+  .nbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9fc0b1;font-weight:700;min-width:42px;flex-shrink:0;padding-top:1px}
+  .nbr b{color:#F4C775}
+  .nbr.risk{color:#f3b6a8} .nbr.risk .nbl{color:#e79683}
+  .steps{margin-top:14px}
+  .sl{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#9fc0b1;font-weight:700;margin-bottom:9px}
+  .steps ol{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:8px}
+  .steps li{counter-increment:s;position:relative;padding-left:30px;font-size:14.5px;line-height:1.35}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:-1px;width:21px;height:21px;border-radius:7px;background:rgba(244,199,117,.18);color:#F4C775;font-family:"Unbounded";font-weight:700;font-size:11px;display:grid;place-items:center}
+  .phrase{display:flex;flex-direction:column}
+  .phrase p{font-size:14.5px;line-height:1.5;font-style:italic;color:#EAF2EC}
+  .now-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;position:relative}
+  .btn-go{border:0;cursor:pointer;font-family:"Unbounded";font-weight:700;font-size:15px;color:#3a2a06;background:linear-gradient(150deg,#e7b24f,#cf8f24);padding:14px 20px;border-radius:13px;display:inline-flex;align-items:center;gap:9px}
+  .btn-go:active{transform:translateY(1px)}
+  .btn-2{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#EAF2EC;cursor:pointer;font-family:"Golos Text";font-weight:600;font-size:14px;padding:14px 16px;border-radius:13px}
+  .btn-2:hover{background:rgba(255,255,255,.13)}
+  .now-done{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);position:relative}
+  .btn-done{border:1px solid rgba(79,208,138,.5);background:rgba(79,208,138,.12);color:#bff0d4;cursor:pointer;font-family:"Golos Text";font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;display:inline-flex;align-items:center;gap:8px}
+  .done-note{font-size:12px;color:#9fc0b1;line-height:1.4;max-width:420px}
+  .done-note b{color:#cfe6da}
+
+  .load{margin-top:18px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 18px}
+  .load-h{font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;color:var(--muted);margin-bottom:11px}
+  .load-h span{text-transform:none;letter-spacing:0;font-weight:400;color:var(--faint)}
+  .load-row{display:flex;flex-wrap:wrap;gap:9px}
+  .ls{display:inline-flex;align-items:center;gap:7px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13px;color:var(--muted)}
+  .ls b{font-family:"Unbounded";font-weight:800;font-size:14px;color:var(--ink)}
+  .ls.warn{background:#FBEDEB;border-color:rgba(154,45,34,.2);color:var(--red)} .ls.warn b{color:var(--red)}
+
+  .hint{margin-top:14px;font-size:13px;color:var(--muted);line-height:1.55;max-width:780px}
+  .hint b{color:var(--green-deep)}
+
+  .reg{margin-top:24px;border-top:1px solid var(--line);padding-top:18px}
+  .reg-h{font-family:"Unbounded";font-weight:700;font-size:14px;color:#33475b;margin-bottom:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .reg-h .rs{font-family:"Golos Text";font-weight:400;font-size:12.5px;color:var(--faint)}
+  .reg-h .full{margin-left:auto;font-family:"Golos Text";font-weight:600;font-size:12.5px;color:var(--green);border:1px solid rgba(14,92,70,.3);border-radius:999px;padding:5px 12px}
+  .reg-h .full:hover{background:rgba(14,92,70,.07)}
+  .reg-funnel{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+  .rf{flex:1;min-width:118px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:9px 12px;border-top:3px solid #7C756A;display:block;transition:.15s}
+  .rf:hover{border-color:var(--green);transform:translateY(-1px)}
+  .rf.amber{border-top-color:var(--amber)} .rf.green{border-top-color:var(--green)} .rf.gold{border-top-color:var(--gold)}
+  .rf b{font-size:12.5px;font-weight:700;display:block;color:var(--ink)}
+  .rf small{font-size:10.5px;color:var(--muted);display:block;margin-top:3px;line-height:1.3}
+  .rf .lk{font-size:10px;color:var(--green);font-weight:600;margin-top:5px;display:block}
+  .reg-rules{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  @media (max-width:720px){.reg-rules{grid-template-columns:1fr}}
+  .rr{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:13px;color:var(--muted);line-height:1.45}
+  .rr>b{display:block;color:var(--green-deep);font-family:"Unbounded";font-weight:700;font-size:12px;margin-bottom:4px}
+</style>
+</head>
+<body>
+<div class="amo">
+  <div class="side">
+    <div class="acc">👤</div>
+    <div class="si"><span class="g">🧭</span>Рабочий<br>стол</div>
+    <div class="si brand active"><span class="g">⚡</span>Моя<br>смена</div>
+    <div class="si"><span class="g">💼</span>Сделки</div>
+    <div class="si"><span class="g">💬</span>imBox<span class="badge">99</span></div>
+    <div class="si"><span class="g">✅</span>Задачи<span class="badge">33</span></div>
+    <div class="si"><span class="g">📋</span>Списки</div>
+    <div class="si"><span class="g">✉️</span>Почта</div>
+    <div class="si"><span class="g">📊</span>Аналитика</div>
+    <div class="si"><span class="g">⚙️</span>Sensei<span class="badge">2</span></div>
+  </div>
+
+  <div class="work">
+    <div class="topbar">
+      <span class="tt">Моя смена</span>
+      <span class="search">🔍 Поиск и фильтр</span>
+      <span class="spacer"></span>
+      <span class="ub">⋯</span>
+      <span class="ub">НАСТРОИТЬ</span>
+    </div>
+
+    <div class="content">
+      <div class="page-h">Пульт менеджера</div>
+      <div class="page-s">Не держи регламент в голове — делай, что написано. Система ведёт очередь сама.</div>
+
+      <div class="cockpit">
+        <div class="ctx">
+          <span class="pill live"><i>●</i> на линии</span>
+          <span class="pill">Новые сегодня <b>4 / 10</b></span>
+          <span class="pill">Консультаций <b>3 / 6</b></span>
+          <span class="pill pause">🚫 Новые лиды на паузе · причина: <b>1 горящее (Анна)</b></span>
+          <span class="spacer"></span>
+          <span class="pill rate">Рейтинг <b>92%</b> ↑</span>
+        </div>
+
+        <div class="now">
+          <div class="now-top">
+            <span class="now-label">⚡ СЕЙЧАС ДЕЛАЙ</span>
+            <span class="now-timer">⏱ до 18:00 · осталось ~3 ч</span>
+          </div>
+          <div class="now-name">Анна Владимировна</div>
+
+          <div class="now-body">
+            <div>
+              <div class="nb">
+                <div class="nbr"><span class="nbl">Этап</span> 990 ₽ оплачены</div>
+                <div class="nbr"><span class="nbl">Цель</span> добрать первый платёж <b>13 500 ₽</b> сегодня</div>
+                <div class="nbr risk"><span class="nbl">Риск</span> уйдёт в пул в 18:00 — комиссия уйдёт другому</div>
+              </div>
+              <div class="steps">
+                <div class="sl">Что сделать</div>
+                <ol>
+                  <li>Отправить ссылку СБП 13 500 ₽</li>
+                  <li>Позвонить</li>
+                  <li>Не отвечает — написать</li>
+                  <li>Зафиксировать следующий шаг</li>
+                </ol>
+              </div>
+            </div>
+            <div class="phrase">
+              <div class="sl">Что сказать — готовый текст</div>
+              <p>«Анна, вы уже внесли 990 ₽, мы зафиксировали старт. Следующий шаг — внести первый платёж 13 500 ₽, чтобы мы начали работу по договору. Я сейчас отправлю ссылку, оплатите через СБП.»</p>
+            </div>
+          </div>
+
+          <div class="now-actions">
+            <button class="btn-go">📲 Отправить СБП 13 500 ₽</button>
+            <button class="btn-2">📞 Позвонить</button>
+            <button class="btn-2">✍️ Написать</button>
+            <button class="btn-2">Клиент не отвечает</button>
+          </div>
+          <div class="now-done">
+            <button class="btn-done">✓ Касание выполнено</button>
+            <span class="done-note">Система проверит: <b>был звонок · сообщение · отправлена ссылка · есть следующий шаг</b>. Нет факта — задача не закроется.</span>
+          </div>
+        </div>
+
+        <div class="load">
+          <div class="load-h">На тебе сейчас <span>· это не выбор, а чтобы видеть, что висит</span></div>
+          <div class="load-row">
+            <div class="ls">🔥 <b>0</b> срочных</div>
+            <div class="ls">⏰ <b>3</b> горящих</div>
+            <div class="ls">📄 <b>2</b> без оплаты</div>
+            <div class="ls">💵 <b>1</b> на 990</div>
+            <div class="ls warn">⚠️ <b>1</b> просрочка</div>
+          </div>
+        </div>
+
+        <div class="hint">Ты <b>не выбираешь</b>, кого брать — очередь выдаёт самое денежное и срочное сверху. Пока не закроешь горящее — <b>новых лидов не будет</b>. Детали по сделкам — на доске «Сделки».</div>
+
+        <div class="reg">
+          <div class="reg-h">Регламент воронки <span class="rs">· шпаргалка, помнить не надо</span><a class="full" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-06/closer-funnel/" target="_blank">Полный регламент →</a></div>
+          <div class="reg-funnel">
+            <a class="rf" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-06/closer-funnel/#s1" target="_blank"><b>1 · Новый лид</b><small>минуты · 3 ндз → дозвонщики</small><span class="lk">правило →</span></a>
+            <a class="rf" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-06/closer-funnel/#s2" target="_blank"><b>2 · В работе</b><small>до договора · 3 дня → пул</small><span class="lk">правило →</span></a>
+            <a class="rf amber" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-06/closer-funnel/#s3" target="_blank"><b>3 · Принимает решение</b><small>3 дня → пул · нужны 4 поля</small><span class="lk">правило →</span></a>
+            <a class="rf amber" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-06/closer-funnel/#s4" target="_blank"><b>4 · Договор на подписи</b><small>презентация → подпись, 1 час</small><span class="lk">правило →</span></a>
+            <a class="rf green" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-06/closer-funnel/#s5" target="_blank"><b>5 · Подписан — платёж</b><small>твой, добивай · забил 1 д → пул</small><span class="lk">правило →</span></a>
+            <a class="rf green" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-06/closer-funnel/#s6" target="_blank"><b>6 · Оплачено 990</b><small>твой, добивай · забил 3 д → пул</small><span class="lk">правило →</span></a>
+            <a class="rf gold" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-06/closer-funnel/#s7" target="_blank"><b>7 · Полная продажа</b><small>13 500 → сопровождение</small><span class="lk">правило →</span></a>
+          </div>
+          <div class="reg-rules">
+            <div class="rr"><b>Деньги за закрытием</b>Комиссия у того, кто взял оплату. Бросил → закрыл другой → деньги у другого.</div>
+            <div class="rr"><b>Касаешься — лид твой</b>Подписанный и 990 не выхватят, пока ведёшь. Без договора не успел в окно → пул.</div>
+            <div class="rr"><b>Уход в пул ≠ наказание</b>Рейтингом бьют только за заброс (нет двустороннего касания). Старался, клиент не созрел → рейтинг цел.</div>
+            <div class="rr"><b>Касание = задание</b>Двустороннее, с заданием (документ/платёж), не «как дела». Кап входа: 10 новых/день ИЛИ 6 консультаций.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
