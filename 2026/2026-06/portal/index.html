@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>ДОНУЛЯ — ваше дело</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4EFE6; --paper2:#ECE5D8;
+  --surface:#FFFFFF; --surface2:#FBF8F2;
+  --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0E2A22; --pine2:#143A2E;
+  --green:#137A53; --green-soft:#E2F0E8; --green-ink:#0C5238;
+  --gold:#D7A33B; --gold-soft:#FBEFD2; --gold-ink:#8A6212;
+  --brick:#BD4A30; --brick-soft:#F8E3DC;
+  --line:#E4DCCD; --line2:#D7CDBA;
+  --shadow:0 14px 40px -18px rgba(20,40,30,.45);
+  --shadow-sm:0 6px 18px -10px rgba(20,40,30,.4);
+  --r:22px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--surface);color:var(--ink);-webkit-font-smoothing:antialiased}
+.shell{min-height:100dvh;display:flex}
+.app{flex:1 1 auto;width:100%;background:var(--surface);display:flex;flex-direction:column;position:relative;min-height:100dvh}
+.screen{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 18px 120px}
+@media (min-width:680px){
+  body{background:
+    radial-gradient(1100px 600px at 85% -10%, #fff6e3 0%, transparent 55%),
+    radial-gradient(900px 520px at -10% 10%, #e7f1ea 0%, transparent 50%),
+    var(--paper);}
+  .shell{align-items:center;justify-content:center;padding:28px}
+  .app{flex:0 0 auto;max-width:440px;min-height:auto;height:min(940px,calc(100dvh - 56px));
+    border-radius:34px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden}
+}
+
+/* HEADER */
+.hdr{background:var(--pine);color:#fff;padding:18px 20px 22px;position:sticky;top:0;z-index:5}
+.hdr .brand{font-family:"Unbounded";font-weight:700;font-size:13px;letter-spacing:.14em;opacity:.85}
+.hdr .who{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.hdr h1{font-family:"Unbounded";font-weight:600;font-size:21px;line-height:1.15}
+.hdr .name{font-size:13px;opacity:.7;margin-top:3px}
+.statusp{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);
+  color:#fff;font-size:12px;font-weight:600;padding:7px 12px;border-radius:999px;white-space:nowrap}
+.dotpulse{width:7px;height:7px;border-radius:50%;background:#7FE3B3;box-shadow:0 0 0 0 rgba(127,227,179,.7);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(127,227,179,.6)}70%{box-shadow:0 0 0 7px rgba(127,227,179,0)}100%{box-shadow:0 0 0 0 rgba(127,227,179,0)}}
+
+.sec-lab{font-family:"Unbounded";font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);margin:22px 2px 10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm)}
+
+/* CURATOR */
+.cur{display:flex;align-items:center;gap:13px;margin-top:16px}
+.ava{width:48px;height:48px;border-radius:50%;background:linear-gradient(150deg,#1c6b4c,#0d3a2a);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:"Unbounded";font-weight:600;font-size:17px;flex-shrink:0}
+.cur .t b{display:block;font-size:15px}
+.cur .t span{font-size:12.5px;color:var(--muted)}
+.cur .msg{margin-left:auto;background:var(--green-soft);color:var(--green-ink);border:none;font-weight:600;font-size:13px;
+  padding:9px 14px;border-radius:12px;font-family:"Golos Text"}
+
+/* LADDER */
+.ladder{position:relative;margin-top:4px}
+.step{display:flex;gap:14px;position:relative;padding-bottom:18px}
+.step:last-child{padding-bottom:0}
+.rail{display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.bub{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;z-index:2;flex-shrink:0}
+.line{width:2px;flex:1;background:var(--line2);margin:2px 0}
+.step.done .bub{background:var(--green);color:#fff}
+.step.done .line{background:var(--green)}
+.step.cur .bub{background:var(--gold);color:#3a2a06;box-shadow:0 0 0 4px var(--gold-soft)}
+.step.lock .bub{background:var(--paper2);color:var(--faint);border:1.5px solid var(--line2)}
+.sbody{padding-top:3px}
+.sbody b{font-size:14.5px;display:block}
+.step.lock .sbody b{color:var(--faint)}
+.sbody p{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+.tagwin{display:inline-block;margin-top:5px;font-size:11px;font-weight:700;color:var(--green-ink);background:var(--green-soft);padding:3px 8px;border-radius:7px}
+.taglock{display:inline-block;margin-top:5px;font-size:11px;font-weight:700;color:var(--gold-ink);background:var(--gold-soft);padding:3px 8px;border-radius:7px}
+
+/* LEGAL OPINION */
+.opin{background:linear-gradient(160deg,#fbfdfb,#eef6f0);border-color:#cfe6d8}
+.opin .top{display:flex;align-items:center;gap:9px}
+.opin .ic{width:34px;height:34px;border-radius:10px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px}
+.opin b{font-size:14.5px}
+.opin .ready{margin-left:auto;font-size:11px;font-weight:700;color:var(--green-ink)}
+.opin .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:13px 0 12px}
+.opin .g{background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 11px}
+.opin .g span{font-size:11px;color:var(--faint);display:block}
+.opin .g b{font-size:15px;color:var(--ink);margin-top:1px}
+.opin .check{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.opin .open{margin-top:11px;width:100%;background:var(--pine);color:#fff;border:none;font-family:"Golos Text";font-weight:600;
+  font-size:13.5px;padding:11px;border-radius:13px}
+
+/* DOCS */
+.doc{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.doc:last-child{border-bottom:none}
+.dck{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.dck.ok{background:var(--green);color:#fff}
+.dck.wait{background:var(--gold-soft);color:var(--gold-ink);border:1.5px solid var(--gold)}
+.doc .dt{font-size:13.5px}
+.doc .dt span{display:block;font-size:11.5px;color:var(--faint)}
+.doc .up{margin-left:auto;font-size:12.5px;font-weight:600;color:var(--green-ink);background:var(--green-soft);border:none;padding:7px 12px;border-radius:10px;font-family:"Golos Text"}
+.docbar{height:6px;border-radius:99px;background:var(--paper2);margin-top:12px;overflow:hidden}
+.docbar>i{display:block;height:100%;width:75%;background:var(--green);border-radius:99px}
+.docp{font-size:11.5px;color:var(--muted);margin-top:7px}
+
+/* GATE */
+.gate{background:linear-gradient(160deg,#fff8ec,#fbeccd);border:1.5px solid var(--gold);border-radius:var(--r);padding:18px;
+  box-shadow:0 16px 38px -18px rgba(168,120,20,.5);position:relative;overflow:hidden}
+.gate .kick{font-family:"Unbounded";font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink)}
+.gate h3{font-family:"Unbounded";font-weight:600;font-size:18px;margin:7px 0 8px;line-height:1.2}
+.gate p{font-size:13px;color:#5b4a22;line-height:1.5}
+.gate .unlocks{display:flex;gap:8px;margin:13px 0 15px;flex-wrap:wrap}
+.gate .u{font-size:11.5px;font-weight:600;color:var(--gold-ink);background:rgba(255,255,255,.7);border:1px solid #e7cf95;padding:6px 10px;border-radius:9px}
+.cta{position:relative;width:100%;background:var(--pine);color:#fff;border:none;font-family:"Unbounded";font-weight:600;font-size:16px;
+  padding:15px;border-radius:15px;overflow:hidden;cursor:pointer}
+.cta small{display:block;font-family:"Golos Text";font-weight:500;font-size:11.5px;opacity:.7;margin-top:2px}
+.cta::before{content:"";position:absolute;top:0;left:-75%;width:55%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-18deg);
+  pointer-events:none;animation:shine 4.5s ease-in-out 1.2s infinite}
+@keyframes shine{0%{left:-75%}16%{left:135%}100%{left:135%}}
+@media (prefers-reduced-motion:reduce){.cta::before{animation:none}}
+.sbp{display:flex;align-items:center;justify-content:center;gap:7px;font-size:11.5px;color:var(--muted);margin-top:9px}
+.sbp i{width:7px;height:7px;border-radius:50%}
+.sbp .a{background:#1e9be0}.sbp .b{background:#7b2ff7}.sbp .c{background:#f53b6b}
+
+/* COLLECTORS */
+.coll{display:flex;align-items:flex-start;gap:12px;margin-top:16px}
+.coll .ic{width:38px;height:38px;border-radius:11px;background:var(--brick-soft);color:var(--brick);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.coll b{font-size:14px}
+.coll p{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.45}
+.coll .rep{margin-top:9px;font-size:12.5px;font-weight:600;color:var(--brick);background:var(--brick-soft);border:none;padding:8px 13px;border-radius:11px;font-family:"Golos Text"}
+
+/* FEED */
+.feed .it{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.feed .it:last-child{border-bottom:none}
+.feed .fd{width:9px;height:9px;border-radius:50%;background:var(--green);margin-top:5px;flex-shrink:0}
+.feed .it.ai .fd{background:var(--gold)}
+.feed .ft{font-size:13px;line-height:1.4}
+.feed .ft span{display:block;font-size:11px;color:var(--faint);margin-top:1px}
+.aibadge{font-size:10px;font-weight:700;color:var(--gold-ink);background:var(--gold-soft);padding:1px 6px;border-radius:6px;margin-left:6px;vertical-align:middle}
+
+.foot{text-align:center;padding:22px 0 8px;font-size:11px;color:var(--faint)}
+.note{font-size:11px;color:var(--faint);margin-top:7px;line-height:1.4;padding:0 2px}
+</style>
+</head>
+<body>
+<div class="shell"><div class="app">
+
+  <div class="hdr">
+    <div class="brand">ДОНУЛЯ · банкротство 127-ФЗ</div>
+    <div class="who">
+      <div>
+        <h1>Ваше дело</h1>
+        <div class="name">Игорь П. · договор № 2026-0617</div>
+      </div>
+      <span class="statusp"><span class="dotpulse"></span>Дело ведётся</span>
+    </div>
+  </div>
+
+  <div class="screen">
+
+    <!-- КУРАТОР -->
+    <div class="cur">
+      <div class="ava">СК</div>
+      <div class="t"><b>Светлана Кравцова</b><span>ваш юрист по делу · на связи</span></div>
+      <button class="msg">Написать</button>
+    </div>
+
+    <!-- ПРОГРЕСС -->
+    <div class="sec-lab">Этапы дела</div>
+    <div class="card">
+      <div class="ladder">
+        <div class="step done">
+          <div class="rail"><div class="bub">✓</div><div class="line"></div></div>
+          <div class="sbody"><b>Дело принято в работу</b><p>Юрист назначен, ситуация разобрана.</p></div>
+        </div>
+        <div class="step cur">
+          <div class="rail"><div class="bub">2</div><div class="line"></div></div>
+          <div class="sbody"><b>Сбор документов</b><p>Паспорт, СНИЛС, ИНН и кредитная история через Госуслуги.</p>
+            <span class="tagwin">сейчас · 3 из 4 готово</span></div>
+        </div>
+        <div class="step lock">
+          <div class="rail"><div class="bub">🔒</div><div class="line"></div></div>
+          <div class="sbody"><b>Подготовка заявления в суд</b><p>Юрист готовит заявление по вашему делу.</p>
+            <span class="taglock">отпирается доплатой</span></div>
+        </div>
+        <div class="step lock">
+          <div class="rail"><div class="bub">🔒</div><div class="line"></div></div>
+          <div class="sbody"><b>Суд принял · процедура введена</b><p>Закон останавливает требования банков и рост долга.</p></div>
+        </div>
+        <div class="step lock">
+          <div class="rail"><div class="bub">🔒</div></div>
+          <div class="sbody"><b>Долги списаны</b><p>Финал процедуры.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ЮР-ЗАКЛЮЧЕНИЕ -->
+    <div class="sec-lab">Заключение по вашему делу</div>
+    <div class="card opin">
+      <div class="top">
+        <div class="ic">📄</div>
+        <b>Ваш вопрос решаем</b>
+        <span class="ready">ГОТОВО</span>
+      </div>
+      <div class="grid">
+        <div class="g"><span>Подходит процедура</span><b>Реализация имущества</b></div>
+        <div class="g"><span>Оценка списания*</span><b>≈ 1 240 000 ₽</b></div>
+      </div>
+      <div class="check">✓ Подготовлено и проверено юристом</div>
+      <button class="open">Открыть заключение</button>
+    </div>
+
+    <!-- ДОКУМЕНТЫ -->
+    <div class="sec-lab">Документы</div>
+    <div class="card">
+      <div class="doc"><div class="dck ok">✓</div><div class="dt">Паспорт</div></div>
+      <div class="doc"><div class="dck ok">✓</div><div class="dt">СНИЛС</div></div>
+      <div class="doc"><div class="dck ok">✓</div><div class="dt">ИНН</div></div>
+      <div class="doc"><div class="dck wait">!</div><div class="dt">Кредитная история <span>через Госуслуги — поможем вытащить</span></div><button class="up">Загрузить</button></div>
+      <div class="docbar"><i></i></div>
+      <div class="docp">3 из 4 — остался один шаг до полного пакета</div>
+    </div>
+
+    <!-- ГЕЙТ / ДОЖИМ -->
+    <div class="sec-lab">Следующий шаг</div>
+    <div class="gate">
+      <div class="kick">⚡ Разблокировать</div>
+      <h3>Юрист готов начать заявление в суд</h3>
+      <p>Документы почти собраны и заключение готово. Первый платёж запускает подготовку заявления и защиту от коллекторов.</p>
+      <div class="unlocks">
+        <span class="u">⚖️ Подготовка заявления</span>
+        <span class="u">📞 Защита от коллекторов</span>
+      </div>
+      <button class="cta">Внести 13 500 ₽<small>первый платёж рассрочки · отпирает подачу</small></button>
+      <div class="sbp"><i class="a"></i><i class="b"></i><i class="c"></i>Оплата через СБП · мгновенно</div>
+    </div>
+
+    <!-- КОЛЛЕКТОРЫ -->
+    <div class="coll">
+      <div class="ic">📞</div>
+      <div>
+        <b>Звонят коллекторы?</b>
+        <p>Сообщите нам — представляем ваши интересы и подскажем, что отвечать. После введения процедуры требования останавливаются по закону.</p>
+        <button class="rep">Сообщить о звонке</button>
+      </div>
+    </div>
+
+    <!-- ЛЕНТА -->
+    <div class="sec-lab">Что происходит по делу</div>
+    <div class="card feed">
+      <div class="it ai"><div class="fd"></div><div class="ft">Заключение готово: ваш вопрос решаем <span class="aibadge">помощник</span><span>сегодня, 11:20</span></div></div>
+      <div class="it"><div class="fd"></div><div class="ft">Кредитная история запрошена через Госуслуги<span>сегодня, 10:05</span></div></div>
+      <div class="it"><div class="fd"></div><div class="ft">Юрист Светлана изучила ваше дело<span>вчера, 16:40</span></div></div>
+      <div class="it"><div class="fd"></div><div class="ft">Дело принято в работу<span>2 дня назад</span></div></div>
+    </div>
+
+    <div class="note">* Оценка списания — предварительная, не гарантия. Точные суммы определяются в ходе процедуры. Заявление и заключение готовятся с участием юриста.</div>
+    <div class="foot">ДОНУЛЯ · ваше дело · банкротство физлиц 127-ФЗ</div>
+
+  </div>
+</div></div>
+</body>
+</html>
