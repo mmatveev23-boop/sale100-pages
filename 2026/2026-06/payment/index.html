@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Оплата — ДОНУЛЯ</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4EFE6; --card:#FFFFFF; --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+    --pine:#0E2A22; --green:#137A53; --green-soft:#E2F0E8; --green-ink:#0C5238;
+    --gold:#D7A33B; --gold-ink:#8A6212; --line:#E4DCCD;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:"Golos Text",sans-serif;color:var(--ink);background:
+    radial-gradient(900px 520px at 85% -10%,#fff6e3 0%,transparent 55%),
+    radial-gradient(800px 480px at -10% 8%,#e7f1ea 0%,transparent 50%),var(--paper);
+    min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px 16px;-webkit-font-smoothing:antialiased}
+  .card{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:26px;overflow:hidden;box-shadow:0 28px 60px -28px rgba(20,40,30,.45)}
+
+  .head{background:radial-gradient(360px 150px at 100% 0%,#1d5a47 0%,transparent 70%),linear-gradient(160deg,#143A2E,var(--pine));color:#F3EEE2;padding:20px 22px 18px}
+  .logo{font-family:"Unbounded";font-weight:800;font-size:20px;letter-spacing:.02em}
+  .logo span{display:block;font-family:"Golos Text";font-weight:500;font-size:10px;letter-spacing:.22em;color:#9fc0b1;margin-top:3px}
+  .htitle{font-size:13.5px;color:#cfe0d6;margin-top:14px}
+
+  .amt{padding:22px 22px 8px;text-align:center}
+  .amt .lbl{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);font-weight:600}
+  .amt .big{font-family:"Unbounded";font-weight:800;font-size:46px;color:var(--ink);line-height:1;margin:7px 0 6px}
+  .amt .sub{font-size:13.5px;color:var(--muted);line-height:1.4}
+  .amt .sub b{color:var(--ink)}
+
+  .qrwrap{display:flex;justify-content:center;margin:14px 0 6px}
+  .qr{width:180px;height:180px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:13px;box-shadow:0 10px 26px -14px rgba(20,40,30,.4)}
+  .qr svg{width:100%;height:100%;display:block}
+  .qr-note{text-align:center;font-size:13px;color:var(--muted);margin-top:2px}
+
+  .pay{padding:6px 22px 4px}
+  .sbp-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;border:0;cursor:pointer;font-family:"Unbounded";font-weight:700;font-size:16px;color:#fff;padding:16px;border-radius:16px;background:linear-gradient(120deg,#E6177A,#7B2FB3 48%,#13A2A2);box-shadow:0 14px 30px -14px rgba(123,47,179,.5);margin-top:8px}
+  .sbp-btn:active{transform:translateY(1px)}
+  .alt{display:block;width:100%;text-align:center;margin-top:11px;background:none;border:0;color:var(--green-ink);font-family:"Golos Text";font-weight:600;font-size:13.5px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+  .chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 22px 6px}
+  .chip{display:flex;align-items:center;gap:9px;background:var(--paper);border:1px solid var(--line);border-radius:13px;padding:10px 12px;font-size:12.3px;line-height:1.25;font-weight:500}
+  .chip.full{grid-column:1/3}
+  .chip .ic{font-size:16px}
+  .chip b{color:var(--green-ink)}
+
+  .after{margin:14px 22px 20px;background:var(--green-soft);border-radius:15px;padding:13px 15px;font-size:13px;color:var(--green-ink);line-height:1.45;display:flex;gap:10px}
+  .after .ic{font-size:18px;flex-shrink:0}
+  .after b{font-weight:700}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <div class="logo">ДОНУЛЯ<span>СПИСАНИЕ ДОЛГОВ</span></div>
+    <div class="htitle">Оплата первого платежа по договору · 127-ФЗ</div>
+  </div>
+
+  <div class="amt">
+    <div class="lbl">К оплате</div>
+    <div class="big">13 500 ₽</div>
+    <div class="sub">Первый платёж рассрочки · договор <b>№ 25693690</b><br>Анна Владимировна</div>
+  </div>
+
+  <div class="qrwrap"><div class="qr"><svg id="qr" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"></svg></div></div>
+  <div class="qr-note">Наведите камеру или приложение банка</div>
+
+  <div class="pay">
+    <button class="sbp-btn">Оплатить через СБП</button>
+    <button class="alt">Оплатить картой / по реквизитам</button>
+  </div>
+
+  <div class="chips">
+    <div class="chip"><span class="ic">🏦</span><div>Счёт в <b>Сбербанке</b></div></div>
+    <div class="chip"><span class="ic">🔒</span><div>Безопасно через <b>СБП</b></div></div>
+    <div class="chip"><span class="ic">✍️</span><div>Договор <b>подписан</b></div></div>
+    <div class="chip"><span class="ic">💯</span><div>Гарантия <b>возврата</b></div></div>
+  </div>
+
+  <div class="after"><span class="ic">⚖️</span><div>После оплаты юрист <b>сразу берёт дело в работу</b> — готовим и подаём заявление в суд.</div></div>
+</div>
+
+<script>
+(function(){
+  var N=25, c=document.getElementById('qr'); if(!c)return;
+  var px=100/N, r='';
+  function finder(ox,oy){
+    r+='<rect x="'+(ox*px)+'" y="'+(oy*px)+'" width="'+(7*px)+'" height="'+(7*px)+'" rx="'+(px*1.1)+'" fill="#0E2A22"/>';
+    r+='<rect x="'+((ox+1)*px)+'" y="'+((oy+1)*px)+'" width="'+(5*px)+'" height="'+(5*px)+'" rx="'+(px*.8)+'" fill="#fff"/>';
+    r+='<rect x="'+((ox+2)*px)+'" y="'+((oy+2)*px)+'" width="'+(3*px)+'" height="'+(3*px)+'" rx="'+(px*.5)+'" fill="#0E2A22"/>';
+  }
+  function inF(x,y){return (x<8&&y<8)||(x>N-9&&y<8)||(x<8&&y>N-9);}
+  for(var y=0;y<N;y++)for(var x=0;x<N;x++){
+    if(inF(x,y))continue;
+    if(((x*7+y*5+x*y*3)%4)===0) r+='<rect x="'+(x*px+px*.1)+'" y="'+(y*px+px*.1)+'" width="'+(px*.8)+'" height="'+(px*.8)+'" rx="'+(px*.18)+'" fill="#143A2E"/>';
+  }
+  finder(0,0);finder(N-7,0);finder(0,N-7);
+  c.innerHTML=r;
+})();
+</script>
+</body>
+</html>

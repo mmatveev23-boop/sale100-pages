@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SALE 100.0 — наши проекты</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="SALE 100.0 — все материалы: дорожная карта менеджера, воронка, презентация для клиента, оплата, виджет для amoCRM.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2E9; --card:#FFFFFF; --ink:#191713; --muted:#615B50; --faint:#8A938A;
+    --green:#0E5C46; --green-deep:#0A3D2E; --amber:#C2790F; --gold:#C99A33;
+    --line:rgba(25,23,19,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:"Golos Text",sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:920px;margin:0 auto;padding:0 22px}
+
+  header{padding:72px 0 8px}
+  .kicker{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);font-weight:700}
+  h1{font-family:"Unbounded";font-size:clamp(38px,7vw,68px);line-height:1;font-weight:800;letter-spacing:-.02em;margin:16px 0 0}
+  h1 .hl{color:var(--green)}
+  .lead{font-size:clamp(16px,2.3vw,20px);color:var(--muted);max-width:640px;margin:20px 0 0;font-weight:500}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:34px;padding-bottom:60px}
+  @media (max-width:720px){.grid{grid-template-columns:1fr}}
+  .pcard{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 22px 18px;transition:.18s;position:relative;overflow:hidden}
+  .pcard:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 20px 44px -26px rgba(20,40,30,.4)}
+  .pcard.wide{grid-column:1/-1}
+  .pn{font-family:"Unbounded";font-weight:700;font-size:13px;color:var(--gold);letter-spacing:.04em}
+  .pic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;font-size:22px;background:var(--paper);border:1px solid var(--line);margin-bottom:14px}
+  .pcard h2{font-family:"Unbounded";font-weight:700;font-size:20px;letter-spacing:-.01em;margin-bottom:6px}
+  .pcard p{color:var(--muted);font-size:14.5px;line-height:1.45;flex:1}
+  .go{margin-top:14px;display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;color:var(--green-deep)}
+  .tag{position:absolute;top:18px;right:18px;font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;background:var(--green-soft,#E2F0E8);color:var(--green-deep);padding:4px 9px;border-radius:8px}
+  .tag.client{background:#FBF2E8;color:#8a560a}
+
+  footer{padding:30px 0 70px;border-top:1px solid var(--line)}
+  .sig{color:var(--muted);font-size:14px}
+  .warn{font-size:13px;color:var(--amber);margin-top:8px}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <div class="kicker">SALE 100.0 · Банкротство и РДГ</div>
+  <h1>Наши <span class="hl">проекты</span></h1>
+  <p class="lead">Все материалы в одном месте — для менеджеров и для клиента.</p>
+</div></header>
+
+<main class="wrap">
+  <div class="grid">
+
+    <a class="pcard" href="../manager-roadmap/">
+      <span class="tag">для менеджера</span>
+      <div class="pic">🧭</div>
+      <div class="pn">01</div>
+      <h2>Дорожная карта менеджера</h2>
+      <p>Правила игры с первого дня: цель, за что платят, лестница звонка, сроки, оценка и что нельзя.</p>
+      <span class="go">Открыть →</span>
+    </a>
+
+    <a class="pcard" href="../closer-funnel/">
+      <span class="tag">для менеджера</span>
+      <div class="pic">📊</div>
+      <div class="pn">02</div>
+      <h2>Воронка менеджера</h2>
+      <p>7 статусов, деньги за закрытием, касание + рейтинг, кто куда уходит. Версия v5.</p>
+      <span class="go">Открыть →</span>
+    </a>
+
+    <a class="pcard" href="../client-presentation/">
+      <span class="tag client">для клиента</span>
+      <div class="pic">📄</div>
+      <div class="pn">03</div>
+      <h2>Презентация для клиента</h2>
+      <p>Условия → договор → подпись по СМС → оплата. Менеджер ведёт клиента по экранам.</p>
+      <span class="go">Открыть →</span>
+    </a>
+
+    <a class="pcard" href="../payment/">
+      <span class="tag client">для клиента</span>
+      <div class="pic">💳</div>
+      <div class="pn">04</div>
+      <h2>Оплата (СБП)</h2>
+      <p>Страница оплаты первого платежа: сумма, QR и кнопка СБП, счёт в Сбербанке.</p>
+      <span class="go">Открыть →</span>
+    </a>
+
+    <a class="pcard wide" href="../manager-widget/">
+      <span class="tag">для менеджера</span>
+      <div class="pic">⚡</div>
+      <div class="pn">05</div>
+      <h2>Виджет для amoCRM — пульт менеджера</h2>
+      <p>Презентация для команды: 4 прототипа на одной странице — пульт «Моя смена», как это в amoCRM, мини-блок в карточке сделки, статус «Принимает решение».</p>
+      <span class="go">Открыть галерею →</span>
+    </a>
+
+  </div>
+</main>
+
+<footer><div class="wrap">
+  <div class="sig">SALE 100.0 · материалы проекта</div>
+  <div class="warn">⚠ Ссылки открываются на github.io — в РФ может потребоваться VPN.</div>
+</div></footer>
+
+</body>
+</html>
