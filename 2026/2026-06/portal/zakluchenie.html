@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Заключение по кредитной истории — ДОНУЛЯ (демо)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4EFE6; --surface:#FFFFFF; --surface2:#FBF8F2;
+  --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0E2A22; --green:#137A53; --green-soft:#E2F0E8; --green-ink:#0C5238;
+  --gold:#D7A33B; --gold-soft:#FBEFD2; --gold-ink:#8A6212;
+  --brick:#BD4A30; --brick-soft:#F8E3DC;
+  --line:#E4DCCD; --line2:#D7CDBA;
+  --shadow:0 18px 50px -24px rgba(20,40,30,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Golos Text",system-ui,sans-serif;color:var(--ink);line-height:1.55;
+  background:
+    radial-gradient(1000px 560px at 88% -8%, #fff6e3 0%, transparent 55%),
+    radial-gradient(820px 480px at -8% 6%, #e7f1ea 0%, transparent 50%),
+    var(--paper);
+  -webkit-font-smoothing:antialiased;padding:22px 14px 60px}
+.doc{max-width:740px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:22px;
+  box-shadow:var(--shadow);overflow:hidden}
+.demo{background:var(--gold-soft);color:var(--gold-ink);font-weight:700;font-size:12px;text-align:center;
+  padding:7px;letter-spacing:.04em;border-bottom:1px solid #ecd9a8}
+.hd{background:var(--pine);color:#fff;padding:24px 26px}
+.hd .brand{font-family:"Unbounded";font-weight:700;font-size:13px;letter-spacing:.14em;opacity:.85}
+.hd h1{font-family:"Unbounded";font-weight:600;font-size:23px;margin:10px 0 4px;line-height:1.2}
+.hd .meta{font-size:13px;opacity:.7}
+.hd .who{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.14)}
+.hd .who div span{display:block;font-size:11px;opacity:.6}
+.hd .who div b{font-size:14px;font-weight:600}
+
+.upd{display:flex;gap:11px;align-items:flex-start;background:#E2F0E8;border-bottom:1px solid #bfe0cd;
+  padding:13px 26px;font-size:13px;color:#0C5238}
+.upd .ic{font-size:16px}
+
+/* HERO ВЫГОДА */
+.hero{margin:20px 0 4px;background:linear-gradient(155deg,#0E2A22,#143A2E);color:#fff;border-radius:18px;
+  padding:20px 20px 18px;box-shadow:0 16px 40px -22px rgba(20,40,30,.6)}
+.hero .hl{font-family:"Unbounded";font-weight:600;font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.65}
+.hero .nums{display:flex;align-items:baseline;gap:10px;margin-top:9px;flex-wrap:wrap}
+.hero .d{font-family:"Unbounded";font-weight:600;font-size:clamp(19px,5.2vw,27px);text-decoration:line-through;opacity:.5}
+.hero .ar{opacity:.5;font-size:19px}
+.hero .pay{font-family:"Unbounded";font-weight:700;font-size:clamp(19px,5.2vw,27px);color:#7FE3B3}
+.hero .pl{font-size:12px;opacity:.7}
+.hero .hbar{height:30px;border-radius:9px;overflow:hidden;display:flex;margin:14px 0 12px;background:rgba(255,255,255,.08)}
+.hero .bp{background:#7FE3B3;color:#0A3D2E;font-weight:700;font-size:11.5px;display:flex;align-items:center;padding:0 10px;white-space:nowrap;min-width:92px}
+.hero .bw{flex:1;display:flex;align-items:center;justify-content:center;font-size:12px;opacity:.82;font-weight:600;text-align:center;padding:0 6px}
+.hero .sv{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid rgba(255,255,255,.15);padding-top:13px}
+.hero .sv span{font-size:12.5px;opacity:.82;max-width:58%}
+.hero .sv b{font-family:"Unbounded";font-weight:700;font-size:clamp(22px,6.2vw,32px);color:#7FE3B3;white-space:nowrap}
+.hero .note{font-size:11.5px;opacity:.6;margin-top:11px;line-height:1.4}
+
+.body{padding:8px 26px 26px}
+.sec{padding:22px 0;border-bottom:1px solid var(--line)}
+.sec:last-child{border-bottom:none}
+.lab{display:flex;align-items:center;gap:9px;margin-bottom:13px}
+.lab .n{width:24px;height:24px;border-radius:7px;background:var(--pine);color:#fff;font-family:"Unbounded";font-weight:600;
+  font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lab h2{font-family:"Unbounded";font-weight:600;font-size:16px}
+
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-size:11px;color:var(--faint);font-weight:600;padding:6px 8px;border-bottom:1.5px solid var(--line2)}
+.tbl td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl td.sum{font-weight:700;white-space:nowrap;text-align:right}
+.tbl .od{font-size:11px;color:var(--brick);font-weight:600}
+.tbl tr.tot td{border-bottom:none;border-top:2px solid var(--ink);font-weight:700;padding-top:11px}
+.cr{font-weight:600}
+.cr span{display:block;font-size:11px;color:var(--faint);font-weight:400}
+.kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:14px}
+.kpi{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi span{font-size:11px;color:var(--faint);display:block}
+.kpi b{font-size:16px}
+.kpi.bad b{color:var(--brick)}
+
+.callout{background:var(--green-soft);border:1px solid #bfe0cd;border-radius:14px;padding:14px 16px;margin-top:4px}
+.verdict{font-family:"Unbounded";font-weight:600;font-size:17px;color:var(--green-ink)}
+ul.clean{list-style:none;margin-top:10px;display:grid;gap:7px}
+ul.clean li{font-size:13.5px;padding-left:22px;position:relative}
+ul.clean li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:700}
+ul.warn li::before{content:"!";color:var(--gold-ink)}
+
+.steps{display:grid;gap:11px;margin-top:4px}
+.st{display:flex;gap:12px;align-items:flex-start}
+.st .b{width:26px;height:26px;border-radius:50%;background:var(--green-soft);color:var(--green-ink);font-weight:700;
+  font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.st .t b{font-size:13.5px;display:block}
+.st .t span{font-size:12px;color:var(--muted)}
+
+.foot{background:var(--surface2);border-top:1px solid var(--line);padding:18px 26px;font-size:12px;color:var(--muted)}
+.foot .sign{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.foot .ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(150deg,#1c6b4c,#0d3a2a);color:#fff;
+  font-family:"Unbounded";font-weight:600;font-size:13px;display:flex;align-items:center;justify-content:center}
+.foot .sign b{font-size:13px;color:var(--ink)}
+.foot .sign span{font-size:11.5px}
+.disc{font-size:11px;color:var(--faint);line-height:1.45}
+@media (max-width:520px){.kpis{grid-template-columns:1fr}.hd,.body,.foot,.upd{padding-left:18px;padding-right:18px}.tbl td,.tbl th{padding:7px 5px}}
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <div class="demo">★ ДЕМО-ОБРАЗЕЦ · данные вымышленные, для показа сотрудникам</div>
+
+  <div class="hd">
+    <div class="brand">ДОНУЛЯ · банкротство физлиц 127-ФЗ</div>
+    <h1>Заключение по кредитной истории</h1>
+    <div class="meta">№ 2026-0617 · от 28.06.2026</div>
+    <div class="who">
+      <div><span>Клиент</span><b>Петров Игорь Анатольевич</b></div>
+      <div><span>Долг</span><b>1 200 000 ₽</b></div>
+      <div><span>Источник</span><b>выписка НБКИ</b></div>
+    </div>
+  </div>
+
+  <div class="upd">
+    <span class="ic">🔓</span>
+    <span>Точная картина <b>по вашей кредитной истории (НБКИ)</b> — вместо оценки со слов. Вы называли «около 1,2 млн» — по выписке подтвердилось <b>1 200 000 ₽</b>, из них <b>143 000 ₽ уже передано коллекторам</b>.</span>
+  </div>
+
+  <div style="padding:0 26px">
+    <div class="hero">
+      <div class="hl">Ваша выгода</div>
+      <div class="nums"><span class="d">1 200 000 ₽</span><span class="ar">→</span><span class="pay">189 000 ₽</span><span class="pl">платите</span></div>
+      <div class="hbar"><div class="bp">189 000 ₽</div><div class="bw">остальное — списывается</div></div>
+      <div class="sv"><span>Освобождаетесь от долга, заплатив примерно в 5 раз меньше</span><b>≈ 960 000 ₽</b></div>
+      <div class="note">Рассрочка 14 × 13 500 ₽ или сразу 169 000 ₽ (скидка 20 000). Госрасходы ≈ 50 000 ₽ — отдельно.</div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- 1 -->
+    <div class="sec">
+      <div class="lab"><div class="n">1</div><h2>Кредитная картина</h2></div>
+      <table class="tbl">
+        <thead><tr><th>Кредитор</th><th>Тип</th><th style="text-align:right">Долг</th></tr></thead>
+        <tbody>
+          <tr><td class="cr">ПАО Сбербанк<span>потреб. кредит</span></td><td>кредит<div class="od">просрочка 90+ дн</div></td><td class="sum">412 000 ₽</td></tr>
+          <tr><td class="cr">ПАО Банк ВТБ<span>потреб. кредит</span></td><td>кредит<div class="od">просрочка 30 дн</div></td><td class="sum">305 000 ₽</td></tr>
+          <tr><td class="cr">АО «Тинькофф Банк»<span>кредитная карта</span></td><td>карта<div class="od">просрочка 60 дн</div></td><td class="sum">198 000 ₽</td></tr>
+          <tr><td class="cr">АО «Альфа-Банк»<span>кредитная карта</span></td><td>карта<div class="od">просрочка 90+ дн</div></td><td class="sum">142 000 ₽</td></tr>
+          <tr><td class="cr">ООО МФК «Турбозайм»<span>микрозаём</span></td><td>МФО<div class="od">передан коллектору</div></td><td class="sum">88 000 ₽</td></tr>
+          <tr><td class="cr">ООО «ЭОС»<span>выкупленный долг</span></td><td>коллектор<div class="od">взыскание</div></td><td class="sum">55 000 ₽</td></tr>
+          <tr class="tot"><td colspan="2">Итого задолженность</td><td class="sum">1 200 000 ₽</td></tr>
+        </tbody>
+      </table>
+      <div class="kpis">
+        <div class="kpi"><span>Кредиторов</span><b>6</b></div>
+        <div class="kpi bad"><span>Просрочено</span><b>4 счёта</b></div>
+        <div class="kpi bad"><span>У коллекторов</span><b>143 000 ₽</b></div>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="sec">
+      <div class="lab"><div class="n">2</div><h2>Вывод по процедуре</h2></div>
+      <div class="callout">
+        <div class="verdict">Подходит: реализация имущества</div>
+        <p style="font-size:13.5px;margin-top:6px">Долг превышает 500 000 ₽, есть просрочки свыше 90 дней, дохода для реструктуризации недостаточно — это прямые основания для банкротства по 127-ФЗ.</p>
+      </div>
+      <ul class="clean">
+        <li>Долг и просрочки выше порога банкротства</li>
+        <li>Залогового и дорогого имущества по выписке не выявлено</li>
+        <li>Единственное жильё и личные вещи защищены законом</li>
+      </ul>
+    </div>
+
+    <!-- 3 -->
+    <div class="sec">
+      <div class="lab"><div class="n">3</div><h2>Что будет с долгом</h2></div>
+      <div class="kpis">
+        <div class="kpi"><span>Подлежит списанию (оценка*)</span><b style="color:var(--green-ink)">≈ 1 200 000 ₽</b></div>
+        <div class="kpi"><span>Цель процедуры</span><b>освобождение</b></div>
+        <div class="kpi"><span>Срок дела</span><b>6–10 мес</b></div>
+      </div>
+      <p style="font-size:12.5px;color:var(--muted);margin-top:11px">После завершения процедуры требования кредиторов и коллекторов прекращаются, исполнительные производства закрываются.</p>
+    </div>
+
+    <!-- 4 -->
+    <div class="sec">
+      <div class="lab"><div class="n">4</div><h2>Как пойдёт дело</h2></div>
+      <div class="steps">
+        <div class="st"><div class="b">1</div><div class="t"><b>Сбор документов</b><span>паспорт, СНИЛС, ИНН, кредитная история — помогаем</span></div></div>
+        <div class="st"><div class="b">2</div><div class="t"><b>Подача заявления в суд</b><span>юрист готовит и подаёт — отпирается первым платежом</span></div></div>
+        <div class="st"><div class="b">3</div><div class="t"><b>Суд вводит процедуру</b><span>требования банков и рост долга останавливаются</span></div></div>
+        <div class="st"><div class="b">4</div><div class="t"><b>Реализация и списание</b><span>финуправляющий завершает дело, долги списываются</span></div></div>
+      </div>
+    </div>
+
+    <!-- 5 -->
+    <div class="sec">
+      <div class="lab"><div class="n">5</div><h2>Что важно знать честно</h2></div>
+      <ul class="clean warn">
+        <li>Крупные сделки и дарения за последние 3 года суд может проверить</li>
+        <li>Не единственное жильё и дорогое имущество могут пойти в реализацию</li>
+        <li>На время процедуры — взаимодействие с финансовым управляющим</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <div class="sign">
+      <div class="ava">СК</div>
+      <div><b>Подготовлено помощником ДОНУЛЯ · проверено юристом</b><br><span>Светлана Кравцова, юрист по банкротству</span></div>
+    </div>
+    <p class="disc">* Оценка списания — предварительная, не является гарантией. Объём фактического списания определяется судом; часть требований законом не списывается. Заключение подготовлено на основании выписки НБКИ; для подачи в суд требуется проверка и подпись юриста. Демо-образец с вымышленными данными.</p>
+  </div>
+
+</div>
+</body>
+</html>
