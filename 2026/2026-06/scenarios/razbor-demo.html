@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Разбор звонка (пример) · SALE 100.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4EFE6; --card:#FFFFFF; --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0E2A22; --green:#137A53; --green-soft:#E2F0E8; --green-ink:#0C5238;
+  --amber:#C2790F; --gold-soft:#FBEFD2; --gold-ink:#8A6212;
+  --brick:#BD4A30; --brick-soft:#F8E3DC;
+  --teal:#1f6e91; --teal-d:#184a66;
+  --line:#E4DCCD; --line2:#D7CDBA;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Golos Text",system-ui,sans-serif;color:var(--ink);line-height:1.5;
+  background:radial-gradient(900px 500px at 85% -10%,#eaf3f7 0%,transparent 55%),radial-gradient(800px 460px at -8% 8%,#e7f1ea 0%,transparent 50%),var(--paper);
+  -webkit-font-smoothing:antialiased;padding:22px 14px 60px}
+.win{max-width:580px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 22px 56px -26px rgba(20,40,30,.5)}
+.demo{background:var(--gold-soft);color:var(--gold-ink);font-weight:700;font-size:12px;text-align:center;padding:6px;border-bottom:1px solid #ecd9a8}
+
+.hd{background:linear-gradient(110deg,var(--teal-d),var(--teal));color:#fff;padding:18px 20px}
+.hd .t{font-family:"Unbounded";font-weight:600;font-size:12px;letter-spacing:.08em;opacity:.8}
+.hd .top{display:flex;align-items:center;gap:16px;margin-top:10px}
+.score{width:74px;height:74px;border-radius:50%;background:rgba(255,255,255,.12);border:3px solid #7fd0ec;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.score b{font-family:"Unbounded";font-weight:700;font-size:24px;line-height:1}
+.score span{font-size:10px;opacity:.8}
+.hd .who b{font-size:15px;font-weight:600;display:block}
+.hd .who span{font-size:12.5px;opacity:.8}
+.hd .msg{font-size:13px;opacity:.95;margin-top:11px;padding-top:11px;border-top:1px solid rgba(255,255,255,.18)}
+
+.body{padding:16px 20px}
+.lab{font-family:"Unbounded";font-weight:600;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin:6px 0 11px}
+.st{display:grid;grid-template-columns:1fr auto;gap:3px 10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.st:last-child{border-bottom:none}
+.st .n{font-size:13.5px;font-weight:600}
+.st .n small{color:var(--faint);font-weight:400;font-size:11.5px}
+.st .pct{font-family:"Unbounded";font-weight:700;font-size:14px;text-align:right}
+.st .bar{grid-column:1/-1;height:6px;border-radius:99px;background:var(--paper);overflow:hidden;margin-top:1px}
+.st .bar>i{display:block;height:100%;border-radius:99px}
+.st .note{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:3px}
+.g{color:var(--green-ink)} .g-b{background:var(--green)}
+.a{color:var(--gold-ink)} .a-b{background:var(--amber)}
+
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+.tag{font-size:12px;font-weight:600;padding:6px 11px;border-radius:9px}
+.tag.ok{background:var(--green-soft);color:var(--green-ink)}
+.tag.warn{background:var(--gold-soft);color:var(--gold-ink)}
+.tag.no{background:var(--brick-soft);color:var(--brick)}
+
+.box{border-radius:13px;padding:13px 15px;margin-top:13px}
+.box.win-b{background:var(--green-soft);border:1px solid #bfe0cd}
+.box.fix-b{background:var(--gold-soft);border:1px solid #ecd9a8}
+.box h4{font-family:"Unbounded";font-weight:600;font-size:13px;margin-bottom:7px}
+.box.win-b h4{color:var(--green-ink)} .box.fix-b h4{color:var(--gold-ink)}
+.box ul{list-style:none;display:grid;gap:6px}
+.box li{font-size:13.5px;padding-left:20px;position:relative}
+.box.win-b li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:700}
+.box.fix-b li{counter-increment:f}
+.box.fix-b li::before{content:counter(f);position:absolute;left:0;color:var(--gold-ink);font-weight:700}
+.box.fix-b ul{counter-reset:f}
+
+.foot{background:#FBF8F2;border-top:1px solid var(--line);padding:15px 20px}
+.nums{display:flex;gap:10px;text-align:center;margin-bottom:13px}
+.num{flex:1;background:#fff;border:1px solid var(--line);border-radius:12px;padding:9px 6px}
+.num b{font-family:"Unbounded";font-weight:700;font-size:18px;display:block}
+.num span{font-size:11px;color:var(--faint)}
+.num.me b{color:var(--teal)}
+.notetop{font-size:12px;color:var(--muted);text-align:center;margin-bottom:12px}
+.btns{display:flex;gap:9px}
+.btn{flex:1;text-align:center;font-family:"Golos Text";font-weight:600;font-size:13.5px;padding:12px;border-radius:12px}
+.btn.pri{background:var(--pine);color:#fff}
+.btn.gh{background:#fff;border:1px solid var(--line2);color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="win">
+  <div class="demo">★ ДЕМО · пример окна, данные вымышленные</div>
+
+  <div class="hd">
+    <div class="t">РАЗБОР ЗВОНКА · ТРЕНЕР</div>
+    <div class="top">
+      <div class="score"><b>82%</b><span>тир B</span></div>
+      <div class="who">
+        <b>Первая консультация · Игорь Петров</b>
+        <span>Менеджер: Дмитрий К. · 14 мин · 29.06, 11:40</span>
+      </div>
+    </div>
+    <div class="msg">👍 Хороший звонок. Два момента подтянуть — и будет топ.</div>
+  </div>
+
+  <div class="body">
+    <div class="lab">По этапам продажи</div>
+
+    <div class="st">
+      <div class="n">Открытие и контроль <small>· вес 8%</small></div><div class="pct g">90%</div>
+      <div class="bar"><i class="g-b" style="width:90%"></i></div>
+      <div class="note">Представился, держал инициативу в разговоре.</div>
+    </div>
+    <div class="st">
+      <div class="n">Диагностика <small>· вес 15%</small></div><div class="pct g">85%</div>
+      <div class="bar"><i class="g-b" style="width:85%"></i></div>
+      <div class="note">Выяснил долги, доход, просрочки — картина собрана.</div>
+    </div>
+    <div class="st">
+      <div class="n">Ценность (BAB) <small>· вес 12%</small></div><div class="pct a">68%</div>
+      <div class="bar"><i class="a-b" style="width:68%"></i></div>
+      <div class="note">Выгоду показал, но «жизнь после списания» не дожал.</div>
+    </div>
+    <div class="st">
+      <div class="n">Отработка возражений <small>· вес 25%</small></div><div class="pct g">88%</div>
+      <div class="bar"><i class="g-b" style="width:88%"></i></div>
+      <div class="note">«Дорого» закрыл лестницей — сильно.</div>
+    </div>
+    <div class="st">
+      <div class="n">Презентация + закрытие <small>· вес 35%</small></div><div class="pct a">74%</div>
+      <div class="bar"><i class="a-b" style="width:74%"></i></div>
+      <div class="note">Провёл по экранам, но при «не готов на 13 500» спрыгнул на «подумайте».</div>
+    </div>
+    <div class="st">
+      <div class="n">Тон и процесс <small>· вес 5%</small></div><div class="pct g">95%</div>
+      <div class="bar"><i class="g-b" style="width:95%"></i></div>
+      <div class="note">Спокойный, уверенный.</div>
+    </div>
+
+    <div class="tags">
+      <span class="tag ok">Лестница: 13 500 ✓</span>
+      <span class="tag no">990 как запас ✗ не предложил</span>
+      <span class="tag warn">Скрипт 85% · пропустил госрасходы</span>
+      <span class="tag ok">Комплаенс ✓ чисто</span>
+    </div>
+
+    <div class="box win-b">
+      <h4>Что сильно</h4>
+      <ul>
+        <li>Диагностика — собрал всю картину по долгам</li>
+        <li>Отработал «дорого» лестницей</li>
+        <li>Спокойный, уверенный тон</li>
+      </ul>
+    </div>
+
+    <div class="box fix-b">
+      <h4>Что подтянуть (2)</h4>
+      <ul>
+        <li>При «не готов на 13 500» — предлагай <b>990 как ступень</b>, не отпускай в «подумаю»</li>
+        <li>Дожимай <b>картину будущего</b> — что у клиента будет ПОСЛЕ списания (жизнь без долгов и звонков)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="nums">
+      <div class="num me"><b>82%</b><span>этот звонок</span></div>
+      <div class="num"><b>88%</b><span>среднее за 5</span></div>
+      <div class="num"><b>B</b><span>твой тир</span></div>
+    </div>
+    <div class="notetop">Один звонок не топит — на рейтинг идёт среднее.</div>
+    <div class="btns">
+      <span class="btn pri">Понятно</span>
+      <span class="btn gh">Не согласен → разбор с РОП</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
