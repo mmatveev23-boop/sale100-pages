@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Сценарии действий — виджет «Сейчас делай» · SALE 100.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F2E9; --card:#FFFFFF; --ink:#191713; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0E2A22; --green:#137A53; --green-soft:#E2F0E8; --green-ink:#0C5238;
+  --amber:#C2790F; --gold:#C99A33; --gold-soft:#FBEFD2; --gold-ink:#8A6212;
+  --brick:#BD4A30; --brick-soft:#F8E3DC;
+  --line:#E4DCCD; --line2:#D7CDBA;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Golos Text",system-ui,sans-serif;color:var(--ink);line-height:1.5;background:var(--paper);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{padding:56px 0 8px}
+.kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);font-weight:700}
+h1{font-family:"Unbounded";font-size:clamp(30px,5vw,50px);font-weight:800;letter-spacing:-.02em;margin:14px 0 0;line-height:1.04}
+h1 .hl{color:var(--green)}
+.lead{font-size:clamp(15px,2vw,18px);color:var(--muted);max-width:680px;margin:16px 0 0;font-weight:500}
+.note{background:var(--green-soft);border:1px solid #bfe0cd;border-radius:14px;padding:13px 16px;margin:22px 0 6px;font-size:14px;color:var(--green-ink)}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0 60px}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+
+.sc{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 12px 30px -20px rgba(20,40,30,.35);display:flex;flex-direction:column}
+.sc.hot{border-color:#e7cf95}
+.sc-h{padding:11px 16px;font-family:"Unbounded";font-weight:600;font-size:12px;letter-spacing:.03em;color:#fff;background:var(--pine)}
+.sc.hot .sc-h{background:linear-gradient(90deg,#a8540f,#c2790f)}
+.sc-b{padding:15px 16px 16px;display:flex;flex-direction:column;gap:11px;flex:1}
+.do{font-family:"Unbounded";font-weight:600;font-size:17px;line-height:1.2}
+.row{font-size:13.5px;color:var(--muted)}
+.row b{color:var(--ink)}
+.btns{display:flex;gap:7px;flex-wrap:wrap}
+.btn{font-size:12.5px;font-weight:600;padding:8px 12px;border-radius:10px;background:var(--pine);color:#fff}
+.btn.g{background:var(--green)}
+.btn.ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line2)}
+.say{background:var(--surface2,#FBF8F2);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:0 10px 10px 0;padding:10px 12px;font-size:13.5px;font-style:italic;color:#33402f}
+.say b{font-style:normal;color:var(--green-ink);font-size:11px;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:3px}
+.meta{display:flex;flex-direction:column;gap:6px;margin-top:auto;padding-top:4px}
+.when{font-size:12.5px;font-weight:600;color:var(--gold-ink);background:var(--gold-soft);border-radius:8px;padding:6px 10px;display:inline-block;width:fit-content}
+.risk{font-size:12px;color:var(--brick);background:var(--brick-soft);border-radius:8px;padding:6px 10px}
+footer{padding:24px 0 60px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="kicker">SALE 100.0 · Внедрение воронки</div>
+  <h1>Сценарии действий —<br>виджет <span class="hl">«Сейчас делай»</span></h1>
+  <p class="lead">Воронка — это регламент. Чтобы менеджер не читал всю страницу и не держал в голове «статус 5, касание, 3 дня», amoCRM показывает <b>одно следующее действие</b> на лид. Ниже — что виджет показывает в каждом состоянии (спека для движка + экран для команды).</p>
+</div></header>
+
+<main class="wrap">
+  <div class="note">📌 Каждая карточка = одно состояние лида → 6 полей: <b>что делать · почему · что нажать · что сказать · до какого времени · что будет, если не сделаешь.</b> Имя клиента и суммы движок подставляет сам.</div>
+
+  <div class="grid">
+
+    <div class="sc">
+      <div class="sc-h">Статус 1 · Новый лид</div>
+      <div class="sc-b">
+        <div class="do">📞 Позвонить прямо сейчас</div>
+        <div class="row"><b>Почему:</b> заявка только пришла — звонок в первые минуты в разы повышает шанс дозвониться и закрыть.</div>
+        <div class="btns"><span class="btn g">Позвонить</span><span class="btn ghost">Написать</span></div>
+        <div class="say"><b>Что сказать</b>«[Имя], здравствуйте! Это [менеджер], компания ДОНУЛЯ, по вашей заявке на списание долгов. Удобно сейчас 5 минут — посмотрю вашу ситуацию и скажу, сможем ли помочь?»</div>
+        <div class="meta"><span class="when">⏱ Первые минуты после заявки</span><span class="risk">⚠ 3 недозвона → лид уходит дозвонщикам · медленно берёшь свежак → рейтинг ведения вниз</span></div>
+      </div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-h">Статус 2 · В работе</div>
+      <div class="sc-b">
+        <div class="do">🔄 Довести консультацию до договора</div>
+        <div class="row"><b>Почему:</b> поговорили, но консультацию не закончили. Задача — провести её полностью и выйти на договор.</div>
+        <div class="btns"><span class="btn g">Позвонить</span><span class="btn ghost">Зафиксировать шаг (дата)</span></div>
+        <div class="say"><b>Что сказать</b>«[Имя], продолжим — покажу, что списываем в вашем случае и сколько это стоит. На чём мы остановились?»</div>
+        <div class="meta"><span class="when">⏱ До договора · цель сегодня · потолок 3 дня</span><span class="risk">⚠ нет договора в срок → лид в пул (звонок ≥65% — без штрафа)</span></div>
+      </div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-h">Статус 3 · Принимает решение</div>
+      <div class="sc-b">
+        <div class="do">🤝 Вернуться сильным заходом — на твоё усмотрение</div>
+        <div class="row"><b>Почему:</b> полную консультацию провёл, клиент думает. Бот сам шлёт заключение со слов. Звонить каждый день не обязан — вернись, когда есть с чем дожать.</div>
+        <div class="btns"><span class="btn g">Позвонить</span><span class="btn ghost">Отпустить в пул</span></div>
+        <div class="say"><b>Что сказать</b>«[Имя], я посчитал по вашим словам: долг около [сумма], наша услуга [сумма] — экономия большая. Готовы запустить дело?»</div>
+        <div class="meta"><span class="when">⏱ До 3 дней на усмотрение, потом пул</span><span class="risk">⚠ за «не подписал» НЕ штрафуем · спрос только за качество звонка (ниже 65% → рейтинг вниз)</span></div>
+      </div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-h">Статус 4 · Договор на подписи</div>
+      <div class="sc-b">
+        <div class="do">📊 Вести по презентации до подписи</div>
+        <div class="row"><b>Почему:</b> клиент согласен, ты прислал ссылку. Веди по экранам условий до подписи по СМС — не вешая трубку.</div>
+        <div class="btns"><span class="btn g">Отправить презентацию</span><span class="btn ghost">Перезвонить</span></div>
+        <div class="say"><b>Что сказать</b>«Открыли? Первый экран — ваши условия. Идём дальше… вот здесь подписываете по СМС: это вас защищает, платить будете только после.»</div>
+        <div class="meta"><span class="when">⏱ Подпись за час · 30 мин тишины → перезвон</span><span class="risk">⚠ забил час, ноль попыток → «Завис» + пауза лидов + рейтинг вниз</span></div>
+      </div>
+    </div>
+
+    <div class="sc hot">
+      <div class="sc-h">⚠ Завис · забил на горячем</div>
+      <div class="sc-b">
+        <div class="do">🚨 Срочно связаться — лид завис</div>
+        <div class="row"><b>Почему:</b> час на подписи прошёл, ты не выходил. Лид помечен «Завис», новые тебе на паузе, пока не сделаешь попытку.</div>
+        <div class="btns"><span class="btn">Позвонить</span><span class="btn ghost">Написать</span></div>
+        <div class="say"><b>Что сказать</b>«[Имя], всё готово к подписи — давайте за пару минут закончим, чтобы юрист сразу начал ваше дело?»</div>
+        <div class="meta"><span class="when">⏱ Сейчас · ещё N часов без попытки → лид в пул</span><span class="risk">⚠ новые лиды на паузе · дольше N ч → лид добьёт другой + рейтинг вниз</span></div>
+      </div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-h">Статус 5 · Договор подписан — платёж сегодня</div>
+      <div class="sc-b">
+        <div class="do">💳 Взять платёж сегодня по СБП</div>
+        <div class="row"><b>Почему:</b> договор подписан. Цель — 13 500 сразу; не готов — 990 (тогда закажем КИ). Заплатил сегодня → симка в подарок.</div>
+        <div class="btns"><span class="btn g">Отправить СБП 13 500</span><span class="btn ghost">Отправить СБП 990</span></div>
+        <div class="say"><b>Что сказать</b>«[Имя], договор у вас есть. Чтобы юрист сразу начал — внесём первый платёж 13 500 по ссылке, я отправил. Если сегодня тяжело — зафиксируем 990 и закажем вашу кредитную историю.»</div>
+        <div class="meta"><span class="when">⏱ Сегодня</span><span class="risk">⚠ день без попытки → лид в пул («подписал договор», добьёт другой) + рейтинг вниз</span></div>
+      </div>
+    </div>
+
+    <div class="sc hot">
+      <div class="sc-h">🔥 Горячее · клиент назвал время оплаты</div>
+      <div class="sc-b">
+        <div class="do">🔥 Позвонить — клиент обещал оплатить сейчас</div>
+        <div class="row"><b>Почему:</b> клиент сам назвал это время оплаты. Лид всплыл горячим, наверху очереди.</div>
+        <div class="btns"><span class="btn">Позвонить</span><span class="btn ghost">Отправить ссылку СБП</span></div>
+        <div class="say"><b>Что сказать</b>«[Имя], вы говорили оплатить сегодня — я рядом, помогу прямо сейчас, это пара минут.»</div>
+        <div class="meta"><span class="when">⏱ Ровно в названное время</span><span class="risk">⚠ пропустил без попытки → новые лиды на паузе</span></div>
+      </div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-h">Статус 6 · Оплачено 990 — заказ КИ</div>
+      <div class="sc-b">
+        <div class="do">📂 Отправить инструкцию заказать КИ через Госуслуги</div>
+        <div class="row"><b>Почему:</b> внёс 990 — запустили работу. Кредитная история нужна для точного заключения и закрытия на 13 500.</div>
+        <div class="btns"><span class="btn g">Отправить инструкцию КИ</span><span class="btn ghost">Поставить дату след. шага</span></div>
+        <div class="say"><b>Что сказать</b>«[Имя], чтобы юрист дал точное заключение и мы запустили дело — закажите кредитную историю через Госуслуги, инструкцию я отправил. Сделаете сегодня?»</div>
+        <div class="meta"><span class="when">⏱ Цель 13 500 за 7 дней (до 14 с касаниями)</span><span class="risk">⚠ 3 дня ни одной попытки → лид в пул + рейтинг вниз</span></div>
+      </div>
+    </div>
+
+    <div class="sc hot">
+      <div class="sc-h">🔥 Горячее · дата платежа по графику</div>
+      <div class="sc-b">
+        <div class="do">🔥 Звонить ровно сегодня — день платежа</div>
+        <div class="row"><b>Почему:</b> согласованная по графику дата платежа. Лид всплыл горячим.</div>
+        <div class="btns"><span class="btn">Позвонить</span><span class="btn ghost">Отправить ссылку СБП</span></div>
+        <div class="say"><b>Что сказать</b>«[Имя], сегодня по нашему графику платёж — давайте оформим, помогу прямо сейчас.»</div>
+        <div class="meta"><span class="when">⏱ Сегодня (дата графика)</span><span class="risk">⚠ пропустил без попытки → новые на паузе</span></div>
+      </div>
+    </div>
+
+    <div class="sc hot">
+      <div class="sc-h">⚡ Бот поднял горячее</div>
+      <div class="sc-b">
+        <div class="do">⚡ Выйти на связь — клиент горячий</div>
+        <div class="row"><b>Почему:</b> бот увидел, что клиент готов платить/подписать или просит счёт/договор — и поднял тебе.</div>
+        <div class="btns"><span class="btn">Позвонить</span><span class="btn ghost">Открыть чат</span></div>
+        <div class="say"><b>Что сказать</b>(клиент сам поднял оплату/договор — подхватывай и закрывай: «[Имя], отлично, давайте прямо сейчас оформим…»)</div>
+        <div class="meta"><span class="when">⏱ Сейчас, пока горячий</span><span class="risk">⚠ проигнорил бот-эскалацию → рейтинг ведения вниз</span></div>
+      </div>
+    </div>
+
+    <div class="sc hot">
+      <div class="sc-h">🛟 После сделки · возражение (со-владение)</div>
+      <div class="sc-b">
+        <div class="do">🛟 Спасти сделку — клиент сомневается</div>
+        <div class="row"><b>Почему:</b> клиент к расторжению, МОС не удержал — эскалировали тебе. Твои вторые 50% на кону.</div>
+        <div class="btns"><span class="btn">Позвонить</span><span class="btn ghost">Открыть чат</span></div>
+        <div class="say"><b>Что сказать</b>«[Имя], услышал, появились сомнения — давайте разберём, я с вами с самого начала. Что именно беспокоит?»</div>
+        <div class="meta"><span class="when">⏱ Сейчас</span><span class="risk">⚠ не вышел → клиент расторгается; если по твоей вине → бьёт по % расторжений</span></div>
+      </div>
+    </div>
+
+    <div class="sc">
+      <div class="sc-h">Статус 7 · Сделка закрыта</div>
+      <div class="sc-b">
+        <div class="do">📝 Анкета + декларация с клиентом</div>
+        <div class="row"><b>Почему:</b> 13 500 оплачено. Декларация подтверждает, что клиент всё понял — с неё ты получаешь <b>50% комиссии</b>.</div>
+        <div class="btns"><span class="btn g">Открыть анкету</span><span class="btn ghost">Отправить декларацию</span></div>
+        <div class="say"><b>Что сказать</b>«[Имя], поздравляю — запускаем! Заполним анкету и вы подпишете декларацию (подтверждает, что всё понятно). Дальше вами займётся отдел сопровождения, а я на связи.»</div>
+        <div class="meta"><span class="when">⏱ Сейчас, на закрытии</span><span class="risk">⚠ наобещал лажу → комиссии нет · вторые 50% — после 2-го платежа клиента</span></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer><div class="wrap">SALE 100.0 · Сценарии для виджета «Сейчас делай» (amoCRM) · спека по действиям воронки v6</div></footer>
+</body>
+</html>
