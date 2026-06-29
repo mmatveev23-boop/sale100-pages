@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Что прописать в amoCRM · SALE 100.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Golos+Text:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F6F2E9; --card:#FFFFFF; --ink:#191713; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0E2A22; --green:#137A53; --green-soft:#E2F0E8; --green-ink:#0C5238;
+  --amber:#C2790F; --gold-soft:#FBEFD2; --gold-ink:#8A6212;
+  --brick:#BD4A30; --brick-soft:#F8E3DC; --teal:#1f6e91;
+  --line:#E4DCCD; --line2:#D7CDBA;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Golos Text",system-ui,sans-serif;color:var(--ink);line-height:1.5;background:var(--paper);-webkit-font-smoothing:antialiased}
+.wrap{max-width:940px;margin:0 auto;padding:0 20px}
+header{padding:54px 0 6px}
+.kicker{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);font-weight:700}
+h1{font-family:"Unbounded";font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-.02em;margin:13px 0 0;line-height:1.05}
+h1 .hl{color:var(--green)}
+.lead{font-size:clamp(15px,2vw,18px);color:var(--muted);max-width:660px;margin:15px 0 0;font-weight:500}
+.lead b{color:var(--ink)}
+
+.sec{margin-top:30px}
+.sec>h2{font-family:"Unbounded";font-weight:700;font-size:21px;display:flex;align-items:center;gap:10px}
+.sec>h2 .ic{width:30px;height:30px;border-radius:9px;background:var(--pine);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.sub{color:var(--muted);font-size:14px;margin:6px 0 14px}
+
+.stages{display:flex;flex-wrap:wrap;gap:8px}
+.stg{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:9px 13px;font-size:13.5px;font-weight:600}
+.stg b{font-family:"Unbounded";color:var(--green);margin-right:5px}
+.stg.aux{background:#EDF2F5;border-color:#cfe0e7}
+.stg.cl{background:var(--brick-soft);border-color:#f0d3cb}
+
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px}
+th{text-align:left;background:var(--pine);color:#fff;font-weight:600;font-size:12px;padding:9px 12px}
+td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+td:first-child{font-weight:600;white-space:nowrap}
+td .ty{display:inline-block;font-size:11px;color:var(--teal);background:#eaf3f7;border-radius:6px;padding:1px 7px;font-weight:600}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+.box{border-radius:14px;padding:16px 18px}
+.box.amo{background:var(--green-soft);border:1px solid #bfe0cd}
+.box.eng{background:#fff;border:2px solid #cfe0e7}
+.box h3{font-family:"Unbounded";font-weight:600;font-size:15px;margin-bottom:9px}
+.box.amo h3{color:var(--green-ink)}.box.eng h3{color:var(--teal)}
+.box ul{list-style:none;display:grid;gap:6px}
+.box li{font-size:13.5px;padding-left:19px;position:relative}
+.box.amo li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:700}
+.box.eng li::before{content:"⚙";position:absolute;left:0;color:var(--teal);font-size:11px}
+
+.flow{background:var(--pine);color:#fff;border-radius:14px;padding:18px;font-size:13.5px;display:grid;gap:9px}
+.flow .r{display:flex;gap:10px;align-items:flex-start}
+.flow .a{font-family:"Unbounded";font-weight:600;font-size:11px;background:rgba(255,255,255,.13);padding:3px 8px;border-radius:7px;white-space:nowrap;flex-shrink:0;margin-top:1px}
+.tldr{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:16px;font-size:14.5px}
+.tldr b{color:var(--green-ink)}
+footer{padding:24px 0 60px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;margin-top:34px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="kicker">SALE 100.0 · Внедрение в amoCRM</div>
+  <h1>Что прописать <span class="hl">в amoCRM</span></h1>
+  <p class="lead">Воронка v6 → конкретная настройка amoCRM. Принцип: <b>amoCRM хранит и показывает + простые авто-задачи; весь «ум» (раздача, рейтинг, таймеры, ИИ, бот) — наш движок на donula.online</b>, связь через вебхуки и API.</p>
+</div></header>
+
+<main class="wrap">
+
+  <div class="sec">
+    <h2><span class="ic">1</span>Воронка — этапы</h2>
+    <p class="sub">Открытые этапы 1–7 + два служебных. Закрытие — с причиной.</p>
+    <div class="stages">
+      <span class="stg"><b>1</b>Новый лид</span>
+      <span class="stg"><b>2</b>В работе</span>
+      <span class="stg"><b>3</b>Принимает решение</span>
+      <span class="stg"><b>4</b>Договор на подписи</span>
+      <span class="stg"><b>5</b>Договор подписан — платёж сегодня</span>
+      <span class="stg"><b>6</b>Оплачено 990 — добор до 13 500</span>
+      <span class="stg"><b>7</b>Сделка закрыта → сопровождение</span>
+    </div>
+    <div class="stages" style="margin-top:8px">
+      <span class="stg aux">↩ Дозвонщики (бот-автодозвон)</span>
+      <span class="stg aux">♻︎ Общий пул (ждёт переназначения)</span>
+      <span class="stg cl">✕ Закрыто/не реализовано — причина: отказ · не наш · недозвон · расторжение</span>
+    </div>
+    <p class="sub" style="margin-top:10px">Статус 7 → передача в <b>отдельную воронку «Сопровождение»</b> (другой отдел). «Общий пул» — этап без ответственного, откуда движок раздаёт. «Закрыто» — нативное, с обязательной причиной (loss reason).</p>
+  </div>
+
+  <div class="sec">
+    <h2><span class="ic">2</span>Поля карточки</h2>
+    <p class="sub">Минимум, на который опирается логика. Тип — как заводить в amoCRM.</p>
+    <table>
+      <tr><th>Поле</th><th>Тип</th><th>Зачем</th></tr>
+      <tr><td>Сумма долга</td><td><span class="ty">число</span></td><td>скоринг лида (деньги) + квалификация «наш/не наш» (> 300 000) + заключение</td></tr>
+      <tr><td>Тариф</td><td><span class="ty">список</span></td><td>Рассрочка 189 000 / VIP сразу 169 000</td></tr>
+      <tr><td>Следующий шаг</td><td><span class="ty">текст</span></td><td>ведение, «Сейчас делай»</td></tr>
+      <tr><td>Дата след. шага</td><td><span class="ty">дата+время</span></td><td>дедлайн + «горячий момент» (названная дата оплаты)</td></tr>
+      <tr><td>Горячий</td><td><span class="ty">флаг</span></td><td>приоритет в очереди (ставит движок/бот)</td></tr>
+      <tr><td>Завис</td><td><span class="ty">флаг</span></td><td>статус 4 — забил час на подписи</td></tr>
+      <tr><td>Договор подписан</td><td><span class="ty">дата</span></td><td>переход 4→5 (приходит от ОКИ ДОКИ)</td></tr>
+      <tr><td>Декларация подписана</td><td><span class="ty">флаг</span></td><td>триггер 1-х 50% комиссии (статус 7)</td></tr>
+      <tr><td>Оплачено (сумма / даты)</td><td><span class="ty">число + дата</span></td><td>движение: 990 / 13 500 / 169 000; даты 1-го и 2-го платежа</td></tr>
+      <tr><td>Остаток</td><td><span class="ty">число</span></td><td>статус 6 — платёж засчитывается от ~10% остатка</td></tr>
+      <tr><td>КИ получена</td><td><span class="ty">дата</span></td><td>статус 6 — старт точного заключения</td></tr>
+      <tr><td>Документы</td><td><span class="ty">чек-лист</span></td><td>паспорт · СНИЛС · ИНН · КИ — движение + чек-лист статуса 7</td></tr>
+      <tr><td>Расторгнут + причина</td><td><span class="ty">флаг + список</span></td><td>% расторжений (норма 5–10%)</td></tr>
+      <tr><td>Попыток дозвона</td><td><span class="ty">число</span></td><td>дозвонщики: 5 попыток / 3 дня → закрытые</td></tr>
+      <tr><td colspan="3" style="background:#FBF8F2;font-weight:400;color:var(--muted)"><b>На менеджере (пользователе), не на лиде:</b> Рейтинг · Тир (A/B/C) · Среднее оценки звонка · % расторжений · лидов сегодня / на руках — это считает и хранит <b>движок</b>, amoCRM их только отображает.</td></tr>
+    </table>
+  </div>
+
+  <div class="sec">
+    <h2><span class="ic">3</span>Кто что делает</h2>
+    <p class="sub">Главная развилка: что тянет нативная amoCRM, а что — наш движок.</p>
+    <div class="two">
+      <div class="box amo">
+        <h3>amoCRM сама (Цифровая воронка + Salesbot)</h3>
+        <ul>
+          <li>Авто-задача при входе в статус (что делать на этапе)</li>
+          <li>Авто-сообщения, <b>Salesbot</b>: мгновенный ответ на входящее</li>
+          <li>Закрытие с причиной (loss reason)</li>
+          <li>Хранит поля, чек-листы, историю, записи звонков</li>
+          <li>Показывает менеджеру карточку + задачу</li>
+        </ul>
+      </div>
+      <div class="box eng">
+        <h3>Движок donula.online (этого amoCRM НЕ умеет)</h3>
+        <ul>
+          <li><b>Умная раздача:</b> кап 10/день + кап на руках + по рейтингу; пул тёплых по рейтингу</li>
+          <li><b>Таймеры исходов:</b> забил 3 дня → пул · «Завис» N ч → пул · 14 дней → пул · недозвон 5/3 → закрытые</li>
+          <li><b>Детект «движения»:</b> реальное касание (звонок+длительность из телефонии) vs попытка · документ · платёж</li>
+          <li><b>Рейтинг:</b> ИИ-балл звонка + ведение + исходы + расторжения → тир</li>
+          <li><b>ИИ-разбор звонка</b> (запись → рубрика → балл), генерация заключения</li>
+          <li><b>Бот-эскалация</b> горячего + «горячий момент» (дата оплаты подошла → флаг + приоритет)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="ic">4</span>Вебхуки и события (стык)</h2>
+    <div class="flow">
+      <div class="r"><span class="a">amoCRM → движок</span><span>новый лид · смена статуса · новое входящее сообщение · результат задачи · оплата (если через amo)</span></div>
+      <div class="r"><span class="a">Телефония → движок</span><span>звонок start/end + agent_id + <b>запись</b> (для ИИ-разбора и детекта реального касания)</span></div>
+      <div class="r"><span class="a">Движок → amoCRM (API)</span><span>назначить ответственного · сменить статус (в пул / Завис / закрытые) · поставить флаг «Горячий» · создать <b>задачу «Сейчас делай»</b> с текстом и скриптом · записать оценку звонка / рейтинг / тир</span></div>
+      <div class="r"><span class="a">Бот ↔ клиент</span><span>входящее → ответ мгновенно · отправка заключения со слов + ссылки на оплату · инструкция по КИ · ловит «готов платить» → флаг + задача менеджеру</span></div>
+    </div>
+  </div>
+
+  <div class="tldr">
+    <b>Граница одной фразой:</b> amoCRM = воронка + поля + простые авто-задачи + Salesbot (хранит и показывает). Движок = раздача лидов, рейтинг, все «умные» таймеры, ИИ-разбор и заключение, бот-эскалация (весь ум). Стык — вебхуки amoCRM/телефонии в движок и обратная запись по API.
+  </div>
+
+</main>
+<footer><div class="wrap">SALE 100.0 · Спека настройки amoCRM под воронку v6</div></footer>
+</body>
+</html>
