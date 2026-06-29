@@ -31,6 +31,10 @@ h1 .hl{color:var(--green)}
 
 .sc{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 12px 30px -20px rgba(20,40,30,.35);display:flex;flex-direction:column}
 .sc.hot{border-color:#e7cf95}
+.sc.full{grid-column:1/-1;border-color:#aecbd9}
+.sc.full .sc-h{background:linear-gradient(90deg,#184a66,#2a6e8f)}
+.sc.full .say{border-left-color:#2a6e8f}
+.sc.full .say b{color:#184a66}
 .sc-h{padding:11px 16px;font-family:"Unbounded";font-weight:600;font-size:12px;letter-spacing:.03em;color:#fff;background:var(--pine)}
 .sc.hot .sc-h{background:linear-gradient(90deg,#a8540f,#c2790f)}
 .sc-b{padding:15px 16px 16px;display:flex;flex-direction:column;gap:11px;flex:1}
@@ -60,6 +64,18 @@ footer{padding:24px 0 60px;border-top:1px solid var(--line);color:var(--muted);f
   <div class="note">📌 Каждая карточка = одно состояние лида → 6 полей: <b>что делать · почему · что нажать · что сказать · до какого времени · что будет, если не сделаешь.</b> Имя клиента и суммы движок подставляет сам.</div>
 
   <div class="grid">
+
+    <div class="sc full">
+      <div class="sc-h">📊 После каждого звонка · Разбор (тренер, не надзиратель)</div>
+      <div class="sc-b">
+        <div class="do">📊 Глянь разбор последнего звонка</div>
+        <div class="row"><b>Когда:</b> сразу после звонка — ИИ обрабатывает запись (пара минут) и показывает это окно.</div>
+        <div class="row"><b>Что показываем:</b> как прошёл по этапам — диагностика · ценность · отработка возражений · <b>презентация</b> · <b>лестница 13 500→990→договор</b> · закрытие; соблюдение скрипта; флаги комплаенса. Сначала что сильно — потом 1-2, что подтянуть.</div>
+        <div class="say"><b>Твой балл (в том же окне)</b>Этот звонок: 82% · среднее за 5: 88% · тир B. <b>Один звонок не топит</b> — на рейтинг и поток лидов идёт среднее, не один.</div>
+        <div class="btns"><span class="btn g">Понятно</span><span class="btn ghost">Не согласен → разбор с РОП</span></div>
+        <div class="meta"><span class="when">⏱ Сразу после звонка (ACW)</span><span class="risk">⚠ Балл идёт в среднее-5 → рейтинг → поток лидов. Систематически ниже 65% → тренер + меньше лидов (последствия только после 15-20 звонков)</span></div>
+      </div>
+    </div>
 
     <div class="sc">
       <div class="sc-h">Статус 1 · Новый лид</div>
