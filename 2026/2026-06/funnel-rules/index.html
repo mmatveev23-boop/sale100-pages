@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Воронка по этапам — правила простыми словами · SALE 100.0</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="Воронка простыми словами: для каждого этапа — что значит, что делает менеджер, когда сделка уходит дальше и почему.">
+<meta name="description" content="Воронка по этапам: на каждый этап — что значит, что делает менеджер, когда и куда уходит сделка и почему. Со всеми сценариями оплаты (990 / часть / КИ / полностью).">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
@@ -23,24 +23,30 @@
   h1,h2,h3,.kicker,.tag{font-family:"Unbounded",sans-serif}
   a{color:inherit}
 
-  header{padding:60px 0 22px}
+  header{padding:58px 0 20px}
   .kicker{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);font-weight:700}
-  h1{font-size:clamp(36px,7vw,66px);line-height:1;font-weight:800;letter-spacing:-.02em;margin:16px 0 0}
+  h1{font-size:clamp(34px,6.6vw,62px);line-height:1;font-weight:800;letter-spacing:-.02em;margin:16px 0 0}
   h1 .hl{color:var(--green)}
-  .lead{font-size:clamp(16px,2.3vw,20px);color:var(--muted);max-width:720px;margin:18px 0 0;font-weight:500}
+  .lead{font-size:clamp(16px,2.3vw,20px);color:var(--muted);max-width:730px;margin:18px 0 0;font-weight:500}
   .promise{margin:24px 0 0;padding:20px 24px;background:var(--green-deep);color:#F6F2E9;border-radius:16px;font-size:clamp(16px,2.4vw,21px);font-weight:600;line-height:1.4}
   .promise b{color:#F4C775}
 
-  h2.sec{font-size:clamp(22px,3.4vw,30px);font-weight:800;letter-spacing:-.01em;margin:50px 0 6px}
-  .sub{color:var(--muted);font-size:15.5px;margin-bottom:18px;max-width:740px}
+  h2.sec{font-size:clamp(22px,3.4vw,30px);font-weight:800;letter-spacing:-.01em;margin:48px 0 6px}
+  .sub{color:var(--muted);font-size:15.5px;margin-bottom:18px;max-width:760px}
 
   /* mini-map strip */
   .strip{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
-  .strip .chip{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--grey);border-radius:10px;padding:9px 14px;font-family:"Unbounded";font-weight:700;font-size:13.5px}
-  .strip .chip.c2{border-left-color:var(--amber)} .strip .chip.c3{border-left-color:var(--green)} .strip .chip.c4{border-left-color:var(--green-deep)}
+  .strip .chip{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--grey);border-radius:10px;padding:9px 13px;font-family:"Unbounded";font-weight:700;font-size:13px}
+  .strip .chip.c2,.strip .chip.c3,.strip .chip.c4{border-left-color:var(--amber)} .strip .chip.c5,.strip .chip.c6{border-left-color:var(--green)} .strip .chip.c7{border-left-color:var(--green-deep)}
   .strip .arr{color:var(--muted);font-weight:700;font-size:15px}
   .strip-side{margin-top:10px;font-size:14px;color:var(--muted)}
   .strip-side b{color:var(--ink)}
+
+  /* money */
+  .money{display:flex;flex-wrap:wrap;gap:9px;margin:10px 0 0}
+  .mcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;font-size:13.5px;flex:1 1 220px;color:var(--muted)}
+  .mcard b{font-family:"Unbounded";font-weight:700;display:block;font-size:14.5px;color:var(--ink);margin-bottom:2px}
+  .mcard.green b{color:var(--green)} .mcard.amber b{color:var(--amber)} .mcard.grey b{color:var(--grey)}
 
   /* stage cards */
   .grid{display:flex;flex-direction:column;gap:14px;margin-top:10px}
@@ -50,8 +56,9 @@
   .st-n{font-family:"Unbounded";font-weight:800;font-size:15px;color:#fff;background:var(--grey);min-width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center}
   .st.t-amber .st-n{background:var(--amber)} .st.t-green .st-n{background:var(--green)} .st.t-win .st-n{background:var(--green-deep)}
   .st-h h3{font-size:clamp(18px,2.6vw,22px);font-weight:700;letter-spacing:-.01em}
-  .st-timer{margin-left:auto;font-family:"Unbounded";font-weight:700;font-size:12.5px;color:var(--amber);background:rgba(194,121,15,.1);border:1px solid rgba(194,121,15,.25);padding:5px 11px;border-radius:999px;white-space:nowrap}
+  .st-timer{margin-left:auto;font-family:"Unbounded";font-weight:700;font-size:12px;color:var(--amber);background:rgba(194,121,15,.1);border:1px solid rgba(194,121,15,.25);padding:5px 11px;border-radius:999px}
   .st-timer.ok{color:var(--green);background:rgba(14,92,70,.08);border-color:rgba(14,92,70,.22)}
+  .st-timer.neu{color:var(--grey);background:rgba(124,117,106,.1);border-color:rgba(124,117,106,.25)}
 
   .entered{font-size:16px;margin-top:12px}
   .entered b,.do b,.because b{font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--muted);display:block;margin-bottom:2px}
@@ -62,26 +69,43 @@
   .exits .elbl{font-family:"Unbounded";font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--green-deep);display:block;margin-bottom:8px}
   .ex{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:7px 0}
   .ex+.ex{border-top:1px dashed var(--line)}
-  .cond{font-size:14.5px;flex:1;min-width:160px}
+  .cond{font-size:14.5px;flex:1;min-width:180px}
   .ar{color:var(--muted);font-weight:700}
-  .dest{font-family:"Unbounded";font-weight:700;font-size:12.5px;padding:4px 11px;border-radius:8px;white-space:nowrap}
+  .dest{font-family:"Unbounded";font-weight:700;font-size:12px;padding:4px 11px;border-radius:8px}
   .dest.g{background:rgba(14,92,70,.1);color:var(--green-deep)}
   .dest.a{background:rgba(194,121,15,.12);color:#8a560a}
   .dest.r{background:rgba(154,45,34,.1);color:var(--red)}
   .dest.n{background:#ECE8DF;color:var(--ink)}
 
+  /* sub-scenarios */
+  .subs{margin-top:15px}
+  .subs .slbl{font-family:"Unbounded";font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--amber);display:block;margin-bottom:8px}
+  .sc{background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 14px;margin-bottom:8px}
+  .sc .sct{font-family:"Unbounded";font-weight:700;font-size:14px;margin-bottom:3px}
+  .sc .scw{font-size:14px;color:var(--muted)}
+  .sc .sce{font-size:13px;color:var(--green-deep);font-weight:600;margin-top:6px}
+  .sc .sce.r{color:var(--red)} .sc .sce.a{color:#8a560a}
+
   .because{margin-top:13px;font-size:14.5px;color:var(--muted);background:#EDF0EE;border:1px solid var(--line);border-radius:12px;padding:11px 14px}
 
   /* side buckets */
-  .loop{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+  .loop{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:10px}
   @media (max-width:720px){.loop{grid-template-columns:1fr}}
   .lp{border-radius:14px;padding:16px 18px;border:1px solid var(--line);background:var(--card)}
-  .lp.pool{background:#F1EEE6} .lp.dial{background:#EDF0EE} .lp.closed{background:#FBEDEB;border-color:rgba(154,45,34,.2)}
+  .lp.pool{background:#F1EEE6} .lp.dial{background:#EDF0EE} .lp.closed{background:#FBEDEB;border-color:rgba(154,45,34,.2)} .lp.bot{background:#F3EFE4;border-color:rgba(194,121,15,.25)}
   .lp h4{font-family:"Unbounded";font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
   .lp .in{font-size:13.5px;color:var(--muted);margin-top:8px}
   .lp .in b{color:var(--ink)}
   .lp .ic{width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-family:"Unbounded";font-weight:700}
-  .lp.pool .ic{background:#9A9386} .lp.dial .ic{background:var(--grey)} .lp.closed .ic{background:var(--red)}
+  .lp.pool .ic{background:#9A9386} .lp.dial .ic{background:var(--grey)} .lp.closed .ic{background:var(--red)} .lp.bot .ic{background:var(--amber)}
+
+  /* short reference cards */
+  .ref{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+  @media (max-width:720px){.ref{grid-template-columns:1fr}}
+  .rc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+  .rc h4{font-family:"Unbounded";font-weight:700;font-size:15px;margin-bottom:7px}
+  .rc p{font-size:14px;color:var(--muted)} .rc p b{color:var(--ink)}
+  .rc p+p{margin-top:6px}
 
   .note{margin-top:22px;background:#F3EFE4;border:1.5px solid rgba(194,121,15,.3);border-radius:14px;padding:15px 18px;font-size:14.5px;color:#6a4d12}
   .note b{color:#8a560a}
@@ -95,9 +119,9 @@
 <body>
 
 <header><div class="wrap">
-  <div class="kicker">SALE 100.0 · Воронка простыми словами</div>
+  <div class="kicker">SALE 100.0 · Воронка по этапам</div>
   <h1>Что происходит<br>со <span class="hl">сделкой</span></h1>
-  <p class="lead">Для каждого этапа всего четыре вещи: что значит, что делает менеджер, <b>когда сделка уходит дальше и почему</b>. Без терминов.</p>
+  <p class="lead">На каждый этап — четыре вещи: что значит, что делает менеджер, <b>когда и куда уходит сделка и почему</b>. Со всеми ситуациями оплаты: не оплатил · оплатил часть · оплатил 990 · оплатил полностью.</p>
   <div class="promise">Один закон на всё: <b>ведёшь к договору и оплате — сделка твоя.</b> Забил — уходит другому. <b>Деньги у того, кто закрыл.</b></div>
 </div></header>
 
@@ -106,74 +130,193 @@
   <!-- MINI MAP -->
   <section><div class="wrap">
     <h2 class="sec">Путь сделки за 5 секунд</h2>
-    <p class="sub">Слева направо — нормальный путь. Если не вышло — две корзины сбоку.</p>
+    <p class="sub">Слева направо — нормальный путь. Не вышло — корзины сбоку.</p>
     <div class="strip">
       <span class="chip c1">1 · Новый лид</span><span class="arr">→</span>
       <span class="chip c2">2 · В работе</span><span class="arr">→</span>
-      <span class="chip c3">3 · Договор подписан</span><span class="arr">→</span>
-      <span class="chip c4">4 · Оплачено · сделка</span>
+      <span class="chip c3">3 · Принимает решение</span><span class="arr">→</span>
+      <span class="chip c4">4 · Договор на подписи</span><span class="arr">→</span>
+      <span class="chip c5">5 · Подписан — платёж</span><span class="arr">→</span>
+      <span class="chip c6">6 · Оплачено 990 — добор</span><span class="arr">→</span>
+      <span class="chip c7">7 · Сделка</span>
     </div>
-    <div class="strip-side">Не вышло → <b>Пул</b> (лид другому менеджеру) · Отказ / не наш → <b>Закрытые</b> · Не дозвонились → <b>Дозвонщики</b> (система звонит сама)</div>
+    <div class="strip-side">Не довёл → <b>Пул</b> (лид другому) · Отказ / не наш → <b>Закрытые</b> · Не дозвонились → <b>Дозвонщики</b> (система звонит сама)</div>
+  </div></section>
+
+  <!-- MONEY CHEAT -->
+  <section><div class="wrap">
+    <h2 class="sec">Деньги — коротко</h2>
+    <p class="sub">Чтобы суммы на этапах были понятны заранее.</p>
+    <div class="money">
+      <div class="mcard amber"><b>990 ₽</b>Маленький платёж — привязать клиента и запустить работу (заказ кредитной истории, заключение). Это ещё НЕ сделка.</div>
+      <div class="mcard green"><b>13 500 ₽</b>Первый платёж рассрочки = СДЕЛКА и комиссия. Главная цель звонка.</div>
+      <div class="mcard grey"><b>189 000 ₽</b>Полная услуга (рассрочка 14 × 13 500).</div>
+      <div class="mcard green"><b>ВИП · 169 000 ₽</b>Оплата сразу, скидка 20 000 → сразу сделка, дожима нет.</div>
+      <div class="mcard grey"><b>50 000 ₽</b>Госрасходы — отдельно, сверх услуги.</div>
+      <div class="mcard amber"><b>Кредитный доктор</b>Доп.услуга (КАИ) внутри презентации, +50 000 ₽ — на закрытие сделки не влияет.</div>
+      <div class="mcard grey"><b>Симка бесплатно</b>На год — по факту любого платежа сегодня при подписанном договоре.</div>
+      <div class="mcard grey"><b>Платёж можно дробить</b>Первый платёж 13 500 можно собирать частями — сделка засчитывается, когда набрали 13 500.</div>
+    </div>
   </div></section>
 
   <!-- STAGES -->
   <section><div class="wrap">
     <h2 class="sec">Правила по этапам</h2>
-    <p class="sub">Сделка зашла на этап → что делаем → когда и куда уходит → почему так.</p>
+    <p class="sub">Сделка зашла на этап → что делаем → когда и куда уходит → почему так. Внутри этапов — разбор по конкретным ситуациям.</p>
     <div class="grid">
 
       <!-- 1 -->
       <div class="st t-neu" id="s1">
-        <div class="st-h"><span class="st-n">1</span><h3>Новый лид</h3><span class="st-timer">срок: первые минуты</span></div>
-        <p class="entered"><b>Сделка зашла сюда</b>Пришла заявка (реклама / сайт). Ещё не звонили — разговора не было.</p>
-        <div class="do"><b>Что делает менеджер</b>Звонит в первые минуты и проводит консультацию: узнаёт долг и ситуацию, предлагает решение.</div>
+        <div class="st-h"><span class="st-n">1</span><h3>Новый лид</h3><span class="st-timer neu">сразу · за минуты</span></div>
+        <p class="entered"><b>Сделка зашла сюда</b>Консультации ещё не было. Сюда попадает новая заявка, тот, кто сразу просит «перезвоните» до разговора, и клиент, которого вернули дозвонщики.</p>
+        <div class="do"><b>Что делает менеджер</b>Дозвониться и провести полную консультацию до конца. Без «как дела» — сразу диагностика ситуации и разбор по долгам.</div>
         <div class="exits">
           <span class="elbl">Когда и куда уходит</span>
-          <div class="ex"><span class="cond">Дозвонился, начали разговор</span><span class="ar">→</span><span class="dest g">В работе (2)</span></div>
-          <div class="ex"><span class="cond">Не дозвонился (несколько попыток)</span><span class="ar">→</span><span class="dest a">Дозвонщики</span></div>
-          <div class="ex"><span class="cond">Сразу «не звоните» / не наш клиент</span><span class="ar">→</span><span class="dest r">Закрытые</span></div>
+          <div class="ex"><span class="cond">Взял в работу, консультацию пока не закончили</span><span class="ar">→</span><span class="dest a">В работе (2)</span></div>
+          <div class="ex"><span class="cond">Сразу провёл полную консультацию</span><span class="ar">→</span><span class="dest g">Принимает решение (3) или Договор (4)</span></div>
+          <div class="ex"><span class="cond">Не дозвонился 3 раза</span><span class="ar">→</span><span class="dest n">Дозвонщики</span></div>
         </div>
-        <div class="because"><b>Почему так</b>Пока не поговорили — двигать некуда. Главное — не упустить первые минуты, дальше клиент остывает.</div>
+        <div class="subs">
+          <span class="slbl">Разбор по ситуациям</span>
+          <div class="sc"><div class="sct">Не дозвонился 3 раза</div><div class="scw">Каждый дозвон фиксирует телефония — система считает сама. После 3 неудач клиент уходит дозвонщикам. Менеджер не сжигает время на тех, до кого не дозвонился.</div><div class="sce">→ Дозвонщики: система сама звонит и пишет ботом</div></div>
+          <div class="sc"><div class="sct">Дозвонщики поймали клиента</div><div class="scw">Автодозвон и бот дозвонились и договорились о разговоре — клиент возвращается в «Новый лид», уже тёплый, консультацию доводит менеджер.</div><div class="sce">→ обратно в Новый лид (1)</div></div>
+        </div>
+        <div class="because"><b>Почему так</b>Время менеджера тратим только на тех, с кем реально поговорили: недозвоны забирает система. Так на руках живые контакты, и ни один клиент не теряется.</div>
       </div>
 
       <!-- 2 -->
       <div class="st t-amber" id="s2">
         <div class="st-h"><span class="st-n">2</span><h3>В работе</h3><span class="st-timer">до договора · 3 дня</span></div>
-        <p class="entered"><b>Сделка зашла сюда</b>Поговорили, клиент в теме. Ведём к договору — консультация идёт или прошла, человек думает.</p>
-        <div class="do"><b>Что делает менеджер</b>Доводит до договора: показывает условия (презентацию по ссылке), снимает возражения, подписывает по СМС.</div>
+        <p class="entered"><b>Сделка зашла сюда</b>Дозвонились и поговорили, но полную консультацию не закончили: клиент бросил трубку, сказал «перезвоните позже» или прервались. Контакт уже был — клиент тёплый.</p>
+        <div class="do"><b>Что делает менеджер</b>Довести консультацию до конца и выйти на договор. Цель — подписать в тот же день. Назначил время — поставь дату внутри 3 дней и будь на связи.</div>
         <div class="exits">
           <span class="elbl">Когда и куда уходит</span>
-          <div class="ex"><span class="cond">Подписал договор</span><span class="ar">→</span><span class="dest g">Договор подписан (3)</span></div>
-          <div class="ex"><span class="cond">3 дня молчит / не созрел</span><span class="ar">→</span><span class="dest a">Пул</span></div>
-          <div class="ex"><span class="cond">Отказ или не наш (сказал «не звоните», уже банкрот, долг меньше 300 000)</span><span class="ar">→</span><span class="dest r">Закрытые</span></div>
+          <div class="ex"><span class="cond">Довёл до договора, клиент согласен</span><span class="ar">→</span><span class="dest g">Договор на подписи (4)</span></div>
+          <div class="ex"><span class="cond">Консультацию закончил, клиент думает</span><span class="ar">→</span><span class="dest a">Принимает решение (3)</span></div>
+          <div class="ex"><span class="cond">Молчит / пропал за 3 дня (контакт был — тёплый)</span><span class="ar">→</span><span class="dest a">Общий пул, без штрафа</span></div>
+          <div class="ex"><span class="cond">Сказал «не звоните» или не наш (банкрот / МФЦ / долг меньше 300 000)</span><span class="ar">→</span><span class="dest r">Закрытые (сразу)</span></div>
         </div>
-        <div class="because"><b>Почему так</b>Лид не должен лежать без движения. Либо ведём к договору, либо отдаём другому менеджеру, пока клиент не остыл. Молчит — это не наказание, просто передаём, чтобы не пропал.</div>
+        <div class="subs">
+          <span class="slbl">Разбор по ситуациям</span>
+          <div class="sc"><div class="sct">Сбросил / молчит / пропал — это НЕ недозвон</div><div class="scw">Контакт уже был, клиент тёплый. Через 3 дня уходит в общий пул — подхватит другой менеджер, всё это время его добивают авто-дозвон и бот. В «Закрытые» он НЕ идёт.</div><div class="sce a">через 3 дня → общий пул (тёплый)</div></div>
+          <div class="sc"><div class="sct">Отказ или не наш — закрываем сразу</div><div class="scw">В «Закрытые» — только по факту: сказал «не звоните» (есть в записи звонка или сообщении) ИЛИ не наш (банкрот / МФЦ / долг меньше 300 000). Тогда сразу, не ждём 3 дня. «Со слов менеджера» не считается.</div><div class="sce r">сразу → Закрытые</div></div>
+          <div class="sc"><div class="sct">За «не подписал» сам по себе не наказывают</div><div class="scw">Спрос идёт за качество звонка — его оценивает ИИ-тренер (см. этап 3), по среднему за несколько звонков, а не за один.</div><div class="sce">остаёшься в работе</div></div>
+        </div>
+        <div class="because"><b>Почему так</b>Клиент тёплый — с ним уже говорили, поэтому при молчании он идёт в пул к другому, а не в «Закрытые»: горячий лид не сгорает зря. Сроки считаются до договора, болтовнёй их не сбросить.</div>
       </div>
 
       <!-- 3 -->
-      <div class="st t-green" id="s3">
-        <div class="st-h"><span class="st-n">3</span><h3>Договор подписан — ждём оплату</h3><span class="st-timer ok">лид твой, пока ведёшь</span></div>
-        <p class="entered"><b>Сделка зашла сюда</b>Клиент подписал договор по СМС. Денег пока нет — или внёс часть / минимальный старт.</p>
-        <div class="do"><b>Что делает менеджер</b>Доводит до оплаты первого платежа. Не готов всю сумму сразу — берём частями и добиваем до первого платежа.</div>
+      <div class="st t-amber" id="s3">
+        <div class="st-h"><span class="st-n">3</span><h3>Принимает решение</h3><span class="st-timer">до 3 дней · на усмотрение</span></div>
+        <p class="entered"><b>Сделка зашла сюда</b>Полную консультацию ты уже провёл — клиент всё услышал, но договор пока не подписал. Думает, советуется, взял паузу.</p>
+        <div class="do"><b>Что делает менеджер</b>Видишь смысл — дорабатывай до 3 дней (звони, снимай сомнения). Это на твоё усмотрение. Согласился — сразу шлёшь ссылку на презентацию и ведёшь к подписи. Спрос с тебя — за КАК провёл консультацию (её слушает ИИ-тренер), а не за «подписал/нет».</div>
         <div class="exits">
           <span class="elbl">Когда и куда уходит</span>
-          <div class="ex"><span class="cond">Оплатил первый платёж</span><span class="ar">→</span><span class="dest g">Оплачено · сделка (4)</span></div>
-          <div class="ex"><span class="cond">Несколько дней забил (не звонил, не писал)</span><span class="ar">→</span><span class="dest a">Пул</span></div>
-          <div class="ex"><span class="cond">Передумал / расторг</span><span class="ar">→</span><span class="dest r">Закрытые</span></div>
+          <div class="ex"><span class="cond">Согласился → отправил презентацию</span><span class="ar">→</span><span class="dest g">Договор на подписи (4)</span></div>
+          <div class="ex"><span class="cond">Решил доработать</span><span class="ar">→</span><span class="dest n">Остаётся здесь, до 3 дней</span></div>
+          <div class="ex"><span class="cond">Не подписал за 3 дня</span><span class="ar">→</span><span class="dest a">Общий пул, без штрафа</span></div>
+          <div class="ex"><span class="cond">Отказ / выяснилось, что не наш</span><span class="ar">→</span><span class="dest r">Закрытые</span></div>
         </div>
-        <div class="because"><b>Почему так</b>Договор без денег — ещё не продажа. Пока ведёшь — сделка твоя, её не отбирают. Бросил на несколько дней — отдаём другому, он добьёт оплату.</div>
+        <div class="subs">
+          <span class="slbl">Разбор по ситуациям</span>
+          <div class="sc"><div class="sct">Оценка звонка решает — штрафовать или нет</div><div class="scw">ИИ-тренер ставит оценку консультации (идеал — 90%+). 65% и выше — претензий нет, даже если клиент не созрел (просто не дожал). Ниже 65% (красная черта) — звонок слабый, это твоя вина → рейтинг вниз и меньше новых лидов.</div><div class="sce">считается по среднему за ~5 звонков, не за один</div></div>
+          <div class="sc"><div class="sct">Бот-дожим тут НЕ работает</div><div class="scw">Бот сам шлёт клиенту заключение и ссылку на оплату только тем, кто УЖЕ ПОДПИСАЛ договор (этап 5). Пока клиент только думает — дожимаешь сам.</div><div class="sce">подписал → этап 5, там подключается бот</div></div>
+        </div>
+        <div class="because"><b>Почему так</b>Срок идёт до договора, поэтому уход в пул — не наказание, а чтобы тёплый клиент не залежался. Спрашиваем за качество звонка: хороший звонок без подписи — нормальный результат, плохой звонок — зона роста.</div>
       </div>
 
       <!-- 4 -->
-      <div class="st t-win" id="s4">
-        <div class="st-h"><span class="st-n">4</span><h3>Оплачено — сделка</h3><span class="st-timer ok">сделка ✓</span></div>
-        <p class="entered"><b>Сделка зашла сюда</b>Первый платёж пришёл. Это закрытая продажа.</p>
-        <div class="do"><b>Что делает менеджер</b>Оформляет (анкета, декларация) и передаёт клиента в отдел сопровождения. Дальше клиент платит по графику.</div>
+      <div class="st t-amber" id="s4">
+        <div class="st-h"><span class="st-n">4</span><h3>Договор на подписи</h3><span class="st-timer">горячий час · ещё НЕ подписан</span></div>
+        <p class="entered"><b>Сделка зашла сюда</b>Клиент согласен подписать. Менеджер шлёт ссылку на презентацию условий — клиент только что был на линии, момент горячий. Договор ещё НЕ подписан.</p>
+        <div class="do"><b>Что делает менеджер</b>Отправь ссылку. Клиент открыл, не вешая трубку — ведёшь его по экранам (условия → Кредитный доктор) до подписи. Прервался — перезвони сразу и продолжи с того же места. Подпись онлайн по СМС (сервис ОКИ ДОКИ — юридически равна живой). Аргумент: «сначала договор — он вас защищает, платить будете только после него».</div>
         <div class="exits">
           <span class="elbl">Когда и куда уходит</span>
-          <div class="ex"><span class="cond">Оформлен и передан</span><span class="ar">→</span><span class="dest n">Сопровождение</span></div>
+          <div class="ex"><span class="cond">Подписал договор по СМС</span><span class="ar">→</span><span class="dest g">Подписан — платёж сегодня (5)</span></div>
+          <div class="ex"><span class="cond">Работал (звонил/писал/презентовал), не созрел</span><span class="ar">→</span><span class="dest a">Принимает решение (3), без штрафа</span></div>
+          <div class="ex"><span class="cond">Твёрдо отказался («нет, подписывать не буду»)</span><span class="ar">→</span><span class="dest r">Закрытые (по факту отказа)</span></div>
+          <div class="ex"><span class="cond">Забил час (ноль попыток)</span><span class="ar">→</span><span class="dest r">Завис → 2 часа → общий пул</span></div>
         </div>
-        <div class="because"><b>Почему так</b>Продажа закрыта — дальше услугу ведёт отдельный отдел до результата.</div>
+        <div class="subs">
+          <span class="slbl">Разбор по ситуациям</span>
+          <div class="sc"><div class="sct">Клиент молчит 30 минут</div><div class="scw">Перезвони сразу, пока не остыл — не жди.</div><div class="sce">дожимаешь подпись здесь же</div></div>
+          <div class="sc"><div class="sct">Час прошёл, ты РАБОТАЛ</div><div class="scw">По факту видно: перезвонил, презентовал, написал, а клиент не созрел.</div><div class="sce a">→ Принимает решение (3), без наказания</div></div>
+          <div class="sc"><div class="sct">Час прошёл, ты ЗАБИЛ (ноль попыток)</div><div class="scw">Лид помечается «Завис», новые лиды тебе на паузе, пока не сделаешь попытку. Висит больше 2 часов без попытки — уходит в общий пул, другой добьёт.</div><div class="sce r">Завис → общий пул, рейтинг вниз</div></div>
+          <div class="sc"><div class="sct">Что считается попыткой</div><div class="scw">Любая попытка — звонок ИЛИ сообщение. Дозвон НЕ обязателен: клиент только что был на линии. Попытка снимает «Завис».</div><div class="sce">попытка → пауза снята</div></div>
+          <div class="sc"><div class="sct">«Горячий» — это не «Завис»</div><div class="scw">«Горячий» = просто приоритет, ты наверху очереди (хорошо). «Завис» = забил на горячем моменте (плохо). Не путать.</div><div class="sce">—</div></div>
+        </div>
+        <div class="because"><b>Почему так</b>Клиент тёплый только сейчас — пока на линии, подпись берётся легче, поэтому час горячий и спрос только за заброс. Договор подписывают ДО денег: он защищает клиента и снимает страх «заплачу и кинут». Числа (1 час / 2 часа) стартовые — настроим.</div>
+      </div>
+
+      <!-- 5 -->
+      <div class="st t-green" id="s5">
+        <div class="st-h"><span class="st-n">5</span><h3>Договор подписан — платёж сегодня</h3><span class="st-timer ok">лид твой · день без попытки → пул</span></div>
+        <p class="entered"><b>Сделка зашла сюда</b>Клиент подписал договор (система видит факт сама). Теперь главное — взять платёж сегодня. Лид закреплён за тобой, №1 в очереди — пока ведёшь, не отберут. <b>Срок тут уже не «часы» (как на этапе 4), а «день»:</b> день без единой попытки → пул.</p>
+        <div class="do"><b>Что делает менеджер</b>Берёшь платёж сегодня по ссылке (СБП — оплата по ссылке/QR через банк). Лестница: сначала проси 13 500 ₽ (это сделка), не готов — бери 990 ₽ (дальше заказываем кредитную историю). Любой платёж сегодня → симка в подарок. Платёж можно собирать частями. Касание здесь = довести до оплаты (ссылка, помощь с оплатой), а не «как дела».</div>
+        <div class="exits">
+          <span class="elbl">Когда и куда уходит</span>
+          <div class="ex"><span class="cond">Оплатил сразу 169 000 ₽ (ВИП, скидка 20 000)</span><span class="ar">→</span><span class="dest g">Сделка (7) — дожима нет</span></div>
+          <div class="ex"><span class="cond">Оплатил 13 500 ₽ (первый платёж)</span><span class="ar">→</span><span class="dest g">Сделка (7)</span></div>
+          <div class="ex"><span class="cond">Оплатил 990 ₽ (или часть)</span><span class="ar">→</span><span class="dest a">Оплачено 990 — добор (6)</span></div>
+          <div class="ex"><span class="cond">Сдался: день без единой попытки / офлайн</span><span class="ar">→</span><span class="dest r">Общий пул («договор подписан»), рейтинг вниз</span></div>
+        </div>
+        <div class="subs">
+          <span class="slbl">Разбор по ситуациям оплаты</span>
+          <div class="sc"><div class="sct">Подписал, но НЕ оплатил сегодня</div><div class="scw">Кредитную историю тут НЕ запрашиваем (она только после 990). Бот сам шлёт клиенту в мессенджер заключение со слов (по тому, что он рассказал о долгах) + ссылку на оплату 990 / 13 500. Можешь позвонить и презентовать сам, но система отправит и без тебя.</div><div class="sce">заплатит позже → по сумме (6 или 7); замолчал на день без попытки → пул</div></div>
+          <div class="sc"><div class="sct">Подписал и оплатил ЧАСТЬ (дробит первый платёж)</div><div class="scw">Платёж можно дробить. Внёс 990 → переходишь на этап 6 и добираешь до 13 500. Любой платёж сегодня = симка в подарок. Сделка засчитывается только когда накопилось 13 500.</div><div class="sce a">внёс 990 → этап 6 · добрал 13 500 → Сделка (7)</div></div>
+          <div class="sc"><div class="sct">Оплатил 990</div><div class="scw">Намерение есть, симка активна, но 13 500 пока нет. Переходишь на этап 6: шлёшь инструкцию заказать кредитную историю через Госуслуги и касаешься КАЖДЫЙ день конкретным делом.</div><div class="sce a">→ Оплачено 990 — добор (6)</div></div>
+          <div class="sc"><div class="sct">Оплатил полностью / ВИП (169 000 ₽)</div><div class="scw">Заплатил всё сразу со скидкой 20 000 — максимальная сделка. Идёт прямо в сопровождение, дожимать нечего.</div><div class="sce">→ Сделка (7), сразу в сопровождение</div></div>
+          <div class="sc"><div class="sct">Клиент назвал время оплаты («оплачу в 18:00»)</div><div class="scw">Лид становится горячим, наверху очереди. Будь на связи ровно в это время. Пропустил, даже не набрав → новые лиды на паузе, пока не позвонишь.</div><div class="sce">заплатил → по сумме (6 или 7)</div></div>
+          <div class="sc"><div class="sct">Звонил, а клиент молчит</div><div class="scw">Лид всё равно потихоньку уйдёт в пул (тёплый, другому), НО рейтинг цел — ты делал, что мог. Три дня добивал, не заплатил → пул, рейтинг не падает.</div><div class="sce a">общий пул (старался → без штрафа)</div></div>
+          <div class="sc"><div class="sct">Забил: день без единой попытки</div><div class="scw">Даже не звонил — лид уходит в пул с пометкой «договор подписан», добьёт другой. За заброс своего подписанного лида рейтинг вниз.</div><div class="sce r">общий пул, рейтинг вниз</div></div>
+        </div>
+        <div class="because"><b>Почему так</b>Клиент уже сказал «да» — осталось взять деньги, и брать сегодня, пока горячий. Лид закреплён за тобой (№1), чтобы готовую сделку не выхватили, пока ведёшь; уйдёт, только если сам забил. Лестница 13 500 → 990, дробление и симка снимают барьер «заплачу потом».</div>
+      </div>
+
+      <!-- 6 -->
+      <div class="st t-green" id="s6">
+        <div class="st-h"><span class="st-n">6</span><h3>Оплачено 990 — добираем до 13 500</h3><span class="st-timer ok">лид твой · цель 7 дней · потолок 14</span></div>
+        <p class="entered"><b>Сделка зашла сюда</b>Клиент подписал договор и внёс 990 ₽ — намерение есть, симка работает, но первого платежа 13 500 ₽ пока нет. Начинается работа по кредитной истории, чтобы добрать до 13 500.</p>
+        <div class="do"><b>Что делает менеджер</b>Шлёшь клиенту инструкцию заказать кредитную историю через Госуслуги и даёшь задание. Пришла история → система собирает заключение → презентуешь и берёшь 13 500. Касаешься КАЖДЫЙ день, но касание — конкретное дело: «пришли паспорт / СНИЛС / ИНН / кредитную историю» или «внеси следующую часть к дате». Всегда держи готовым следующий шаг.</div>
+        <div class="exits">
+          <span class="elbl">Когда и куда уходит</span>
+          <div class="ex"><span class="cond">Добрал 13 500 ₽ (целиком или по частям)</span><span class="ar">→</span><span class="dest g">Сделка (7)</span></div>
+          <div class="ex"><span class="cond">Забил: 3 дня ни одной попытки</span><span class="ar">→</span><span class="dest r">Общий пул («оплатил 990»), рейтинг вниз</span></div>
+          <div class="ex"><span class="cond">Старался, но за 14 дней не добрал 13 500</span><span class="ar">→</span><span class="dest a">Общий пул, рейтинг цел</span></div>
+        </div>
+        <div class="subs">
+          <span class="slbl">Разбор по ситуациям</span>
+          <div class="sc"><div class="sct">Работа по кредитной истории через Госуслуги</div><div class="scw">Шлёшь инструкцию заказать историю через Госуслуги и даёшь задание. Пришла → система генерит заключение → презентуешь и берёшь 13 500. Это и есть повод касаться каждый день: задание за заданием.</div><div class="sce">получил историю и заключение → закрыл на 13 500 → Сделка (7)</div></div>
+          <div class="sc"><div class="sct">Клиент тянет с историей / не заказал</div><div class="scw">Если клиент не заказывает историю — добор НЕ должен встать намертво из-за Госуслуг. Дожимаем заключением со слов (по тому, что клиент рассказал о долгах) и параллельно помогаем заказать историю; уточним по ней позже.</div><div class="sce">заключение со слов → дожим 13 500; историю дозакажем потом</div></div>
+          <div class="sc"><div class="sct">Дробление первого платежа (по частям)</div><div class="scw">13 500 можно собирать частями. Каждый нормальный платёж (от ~1 000–1 500 ₽, а не по 100 ₽) продлевает срок и приближает к цели. Сделка засчитывается, когда накопилось 13 500.</div><div class="sce">набрал 13 500 → Сделка (7); тянет копейками → срок не двигается</div></div>
+          <div class="sc"><div class="sct">990 двигает срок, но НЕ растит рейтинг</div><div class="scw">Срок продлевает документ или платёж. Но рейтинг растит только добор до 13 500 — держать клиента на 990 ради галочки невыгодно.</div><div class="sce">рейтинг — только за добор к 13 500</div></div>
+          <div class="sc"><div class="sct">3 дня без единой попытки</div><div class="scw">Забил, ни разу не связался за 3 дня → пул с пометкой «оплатил 990», добьёт другой, тебе рейтинг вниз. Звонил, а клиент молчит — лид всё равно уйдёт, но рейтинг цел.</div><div class="sce r">ноль попыток 3 дня → пул + рейтинг вниз</div></div>
+          <div class="sc"><div class="sct">Подошла дата платежа по графику</div><div class="scw">В день, когда клиент обещал внести часть, лид становится горячим, наверху очереди — будь на связи. Пропустил, даже не набрав → новые лиды на паузе.</div><div class="sce">набрал вовремя → ведёшь дальше</div></div>
+        </div>
+        <div class="because"><b>Почему так</b>990 нужны, чтобы привязать клиента и запустить работу — заказ истории и заключение, на котором закрывается полная сделка. Срок двигают только документ или платёж — считаем исходы, а не активность. Уход в пул — не наказание, рейтинг бьёт только того, кто реально забил.</div>
+      </div>
+
+      <!-- 7 -->
+      <div class="st t-win" id="s7">
+        <div class="st-h"><span class="st-n">7</span><h3>Сделка закрыта → сопровождение</h3><span class="st-timer ok">сделка · лид твой до 2-го платежа</span></div>
+        <p class="entered"><b>Сделка зашла сюда</b>Клиент оплатил первый платёж 13 500 ₽ (или сразу всю сумму 169 000 ₽ — ВИП). Это засчитанная сделка и твоя комиссия. Если копили частями — лид заходит сюда, когда 13 500 набраны полностью.</p>
+        <div class="do"><b>Что делает менеджер</b>Заполни анкету. Клиент подписывает декларацию — подтверждает, что всё понял и лишнего ему не обещали. Проговори вслух главные риски (это слышит ИИ-контроль — без него комиссии не будет). Передай пакет в отдел сопровождения и собери документы в срок. Комиссия двумя половинами: 50% сразу по декларации, вторые 50% — после 2-го платежа клиента, поэтому до него ты ещё прикреплён.</div>
+        <div class="exits">
+          <span class="elbl">Когда и куда уходит</span>
+          <div class="ex"><span class="cond">Пакет передан, оплата прошла, риски проговорены</span><span class="ar">→</span><span class="dest g">Сделка → отдел сопровождения · 50% сейчас</span></div>
+          <div class="ex"><span class="cond">Клиент дошёл до 2-го платежа</span><span class="ar">→</span><span class="dest g">Вторые 50% твои · сделка закрыта окончательно</span></div>
+          <div class="ex"><span class="cond">Расторгся НЕ по твоей вине (сопровождение / жизнь клиента)</span><span class="ar">→</span><span class="dest n">Ты защищён — 50% и рейтинг целы</span></div>
+          <div class="ex"><span class="cond">Расторгся из-за того, что наобещал лишнего</span><span class="ar">→</span><span class="dest r">Вторых 50% нет + в твой % расторжений</span></div>
+          <div class="ex"><span class="cond">Не собрал документы в срок</span><span class="ar">→</span><span class="dest a">Часть бонуса заморожена, пока не донесёшь</span></div>
+        </div>
+        <div class="subs">
+          <span class="slbl">Разбор по ситуациям</span>
+          <div class="sc"><div class="sct">Комиссия делится 50 / 50</div><div class="scw">Первые 50% — сразу по подписанной декларации. Вторые 50% — после 2-го платежа клиента (значит, провёл честно и он идёт дальше). Возражения до 2-го платежа отрабатываешь сам.</div><div class="sce">декларация → 50% сейчас, 50% после 2-го платежа</div></div>
+          <div class="sc"><div class="sct">Что проверяет система, а что ИИ</div><div class="scw">Система видит оплату и сверяет чек-лист документов (анкета, декларация, кредитная история, паспорт, ИНН, СНИЛС). ИИ слушает запись и проверяет одно — проговорил ли ты главные риски (без «спишем 100%»). Не проговорил — обнуляет, как обман или грубость.</div><div class="sce">оплата + документы + риски → пакет в сопровождение</div></div>
+          <div class="sc"><div class="sct">Лид остаётся за тобой до 2-го платежа</div><div class="scw">Клиента ведёт сопровождение (они главные), ты прикреплён пассивно — на радаре, в нагрузку не считается, каждый день звонить не надо. Тревога (хочет расторгнуть, жалоба, пропустил платёж, замолчал) — сначала держит сопровождение; не удержали за день-два или явный путь к расторжению → система кидает тебе горячую задачу, выходишь и гасишь.</div><div class="sce">удержал → вторые 50% твои</div></div>
+          <div class="sc"><div class="sct">Кто виноват в расторжении — смотрим, где умерло</div><div class="scw">Виновато сопровождение (нагрубили, забили — ИИ слышит и их) или жизнь клиента (не потянул) — ты защищён. Наобещал лишнего (видно по оценке первого звонка) — твой минус. Бьёт не за один случай, а по проценту расторжений: норма 5–10%, выше — рейтинг вниз.</div><div class="sce a">вина не твоя → защищён; обманул → минус по %</div></div>
+        </div>
+        <div class="because"><b>Почему так</b>Деньги достаются тому, кто довёл клиента до 2-го платежа, а не просто до подписи — поэтому половину комиссии платим позже и держим тебя на связи. Декларация и проговор рисков защищают и клиента, и компанию от ложных обещаний.</div>
       </div>
 
     </div>
@@ -181,31 +324,53 @@
 
   <!-- SIDE BUCKETS -->
   <section><div class="wrap">
-    <h2 class="sec">Три корзины сбоку</h2>
+    <h2 class="sec">Корзины сбоку</h2>
     <p class="sub">Сюда сделка попадает с любого этапа, если пошло не по основному пути.</p>
     <div class="loop">
       <div class="lp pool">
-        <h4><span class="ic">♻︎</span>Пул</h4>
-        <div class="in">Кого не довели — бросили или не вышло. Система отдаёт лид <b>другому</b> менеджеру (не тому, кто бросил). Это <b>не наказание</b> — чтобы лид не пропал. Тёплых (был договор или оплата) отдают сильному закрывальщику.</div>
+        <h4><span class="ic">♻︎</span>Общий пул</h4>
+        <div class="in">Кого не довели — бросили или не вышло. Система отдаёт лид <b>другому</b> менеджеру (не тому, кто бросил). Это <b>не наказание</b> — чтобы лид не пропал. Холодные раздаёт по очереди, тёплых (договор / 990) — менеджеру с высоким рейтингом закрытия. Не разобрали тёплого за 2 часа → круг получателей расширяется + сигнал руководителю.</div>
       </div>
       <div class="lp dial">
         <h4><span class="ic">↩</span>Дозвонщики</h4>
-        <div class="in">Кого не поймали с первого раза. Система <b>сама звонит и пишет</b> в мессенджер. Поймали и договорились → вернётся в работу. Совсем не поймали за несколько дней → Закрытые.</div>
+        <div class="in">Кого не поймали (3 недозвона менеджера). Система <b>сама звонит и пишет ботом</b>, выводя клиента на связь. Поймали и договорились → возврат в «Новый лид». Бот видит «пришлите счёт / договор» → лид наверх очереди. Так и не поймали (всего 5 попыток за 3 дня) → Закрытые.</div>
       </div>
       <div class="lp closed">
         <h4><span class="ic">✕</span>Закрытые</h4>
-        <div class="in">Отказ («не звоните»), не наш (банкрот / МФЦ / долг меньше 300 000) или так и не дозвонились. Через <b>30–90 дней</b> можно вернуть в работу — кроме явного отказа.</div>
+        <div class="in">Отказ («не звоните» — по факту в записи/сообщении), не наш (банкрот / МФЦ / долг меньше 300 000 — система сверяет сумму), или так и не дозвонились. Кто уже говорил и потом замолчал — сюда НЕ идёт, он в общем пуле. Через <b>30–90 дней</b> можно вернуть в работу (кроме явного отказа).</div>
+      </div>
+      <div class="lp bot">
+        <h4><span class="ic">⚡</span>Срочные · бот (поверх всех этапов)</h4>
+        <div class="in">Одно окно — звонок и переписка вместе. Клиент написал → <b>бот отвечает мгновенно</b>. Бот видит горячее (готов платить / подписать / просит счёт-договор) → поднимает менеджеру, тот выходит сразу. Клиенты ближе к оплате — выше в очереди.</div>
       </div>
     </div>
+  </div></section>
 
-    <div class="note"><b>Про сроки и «умную» часть.</b> Числа (3 дня и др.) — стартовые, настроим по практике. Рейтинг менеджеров, оценка звонков, тонкие правила удержания — это <b>отдельный слой, добавляем позже</b>. Эта страница — простой каркас, который должен ехать сам по себе.</div>
+  <!-- SHORT REFERENCE -->
+  <section><div class="wrap">
+    <h2 class="sec">Ещё важно — коротко</h2>
+    <div class="ref">
+      <div class="rc">
+        <h4>Касания: что держит лид, что бережёт рейтинг</h4>
+        <p><b>Настоящий разговор</b> (дозвонился и поговорил / клиент ответил) — держит лид за тобой.</p>
+        <p><b>Попытка</b> (позвонил/написал, клиент не ответил) — бережёт рейтинг (ты не молчал), но лид всё равно потихоньку уходит в пул.</p>
+        <p><b>Пустое «как дела»</b> или сброс со смайликом — ни то, ни другое. Касание = конкретное дело (документ / платёж / ссылка).</p>
+      </div>
+      <div class="rc">
+        <h4>Где система, а где ИИ</h4>
+        <p><b>Система по факту</b> (без ИИ): договор, деньги, дозвон, сроки — видит сама.</p>
+        <p><b>ИИ только в двух местах:</b> тренер — слушает запись звонка (качество консультации/презентации); юр-фильтр — ловит «спишем 100%», грубость, незаконное.</p>
+        <p>Прятать лид невыгодно само по себе: деньги идут тому, кто закрыл.</p>
+      </div>
+    </div>
+    <div class="note"><b>Про числа и рейтинг.</b> Все сроки (час / 2 часа / 3 / 7 / 14 дней) — стартовые, настроим по практике. Подробная механика рейтинга и распределения лидов — отдельный слой, добавляем позже. Эта страница — рабочий регламент «что делать на каждом этапе».</div>
   </div></section>
 
 </main>
 
 <footer><div class="wrap">
   <div class="close">Просто: <span class="hl">веди к договору и деньгам</span> — или отдай другому.</div>
-  <div class="sig">SALE 100.0 · Воронка простыми словами · версия 1 · 30.06.2026</div>
+  <div class="sig">SALE 100.0 · Воронка по этапам · версия 2 (полная) · 30.06.2026</div>
 </div></footer>
 
 </body>
