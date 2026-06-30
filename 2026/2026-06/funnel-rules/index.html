@@ -113,6 +113,19 @@
   .note{margin-top:22px;background:#F3EFE4;border:1.5px solid rgba(194,121,15,.3);border-radius:14px;padding:15px 18px;font-size:14.5px;color:#6a4d12}
   .note b{color:#8a560a}
 
+  /* call QA */
+  .qa{background:#F3EFE4;border:1.5px solid rgba(194,121,15,.3);border-radius:16px;padding:20px 22px}
+  .qa p{font-size:15px} .qa p+p{margin-top:11px} .qa p b{color:var(--ink)}
+  .qa-scale{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+  @media(max-width:680px){.qa-scale{grid-template-columns:1fr}}
+  .qz{background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 13px;font-size:13.5px;color:var(--muted)}
+  .qz b{font-family:"Unbounded";font-weight:700;display:block;font-size:16px;margin-bottom:3px}
+  .qz.green{border-left:4px solid var(--green)} .qz.green b{color:var(--green)}
+  .qz.amber{border-left:4px solid var(--amber)} .qz.amber b{color:var(--amber)}
+  .qz.red{border-left:4px solid var(--red)} .qz.red b{color:var(--red)}
+  .qa-impl{background:#EDF0EE;border-radius:10px;padding:11px 14px;font-size:14px;color:var(--muted);margin-top:11px}
+  .qa-impl b{color:var(--ink)}
+
   footer{padding:46px 0 70px;border-top:1px solid var(--line);margin-top:54px}
   .close{font-family:"Unbounded";font-weight:700;font-size:clamp(22px,4vw,34px);letter-spacing:-.02em;line-height:1.1}
   .close .hl{color:var(--green)}
@@ -274,6 +287,7 @@
           <div class="sc"><div class="sct">Час прошёл, ты ЗАБИЛ (ноль попыток)</div><div class="scw">Лид помечается «Завис», новые лиды тебе на паузе, пока не сделаешь попытку. Висит больше 2 часов без попытки — уходит в общий пул, другой добьёт.</div><div class="sce r">Завис → общий пул, рейтинг вниз</div></div>
           <div class="sc"><div class="sct">Что считается попыткой</div><div class="scw">Любая попытка — звонок ИЛИ сообщение. Дозвон НЕ обязателен: клиент только что был на линии. Попытка снимает «Завис».</div><div class="sce">попытка → пауза снята</div></div>
           <div class="sc"><div class="sct">«Горячий» — это не «Завис»</div><div class="scw">«Горячий» = просто приоритет, ты наверху очереди (хорошо). «Завис» = забил на горячем моменте (плохо). Не путать.</div><div class="sce">—</div></div>
+          <div class="sc"><div class="sct">После презентации — оценка звонка</div><div class="scw">Запись твоей консультации и презентации слушает ИИ-тренер и ставит балл (подробно — блок «Оценка звонка» ниже). Спрос — за КАК провёл разговор, а не за «подписал/нет».</div><div class="sce">см. блок «Оценка звонка»</div></div>
         </div>
         <div class="because"><b>Почему так</b>Клиент тёплый только сейчас — пока на линии, подпись берётся легче, поэтому час горячий и спрос только за заброс. Договор подписывают ДО денег: он защищает клиента и снимает страх «заплачу и кинут». Числа (1 час / 2 часа) стартовые — настроим.</div>
       </div>
@@ -370,6 +384,22 @@
         <div class="because"><b>Почему так</b>Деньги достаются тому, кто довёл клиента до 2-го платежа, а не просто до подписи — поэтому половину комиссии платим позже и держим тебя на связи. Декларация и проговор рисков защищают и клиента, и компанию от ложных обещаний.</div>
       </div>
 
+    </div>
+  </div></section>
+
+  <!-- CALL QA -->
+  <section><div class="wrap">
+    <h2 class="sec">Оценка звонка — главный контроль качества</h2>
+    <p class="sub">Важное правило. Работает на этапах «Принимает решение» и «Договор на подписи».</p>
+    <div class="qa">
+      <p><b>После каждой консультации и презентации запись звонка сама уходит на оценку.</b> ИИ-тренер слушает запись и ставит балл: как провёл диагностику, показал ценность, снял возражения и довёл до подписи.</p>
+      <div class="qa-scale">
+        <div class="qz green"><b>90%+</b>идеал</div>
+        <div class="qz amber"><b>65–90%</b>норма — претензий нет, даже если клиент не подписал (просто не дозрел)</div>
+        <div class="qz red"><b>ниже 65%</b>слабый звонок → рейтинг вниз и меньше новых лидов</div>
+      </div>
+      <p>Главное: <b>спрашиваем не за «не подписал», а за то, КАК ты вёл разговор.</b> Хороший звонок без подписи — нормальный результат; слабый звонок — зона роста. Балл считается по среднему за несколько звонков, а не за один — один звонок это случайность.</p>
+      <p class="qa-impl"><b>Для внедрения (директору и разработчикам):</b> нужен доступ к записям звонков + расшифровка и оценка ИИ. На старте включаем в «тихом режиме» — ИИ считает балл, но лиды ещё НЕ режет, пока пару недель не сверим его оценки с живыми руководителями. Совпало — включаем последствия (рейтинг и поток лидов).</p>
     </div>
   </div></section>
 
