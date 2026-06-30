@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Воронка по этапам — правила простыми словами · SALE 100.0</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Воронка простыми словами: для каждого этапа — что значит, что делает менеджер, когда сделка уходит дальше и почему.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2E9; --card:#FFFFFF; --ink:#191713; --muted:#615B50;
+    --green:#0E5C46; --green-deep:#0A3D2E; --amber:#C2790F; --red:#9A2D22;
+    --grey:#7C756A; --gold:#C99A33;
+    --line:rgba(25,23,19,.12);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:"Golos Text",sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+  h1,h2,h3,.kicker,.tag{font-family:"Unbounded",sans-serif}
+  a{color:inherit}
+
+  header{padding:60px 0 22px}
+  .kicker{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);font-weight:700}
+  h1{font-size:clamp(36px,7vw,66px);line-height:1;font-weight:800;letter-spacing:-.02em;margin:16px 0 0}
+  h1 .hl{color:var(--green)}
+  .lead{font-size:clamp(16px,2.3vw,20px);color:var(--muted);max-width:720px;margin:18px 0 0;font-weight:500}
+  .promise{margin:24px 0 0;padding:20px 24px;background:var(--green-deep);color:#F6F2E9;border-radius:16px;font-size:clamp(16px,2.4vw,21px);font-weight:600;line-height:1.4}
+  .promise b{color:#F4C775}
+
+  h2.sec{font-size:clamp(22px,3.4vw,30px);font-weight:800;letter-spacing:-.01em;margin:50px 0 6px}
+  .sub{color:var(--muted);font-size:15.5px;margin-bottom:18px;max-width:740px}
+
+  /* mini-map strip */
+  .strip{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+  .strip .chip{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--grey);border-radius:10px;padding:9px 14px;font-family:"Unbounded";font-weight:700;font-size:13.5px}
+  .strip .chip.c2{border-left-color:var(--amber)} .strip .chip.c3{border-left-color:var(--green)} .strip .chip.c4{border-left-color:var(--green-deep)}
+  .strip .arr{color:var(--muted);font-weight:700;font-size:15px}
+  .strip-side{margin-top:10px;font-size:14px;color:var(--muted)}
+  .strip-side b{color:var(--ink)}
+
+  /* stage cards */
+  .grid{display:flex;flex-direction:column;gap:14px;margin-top:10px}
+  .st{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--grey);border-radius:16px;padding:20px 22px;scroll-margin-top:16px}
+  .st.t-amber{border-left-color:var(--amber)} .st.t-green{border-left-color:var(--green)} .st.t-win{border-left-color:var(--gold)} .st.t-neu{border-left-color:var(--grey)}
+  .st-h{display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+  .st-n{font-family:"Unbounded";font-weight:800;font-size:15px;color:#fff;background:var(--grey);min-width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+  .st.t-amber .st-n{background:var(--amber)} .st.t-green .st-n{background:var(--green)} .st.t-win .st-n{background:var(--green-deep)}
+  .st-h h3{font-size:clamp(18px,2.6vw,22px);font-weight:700;letter-spacing:-.01em}
+  .st-timer{margin-left:auto;font-family:"Unbounded";font-weight:700;font-size:12.5px;color:var(--amber);background:rgba(194,121,15,.1);border:1px solid rgba(194,121,15,.25);padding:5px 11px;border-radius:999px;white-space:nowrap}
+  .st-timer.ok{color:var(--green);background:rgba(14,92,70,.08);border-color:rgba(14,92,70,.22)}
+
+  .entered{font-size:16px;margin-top:12px}
+  .entered b,.do b,.because b{font-size:12px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:var(--muted);display:block;margin-bottom:2px}
+  .do{margin-top:13px;font-size:15.5px}
+
+  /* exits */
+  .exits{margin-top:14px;background:#FAF7EF;border:1px solid var(--line);border-radius:12px;padding:12px 15px}
+  .exits .elbl{font-family:"Unbounded";font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--green-deep);display:block;margin-bottom:8px}
+  .ex{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:7px 0}
+  .ex+.ex{border-top:1px dashed var(--line)}
+  .cond{font-size:14.5px;flex:1;min-width:160px}
+  .ar{color:var(--muted);font-weight:700}
+  .dest{font-family:"Unbounded";font-weight:700;font-size:12.5px;padding:4px 11px;border-radius:8px;white-space:nowrap}
+  .dest.g{background:rgba(14,92,70,.1);color:var(--green-deep)}
+  .dest.a{background:rgba(194,121,15,.12);color:#8a560a}
+  .dest.r{background:rgba(154,45,34,.1);color:var(--red)}
+  .dest.n{background:#ECE8DF;color:var(--ink)}
+
+  .because{margin-top:13px;font-size:14.5px;color:var(--muted);background:#EDF0EE;border:1px solid var(--line);border-radius:12px;padding:11px 14px}
+
+  /* side buckets */
+  .loop{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px}
+  @media (max-width:720px){.loop{grid-template-columns:1fr}}
+  .lp{border-radius:14px;padding:16px 18px;border:1px solid var(--line);background:var(--card)}
+  .lp.pool{background:#F1EEE6} .lp.dial{background:#EDF0EE} .lp.closed{background:#FBEDEB;border-color:rgba(154,45,34,.2)}
+  .lp h4{font-family:"Unbounded";font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+  .lp .in{font-size:13.5px;color:var(--muted);margin-top:8px}
+  .lp .in b{color:var(--ink)}
+  .lp .ic{width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-family:"Unbounded";font-weight:700}
+  .lp.pool .ic{background:#9A9386} .lp.dial .ic{background:var(--grey)} .lp.closed .ic{background:var(--red)}
+
+  .note{margin-top:22px;background:#F3EFE4;border:1.5px solid rgba(194,121,15,.3);border-radius:14px;padding:15px 18px;font-size:14.5px;color:#6a4d12}
+  .note b{color:#8a560a}
+
+  footer{padding:46px 0 70px;border-top:1px solid var(--line);margin-top:54px}
+  .close{font-family:"Unbounded";font-weight:700;font-size:clamp(22px,4vw,34px);letter-spacing:-.02em;line-height:1.1}
+  .close .hl{color:var(--green)}
+  .sig{color:var(--muted);margin-top:13px;font-size:14px}
+</style>
+</head>
+<body>
+
+<header><div class="wrap">
+  <div class="kicker">SALE 100.0 · Воронка простыми словами</div>
+  <h1>Что происходит<br>со <span class="hl">сделкой</span></h1>
+  <p class="lead">Для каждого этапа всего четыре вещи: что значит, что делает менеджер, <b>когда сделка уходит дальше и почему</b>. Без терминов.</p>
+  <div class="promise">Один закон на всё: <b>ведёшь к договору и оплате — сделка твоя.</b> Забил — уходит другому. <b>Деньги у того, кто закрыл.</b></div>
+</div></header>
+
+<main>
+
+  <!-- MINI MAP -->
+  <section><div class="wrap">
+    <h2 class="sec">Путь сделки за 5 секунд</h2>
+    <p class="sub">Слева направо — нормальный путь. Если не вышло — две корзины сбоку.</p>
+    <div class="strip">
+      <span class="chip c1">1 · Новый лид</span><span class="arr">→</span>
+      <span class="chip c2">2 · В работе</span><span class="arr">→</span>
+      <span class="chip c3">3 · Договор подписан</span><span class="arr">→</span>
+      <span class="chip c4">4 · Оплачено · сделка</span>
+    </div>
+    <div class="strip-side">Не вышло → <b>Пул</b> (лид другому менеджеру) · Отказ / не наш → <b>Закрытые</b> · Не дозвонились → <b>Дозвонщики</b> (система звонит сама)</div>
+  </div></section>
+
+  <!-- STAGES -->
+  <section><div class="wrap">
+    <h2 class="sec">Правила по этапам</h2>
+    <p class="sub">Сделка зашла на этап → что делаем → когда и куда уходит → почему так.</p>
+    <div class="grid">
+
+      <!-- 1 -->
+      <div class="st t-neu" id="s1">
+        <div class="st-h"><span class="st-n">1</span><h3>Новый лид</h3><span class="st-timer">срок: первые минуты</span></div>
+        <p class="entered"><b>Сделка зашла сюда</b>Пришла заявка (реклама / сайт). Ещё не звонили — разговора не было.</p>
+        <div class="do"><b>Что делает менеджер</b>Звонит в первые минуты и проводит консультацию: узнаёт долг и ситуацию, предлагает решение.</div>
+        <div class="exits">
+          <span class="elbl">Когда и куда уходит</span>
+          <div class="ex"><span class="cond">Дозвонился, начали разговор</span><span class="ar">→</span><span class="dest g">В работе (2)</span></div>
+          <div class="ex"><span class="cond">Не дозвонился (несколько попыток)</span><span class="ar">→</span><span class="dest a">Дозвонщики</span></div>
+          <div class="ex"><span class="cond">Сразу «не звоните» / не наш клиент</span><span class="ar">→</span><span class="dest r">Закрытые</span></div>
+        </div>
+        <div class="because"><b>Почему так</b>Пока не поговорили — двигать некуда. Главное — не упустить первые минуты, дальше клиент остывает.</div>
+      </div>
+
+      <!-- 2 -->
+      <div class="st t-amber" id="s2">
+        <div class="st-h"><span class="st-n">2</span><h3>В работе</h3><span class="st-timer">до договора · 3 дня</span></div>
+        <p class="entered"><b>Сделка зашла сюда</b>Поговорили, клиент в теме. Ведём к договору — консультация идёт или прошла, человек думает.</p>
+        <div class="do"><b>Что делает менеджер</b>Доводит до договора: показывает условия (презентацию по ссылке), снимает возражения, подписывает по СМС.</div>
+        <div class="exits">
+          <span class="elbl">Когда и куда уходит</span>
+          <div class="ex"><span class="cond">Подписал договор</span><span class="ar">→</span><span class="dest g">Договор подписан (3)</span></div>
+          <div class="ex"><span class="cond">3 дня молчит / не созрел</span><span class="ar">→</span><span class="dest a">Пул</span></div>
+          <div class="ex"><span class="cond">Отказ или не наш (сказал «не звоните», уже банкрот, долг меньше 300 000)</span><span class="ar">→</span><span class="dest r">Закрытые</span></div>
+        </div>
+        <div class="because"><b>Почему так</b>Лид не должен лежать без движения. Либо ведём к договору, либо отдаём другому менеджеру, пока клиент не остыл. Молчит — это не наказание, просто передаём, чтобы не пропал.</div>
+      </div>
+
+      <!-- 3 -->
+      <div class="st t-green" id="s3">
+        <div class="st-h"><span class="st-n">3</span><h3>Договор подписан — ждём оплату</h3><span class="st-timer ok">лид твой, пока ведёшь</span></div>
+        <p class="entered"><b>Сделка зашла сюда</b>Клиент подписал договор по СМС. Денег пока нет — или внёс часть / минимальный старт.</p>
+        <div class="do"><b>Что делает менеджер</b>Доводит до оплаты первого платежа. Не готов всю сумму сразу — берём частями и добиваем до первого платежа.</div>
+        <div class="exits">
+          <span class="elbl">Когда и куда уходит</span>
+          <div class="ex"><span class="cond">Оплатил первый платёж</span><span class="ar">→</span><span class="dest g">Оплачено · сделка (4)</span></div>
+          <div class="ex"><span class="cond">Несколько дней забил (не звонил, не писал)</span><span class="ar">→</span><span class="dest a">Пул</span></div>
+          <div class="ex"><span class="cond">Передумал / расторг</span><span class="ar">→</span><span class="dest r">Закрытые</span></div>
+        </div>
+        <div class="because"><b>Почему так</b>Договор без денег — ещё не продажа. Пока ведёшь — сделка твоя, её не отбирают. Бросил на несколько дней — отдаём другому, он добьёт оплату.</div>
+      </div>
+
+      <!-- 4 -->
+      <div class="st t-win" id="s4">
+        <div class="st-h"><span class="st-n">4</span><h3>Оплачено — сделка</h3><span class="st-timer ok">сделка ✓</span></div>
+        <p class="entered"><b>Сделка зашла сюда</b>Первый платёж пришёл. Это закрытая продажа.</p>
+        <div class="do"><b>Что делает менеджер</b>Оформляет (анкета, декларация) и передаёт клиента в отдел сопровождения. Дальше клиент платит по графику.</div>
+        <div class="exits">
+          <span class="elbl">Когда и куда уходит</span>
+          <div class="ex"><span class="cond">Оформлен и передан</span><span class="ar">→</span><span class="dest n">Сопровождение</span></div>
+        </div>
+        <div class="because"><b>Почему так</b>Продажа закрыта — дальше услугу ведёт отдельный отдел до результата.</div>
+      </div>
+
+    </div>
+  </div></section>
+
+  <!-- SIDE BUCKETS -->
+  <section><div class="wrap">
+    <h2 class="sec">Три корзины сбоку</h2>
+    <p class="sub">Сюда сделка попадает с любого этапа, если пошло не по основному пути.</p>
+    <div class="loop">
+      <div class="lp pool">
+        <h4><span class="ic">♻︎</span>Пул</h4>
+        <div class="in">Кого не довели — бросили или не вышло. Система отдаёт лид <b>другому</b> менеджеру (не тому, кто бросил). Это <b>не наказание</b> — чтобы лид не пропал. Тёплых (был договор или оплата) отдают сильному закрывальщику.</div>
+      </div>
+      <div class="lp dial">
+        <h4><span class="ic">↩</span>Дозвонщики</h4>
+        <div class="in">Кого не поймали с первого раза. Система <b>сама звонит и пишет</b> в мессенджер. Поймали и договорились → вернётся в работу. Совсем не поймали за несколько дней → Закрытые.</div>
+      </div>
+      <div class="lp closed">
+        <h4><span class="ic">✕</span>Закрытые</h4>
+        <div class="in">Отказ («не звоните»), не наш (банкрот / МФЦ / долг меньше 300 000) или так и не дозвонились. Через <b>30–90 дней</b> можно вернуть в работу — кроме явного отказа.</div>
+      </div>
+    </div>
+
+    <div class="note"><b>Про сроки и «умную» часть.</b> Числа (3 дня и др.) — стартовые, настроим по практике. Рейтинг менеджеров, оценка звонков, тонкие правила удержания — это <b>отдельный слой, добавляем позже</b>. Эта страница — простой каркас, который должен ехать сам по себе.</div>
+  </div></section>
+
+</main>
+
+<footer><div class="wrap">
+  <div class="close">Просто: <span class="hl">веди к договору и деньгам</span> — или отдай другому.</div>
+  <div class="sig">SALE 100.0 · Воронка простыми словами · версия 1 · 30.06.2026</div>
+</div></footer>
+
+</body>
+</html>
