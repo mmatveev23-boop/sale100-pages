@@ -4,188 +4,104 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Договор и оплата: механика сообщений · ДОНУЛЯ</title>
-<meta name="description" content="Внутренний регламент: сценарии П/О/Н после презентации, тексты сообщений и таблица зашивки в amoCRM/Salebot.">
-<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Настройка amo: что и когда шлём после презентации · ДОНУЛЯ</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* Внутренняя страница-регламент. Бренд-система ДОНУЛЯ: хвойный + золото + бумага, только Golos Text. */
+/* Рабочая шпаргалка для настройки amoCRM/Salebot. Минимум декора, максимум сканируемости. Печать — ок. */
 :root{
-  --paper:#FAF7F2; --card:#FFFFFF; --ink:#1C1A16; --muted:#68625A; --faint:#9B948A;
-  --pine:#0B3B2E; --pine-2:#0E4838;
-  --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
-  --gold:#C99A33; --gold-soft:#FBF3DC; --gold-ink:#8A6212;
-  --alert:#A8442E; --alert-soft:#FAEDE8;
-  --line:rgba(28,26,22,.11); --line-2:rgba(28,26,22,.17);
-  --r-box:16px; --r-btn:14px; --r-field:12px;
+  --paper:#FAF7F2; --card:#fff; --ink:#1C1A16; --muted:#68625A; --faint:#9B948A;
+  --pine:#0B3B2E; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
+  --gold-soft:#FBF3DC; --gold-ink:#8A6212; --alert:#A8442E; --alert-soft:#FAEDE8;
+  --line:rgba(28,26,22,.13);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
-.num{font-variant-numeric:tabular-nums}
-b,strong{font-weight:700}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;font-size:14px}
+.wrap{max-width:960px;margin:0 auto;padding:26px 18px 60px}
+h1{font-size:21px;font-weight:800;letter-spacing:-.01em}
+.sub{margin-top:4px;color:var(--muted);font-size:13px}
+h2{font-size:16px;font-weight:800;margin:28px 0 8px;padding-top:16px;border-top:2px solid var(--pine)}
+.note{font-size:12.5px;color:var(--muted);margin-bottom:10px}
 
-.hdr{background:var(--pine);color:#fff;padding:26px 18px 24px}
-.hdr .in{max-width:1060px;margin:0 auto}
-.hdr h1{font-size:24px;font-weight:800;letter-spacing:-.01em;line-height:1.2}
-.hdr p{margin-top:6px;font-size:14px;color:rgba(255,255,255,.72);max-width:640px}
-.hdr .chips{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
-.hdr .chip{font-size:11.5px;font-weight:600;border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:4px 11px;color:rgba(255,255,255,.85)}
-.hdr .chip.gold{background:rgba(201,154,51,.18);border-color:rgba(201,154,51,.5);color:#F0D9A5}
+/* таблица */
+.tblwrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+th{background:var(--pine);color:#fff;text-align:left;font-weight:600;padding:8px 11px;white-space:nowrap}
+td{padding:8px 11px;border-top:1px solid var(--line);vertical-align:top}
+td b{font-weight:800}
+tr.gp td{background:#F1F7F3} tr.go td{background:#FCF8EC} tr.gn td{background:#FBF1EE}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:5px;padding:1px 7px}
+.tag.p{background:var(--green-soft);color:var(--green-ink)}
+.tag.o{background:var(--gold-soft);color:var(--gold-ink)}
+.tag.n{background:var(--alert-soft);color:var(--alert)}
 
-.wrap{max-width:1060px;margin:0 auto;padding:22px 18px 60px}
-h2{font-size:17.5px;font-weight:800;letter-spacing:-.01em;margin:30px 0 4px}
-.h2sub{font-size:13px;color:var(--muted);margin-bottom:12px;max-width:680px}
-
-/* принципы */
-.rules{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);padding:6px 16px}
-.rules .r{display:flex;gap:10px;padding:11px 0;font-size:13.5px}
-.rules .r + .r{border-top:1px solid var(--line)}
-.rules .r svg{flex:none;margin-top:2px;color:var(--green)}
-.rules .r b{color:var(--ink)}
-.rules .r span{color:var(--muted)}
-
-/* карта сценариев */
-.lanes{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.lane{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);overflow:hidden;display:flex;flex-direction:column}
-.lane .lh{padding:13px 15px;border-bottom:1px solid var(--line)}
-.lane .lt{font-size:15px;font-weight:800}
-.lane .lc{margin-top:3px;font-size:12px;color:var(--muted)}
-.lane.p .lh{background:var(--green-soft)} .lane.p .lt{color:var(--green-ink)}
-.lane.o .lh{background:var(--gold-soft)} .lane.o .lt{color:var(--gold-ink)}
-.lane.n .lh{background:var(--alert-soft)} .lane.n .lt{color:var(--alert)}
-.steps{padding:6px 15px 4px;flex:1}
-.step{position:relative;padding:10px 0 10px 0}
-.step + .step{border-top:1px dashed var(--line)}
-.step .when{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:2px 9px;background:#EFEBE3;color:var(--muted)}
-.lane.p .step .when{background:var(--green-soft);color:var(--green-ink)}
-.lane.o .step .when{background:var(--gold-soft);color:var(--gold-ink)}
-.lane.n .step .when{background:var(--alert-soft);color:var(--alert)}
-.step .sn{margin-top:5px;font-size:13.5px;font-weight:700}
-.step .sd{font-size:12.5px;color:var(--muted)}
-.step .att{margin-top:4px;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--green-ink);background:var(--green-soft);border-radius:7px;padding:2px 8px}
-.lane .lf{padding:11px 15px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);background:#FDFBF7}
-.lane .lf b{color:var(--ink)}
-.bridge{margin-top:12px;display:flex;align-items:flex-start;gap:10px;background:var(--card);border:1.5px dashed var(--line-2);border-radius:var(--r-btn);padding:12px 15px;font-size:13px;color:var(--muted)}
-.bridge svg{flex:none;margin-top:2px;color:var(--green)}
-.bridge b{color:var(--ink)}
-
-/* тексты сообщений: чат-карточки */
-.msggrp{margin-top:14px}
-.msggrp .gt{font-size:13px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;margin-bottom:8px}
-.msggrp.p .gt{color:var(--green-ink)} .msggrp.o .gt{color:var(--gold-ink)} .msggrp.n .gt{color:var(--alert)}
-.msg{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);margin-bottom:10px;overflow:hidden}
-.msg .mh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;border-bottom:1px solid var(--line);background:#FDFBF7}
-.msg .mh b{font-size:13px}
-.msg .mh .when{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:999px;padding:2px 9px;background:#EFEBE3;color:var(--muted)}
-.msg .mh .att{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--green-ink);background:var(--green-soft);border-radius:7px;padding:2px 8px}
-.msg .mh button{margin-left:auto;border:1.5px solid var(--line-2);background:none;border-radius:9px;padding:5px 11px;font-family:inherit;font-size:11.5px;font-weight:700;color:var(--green-ink);cursor:pointer;transition:border-color .18s ease}
+/* тексты сообщений */
+.msg{background:var(--card);border:1px solid var(--line);border-radius:10px;margin-bottom:10px}
+.msg .mh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid var(--line)}
+.msg .mh b{font-size:13.5px}
+.msg .mh .mi{font-size:12px;color:var(--muted)}
+.msg .mh button{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:7px;padding:4px 10px;font-family:inherit;font-size:12px;font-weight:700;color:var(--green-ink);cursor:pointer}
 .msg .mh button:hover{border-color:var(--green)}
-.msg .mb{padding:13px 16px;font-size:13.5px;white-space:pre-line}
+.msg .mb{padding:11px 14px;white-space:pre-line;font-size:13.5px}
 .ph{background:var(--gold-soft);border-radius:4px;padding:0 4px;font-weight:600;color:var(--gold-ink)}
-.msg .note{padding:0 16px 12px;font-size:12px;color:var(--faint)}
 
-/* таблица зашивки */
-.tblwrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:var(--r-box)}
-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:720px}
-th{background:var(--pine);color:#fff;text-align:left;font-weight:600;padding:9px 12px;white-space:nowrap}
-td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
-td:first-child{color:var(--faint);font-weight:700}
-tr.gp td{background:#F2F7F4} tr.go td{background:#FCF8EC} tr.gn td{background:#FBF1EE}
-td .code{font-weight:800}
+ul.plain{list-style:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:4px 14px}
+ul.plain li{padding:8px 0;font-size:13px;color:var(--muted)}
+ul.plain li + li{border-top:1px solid var(--line)}
+ul.plain b{color:var(--ink)}
+.warn{margin-top:12px;background:var(--alert-soft);border:1px solid rgba(168,68,46,.3);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--alert)}
 
-/* нижние карточки */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);padding:15px 16px;font-size:13px}
-.panel h3{font-size:13.5px;font-weight:800;margin-bottom:8px}
-.panel ul{list-style:none}
-.panel li{padding:5px 0;color:var(--muted)}
-.panel li + li{border-top:1px solid var(--line)}
-.panel li b{color:var(--ink)}
-.warn{margin-top:12px;background:var(--alert-soft);border:1px solid rgba(168,68,46,.25);border-radius:var(--r-btn);padding:12px 15px;font-size:13px;color:var(--alert)}
-.warn b{color:var(--alert)}
-
-.foot{max-width:1060px;margin:0 auto;padding:0 18px 40px;font-size:11.5px;color:var(--faint)}
-
-@media (prefers-reduced-motion: no-preference){
-  .wrap > *{animation:up .5s cubic-bezier(.23,1,.32,1) both}
-  @keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-}
-@media (max-width:860px){
-  .lanes{grid-template-columns:1fr}
-  .grid2{grid-template-columns:1fr}
-}
+@media print{ .msg .mh button{display:none} body{font-size:12px} }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<header class="hdr">
-  <div class="in">
-    <h1>Договор и оплата: механика сообщений</h1>
-    <p>От конца презентации до запуска дела или передачи в дожим. Договор отправляется всегда, в любом сценарии.</p>
-    <div class="chips">
-      <span class="chip gold">зашивается в amoCRM / Salebot</span>
-      <span class="chip">БФЛ и РДГ</span>
-      <span class="chip num">версия от 10 июля 2026</span>
-    </div>
-  </div>
-</header>
+  <h1>Настройка amo: что и когда шлём после презентации</h1>
+  <p class="sub">Договор отправляется всегда. Тексты ниже копируются в Salebot как есть, merge-поля <span class="ph">{в скобках}</span>. Версия от 10 июля 2026.</p>
 
-<main class="wrap">
-
-  <h2>Принципы</h2>
-  <div class="rules">
-    <div class="r"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg><div><b>Договор шлём всегда.</b> <span>Подписал: подписанный экземпляр (ПЭП + график). Не подписал: персональный проект из CRM. Образец не отправляется никогда.</span></div></div>
-    <div class="r"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg><div><b>Никогда голый файл.</b> <span>Каждое вложение идёт с выжимкой (3 условия) и следующим шагом: ссылкой оплаты или подписи.</span></div></div>
-    <div class="r"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg><div><b>Данные только из движка.</b> <span>Суммы, номера договоров и ссылки подставляются merge-полями. Руками не набираются.</span></div></div>
-    <div class="r"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg><div><b>Каденция.</b> <span>Не более 3 касаний в первые сутки. Потолок дожима на подпись: 3 дня («контакт, затем договор»). Дальше по регламенту дожима.</span></div></div>
-    <div class="r"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg><div><b>Частичка от 1 000 ₽</b> <span>живёт в сообщениях и у эксперта. На странице оплаты её нет: клиенту заранее меньший платёж не подсказываем.</span></div></div>
-  </div>
-
-  <h2>Три сценария после презентации</h2>
-  <p class="h2sub">Ветку выбирает результат звонка. Любой ответ клиента в чате: уведомление эксперту, SLA 5 минут.</p>
-
-  <div class="lanes">
-    <div class="lane p">
-      <div class="lh"><div class="lt">П · Подписал и оплатил</div><div class="lc">вебхук ОКИ ДОКИ «подписан» + платёж получен</div></div>
-      <div class="steps">
-        <div class="step"><span class="when">сразу</span><div class="sn">П1 · «Вы в работе»</div><div class="sd">поздравление + что происходит прямо сейчас</div><span class="att"><svg width="12" height="12" viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Z"/></svg>подписанный договор + чек</span></div>
-      </div>
-      <div class="lf">Дальше: <b>статус 7, передача сопровождению</b> (анкета обязательных полей)</div>
-    </div>
-
-    <div class="lane o">
-      <div class="lh"><div class="lt">О · Подписал, не оплатил</div><div class="lc">вебхук «подписан», платежа нет · дело «на паузе»</div></div>
-      <div class="steps">
-        <div class="step"><span class="when">сразу</span><div class="sn">О1 · договор + ссылка оплаты</div><div class="sd">запуск дела + «любой платёж сегодня» закрепляет подарок</div><span class="att"><svg width="12" height="12" viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Z"/></svg>подписанный договор</span></div>
-        <div class="step"><span class="when">+4 часа</span><div class="sn">О2 · напоминание</div><div class="sd">«SIM держим до конца дня», частичка по запросу</div></div>
-        <div class="step"><span class="when">по тегу «денег нет»</span><div class="sn">О3 · частичка</div><div class="sd">ссылка сразу на сумму от 1 000 ₽, вместо О2/О4</div></div>
-        <div class="step"><span class="when">утро +1 день</span><div class="sn">О4 · последнее авто-касание</div><div class="sd">дальше эксперт звонит сам</div></div>
-      </div>
-      <div class="lf">Стоп-условие: <b>оплата</b>. Частичка: <b>статус 6 «Частичка, добор»</b>, полный платёж: <b>статус 7</b></div>
-    </div>
-
-    <div class="lane n">
-      <div class="lh"><div class="lt">Н · Не подписал</div><div class="lc">эксперт закрыл презентацию без подписи · бронь условий 3 дня</div></div>
-      <div class="steps">
-        <div class="step"><span class="when">сразу</span><div class="sn">Н1 · проект договора + выжимка</div><div class="sd">3 условия списком + «подписать за 2 минуты по СМС»</div><span class="att"><svg width="12" height="12" viewBox="0 0 256 256" fill="currentColor"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Z"/></svg>персональный проект PDF</span></div>
-        <div class="step"><span class="when">по тегу «посоветуюсь»</span><div class="sn">Н2 · для семьи</div><div class="sd">договор для родных + созвон втроём на 10 минут</div></div>
-        <div class="step"><span class="when">+1 день</span><div class="sn">Н3 · дожим вопросами</div><div class="sd">по пунктам: гарантия п. 6, госплатежи п. 5.1</div></div>
-        <div class="step"><span class="when">день 3</span><div class="sn">Н4 · финал брони</div><div class="sd">последний день условий + право отказаться</div></div>
-      </div>
-      <div class="lf">Подписи нет к концу дня 3: <b>по регламенту дожима / пул</b></div>
-    </div>
+  <h2>Что и когда шлём</h2>
+  <p class="note">Сценарий определяется результатом звонка: <span class="tag p">П</span> подписал и оплатил · <span class="tag o">О</span> подписал, не оплатил · <span class="tag n">Н</span> не подписал. Любой ответ клиента в чате — уведомление эксперту, SLA 5 минут.</p>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>#</th><th></th><th>Триггер</th><th>Когда</th><th>Шлём</th><th>Вложение</th><th>Стоп</th></tr></thead>
+      <tbody>
+        <tr class="gp"><td>1</td><td><span class="tag p">П</span></td><td>Вебхук ОКИ ДОКИ «подписан» + платёж получен</td><td>сразу</td><td><b>П1</b> «вы в работе»</td><td>подписанный PDF + чек</td><td>—</td></tr>
+        <tr class="go"><td>2</td><td><span class="tag o">О</span></td><td>Вебхук «подписан», платежа нет</td><td>сразу</td><td><b>О1</b> договор + ссылка оплаты</td><td>подписанный PDF</td><td>оплата</td></tr>
+        <tr class="go"><td>3</td><td><span class="tag o">О</span></td><td>оплаты всё ещё нет</td><td>+4 часа</td><td><b>О2</b> напоминание</td><td>—</td><td>оплата / тег «денег нет»</td></tr>
+        <tr class="go"><td>4</td><td><span class="tag o">О</span></td><td>тег «денег нет» (ставит эксперт)</td><td>сразу</td><td><b>О3</b> частичка от 1 000</td><td>—</td><td>оплата</td></tr>
+        <tr class="go"><td>5</td><td><span class="tag o">О</span></td><td>оплаты всё ещё нет</td><td>утро +1 день</td><td><b>О4</b> последнее авто-касание</td><td>—</td><td>оплата</td></tr>
+        <tr class="gn"><td>6</td><td><span class="tag n">Н</span></td><td>эксперт закрыл презентацию без подписи (поле/статус)</td><td>сразу</td><td><b>Н1</b> проект договора + выжимка</td><td>проект PDF из CRM</td><td>подпись</td></tr>
+        <tr class="gn"><td>7</td><td><span class="tag n">Н</span></td><td>тег «посоветуюсь»</td><td>сразу</td><td><b>Н2</b> для семьи + созвон втроём</td><td>—</td><td>подпись</td></tr>
+        <tr class="gn"><td>8</td><td><span class="tag n">Н</span></td><td>тишина</td><td>+1 день</td><td><b>Н3</b> дожим вопросами</td><td>—</td><td>подпись</td></tr>
+        <tr class="gn"><td>9</td><td><span class="tag n">Н</span></td><td>тишина</td><td>день 3</td><td><b>Н4</b> финал брони</td><td>—</td><td>подпись / отказ</td></tr>
+        <tr class="gn"><td>10</td><td><span class="tag n">Н</span></td><td>вебхук «подписан» из ветки Н</td><td>сразу</td><td>стоп цепочки Н → запуск <b>О1</b>, таймеры О от подписи</td><td>подписанный PDF</td><td>—</td></tr>
+      </tbody>
+    </table>
   </div>
 
-  <div class="bridge">
-    <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor"><path d="M141.66,133.66l-40,40a8,8,0,0,1-11.32-11.32L116.69,136H24a8,8,0,0,1,0-16h92.69L90.34,93.66a8,8,0,0,1,11.32-11.32l40,40A8,8,0,0,1,141.66,133.66ZM192,32H136a8,8,0,0,0,0,16h56V208H136a8,8,0,0,0,0,16h56a16,16,0,0,0,16-16V48A16,16,0,0,0,192,32Z"/></svg>
-    <div><b>Переход Н в О.</b> Клиент подписал по ссылке позже (вебхук ОКИ ДОКИ): цепочка Н останавливается, сразу уходит О1 с подписанным договором. Таймеры О считаются от момента подписи.</div>
-  </div>
+  <h2>Правила</h2>
+  <ul class="plain">
+    <li><b>Договор шлём всегда:</b> подписал — подписанный экземпляр (ПЭП + график); не подписал — персональный проект из CRM. Образец не шлём никогда.</li>
+    <li><b>Никогда голый файл:</b> вложение всегда с текстом (выжимка + следующий шаг).</li>
+    <li><b>Каденция:</b> не более 3 касаний в первые сутки; потолок дожима на подпись — 3 дня; дальше по регламенту дожима.</li>
+    <li><b>Статусы:</b> П1 → статус 7 (передача, анкета); ветка О → статус 5, частичка внесена → статус 6 «Частичка — добор»; Н без подписи на день 3 → дожим/пул.</li>
+    <li><b>Частичка от 1 000 ₽</b> — только в сообщениях и у эксперта; на странице оплаты её нет.</li>
+  </ul>
+  <div class="warn"><b>Комплаенс:</b> обещания только формулировками договора («не спишем — вернём», для РДГ «суд не утвердит план — вернём», п. 6 / 6.2). Отказ клиента («не пишите мне») — немедленный стоп всех цепочек, DNC без возврата.</div>
+
+  <h2>Merge-поля</h2>
+  <ul class="plain">
+    <li><span class="ph">{Имя}</span> · <span class="ph">{номер}</span> = Сделка|ID</li>
+    <li><span class="ph">{сумма}</span>, <span class="ph">{платёж}</span>, <span class="ph">{сумма_итого}</span>, <span class="ph">{мин_сумма}</span> — из движка/CRM</li>
+    <li><span class="ph">{ссылка_оплаты}</span> — платёжная ссылка движка (уже с суммой)</li>
+    <li><span class="ph">{ссылка_на_презентацию}</span> — персональная; <b>БФЛ или РДГ по типу сделки</b></li>
+    <li><span class="ph">{дата_брони}</span> = дата контакта + 3 дня</li>
+  </ul>
 
   <h2>Тексты сообщений</h2>
-  <p class="h2sub">Кнопка «Скопировать» отдаёт текст с merge-полями <span class="ph" style="font-size:12px">{как здесь}</span> — вставляется в Salebot как есть. Для РДГ строка гарантии во всех сообщениях: «суд не утвердит план — вернём деньги (п. 6.2)».</p>
+  <p class="note">Для РДГ во всех текстах строка гарантии заменяется на: «суд не утвердит план — вернём деньги (п. 6.2)».</p>
 
-  <div class="msggrp p">
-    <div class="gt">Сценарий П</div>
-    <div class="msg"><div class="mh"><b>П1</b><span class="when">сразу</span><span class="att">договор + чек</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, поздравляю — вы в работе! Во вложении ваш подписанный договор № {номер} (подпись СМС-кодом, ПЭП по 63-ФЗ, график — в приложении) и чек об оплате.
+  <div class="msg"><div class="mh"><b>П1</b><span class="mi">сразу · вложение: подписанный договор + чек</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, поздравляю — вы в работе! Во вложении ваш подписанный договор № {номер} (подпись СМС-кодом, ПЭП по 63-ФЗ, график — в приложении) и чек об оплате.
 
 Что происходит прямо сейчас:
 — в течение часа позвонит ваш юрист сопровождения;
@@ -193,11 +109,8 @@ td .code{font-weight:800}
 — звонки коллекторов переводите на нас.
 
 Я на связи в этом чате.</div></div>
-  </div>
 
-  <div class="msggrp o">
-    <div class="gt">Сценарий О</div>
-    <div class="msg"><div class="mh"><b>О1</b><span class="when">сразу</span><span class="att">подписанный договор</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, договор № {номер} подписан — ваш экземпляр во вложении. Осталось запустить работу: первый платёж {сумма} ₽ по графику.
+  <div class="msg"><div class="mh"><b>О1</b><span class="mi">сразу · вложение: подписанный договор</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, договор № {номер} подписан — ваш экземпляр во вложении. Осталось запустить работу: первый платёж {сумма} ₽ по графику.
 
 Оплата по ссылке через СБП — напрямую на счёт ДОНУЛЯ в Сбербанке, без комиссии, чек придёт сюда же:
 {ссылка_оплаты}
@@ -210,25 +123,25 @@ td .code{font-weight:800}
 Подарок — SIM с защитой от коллекторов — закрепляется за вами при любом платеже сегодня. Если всей суммы сейчас нет, внесите часть от 1 000 ₽: она пойдёт в зачёт, остаток по графику. Напишите мне — поменяю сумму в ссылке.
 
 Платёж защищён договором: не спишем — вернём деньги (п. 6).</div></div>
-    <div class="msg"><div class="mh"><b>О2</b><span class="when">+4 часа, если оплаты нет</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, напомню про запуск дела: договор подписан, ждём только первый платёж — {сумма} ₽.
+
+  <div class="msg"><div class="mh"><b>О2</b><span class="mi">+4 часа, если оплаты нет</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, напомню про запуск дела: договор подписан, ждём только первый платёж — {сумма} ₽.
 
 Ссылка действует: {ссылка_оплаты}
 
 Подарок-SIM держим за вами до конца дня (условие акции — любой платёж сегодня). Если удобнее начать с части — от 1 000 ₽, напишите, я поменяю сумму.</div></div>
-    <div class="msg"><div class="mh"><b>О3</b><span class="when">по тегу «денег нет»</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, чтобы запустить дело и сохранить условия, сегодня достаточно части — от 1 000 ₽, она полностью пойдёт в зачёт первого платежа.
+
+  <div class="msg"><div class="mh"><b>О3</b><span class="mi">по тегу «денег нет»</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, чтобы запустить дело и сохранить условия, сегодня достаточно части — от 1 000 ₽, она полностью пойдёт в зачёт первого платежа.
 
 Вот ссылка на {мин_сумма} ₽: {ссылка_оплаты}
 Остаток доберём по графику, 25-го числа. Чек придёт в чат, юрист позвонит в течение часа после платежа.</div></div>
-    <div class="msg"><div class="mh"><b>О4</b><span class="when">утро следующего дня</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, доброе утро! Дело по договору № {номер} готово к запуску — не хватает только первого платежа.
+
+  <div class="msg"><div class="mh"><b>О4</b><span class="mi">утро следующего дня</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, доброе утро! Дело по договору № {номер} готово к запуску — не хватает только первого платежа.
 
 {ссылка_оплаты}
 
 Вчерашний подарок-SIM я пока удержал(а) за вами. Если что-то смущает или неудобно платить по ссылке — просто ответьте здесь или наберите меня, разберём за минуту.</div></div>
-  </div>
 
-  <div class="msggrp n">
-    <div class="gt">Сценарий Н</div>
-    <div class="msg"><div class="mh"><b>Н1</b><span class="when">сразу</span><span class="att">персональный проект PDF</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, отправляю ваш договор — посмотрите спокойно, он ваш в любом случае. На первой странице всё главное крупно:
+  <div class="msg"><div class="mh"><b>Н1</b><span class="mi">сразу · вложение: персональный проект договора</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, отправляю ваш договор — посмотрите спокойно, он ваш в любом случае. На первой странице всё главное крупно:
 
 — услуги целиком {сумма_итого} ₽, платёж {платёж} ₽/мес без банка и процентов;
 — гарантия в договоре: не спишем — вернём деньги (п. 6);
@@ -238,75 +151,32 @@ td .code{font-weight:800}
 {ссылка_на_презентацию}
 
 Ваши условия и подарок-SIM я забронировал(а) до {дата_брони}. Появится вопрос по любому пункту — пишите сюда, отвечу по номеру пункта.</div></div>
-    <div class="msg"><div class="mh"><b>Н2</b><span class="when">по тегу «посоветуюсь»</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, конечно — договор как раз для этого приложил(а): покажите родным первую страницу, там все условия крупно, и раздел 6 — гарантия возврата.
+
+  <div class="msg"><div class="mh"><b>Н2</b><span class="mi">по тегу «посоветуюсь»</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, конечно — договор как раз для этого приложил(а): покажите родным первую страницу, там все условия крупно, и раздел 6 — гарантия возврата.
 
 Если у близких будут вопросы, давайте созвонимся втроём — так быстрее, чем пересказывать: 10 минут, отвечу на всё напрямую. Когда удобно сегодня?
 
 Условия и подарок держу за вами до {дата_брони}.</div></div>
-    <div class="msg"><div class="mh"><b>Н3</b><span class="when">+1 день, тишина</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, вчера отправлял(а) ваш договор — успели посмотреть?
+
+  <div class="msg"><div class="mh"><b>Н3</b><span class="mi">+1 день, тишина</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, вчера отправлял(а) ваш договор — успели посмотреть?
 
 Чаще всего спрашивают про два пункта: гарантию (п. 6 — не спишем, вернём деньги) и госплатежи (п. 5.1 — 50 000 ₽ отдельно, напрямую государству, это честно прописано). Если смущает что-то другое — напишите одним словом, разберу.
 
 Бронь условий действует до {дата_брони}: {ссылка_на_презентацию}</div></div>
-    <div class="msg"><div class="mh"><b>Н4</b><span class="when">день 3, финал брони</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, сегодня последний день брони ваших условий: {платёж} ₽/мес и подарок-SIM — до конца дня, дальше пересчёт по общим правилам.
+
+  <div class="msg"><div class="mh"><b>Н4</b><span class="mi">день 3, финал брони</span><button onclick="copyMsg(this)">Скопировать</button></div><div class="mb">{Имя}, сегодня последний день брони ваших условий: {платёж} ₽/мес и подарок-SIM — до конца дня, дальше пересчёт по общим правилам.
 
 Подписать — 2 минуты кодом из СМС: {ссылка_на_презентацию}
 
 Если решили не продолжать — просто напишите, я закрою бронь и больше не побеспокою.</div></div>
-  </div>
 
-  <h2>Зашивка в amoCRM / Salebot</h2>
-  <div class="tblwrap">
-    <table>
-      <thead><tr><th>#</th><th>Триггер</th><th>Задержка</th><th>Сообщение</th><th>Вложение</th><th>Стоп-условие</th></tr></thead>
-      <tbody>
-        <tr class="gp"><td>1</td><td>Вебхук ОКИ ДОКИ «подписан» + платёж получен</td><td>сразу</td><td class="code">П1</td><td>подписанный PDF + чек</td><td>—</td></tr>
-        <tr class="go"><td>2</td><td>Вебхук «подписан», платежа нет</td><td>сразу</td><td class="code">О1</td><td>подписанный PDF</td><td>оплата</td></tr>
-        <tr class="go"><td>3</td><td>оплаты всё ещё нет</td><td>+4 ч</td><td class="code">О2</td><td>нет</td><td>оплата / тег «денег нет»</td></tr>
-        <tr class="go"><td>4</td><td>Тег «денег нет» (ставит эксперт)</td><td>сразу</td><td class="code">О3</td><td>нет</td><td>оплата</td></tr>
-        <tr class="go"><td>5</td><td>оплаты всё ещё нет</td><td>утро +1 день</td><td class="code">О4</td><td>нет</td><td>оплата</td></tr>
-        <tr class="gn"><td>6</td><td>Эксперт закрыл презентацию без подписи (поле/статус)</td><td>сразу</td><td class="code">Н1</td><td>проект PDF из CRM</td><td>подпись</td></tr>
-        <tr class="gn"><td>7</td><td>Тег «посоветуюсь»</td><td>сразу</td><td class="code">Н2</td><td>нет</td><td>подпись</td></tr>
-        <tr class="gn"><td>8</td><td>тишина</td><td>+1 день</td><td class="code">Н3</td><td>нет</td><td>подпись</td></tr>
-        <tr class="gn"><td>9</td><td>тишина</td><td>день 3</td><td class="code">Н4</td><td>нет</td><td>подпись / отказ</td></tr>
-        <tr class="gn"><td>10</td><td>Вебхук «подписан» из ветки Н</td><td>сразу</td><td>стоп Н, запуск <span class="code">О1</span></td><td>подписанный PDF</td><td>—</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="grid2" style="margin-top:12px">
-    <div class="panel">
-      <h3>Merge-поля</h3>
-      <ul>
-        <li><span class="ph">{Имя}</span> · <span class="ph">{номер}</span> <b>= Сделка|ID</b></li>
-        <li><span class="ph">{сумма}</span>, <span class="ph">{платёж}</span>, <span class="ph">{сумма_итого}</span>, <span class="ph">{мин_сумма}</span> — из движка</li>
-        <li><span class="ph">{ссылка_оплаты}</span> — платёжная ссылка движка (с суммой)</li>
-        <li><span class="ph">{ссылка_на_презентацию}</span> — персональная, <b>БФЛ или РДГ по типу сделки</b></li>
-        <li><span class="ph">{дата_брони}</span> = дата контакта + 3 дня</li>
-      </ul>
-    </div>
-    <div class="panel">
-      <h3>Статусы воронки</h3>
-      <ul>
-        <li>П1 отправлено: <b>статус 7</b> — передача, анкета обязательных полей</li>
-        <li>Ветка О: <b>статус 5</b>; частичка внесена: <b>статус 6 «Частичка, добор»</b></li>
-        <li>Ветка Н: статус не меняется; день 3 без подписи — дожим / пул</li>
-        <li>Ответ клиента в чате: <b>уведомление эксперту, SLA 5 минут</b></li>
-      </ul>
-    </div>
-  </div>
-
-  <div class="warn"><b>Комплаенс.</b> «Не спишем — вернём» и «суд не утвердит план — вернём» — формулировки договора (п. 6 / п. 6.2), другие обещания запрещены. Отказ клиента («не пишите мне») — немедленный стоп всех цепочек, DNC без возврата.</div>
-
-</main>
-
-<footer class="foot">Внутренний регламент ДОНУЛЯ · источник: docs/contract-messaging-flow-2026-07.md · страницы клиента: client-presentation-v2 (БФЛ), client-presentation-rdg (РДГ)</footer>
+  <p class="note" style="margin-top:16px">Источник: docs/contract-messaging-flow-2026-07.md · клиентские страницы: client-presentation-v2 (БФЛ), client-presentation-rdg (РДГ)</p>
+</div>
 
 <script>
 function copyMsg(btn){
   const body=btn.closest('.msg').querySelector('.mb');
-  const text=body.innerText;
-  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(text):Promise.reject()).then(
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(body.innerText):Promise.reject()).then(
     ()=>{btn.textContent='Скопировано ✓';},
     ()=>{const r=document.createRange();r.selectNodeContents(body);const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Выделено — Ctrl+C';}
   );
