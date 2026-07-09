@@ -345,8 +345,8 @@ details.spoiler .dp b{color:var(--ink)}
 
         <div class="sec stg">
           <div class="st">Доплата за доктора</div>
-          <div class="delta"><span class="dv num">+1 438 ₽</span><small>в месяц</small></div>
-          <div class="sb num">Платёж 13 500 → 14 938 ₽/мес · срок +2 месяца · доктор 50 000 ₽ в рассрочку в тот же договор</div>
+          <div class="delta"><span class="dv num" id="kdDelta">+1 438 ₽</span><small id="kdDeltaCap">в месяц</small></div>
+          <div class="sb num" id="kdSub">Платёж 13 500 → 14 938 ₽/мес · срок +2 месяца · доктор 50 000 ₽ в рассрочку в тот же договор</div>
         </div>
 
         <div class="sec stg">
@@ -559,9 +559,22 @@ function recalc(){
   document.getElementById('docFirst').textContent=fmt(first)+' ₽';
   document.getElementById('payAmount').innerHTML=`${fmt(first)} <small>₽</small>`;
   document.getElementById('payNote').textContent=(vip?'оплата по договору':'первый платёж по графику')+' · договор № ДН-2607-1418';
+  renderKdDelta();
 }
 function setTariff(t){tariff=t;document.getElementById('trfR').classList.toggle('sel',t==='rassrochka');document.getElementById('trfV').classList.toggle('sel',t==='vip');recalc();}
 function setKd(v){kd=v;document.getElementById('kdY').classList.toggle('sel',v);document.getElementById('kdN').classList.toggle('sel',!v);recalc();}
+function renderKdDelta(){
+  const mBase=Math.round(RASS_TOTAL/RASS_M), mKd=Math.round((RASS_TOTAL+KD_PRICE)/(RASS_M+KD_M));
+  if(kd){
+    document.getElementById('kdDelta').textContent='+'+fmt(mKd-mBase)+' ₽';
+    document.getElementById('kdDeltaCap').textContent='в месяц';
+    document.getElementById('kdSub').textContent='Платёж '+fmt(mBase)+' → '+fmt(mKd)+' ₽/мес · срок +2 месяца · доктор '+fmt(KD_PRICE)+' ₽ в рассрочку в тот же договор';
+  }else{
+    document.getElementById('kdDelta').textContent='0 ₽';
+    document.getElementById('kdDeltaCap').textContent='доктор не выбран';
+    document.getElementById('kdSub').textContent='Платёж остаётся '+fmt(mBase)+' ₽/мес · доктора можно добавить в любой момент до подписания договора';
+  }
+}
 function toggleSched(){const f=document.getElementById('schedFull'),b=document.getElementById('schedBtn');const open=f.style.display==='none';f.style.display=open?'':'none';b.textContent=open?'Скрыть график':'Показать график по месяцам';}
 function toggleSchedKd(){const f=document.getElementById('schedFullKd'),b=document.getElementById('schedBtnKd');const open=f.style.display==='none';f.style.display=open?'':'none';b.textContent=open?'Скрыть график':'Показать график с доктором';}
 
