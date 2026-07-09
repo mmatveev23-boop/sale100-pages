@@ -471,7 +471,8 @@ h1 .hl{color:var(--green)}
           </div>
         </div>
 
-        <div class="notice stg"><b>Почему без паспорта — законно.</b> Подпись СМС-кодом через сервис ОКИ ДОКИ — простая электронная подпись по 63-ФЗ, юридически заменяет собственноручную. Паспорт понадобится позже, для суда, — по фото в чат.</div>
+        <div class="notice stg" id="smsNote"><b>Почему без паспорта — законно.</b> Подпись СМС-кодом через сервис ОКИ ДОКИ — простая электронная подпись по 63-ФЗ, юридически заменяет собственноручную. Паспорт понадобится позже, для суда, — по фото в чат.</div>
+        <div class="notice stg" id="passNote" style="display:none">Паспортные данные попадут в реквизиты договора (раздел 13). Подпись — всё равно кодом из СМС на ваш телефон.</div>
       </section>
 
       <!-- 5 · ДОГОВОР -->
@@ -656,9 +657,12 @@ function setSim(v){sim=v;document.getElementById('simY').classList.toggle('sel',
 
 /* ============ ОФОРМЛЕНИЕ ============ */
 function setMode(m){
-  document.getElementById('modeSms').classList.toggle('sel',m==='sms');
-  document.getElementById('modePass').classList.toggle('sel',m==='pass');
-  document.getElementById('passFields').style.display=m==='pass'?'':'none';
+  const pass=m==='pass';
+  document.getElementById('modeSms').classList.toggle('sel',!pass);
+  document.getElementById('modePass').classList.toggle('sel',pass);
+  document.getElementById('passFields').style.display=pass?'':'none';
+  document.getElementById('smsNote').style.display=pass?'none':'';
+  document.getElementById('passNote').style.display=pass?'':'none';
 }
 document.getElementById('fio').addEventListener('input',e=>{document.getElementById('docFio').textContent=e.target.value||'—';});
 
