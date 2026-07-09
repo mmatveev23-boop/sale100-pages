@@ -169,6 +169,11 @@ h1 .hl{color:var(--green)}
 .attach .at small{display:block;margin-top:1px;font-size:11.5px;color:var(--faint)}
 .attach .ad{flex:none;display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;color:var(--green-ink);text-decoration:none}
 
+/* декоративная печать Роспатента (стартовый экран) */
+.rospatent{display:flex;justify-content:flex-end;margin:-26px 10px 0 0;pointer-events:none;user-select:none}
+.rospatent svg{width:124px;height:124px;color:#3A46A8;opacity:.82;transform:rotate(-11deg);mix-blend-mode:multiply}
+@media (max-width:480px){ .rospatent{margin-top:-12px} .rospatent svg{width:110px;height:110px} }
+
 /* предпросмотр договора */
 .cmodal{position:fixed;inset:0;z-index:40;background:#EDE9E0;display:flex;flex-direction:column}
 .cmodal[hidden]{display:none}
@@ -316,6 +321,23 @@ h1 .hl{color:var(--green)}
           <div class="cl"><svg width="15" height="15" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg><div>Светлана объясняет каждый экран, вы задаёте вопросы</div></div>
           <div class="cl"><svg width="15" height="15" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg><div>Все суммы и условия — те, что войдут в договор</div></div>
           <div class="cl"><svg width="15" height="15" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg><div>Ничего не подписывается и не списывается без вашего согласия</div></div>
+        </div>
+
+        <!-- декоративная печать: знак ДОНУЛЯ зарегистрирован в Роспатенте (данные образца) -->
+        <div class="rospatent stg" aria-hidden="true">
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+            <defs><path id="rpArc" d="M 29,100 A 71,71 0 1 1 171,100 A 71,71 0 1 1 29,100"/></defs>
+            <circle cx="100" cy="100" r="95" fill="none" stroke="currentColor" stroke-width="2.4"/>
+            <circle cx="100" cy="100" r="88" fill="none" stroke="currentColor" stroke-width="1"/>
+            <circle cx="100" cy="100" r="56" fill="none" stroke="currentColor" stroke-width="1"/>
+            <text font-size="9.5" font-weight="600" letter-spacing=".8"><textPath href="#rpArc" textLength="440" lengthAdjust="spacingAndGlyphs">РОСПАТЕНТ · ФЕДЕРАЛЬНАЯ СЛУЖБА ПО ИНТЕЛЛЕКТУАЛЬНОЙ СОБСТВЕННОСТИ ·</textPath></text>
+            <g text-anchor="middle">
+              <text x="100" y="94" font-size="22" font-weight="800" letter-spacing=".5">ДОНУЛЯ<tspan font-size="10" dy="-8">®</tspan></text>
+              <text x="100" y="113" font-size="9" font-weight="600" letter-spacing="1.1">ТОВАРНЫЙ ЗНАК</text>
+              <text x="100" y="125" font-size="9" font-weight="600" letter-spacing="1.1">ЗАРЕГИСТРИРОВАН</text>
+              <text x="100" y="140" font-size="8" font-weight="500">свидетельство № 894512</text>
+            </g>
+          </svg>
         </div>
       </section>
 
