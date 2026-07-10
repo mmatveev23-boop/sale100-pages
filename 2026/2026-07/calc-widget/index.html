@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Калькулятор клиента · виджет amo (прототип) · ДОНУЛЯ</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Прототип виджета менеджера для карточки сделки amo. Утилитарный, плотный, бренд-палитра.
+   Математика РДГ — 1:1 по docs/rdg-formula-spec.md. БФЛ — та же кредитная база + экономика услуг. */
+:root{
+  --paper:#FAF7F2; --card:#fff; --ink:#1C1A16; --muted:#68625A; --faint:#9B948A;
+  --pine:#0B3B2E; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
+  --gold:#C99A33; --gold-soft:#FBF3DC; --gold-ink:#8A6212; --alert:#A8442E; --alert-soft:#FAEDE8;
+  --line:rgba(28,26,22,.13); --line-2:rgba(28,26,22,.2);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:13.5px;line-height:1.45}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:12.5px;margin-top:3px}
+
+/* переключатель продукта */
+.prodsw{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#EFEBE3;border-radius:12px;padding:4px;margin:14px 0 16px;max-width:420px}
+.prodsw button{border:none;background:none;border-radius:9px;padding:9px 8px;font-family:inherit;font-weight:700;font-size:13.5px;color:var(--muted);cursor:pointer}
+.prodsw button small{display:block;font-weight:500;font-size:10.5px;color:var(--faint)}
+.prodsw button.on{background:var(--pine);color:#fff}
+.prodsw button.on small{color:rgba(255,255,255,.65)}
+
+h2{font-size:14.5px;font-weight:800;margin:18px 0 8px}
+.hint{font-size:11.5px;color:var(--faint);margin-top:-6px;margin-bottom:8px}
+
+/* кредиты */
+.credits{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.crow{display:grid;grid-template-columns:110px 1fr 76px 74px 74px 1fr 130px 30px;gap:8px;align-items:end;padding:10px 12px}
+.crow + .crow{border-top:1px solid var(--line)}
+.crow label{display:block;font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--faint);margin-bottom:3px}
+.crow input,.crow select{width:100%;border:1px solid var(--line-2);border-radius:8px;background:#fff;padding:7px 8px;font-family:inherit;font-size:13px;color:var(--ink)}
+.crow input:focus,.crow select:focus{outline:none;border-color:var(--green)}
+.crow .del{border:none;background:none;color:var(--faint);font-size:16px;cursor:pointer;padding:6px 2px}
+.crow .del:hover{color:var(--alert)}
+.addrow{display:block;width:100%;border:none;border-top:1px dashed var(--line-2);background:#FDFBF7;padding:9px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--green-ink);cursor:pointer}
+
+/* параметры */
+.params{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.params .p label{display:block;font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--faint);margin-bottom:3px}
+.params .p input{width:100%;border:1px solid var(--line-2);border-radius:8px;padding:7px 8px;font-family:inherit;font-size:13px}
+.params .p input:focus{outline:none;border-color:var(--green)}
+.seg{display:flex;gap:4px;background:#EFEBE3;border-radius:9px;padding:3px}
+.seg button{flex:1;border:none;background:none;border-radius:7px;padding:6px;font-family:inherit;font-weight:700;font-size:12.5px;color:var(--muted);cursor:pointer}
+.seg button.on{background:#fff;color:var(--ink)}
+.chk{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);padding-top:16px;cursor:pointer}
+.chk input{width:15px;height:15px;accent-color:var(--green)}
+
+/* итоги */
+.out{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+.kpi .l{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+.kpi .v{margin-top:3px;font-size:19px;font-weight:800;letter-spacing:-.01em}
+.kpi .s{font-size:11px;color:var(--muted);margin-top:1px}
+.kpi.hero{background:var(--pine);border-color:var(--pine)}
+.kpi.hero .l{color:rgba(255,255,255,.6)} .kpi.hero .v{color:#fff} .kpi.hero .s{color:rgba(255,255,255,.65)}
+.kpi.good .v{color:var(--green-ink)}
+.elig{margin-top:10px;border-radius:12px;padding:11px 14px;font-size:13px;font-weight:600}
+.elig.ok{background:var(--green-soft);color:var(--green-ink)}
+.elig.no{background:var(--alert-soft);color:var(--alert)}
+.elig.warn{background:var(--gold-soft);color:var(--gold-ink)}
+.elig small{display:block;font-weight:400;margin-top:2px}
+
+/* выходные данные */
+.export{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.export .eh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);background:#FDFBF7}
+.export .eh b{font-size:13px}
+.export .eh button{margin-left:auto;border:1px solid var(--line-2);background:#fff;border-radius:7px;padding:5px 11px;font-family:inherit;font-size:12px;font-weight:700;color:var(--green-ink);cursor:pointer}
+.export table{width:100%;border-collapse:collapse;font-size:12.5px}
+.export td{padding:7px 14px;border-top:1px solid var(--line)}
+.export tr:first-child td{border-top:none}
+.export td:first-child{color:var(--muted);width:46%}
+.export td:last-child{font-weight:700;text-align:right}
+.export .dest{font-size:10.5px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--faint);padding:8px 14px 2px}
+.note{margin-top:12px;font-size:11.5px;color:var(--faint)}
+
+@media (max-width:820px){
+  .crow{grid-template-columns:1fr 1fr 1fr;row-gap:8px}
+  .params{grid-template-columns:1fr 1fr}
+  .out{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Калькулятор клиента <span style="color:var(--faint);font-weight:600">· виджет для карточки сделки amo · прототип</span></h1>
+  <p class="sub">Менеджер вносит кредиты (или они приходят из кредитной истории), выбирает продукт — виджет считает цифры клиента, пишет их в поля сделки, оттуда они попадают в презентацию и договор.</p>
+
+  <div class="prodsw" id="prodsw">
+    <button class="on" data-prod="rdg">РДГ<small>реструктуризация: план 36/60 мес</small></button>
+    <button data-prod="bfl">БФЛ<small>списание: переплата vs процедура</small></button>
+  </div>
+
+  <h2>Кредиты клиента</h2>
+  <p class="hint">Платёж: если известен — вводится руками и имеет приоритет. Сумма: остаток или первоначальная (для карт и МФО — текущий долг). Дата — для лимита МФО (×2.3 до 01.04.2026, дальше ×2).</p>
+  <div class="credits" id="credits"></div>
+  <button class="addrow" onclick="addCredit()">+ добавить кредит</button>
+
+  <div id="rdgParams">
+    <h2>Параметры РДГ</h2>
+    <div class="params">
+      <div class="p"><label>Срок плана</label><div class="seg" id="termSeg"><button class="on" data-t="36">36 мес</button><button data-t="60">60 мес</button></div></div>
+      <label class="chk"><input type="checkbox" id="p_fu" checked>ФУ 7%</label>
+      <label class="chk"><input type="checkbox" id="p_load" checked>сравнение по текущей нагрузке</label>
+      <div></div>
+      <div class="p"><label>Доход, ₽/мес</label><input id="p_income" type="number" value="80000"></div>
+      <div class="p"><label>ПМ клиента, ₽</label><input id="p_self" type="number" value="19329"></div>
+      <div class="p"><label>Детей</label><input id="p_kids" type="number" value="1" min="0"></div>
+      <div class="p"><label>ПМ ребёнка, ₽</label><input id="p_child" type="number" value="17201"></div>
+    </div>
+  </div>
+
+  <h2 id="outTitle">Расчёт РДГ</h2>
+  <div class="out" id="out"></div>
+  <div class="elig" id="elig" style="display:none"></div>
+
+  <div class="export">
+    <div class="eh"><b>Что уходит из виджета</b><span style="font-size:11.5px;color:var(--faint)">поля сделки amo → презентация и договор</span><button onclick="copyJson(this)">Скопировать JSON</button></div>
+    <div id="exportBody"></div>
+  </div>
+
+  <p class="note">Расчёт предварительный, для оценки сценария (п. 10.6 спеки). Математика РДГ — по docs/rdg-formula-spec.md. Стоимость услуг в договоре — тариф «Выгодный» (189 000 / VIP 169 000 / 14×13 500), от расчёта не зависит.</p>
+</div>
+
+<script>
+'use strict';
+/* ===== математика по docs/rdg-formula-spec.md ===== */
+function annuityPayment(principal, monthlyRate, months){
+  if(principal<=0||months<=0) return 0;
+  if(monthlyRate<=0) return principal/months;
+  const factor=Math.pow(1+monthlyRate,months);
+  return principal*monthlyRate*factor/(factor-1);
+}
+function loanBalance(principal, monthlyRate, payment, paidMonths){
+  if(principal<=0) return 0;
+  if(monthlyRate<=0) return Math.max(0, principal-payment*paidMonths);
+  const factor=Math.pow(1+monthlyRate,paidMonths);
+  return Math.max(0, principal*factor-payment*((factor-1)/monthlyRate));
+}
+function projectRevolving(balance, monthlyRate, payment, maxMonths){
+  let totalPaid=0,current=balance;
+  for(let i=0;i<maxMonths&&current>1;i++){
+    const interest=current*monthlyRate;
+    const actualPayment=Math.min(payment,current+interest);
+    current=current+interest-actualPayment;
+    totalPaid+=actualPayment;
+  }
+  return totalPaid;
+}
+function mfoMultiplier(openedAt){
+  if(!openedAt||openedAt<new Date('2026-04-01')) return 2.3;
+  return 2;
+}
+/* расчёт одного кредита → {balance, currentPayment, remainingMonths, remainingTotal} */
+function calcCredit(c){
+  const monthlyRate=c.rate/100/12;
+  const remainingMonths=Math.max(0,c.months-c.paid);
+  let balance, currentPayment;
+  if(c.product==='loan'){
+    if(c.balanceMode==='current'){
+      balance=c.amount;
+      currentPayment=annuityPayment(c.amount,monthlyRate,remainingMonths);
+    }else{
+      const originalPayment=annuityPayment(c.amount,monthlyRate,c.months);
+      balance=loanBalance(c.amount,monthlyRate,originalPayment,c.paid);
+      currentPayment=annuityPayment(balance,monthlyRate,remainingMonths);
+    }
+  }else{
+    balance=c.amount; /* карта и МФО: amount = текущий долг */
+    if(c.product==='card'){
+      currentPayment=Math.max(annuityPayment(c.amount,monthlyRate,remainingMonths), c.amount*0.07);
+    }else{
+      currentPayment=(c.amount*mfoMultiplier(c.openedAt))/Math.max(1,remainingMonths);
+    }
+  }
+  if(c.payment>0) currentPayment=c.payment; /* ручной платёж важнее */
+  let remainingTotal;
+  if(c.product==='loan'){
+    remainingTotal=currentPayment*remainingMonths;
+    if(c.balanceMode==='current') remainingTotal=Math.max(remainingTotal, c.amount);
+  }else if(c.product==='card'){
+    remainingTotal=projectRevolving(balance,monthlyRate,currentPayment,remainingMonths);
+  }else{
+    remainingTotal=Math.min(projectRevolving(c.amount,monthlyRate,currentPayment,remainingMonths), c.amount*mfoMultiplier(c.openedAt));
+  }
+  return {balance,currentPayment,remainingMonths,remainingTotal};
+}
+/* итог по всем кредитам */
+function calcAll(credits, opts){
+  const rows=credits.map(calcCredit);
+  const debt=rows.reduce((s,r)=>s+r.balance,0);
+  const currentMonthly=rows.reduce((s,r)=>s+r.currentPayment,0);
+  const noRdgDetailed=rows.reduce((s,r)=>s+r.remainingTotal,0);
+  const noRdgCurrentLoad=rows.reduce((s,r)=>s+Math.max(r.currentPayment*Math.min(r.remainingMonths,opts.rdgTerm), r.balance),0);
+  const noRdgTotal=opts.useCurrentLoad?noRdgCurrentLoad:noRdgDetailed;
+  const fuTotal=opts.includeFu?debt*0.07:0;
+  const rdgTotal=debt+fuTotal;
+  const rdgMonthly=rdgTotal/opts.rdgTerm;
+  const benefit=noRdgTotal-rdgTotal;
+  const monthlyRelief=currentMonthly-rdgMonthly;
+  const familyMinimum=opts.livingSelf+opts.childrenCount*opts.livingChild;
+  const freeIncome=opts.income-familyMinimum;
+  const threeMonthNeed=debt/3;
+  let eligibilityStatus,eligibilityReason;
+  if(freeIncome>=threeMonthNeed){eligibilityStatus='Не подходит';eligibilityReason='Клиент может закрыть долг за 3 месяца';}
+  else if(freeIncome<rdgMonthly){eligibilityStatus='Не хватает';eligibilityReason='После прожиточного минимума не хватает на платёж РДГ';}
+  else{eligibilityStatus='Подходит';eligibilityReason='3-месячный фильтр пройден, дохода хватает на платёж РДГ';}
+  return {debt,currentMonthly,noRdgTotal,rdgTotal,rdgMonthly,benefit,monthlyRelief,familyMinimum,freeIncome,eligibilityStatus,eligibilityReason,fuTotal,noRdgDetailed,noRdgCurrentLoad};
+}
+
+/* ===== UI ===== */
+const fmt=n=>Math.round(n).toLocaleString('ru-RU');
+let prod='rdg', rdgTerm=36;
+let credits=[
+  {product:'loan',amount:850000,rate:24,months:60,paid:14,payment:0,balanceMode:'current',openedAt:null},
+  {product:'card',amount:240000,rate:36,months:36,paid:0,payment:0,balanceMode:'current',openedAt:null},
+  {product:'mfo',amount:60000,rate:180,months:12,paid:2,payment:0,balanceMode:'current',openedAt:'2026-05-15'},
+];
+function addCredit(){credits.push({product:'loan',amount:300000,rate:22,months:48,paid:6,payment:0,balanceMode:'current',openedAt:null});renderCredits();recalc();}
+function delCredit(i){credits.splice(i,1);renderCredits();recalc();}
+function upd(i,k,v){
+  credits[i][k]=(k==='product'||k==='balanceMode'||k==='openedAt')?(v||null):(parseFloat(v)||0);
+  if(k==='product'){renderCredits();}
+  recalc();
+}
+function renderCredits(){
+  document.getElementById('credits').innerHTML=credits.map((c,i)=>`
+  <div class="crow">
+    <div><label>Тип</label><select onchange="upd(${i},'product',this.value)">
+      <option value="loan"${c.product==='loan'?' selected':''}>Кредит</option>
+      <option value="card"${c.product==='card'?' selected':''}>Кредитка</option>
+      <option value="mfo"${c.product==='mfo'?' selected':''}>МФО</option></select></div>
+    <div><label>Сумма, ₽</label><input type="number" value="${c.amount}" oninput="upd(${i},'amount',this.value)"></div>
+    <div><label>Ставка %</label><input type="number" value="${c.rate}" oninput="upd(${i},'rate',this.value)"></div>
+    <div><label>Срок, мес</label><input type="number" value="${c.months}" oninput="upd(${i},'months',this.value)"></div>
+    <div><label>Прошло</label><input type="number" value="${c.paid}" oninput="upd(${i},'paid',this.value)"></div>
+    <div><label>Платёж ₽ (опц.)</label><input type="number" value="${c.payment||''}" placeholder="авто" oninput="upd(${i},'payment',this.value)"></div>
+    ${c.product==='loan'
+      ?`<div><label>Сумма — это</label><select onchange="upd(${i},'balanceMode',this.value)"><option value="current"${c.balanceMode==='current'?' selected':''}>остаток</option><option value="original"${c.balanceMode==='original'?' selected':''}>первоначальная</option></select></div>`
+      :c.product==='mfo'
+      ?`<div><label>Открыт (для лимита)</label><input type="date" value="${c.openedAt||''}" onchange="upd(${i},'openedAt',this.value)"></div>`
+      :`<div></div>`}
+    <button class="del" onclick="delCredit(${i})" aria-label="Удалить">×</button>
+  </div>`).join('');
+}
+function creditObjects(){
+  return credits.map(c=>({...c, openedAt:c.openedAt?new Date(c.openedAt):null}));
+}
+let lastExport={};
+function recalc(){
+  const opts={
+    rdgTerm, includeFu:document.getElementById('p_fu').checked,
+    useCurrentLoad:document.getElementById('p_load').checked,
+    income:parseFloat(document.getElementById('p_income').value)||0,
+    livingSelf:parseFloat(document.getElementById('p_self').value)||0,
+    childrenCount:parseFloat(document.getElementById('p_kids').value)||0,
+    livingChild:parseFloat(document.getElementById('p_child').value)||0,
+  };
+  const r=calcAll(creditObjects(),opts);
+  const out=document.getElementById('out'), elig=document.getElementById('elig');
+  if(prod==='rdg'){
+    document.getElementById('outTitle').textContent='Расчёт РДГ';
+    document.getElementById('rdgParams').style.display='';
+    out.innerHTML=`
+      <div class="kpi"><div class="l">Общий долг</div><div class="v num">${fmt(r.debt)} ₽</div><div class="s num">платит сейчас ${fmt(r.currentMonthly)} ₽/мес</div></div>
+      <div class="kpi"><div class="l">Без РДГ заплатит</div><div class="v num">${fmt(r.noRdgTotal)} ₽</div><div class="s">${opts.useCurrentLoad?'по текущей нагрузке':'детальный расчёт'}</div></div>
+      <div class="kpi hero"><div class="l">План РДГ · ${rdgTerm} мес</div><div class="v num">${fmt(r.rdgMonthly)} ₽/мес</div><div class="s num">итого ${fmt(r.rdgTotal)} ₽${opts.includeFu?' (с ФУ 7%: '+fmt(r.fuTotal)+' ₽)':''}</div></div>
+      <div class="kpi good"><div class="l">Выгода</div><div class="v num">${fmt(r.benefit)} ₽</div><div class="s num">платёж легче на ${fmt(r.monthlyRelief)} ₽/мес</div></div>`;
+    elig.style.display='';
+    elig.className='elig '+(r.eligibilityStatus==='Подходит'?'ok':r.eligibilityStatus==='Не хватает'?'warn':'no');
+    elig.innerHTML=`${r.eligibilityStatus==='Подходит'?'✓':'!'} ${r.eligibilityStatus} под РДГ<small>${r.eligibilityReason}. ПМ семьи ${fmt(r.familyMinimum)} ₽, свободный доход ${fmt(r.freeIncome)} ₽, платёж плана ${fmt(r.rdgMonthly)} ₽.</small>`;
+    lastExport={product:'РДГ', debt:Math.round(r.debt), currentMonthly:Math.round(r.currentMonthly),
+      noRdgTotal:Math.round(r.noRdgTotal), rdgTerm, rdgTotal:Math.round(r.rdgTotal),
+      rdgMonthly:Math.round(r.rdgMonthly), benefit:Math.round(r.benefit),
+      monthlyRelief:Math.round(r.monthlyRelief), eligibility:r.eligibilityStatus};
+    renderExport([
+      ['В сделку amo (поля)',[
+        ['Общий долг (Сделка|Сумма долга)', fmt(r.debt)+' ₽'],
+        ['Текущая нагрузка, ₽/мес', fmt(r.currentMonthly)+' ₽'],
+        ['Срок плана РДГ', rdgTerm+' мес'],
+        ['Платёж по плану РДГ', fmt(r.rdgMonthly)+' ₽/мес'],
+        ['Итого по плану (долг + ФУ)', fmt(r.rdgTotal)+' ₽'],
+        ['Выгода против «без РДГ»', fmt(r.benefit)+' ₽'],
+        ['Квалификация', r.eligibilityStatus]]],
+      ['В презентацию (шаг 1, «ваши условия»)',[
+        ['«Урегулируем ваш долг N законно»', fmt(r.debt)+' ₽'],
+        ['«Платёж по плану вместо текущего»', fmt(r.rdgMonthly)+' ₽ вместо '+fmt(r.currentMonthly)+' ₽'],
+        ['«Выгода» / «легче на»', fmt(r.benefit)+' ₽ / '+fmt(r.monthlyRelief)+' ₽ в мес']]],
+      ['В договор (приложение, merge-поля)',[
+        ['Сумма задолженности', fmt(r.debt)+' ₽'],
+        ['Срок плана реструктуризации', rdgTerm+' мес'],
+        ['Расчётный платёж по плану', fmt(r.rdgMonthly)+' ₽/мес'],
+        ['Услуги (тариф «Выгодный», константа)', '189 000 ₽ · 14 × 13 500 ₽']]]
+    ]);
+  }else{
+    document.getElementById('outTitle').textContent='Расчёт БФЛ';
+    document.getElementById('rdgParams').style.display='none';
+    const interestM=creditObjects().reduce((s,c)=>{const cc=calcCredit(c);return s+cc.balance*(c.rate/100/12);},0);
+    const SERVICES=189000, GOV=50000, PROC_M=14;
+    const bflCost=SERVICES+GOV;
+    const bflBenefit=r.noRdgTotal-bflCost;
+    out.innerHTML=`
+      <div class="kpi"><div class="l">Общий долг</div><div class="v num">${fmt(r.debt)} ₽</div><div class="s num">платит сейчас ${fmt(r.currentMonthly)} ₽/мес</div></div>
+      <div class="kpi"><div class="l">Проценты сжирают</div><div class="v num">${fmt(interestM)} ₽/мес</div><div class="s num">${fmt(interestM*12)} ₽ в год — долг почти не двигается</div></div>
+      <div class="kpi hero"><div class="l">Списание за ~${PROC_M} мес</div><div class="v num">13 500 ₽/мес</div><div class="s num">услуги ${fmt(SERVICES)} ₽ + госплатежи ${fmt(GOV)} ₽</div></div>
+      <div class="kpi good"><div class="l">Выгода</div><div class="v num">${fmt(bflBenefit)} ₽</div><div class="s num">вместо ${fmt(r.noRdgTotal)} ₽ выплат — ${fmt(bflCost)} ₽ и долг списан</div></div>`;
+    elig.style.display='none';
+    lastExport={product:'БФЛ', debt:Math.round(r.debt), currentMonthly:Math.round(r.currentMonthly),
+      interestMonthly:Math.round(interestM), noProcTotal:Math.round(r.noRdgTotal),
+      procCost:bflCost, benefit:Math.round(bflBenefit)};
+    renderExport([
+      ['В сделку amo (поля)',[
+        ['Общий долг (Сделка|Сумма долга)', fmt(r.debt)+' ₽'],
+        ['Текущая нагрузка, ₽/мес', fmt(r.currentMonthly)+' ₽'],
+        ['Проценты, ₽/мес', fmt(interestM)+' ₽'],
+        ['Без процедуры заплатит', fmt(r.noRdgTotal)+' ₽'],
+        ['Выгода с процедурой', fmt(bflBenefit)+' ₽']]],
+      ['В презентацию (шаг 1)',[
+        ['«Спишем ваш долг N законно»', fmt(r.debt)+' ₽'],
+        ['«Проценты съедают»', fmt(interestM)+' ₽ в месяц'],
+        ['«Выгода»', fmt(bflBenefit)+' ₽']]],
+      ['В договор (merge-поля)',[
+        ['Сумма задолженности', fmt(r.debt)+' ₽'],
+        ['Услуги (тариф «Выгодный», константа)', '189 000 ₽ · 14 × 13 500 ₽'],
+        ['Госплатежи (п. 5.1)', '50 000 ₽ отдельно']]]
+    ]);
+  }
+}
+function renderExport(groups){
+  document.getElementById('exportBody').innerHTML=groups.map(([dest,rows])=>
+    `<div class="dest">${dest}</div><table>`+rows.map(([k,v])=>`<tr><td>${k}</td><td class="num">${v}</td></tr>`).join('')+`</table>`
+  ).join('');
+}
+function copyJson(btn){
+  const text=JSON.stringify(lastExport,null,2);
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(text):Promise.reject()).then(
+    ()=>{btn.textContent='Скопировано ✓';},()=>{btn.textContent=text.slice(0,20)+'…';});
+  setTimeout(()=>{btn.textContent='Скопировать JSON';},2000);
+}
+/* переключатели */
+document.querySelectorAll('#prodsw button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#prodsw button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); prod=b.dataset.prod; recalc();
+}));
+document.querySelectorAll('#termSeg button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#termSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); rdgTerm=+b.dataset.t; recalc();
+}));
+['p_fu','p_load','p_income','p_self','p_kids','p_child'].forEach(id=>document.getElementById(id).addEventListener('input',recalc));
+renderCredits(); recalc();
+</script>
+</body>
+</html>
