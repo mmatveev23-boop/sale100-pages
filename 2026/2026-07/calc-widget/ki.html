@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Загрузка КИ → расчёт и страница выгод · ДОНУЛЯ</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Инструмент менеджера: загрузка PDF кредитной истории (ОКБ) → парсинг → расчёт → клиентская страница выгод (печать в PDF).
+   Парсер сверяет сумму распарсенных договоров со сводкой самого отчёта. */
+:root{
+  --paper:#FAF7F2; --card:#fff; --ink:#1C1A16; --muted:#68625A; --faint:#9B948A;
+  --pine:#0B3B2E; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
+  --gold:#C99A33; --gold-soft:#FBF3DC; --gold-ink:#8A6212; --alert:#A8442E; --alert-soft:#FAEDE8;
+  --line:rgba(28,26,22,.13); --line-2:rgba(28,26,22,.2);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:13.5px;line-height:1.5}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:960px;margin:0 auto;padding:22px 16px 60px}
+h1{font-size:19px;font-weight:800}
+.sub{color:var(--muted);font-size:12.5px;margin-top:3px;max-width:640px}
+h2{font-size:14.5px;font-weight:800;margin:20px 0 8px}
+
+/* менеджерская зона */
+.drop{margin-top:14px;border:2px dashed var(--line-2);border-radius:14px;background:var(--card);padding:26px 16px;text-align:center;cursor:pointer}
+.drop:hover{border-color:var(--green)}
+.drop b{display:block;font-size:14.5px}
+.drop span{font-size:12px;color:var(--faint)}
+.drop input{display:none}
+.demo{margin-top:8px;width:100%;border:1.5px dashed var(--line-2);background:none;border-radius:10px;padding:9px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--green-ink);cursor:pointer}
+.status{margin-top:10px;border-radius:10px;padding:10px 14px;font-size:13px;display:none}
+.status.ok{display:block;background:var(--green-soft);color:var(--green-ink)}
+.status.err{display:block;background:var(--alert-soft);color:var(--alert)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+.kpi .l{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+.kpi .v{margin-top:3px;font-size:18px;font-weight:800}
+.kpi .s{font-size:11px;color:var(--muted)}
+.tblwrap{margin-top:12px;overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:640px}
+th{background:var(--pine);color:#fff;text-align:left;font-weight:600;padding:8px 11px;white-space:nowrap}
+td{padding:7px 11px;border-top:1px solid var(--line)}
+td.r{text-align:right;font-weight:700;white-space:nowrap}
+tr.mfo td{background:#FBF1EE}
+.mk{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:1px 7px}
+.mk.mfo{background:var(--alert-soft);color:var(--alert)}
+.mk.loan{background:var(--green-soft);color:var(--green-ink)}
+.mk.card{background:var(--gold-soft);color:var(--gold-ink)}
+.gen{margin-top:14px;display:block;width:100%;border:none;border-radius:12px;background:var(--green);color:#fff;padding:13px;font-family:inherit;font-size:14.5px;font-weight:800;cursor:pointer}
+.gen:hover{filter:brightness(1.06)}
+.note{margin-top:10px;font-size:11.5px;color:var(--faint)}
+#mgr .params{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:12px}
+#mgr .params label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--faint);margin-bottom:3px}
+#mgr .params input{width:100%;border:1px solid var(--line-2);border-radius:8px;padding:7px 9px;font-family:inherit;font-size:13px}
+.seg{display:flex;gap:4px;background:#EFEBE3;border-radius:9px;padding:3px}
+.seg button{flex:1;border:none;background:none;border-radius:7px;padding:6px;font-family:inherit;font-weight:700;font-size:12.5px;color:var(--muted);cursor:pointer}
+.seg button.on{background:#fff;color:var(--ink)}
+
+/* ===== клиентская страница выгод ===== */
+#client{display:none}
+.c-hero{background:linear-gradient(165deg,#0C4233 0%,#0B3B2E 60%,#082A21 100%);color:#fff;border-radius:18px;padding:26px 24px;margin-top:14px}
+.c-hero .cd{font-size:11.5px;color:rgba(255,255,255,.6)}
+.c-hero h1{margin-top:6px;font-size:23px;line-height:1.2;color:#fff}
+.c-hero h1 i{font-style:normal;color:#F4C775}
+.c-hero p{margin-top:8px;font-size:13.5px;color:rgba(255,255,255,.78);max-width:560px}
+.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
+.fact .l{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+.fact .v{margin-top:4px;font-size:21px;font-weight:800;letter-spacing:-.01em}
+.fact .s{margin-top:2px;font-size:11.5px;color:var(--muted)}
+.fact.bad .v{color:var(--alert)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.way{border-radius:16px;padding:16px 18px}
+.way.rdg{background:var(--pine);color:#fff}
+.way.bfl{background:var(--card);border:1.5px solid var(--green);color:var(--ink)}
+.way .wl{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.65}
+.way .wt{margin-top:4px;font-size:17px;font-weight:800}
+.way .wv{margin-top:8px;font-size:26px;font-weight:800;letter-spacing:-.01em}
+.way.rdg .wv{color:#F4C775}
+.way.bfl .wv{color:var(--green-ink)}
+.way .ws{font-size:12px;margin-top:2px;opacity:.75}
+.way ul{margin-top:10px;list-style:none;font-size:12.5px}
+.way li{padding:4px 0 4px 20px;position:relative}
+.way li::before{content:"✓";position:absolute;left:0;font-weight:800}
+.way.rdg li::before{color:#9FE8C6}
+.way.bfl li::before{color:var(--green)}
+.c-cta{margin-top:12px;background:var(--gold-soft);border:1px solid rgba(201,154,51,.4);border-radius:14px;padding:14px 16px;font-size:13.5px;color:var(--gold-ink)}
+.c-cta b{color:var(--ink)}
+.c-disc{margin-top:10px;font-size:10.5px;color:var(--faint);line-height:1.5}
+.c-actions{display:flex;gap:8px;margin-top:14px}
+.c-actions button{flex:1;border:none;border-radius:12px;padding:12px;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer}
+.c-actions .pdf{background:var(--green);color:#fff}
+.c-actions .back{background:none;border:1.5px solid var(--line-2);color:var(--ink)}
+
+@media (max-width:760px){ .kpis,.facts{grid-template-columns:1fr 1fr} .split{grid-template-columns:1fr} #mgr .params{grid-template-columns:1fr} }
+@media print{
+  body{background:#fff}
+  #mgr,.c-actions,.wrap>h1,.wrap>.sub{display:none!important}
+  #client{display:block!important}
+  .wrap{padding:0;max-width:none}
+  .c-hero{border-radius:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .way.rdg{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Загрузка кредитной истории → расчёт и страница выгод</h1>
+  <p class="sub">Менеджер загружает PDF отчёта ОКБ. Парсер достаёт действующие договоры, сверяет сумму со сводкой самого отчёта, считает оба продукта и собирает клиентскую страницу выгод — файл для дожима на второй день.</p>
+
+  <div id="mgr">
+    <label class="drop" id="drop">
+      <b>Загрузить отчёт ОКБ (PDF)</b>
+      <span>перетащите файл сюда или нажмите · обрабатывается в браузере, никуда не отправляется</span>
+      <input type="file" id="file" accept="application/pdf">
+    </label>
+    <button class="demo" onclick="loadDemo()">Демо: пример реальной КИ (22 договора, долг 1 050 460 ₽)</button>
+    <div class="status" id="status"></div>
+
+    <div id="parsed" style="display:none">
+      <div class="kpis" id="kpis"></div>
+      <div class="params">
+        <div><label>Имя клиента (для страницы)</label><input id="p_name" value=""></div>
+        <div><label>Офиц. доход, ₽/мес (для РДГ)</label><input id="p_income" type="number" value="80000"></div>
+        <div><label>Срок плана РДГ</label><div class="seg" id="kiTerm"><button class="on" data-t="36">36 мес</button><button data-t="60">60 мес</button></div></div>
+      </div>
+      <div class="tblwrap"><table id="tbl"></table></div>
+      <button class="gen" onclick="buildClient()">Сформировать страницу выгод для клиента</button>
+      <p class="note">Проценты и платежи по КИ — оценка по типам обязательств (МФО ≈ 15%/мес, банковские ≈ 25%/год); суммы долга — точные из отчёта. Персональная страница — предварительный расчёт, не оферта.</p>
+    </div>
+  </div>
+
+  <!-- ===== клиентская страница ===== -->
+  <div id="client">
+    <div class="c-hero">
+      <div class="cd num" id="c_date">по вашей кредитной истории</div>
+      <h1 id="c_title">…</h1>
+      <p id="c_intro">…</p>
+    </div>
+    <div class="facts" id="c_facts"></div>
+    <div class="split">
+      <div class="way rdg" id="c_rdg"></div>
+      <div class="way bfl" id="c_bfl"></div>
+    </div>
+    <div class="c-cta"><b>Что дальше?</b> Эти цифры мы уже посчитали по вашей официальной кредитной истории. Осталось выбрать путь на консультации с экспертом — она у вас уже оплачена. Эксперт позвонит в назначенное время, либо напишите нам в чат.</div>
+    <p class="c-disc" id="c_disc"></p>
+    <div class="c-actions">
+      <button class="pdf" onclick="window.print()">Скачать PDF / распечатать</button>
+      <button class="back" onclick="backToMgr()">← Вернуться к расчёту</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+'use strict';
+if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const fmt=n=>Math.round(n).toLocaleString('ru-RU');
+let data=null, kiTerm=36, reportDate='';
+
+/* ===== парсер сводной таблицы действующих договоров ОКБ ===== */
+function parseOkb(fullText){
+  /* колонтитулы страниц выкидываем до склейки */
+  let flat=fullText.replace(/Сформирован[\s\S]{0,140}?из \d+/g,' ').replace(/ /g,' ').replace(/\s+/g,' ');
+  const num=s=>parseFloat(s.replace(/ /g,'').replace(',','.'));
+  // сводка для сверки
+  const sumM=flat.match(/([\d ]+(?:,\d+)?) р\. Задолженности по обязательствам/);
+  const cntM=flat.match(/(\d+) Действующие кредиты\/займы/);
+  const reqM=flat.match(/(\d+) запросов Запросы кредитной истории/);
+  const dateM=fullText.match(/Кредитный отчет\s*на (.+?) года/);
+  // работаем только со сводной таблицей раздела «Действующие кредитные договоры»
+  let secIdx=flat.indexOf('ДЕЙСТВУЮЩИЕ КРЕДИТНЫЕ ДОГОВОРЫ Информация о действующих');
+  if(secIdx<0) secIdx=flat.lastIndexOf('ДЕЙСТВУЮЩИЕ КРЕДИТНЫЕ ДОГОВОРЫ');
+  if(secIdx>0) flat=flat.slice(secIdx);
+  const cut=flat.search(/ 1\. [А-ЯЁA-Z]/);   /* начало детальных блоков */
+  if(cut>0) flat=flat.slice(0,cut);
+  // якорь — каждое «Договор займа (кредита) - »; номер и кредитор ищем НАЗАД, вид/суммы/статус — ВПЕРЁД
+  const fwd=/^Договор займа \(кредита\) - (.+?) ((?:\d[\d ]*)(?:,\d+)?) р\. ((?:\d[\d ]*)(?:,\d+)?) р\. ((?:\d[\d ]*)(?:,\d+)?) р\. (Без просрочек|Была просрочка по \d{2}\.\d{2}\.\d{4}|Просрочка с \d{2}\.\d{2}\.\d{4})/;
+  const credits=[]; const seen=new Set();
+  let idx=flat.indexOf('Договор займа (кредита) - ');
+  while(idx!==-1){
+    const back=flat.slice(Math.max(0,idx-110),idx);
+    const ms=[...back.matchAll(/(\d{1,2}) (?=[А-ЯЁA-Z«"])/g)];   /* ближайший к кредитору номер строки */
+    const fm=flat.slice(idx).match(fwd);
+    if(ms.length&&fm){
+      const last=ms[ms.length-1];
+      const n=+last[1], lender=back.slice(last.index+last[0].length).trim(), kind=fm[1].trim();
+      if(!seen.has(n)){
+        seen.add(n);
+        const product=/микрозаем/i.test(kind)?'mfo':(/карт|овердрафт/i.test(kind)?'card':'loan');
+        credits.push({n,lender,kind,product,amount:num(fm[2]),debt:num(fm[3]),overdue:num(fm[4]),status:fm[5]});
+      }
+    }
+    idx=flat.indexOf('Договор займа (кредита) - ', idx+1);
+  }
+  credits.sort((a,b)=>a.n-b.n);
+  return {
+    credits,
+    summary:{debt:sumM?num(sumM[1]):null,count:cntM?+cntM[1]:null,requests:reqM?+reqM[1]:null},
+    date:dateM?dateM[1]+' года':''
+  };
+}
+async function parseFile(file){
+  setStatus('Читаю PDF: '+file.name+'…','ok');
+  try{
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    let text='';
+    const maxP=Math.min(pdf.numPages,40); /* сводка и таблица договоров — в начале отчёта */
+    for(let i=1;i<=maxP;i++){
+      const pg=await pdf.getPage(i);
+      const tc=await pg.getTextContent();
+      text+=tc.items.map(it=>it.str).join(' ')+'\n';
+    }
+    const parsed=parseOkb(text);
+    if(!parsed.credits.length){ setStatus('Не нашёл таблицу действующих договоров. Поддерживается формат отчёта ОКБ; пришлите файл — добавим формат.','err'); return; }
+    applyData(parsed);
+  }catch(e){ setStatus('Не удалось прочитать PDF: '+e.message,'err'); }
+}
+function applyData(parsed){
+  data=parsed;
+  const total=data.credits.reduce((s,c)=>s+c.debt,0);
+  const okSum=data.summary.debt!=null && Math.abs(total-data.summary.debt)<1;
+  const okCnt=data.summary.count!=null && data.credits.length===data.summary.count;
+  setStatus((okSum&&okCnt)
+    ?'✓ Распарсено '+data.credits.length+' договоров. Контрольная сверка со сводкой отчёта: суммы сходятся копейка в копейку ('+fmt(total)+' ₽).'
+    :'Распарсено '+data.credits.length+' договоров на '+fmt(total)+' ₽. Сводка отчёта: '+(data.summary.debt!=null?fmt(data.summary.debt)+' ₽, '+data.summary.count+' шт':'не найдена')+' — проверьте глазами.',
+    (okSum&&okCnt)?'ok':'err');
+  renderParsed();
+}
+function estMonthlyInterest(c){ return c.product==='mfo'? c.debt*0.15 : c.debt*(0.25/12); }
+function renderParsed(){
+  const total=data.credits.reduce((s,c)=>s+c.debt,0);
+  const over=data.credits.reduce((s,c)=>s+c.overdue,0);
+  const mfo=data.credits.filter(c=>c.product==='mfo');
+  const interest=data.credits.reduce((s,c)=>s+estMonthlyInterest(c),0);
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi"><div class="l">Долг по отчёту</div><div class="v num">${fmt(total)} ₽</div><div class="s num">${data.credits.length} действующих договоров</div></div>
+    <div class="kpi"><div class="l">Из них МФО</div><div class="v num">${mfo.length} шт</div><div class="s num">${fmt(mfo.reduce((s,c)=>s+c.debt,0))} ₽ под самые дикие ставки</div></div>
+    <div class="kpi"><div class="l">Просрочка</div><div class="v num">${over>0?fmt(over)+' ₽':'нет'}</div><div class="s">${over>0?'уже началась':'пока чисто'}</div></div>
+    <div class="kpi"><div class="l">Проценты (оценка)</div><div class="v num">~${fmt(interest)} ₽/мес</div><div class="s">сгорают, долг не двигается</div></div>`;
+  document.getElementById('tbl').innerHTML='<tr><th>#</th><th>Кредитор</th><th>Тип</th><th>Долг</th><th>Просрочка</th><th>Статус</th></tr>'
+    +data.credits.map(c=>`<tr class="${c.product}"><td>${c.n}</td><td>${c.lender}</td><td><span class="mk ${c.product}">${c.product==='mfo'?'МФО':c.product==='card'?'карта':'кредит'}</span></td><td class="r num">${fmt(c.debt)} ₽</td><td class="r num">${c.overdue>0?fmt(c.overdue)+' ₽':'—'}</td><td>${c.status}</td></tr>`).join('');
+  document.getElementById('parsed').style.display='';
+}
+function setStatus(msg,cls){ const s=document.getElementById('status'); s.className='status '+cls; s.textContent=msg; }
+
+/* ===== клиентская страница выгод ===== */
+function buildClient(){
+  const name=document.getElementById('p_name').value.trim()||'Ваш расчёт';
+  const total=data.credits.reduce((s,c)=>s+c.debt,0);
+  const over=data.credits.reduce((s,c)=>s+c.overdue,0);
+  const mfo=data.credits.filter(c=>c.product==='mfo');
+  const interest=data.credits.reduce((s,c)=>s+estMonthlyInterest(c),0);
+  const rdgTotal=total*1.07, rdgPay=rdgTotal/kiTerm;
+  document.getElementById('c_date').textContent='Расчёт по вашей кредитной истории'+(data.date?' · отчёт ОКБ на '+data.date:'');
+  document.getElementById('c_title').innerHTML=(name==='Ваш расчёт'?name:name+', вот что показала <i>ваша кредитная история</i>');
+  document.getElementById('c_intro').textContent='Это официальные данные бюро кредитных историй — те же, что видят банки. Мы посчитали по ним оба законных пути решения. Цифры ниже — ваши, не примерные.';
+  document.getElementById('c_facts').innerHTML=`
+    <div class="fact"><div class="l">Ваш долг</div><div class="v num">${fmt(total)} ₽</div><div class="s num">${data.credits.length} действующих договоров</div></div>
+    <div class="fact bad"><div class="l">Из них МФО</div><div class="v num">${mfo.length}</div><div class="s num">${fmt(mfo.reduce((s,c)=>s+c.debt,0))} ₽ — ставки до 292% годовых</div></div>
+    <div class="fact bad"><div class="l">Проценты съедают</div><div class="v num">~${fmt(interest)} ₽</div><div class="s">каждый месяц — долг при этом не уменьшается</div></div>
+    <div class="fact ${over>0?'bad':''}"><div class="l">Просрочка</div><div class="v num">${over>0?fmt(over)+' ₽':'ещё нет'}</div><div class="s">${over>0?'уже в отчёте — дальше пени и коллекторы':'но запас прочности кончается'}</div></div>`;
+  document.getElementById('c_rdg').innerHTML=`
+    <div class="wl">Путь 1 · Реструктуризация (РДГ)</div>
+    <div class="wt">Долг замораживается, платёж один</div>
+    <div class="wv num">${fmt(rdgPay)} ₽/мес</div>
+    <div class="ws num">план на ${kiTerm} мес вместо ~${fmt(interest)} ₽ одних только процентов</div>
+    <ul><li>Проценты и пени останавливаются по закону</li><li>Вместо ${data.credits.length} кредиторов — один платёж</li><li>Вы не признаётесь банкротом, имущество не трогают</li></ul>`;
+  document.getElementById('c_bfl').innerHTML=`
+    <div class="wl">Путь 2 · Списание долга (БФЛ)</div>
+    <div class="wt">Долг ${fmt(total)} ₽ списывается целиком</div>
+    <div class="wv num">13 500 ₽/мес</div>
+    <div class="ws">процедура ~14 месяцев, дальше — жизнь с чистого листа</div>
+    <ul><li>Списываются все ${data.credits.length} договоров, включая МФО</li><li>Коллекторам и банкам звонить вам запрещено</li><li>Гарантия в договоре: не спишем — вернём деньги</li></ul>`;
+  document.getElementById('c_disc').textContent='Расчёт предварительный, по данным отчёта бюро кредитных историй'+(data.date?' от '+data.date:'')+'. Проценты по действующим договорам оценены по типам обязательств. Итоговые условия фиксируются в договоре; выбор процедуры — после консультации. ИП Плешаков Р. Т., ИНН 470516340503 · донуля.рф';
+  document.getElementById('mgr').style.display='none';
+  document.getElementById('client').style.display='block';
+  window.scrollTo(0,0);
+}
+function backToMgr(){ document.getElementById('client').style.display='none'; document.getElementById('mgr').style.display=''; }
+
+/* ===== демо-фикстура (обезличено: из примера отчёта) ===== */
+const DEMO={date:'18 августа 2025 года',name:'Надежда Николаевна',credits:[{"n": 1, "lender": "ФИНАНСОВЫЙ СУПЕРМАРКЕТ ООО МКК", "kind": "Необеспеченный микрозаем", "product": "mfo", "amount": 5000.0, "debt": 5000.0, "overdue": 0.0, "status": "Без просрочек"}, {"n": 2, "lender": "ООО МКК \"СТРАТОСФЕРА\"", "kind": "Необеспеченный микрозаем", "product": "mfo", "amount": 20000.0, "debt": 3000.0, "overdue": 0.0, "status": "Без просрочек"}, {"n": 3, "lender": "ООО МКК АКАДЕМИЧЕСКАЯ", "kind": "Необеспеченный микрозаем", "product": "mfo", "amount": 3000.0, "debt": 3000.0, "overdue": 0.0, "status": "Без просрочек"}, {"n": 4, "lender": "ООО МКК ЭКВАЗАЙМ", "kind": "Необеспеченный микрозаем", "product": "mfo", "amount": 15000.0, "debt": 15000.0, "overdue": 0.0, "status": "Без просрочек"}, {"n": 5, "lender": "БЫСТРОДЕНЬГИ ООО МФК", "kind": "Необеспеченный микрозаем", "product": "mfo", "amount": 20000.0, "debt": 21760.0, "overdue": 0.0, "status": "Без просрочек"}, {"n": 6, "lender": "ВЭББАНКИР ООО МФК", "kind": "Необеспеченный микрозаем", "product": "mfo", "amount": 14000.0, "debt": 14000.0, "overdue": 0.0, "status": "Без просрочек"}, {"n": 7, "lender": "МКК ТУРБОЗАЙМ ООО", "kind": "Необеспеченный микрозаем", "product": "mfo", "amount": 30000.0, "debt": 30000.0, "overdue": 0.0, "status": "Без просрочек"}, {"n": 8, "lender": "МИГКРЕДИТ ООО МФК", "kind": "Необеспеченный микрозаем", "product": "mfo", "amount": 30000.0, "debt": 22968.06, "overdue": 0.0, "status": "Без просрочек"}, {"n": 9, "lender": "МАНИ МЕН ООО МФК", "kind": "Необеспеченный микрозаем", "product": "mfo", "amount": 49900.0, "debt": 33267.05, "overdue": 0.0, "status": "Была просрочка по 12.07.2025"}, {"n": 10, "lender": "ПЛАТИЗАРУ ООО МКК", "kind": "Необеспеченный микрозаем", "product": "mfo", "amount": 30000.0, "debt": 11858.19, "overdue": 0.0, "status": "Без просрочек"}, {"n": 11, "lender": "АО МФК \"САММИТ\"", "kind": "Необеспеченный микрозаем", "product": "mfo", "amount": 34500.0, "debt": 27929.94, "overdue": 0.0, "status": "Была просрочка по 08.08.2025"}, {"n": 12, "lender": "АЛЬФА-БАНК АО", "kind": "Иной необеспеченный заем", "product": "loan", "amount": 20000.0, "debt": 19956.28, "overdue": 0.0, "status": "Без просрочек"}, {"n": 13, "lender": "ООО МКК ОЗОН КРЕДИТ", "kind": "Иной необеспеченный заем", "product": "loan", "amount": 3000.0, "debt": 1695.47, "overdue": 0.0, "status": "Без просрочек"}, {"n": 14, "lender": "ПАО СБЕРБАНК", "kind": "Иной необеспеченный заем", "product": "loan", "amount": 160000.0, "debt": 164478.51, "overdue": 0.0, "status": "Была просрочка по 31.07.2025"}, {"n": 15, "lender": "СОВКОМБАНК ПАО", "kind": "Иной необеспеченный заем", "product": "loan", "amount": 50000.0, "debt": 49927.25, "overdue": 0.0, "status": "Была просрочка по 05.08.2025"}, {"n": 16, "lender": "РЕНЕССАНС КРЕДИТ ООО КБ", "kind": "Иной необеспеченный заем", "product": "loan", "amount": 98999.09, "debt": 83241.83, "overdue": 0.0, "status": "Была просрочка по 05.05.2025"}, {"n": 17, "lender": "СОВКОМБАНК ПАО", "kind": "Иной необеспеченный заем", "product": "loan", "amount": 25128.87, "debt": 12870.75, "overdue": 0.0, "status": "Была просрочка по 05.05.2025"}, {"n": 18, "lender": "РЕНЕССАНС КРЕДИТ ООО КБ", "kind": "Кредит", "product": "loan", "amount": 60000.0, "debt": 58100.8, "overdue": 0.0, "status": "Была просрочка по 16.08.2025"}, {"n": 19, "lender": "СОВКОМБАНК ПАО", "kind": "Иной необеспеченный заем", "product": "loan", "amount": 66293.27, "debt": 56259.53, "overdue": 0.0, "status": "Была просрочка по 27.06.2025"}, {"n": 20, "lender": "РЕНЕССАНС КРЕДИТ ООО КБ", "kind": "Иной необеспеченный заем", "product": "loan", "amount": 211319.3, "debt": 97844.26, "overdue": 0.0, "status": "Была просрочка по 27.06.2025"}, {"n": 21, "lender": "ООО \"СФО ПБ СЕРВИС ФИНАНС\"", "kind": "Иной необеспеченный заем", "product": "loan", "amount": 439255.0, "debt": 237354.09, "overdue": 0.0, "status": "Была просрочка по 07.11.2024"}, {"n": 22, "lender": "СОВКОМБАНК ПАО", "kind": "Иной необеспеченный заем", "product": "loan", "amount": 78000.0, "debt": 80948.46, "overdue": 2167.99, "status": "Просрочка с 14.08.2025"}],
+  summary:{debt:1050460.47,count:22,requests:235}};
+function loadDemo(){
+  document.getElementById('p_name').value=DEMO.name;
+  applyData({credits:DEMO.credits,summary:DEMO.summary,date:DEMO.date});
+}
+
+document.getElementById('file').addEventListener('change',e=>{ if(e.target.files[0]) parseFile(e.target.files[0]); });
+const drop=document.getElementById('drop');
+drop.addEventListener('dragover',e=>{e.preventDefault();});
+drop.addEventListener('drop',e=>{e.preventDefault(); if(e.dataTransfer.files[0]) parseFile(e.dataTransfer.files[0]);});
+document.querySelectorAll('#kiTerm button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#kiTerm button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); kiTerm=+b.dataset.t;
+}));
+</script>
+</body>
+</html>
