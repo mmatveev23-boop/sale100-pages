@@ -215,6 +215,22 @@ h1 .hl{color:var(--green)}
 .cmp .cf .v{margin-top:2px;font-size:22px;font-weight:800;letter-spacing:-.01em;color:var(--green-ink)}
 .cmp .cf .m{font-size:12.5px;color:var(--green-ink)}
 
+.save-hero{background:radial-gradient(120% 90% at 85% -10%, #135741 0%, transparent 55%),linear-gradient(165deg,#0C4233 0%,#0B3B2E 60%,#082A21 100%);color:#fff;border-radius:var(--r-box);padding:22px 20px;margin-top:12px;text-align:center}
+.save-hero .sl{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.save-hero .sv{margin-top:6px;font-size:46px;font-weight:800;letter-spacing:-.02em;line-height:1;color:#F4C775}
+.save-hero .ss{margin-top:8px;font-size:14px;color:rgba(255,255,255,.82)}
+.save-hero .ss b{color:#9FE8C6}
+.bars{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);padding:15px 16px;margin-top:12px}
+.bar + .bar{margin-top:12px}
+.bar .bl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
+.bar .bl span{color:var(--muted)}
+.bar .bl b{font-weight:800}
+.bar i{display:block;height:14px;border-radius:7px}
+.bar.now i{background:#E4B8AC}
+.bar.now .bl b{color:var(--alert)}
+.bar.us i{background:var(--green)}
+.bar.us .bl b{color:var(--green-ink)}
+.bars .bnote{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
 .cmp .duo{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
 .cmp .duo > div{padding:11px 15px}
 .cmp .duo > div + div{border-left:1px solid var(--line)}
@@ -395,27 +411,28 @@ h1 .hl{color:var(--green)}
       <section class="scr" data-name="Шаг 1 из 6 · Условия">
         <h1>Урегулируем ваш долг <span class="hl nowrap">1&nbsp;240&nbsp;000&nbsp;₽</span> законно</h1>
 
-        <div class="cmp stg">
-          <div class="ch">По вашим цифрам: долг <b class="num" id="cmpDebt">—</b></div>
+        <div class="save-hero stg">
+          <div class="sl">Ваша экономия с нами</div>
+          <div class="sv num" id="cmpSave">—</div>
+          <div class="ss num">и каждый месяц у вас остаётся <b id="cmpSaveM">—</b></div>
+        </div>
+
+        <div class="bars stg">
+          <div class="bar now"><div class="bl"><span>Платите сейчас</span><b class="num" id="cmpPayNow">—</b></div><i style="width:100%"></i></div>
+          <div class="bar us"><div class="bl"><span>Будете платить с нами</span><b class="num" id="cmpUsMonthly">—</b></div><i id="cmpUsBar" style="width:68%"></i></div>
+          <div class="bnote">Всё включено: платёж по плану, который утвердит суд, и наши услуги. Проценты и пени остановлены — долг больше не растёт.</div>
+        </div>
+
+        <button class="linkbtn stg" id="calcBtn" onclick="toggleCalc()">Как посчитана экономия</button>
+        <div id="calcDetail" style="display:none">
+        <div class="cmp">
+          <div class="ch">По вашим цифрам: долг <b class="num" id="cmpDebt">—</b>, платите <b class="num" id="cmpPay2">—</b> в месяц</div>
           <div class="cr bad"><span>Выплатите, если оставить всё как есть<small>из них переплата по процентам ~<span class="num" id="cmpInterest">—</span> за <span class="num" id="cmpTerm">36</span> мес</small></span><b class="num" id="cmpNoUs">—</b></div>
-          <div class="cr"><span>Выплатите, если пойдёте с нами<small>план РДГ + услуги целиком, проценты остановлены</small></span><b class="num" id="cmpWithUs">—</b></div>
-          <div class="duo">
-            <div class="now"><i>Платите сейчас</i><b class="num" id="cmpPayNow">—</b></div>
-            <div class="us"><i>Нам по договору</i><b class="num">13 500 ₽/мес</b></div>
-          </div>
-          <div class="cf"><div class="t">Ваша выгода</div><div class="v" id="cmpSave">—</div><div class="m num" id="cmpSaveM">—</div></div>
+          <div class="cr"><span>Выплатите, если пойдёте с нами<small>план ~<span class="num" id="planPay">—</span> ₽/мес на <span class="num" id="planTerm">36</span> мес (утверждает суд) + услуги 189 000 ₽</small></span><b class="num" id="cmpWithUs">—</b></div>
+        </div>
         </div>
 
-        <div class="planvs stg">
-          <div class="pl">Ежемесячный платёж по долгам</div>
-          <div class="row">
-            <div class="a"><i>Будете платить по утверждённому плану</i><b class="num">~<span id="planPay">—</span> ₽</b></div>
-            <div class="b"><i>Платите сейчас</i><b class="num" id="planNow">—</b></div>
-          </div>
-          <div class="d num">Каждый месяц легче на <b2 id="planDiff">—</b2> · план на <span id="planTerm">36</span> мес утверждает суд, проценты и пени остановлены</div>
-        </div>
-
-        <p class="sub">Процедура по 127-ФЗ: реструктуризация долгов — суд фиксирует долг и утверждает посильный план. Здесь всё, о чём говорили с экспертом, — проверьте глазами.</p>
+        <p class="sub">Процедура по 127-ФЗ: реструктуризация долгов — суд фиксирует долг и утверждает посильный план. Расчёт по вашим цифрам, итог зафиксирует суд.</p>
 
         <div class="paysplit stg" style="grid-template-columns:1fr">
           <div class="price svc">
@@ -737,20 +754,22 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   const noUs=Math.max(CLIENT_PAY*RDG_TERM, CLIENT.debt);
   const interest=Math.max(0,noUs-CLIENT.debt);
   const withUs=CLIENT.debt*1.07+RASS_TOTAL;
-  const save=noUs-withUs, saveM=Math.round(CLIENT_PAY-withUs/RDG_TERM);
+  const usMonthly=Math.round(withUs/RDG_TERM);
+  const save=noUs-withUs, saveM=CLIENT_PAY-usMonthly;
   const plan=Math.round(CLIENT.debt*1.07/RDG_TERM);
   const set=(id,v)=>document.getElementById(id).textContent=v;
-  set('cmpDebt',fmt(CLIENT.debt)+' ₽');
+  set('cmpSave','~'+fmt(save)+' ₽');
+  set('cmpSaveM','~'+fmt(saveM)+' ₽');
+  set('cmpPayNow','~'+fmt(CLIENT_PAY)+' ₽/мес');
+  set('cmpUsMonthly','~'+fmt(usMonthly)+' ₽/мес');
+  document.getElementById('cmpUsBar').style.width=Math.round(usMonthly/CLIENT_PAY*100)+'%';
+  set('cmpDebt',fmt(CLIENT.debt)+' ₽'); set('cmpPay2','~'+fmt(CLIENT_PAY)+' ₽');
   set('cmpTerm',RDG_TERM);
   set('cmpNoUs','~'+fmt(noUs)+' ₽'); set('cmpInterest',fmt(interest)+' ₽');
   set('cmpWithUs',fmt(withUs)+' ₽');
-  set('cmpPayNow','~'+fmt(CLIENT_PAY)+' ₽/мес');
-  set('cmpSave','~'+fmt(save)+' ₽ всего');
-  set('cmpSaveM','в месяц у вас остаётся ~'+fmt(saveM)+' ₽');
   set('planPay',fmt(plan)); set('planTerm',RDG_TERM);
-  set('planNow','~'+fmt(CLIENT_PAY)+' ₽');
-  set('planDiff','~'+fmt(CLIENT_PAY-plan)+' ₽');
 })();
+function toggleCalc(){const d=document.getElementById('calcDetail'),b=document.getElementById('calcBtn');const open=d.style.display==='none';d.style.display=open?'':'none';b.textContent=open?'Скрыть расчёт':'Как посчитана экономия';}
 
 recalc(); show(0);
 
