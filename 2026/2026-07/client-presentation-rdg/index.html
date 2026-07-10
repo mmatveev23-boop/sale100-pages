@@ -377,10 +377,12 @@ h1 .hl{color:var(--green)}
         </div>
 
         <div class="price stg">
-          <div class="pl">Ваш платёж</div>
+          <div class="pl">Услуги ДОНУЛЯ · платёж нам</div>
           <div class="pv num" id="heroPay">13 500 <small>₽ / месяц</small></div>
           <div class="ps num" id="heroSub">14 платежей · услуги целиком 189 000 ₽ · <b>VIP при оплате сразу 169 000 ₽ (выгода 20 000 ₽)</b></div>
         </div>
+
+        <div class="notice stg"><b>Платёж по плану РДГ — отдельно:</b> ~<span class="num" id="planPay">—</span> ₽/мес кредиторам на <span class="num" id="planTerm">36</span> мес. Его утверждает суд, проценты и пени на это время остановлены.</div>
 
         <div class="tariffs stg">
           <button class="trf sel" id="trfR" onclick="setTariff('rassrochka')"><div><div class="tn">Рассрочка на 14 месяцев</div><small class="num">13 500 ₽/мес · без банка и процентов</small></div><span class="rad"></span></button>
@@ -702,6 +704,7 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   set('cmpWithUs',fmt(withUs)+' ₽');
   set('cmpSave','~'+fmt(save)+' ₽');
   set('cmpSaveM','в месяц легче на ~'+fmt(saveM)+' ₽');
+  set('planPay',fmt(Math.round(CLIENT.debt*1.07/RDG_TERM))); set('planTerm',RDG_TERM);
 })();
 
 recalc(); show(0);
