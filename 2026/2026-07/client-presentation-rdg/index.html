@@ -215,6 +215,25 @@ h1 .hl{color:var(--green)}
 .cmp .cf .v{margin-top:2px;font-size:22px;font-weight:800;letter-spacing:-.01em;color:var(--green-ink)}
 .cmp .cf .m{font-size:12.5px;color:var(--green-ink)}
 
+.cmp .duo{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+.cmp .duo > div{padding:11px 15px}
+.cmp .duo > div + div{border-left:1px solid var(--line)}
+.cmp .duo i{display:block;font-style:normal;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+.cmp .duo b{display:block;margin-top:2px;font-size:17px;font-weight:800}
+.cmp .duo .now b{color:var(--alert)}
+.cmp .duo .us b{color:var(--green-ink)}
+
+/* план vs сейчас (ежемесячный платёж) */
+.planvs{background:var(--pine);color:#fff;border-radius:var(--r-box);padding:15px 17px;margin-top:12px}
+.planvs .pl{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.planvs .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:9px}
+.planvs i{display:block;font-style:normal;font-size:11.5px;color:rgba(255,255,255,.65)}
+.planvs b{display:block;margin-top:2px;font-size:23px;font-weight:800;letter-spacing:-.01em}
+.planvs .a b{color:#F4C775}
+.planvs .b b{color:rgba(255,255,255,.55);text-decoration:line-through;text-decoration-thickness:2px}
+.planvs .d{margin-top:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,.16);font-size:12.5px;color:rgba(255,255,255,.78)}
+.planvs .d b2{color:#9FE8C6;font-weight:800}
+
 /* SIM: маркетплейсы выдачи */
 .mkts{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);padding:13px 15px}
 .mkts .mt{font-size:13px;color:var(--muted)}
@@ -375,21 +394,30 @@ h1 .hl{color:var(--green)}
       <!-- 1 · ВЫЖИМКА -->
       <section class="scr" data-name="Шаг 1 из 6 · Условия">
         <h1>Урегулируем ваш долг <span class="hl nowrap">1&nbsp;240&nbsp;000&nbsp;₽</span> законно</h1>
-        <p class="sub">Процедура по 127-ФЗ: реструктуризация долгов — суд фиксирует долг и утверждает посильный план. Здесь всё, о чём говорили с экспертом, — проверьте глазами.</p>
 
         <div class="cmp stg">
-          <div class="ch">По вашим цифрам: долг <b class="num" id="cmpDebt">—</b>, сейчас платите <b class="num" id="cmpPay">—</b> в месяц</div>
-          <div class="cr bad"><span>Если оставить как есть, за <span class="num" id="cmpTerm">36</span> мес вы заплатите<small>из них переплата по процентам ~<span class="num" id="cmpInterest">—</span></small></span><b class="num" id="cmpNoUs">—</b></div>
-          <div class="cr"><span>С нами: план РДГ + услуги целиком<small>суд фиксирует долг, проценты и пени остановлены</small></span><b class="num" id="cmpWithUs">—</b></div>
-          <div class="cf"><div class="t">Ваша экономия</div><div class="v" id="cmpSave">—</div><div class="m num" id="cmpSaveM">—</div></div>
+          <div class="ch">По вашим цифрам: долг <b class="num" id="cmpDebt">—</b></div>
+          <div class="cr bad"><span>Выплатите, если оставить всё как есть<small>из них переплата по процентам ~<span class="num" id="cmpInterest">—</span> за <span class="num" id="cmpTerm">36</span> мес</small></span><b class="num" id="cmpNoUs">—</b></div>
+          <div class="cr"><span>Выплатите, если пойдёте с нами<small>план РДГ + услуги целиком, проценты остановлены</small></span><b class="num" id="cmpWithUs">—</b></div>
+          <div class="duo">
+            <div class="now"><i>Платите сейчас</i><b class="num" id="cmpPayNow">—</b></div>
+            <div class="us"><i>Нам по договору</i><b class="num">13 500 ₽/мес</b></div>
+          </div>
+          <div class="cf"><div class="t">Ваша выгода</div><div class="v" id="cmpSave">—</div><div class="m num" id="cmpSaveM">—</div></div>
         </div>
 
-        <div class="paysplit stg">
-          <div class="price">
-            <div class="pl">Платёж по плану РДГ · кредиторам</div>
-            <div class="pv num">~<span id="planPay">—</span> <small>₽ / месяц</small></div>
-            <div class="ps num">план на <span id="planTerm">36</span> мес · утверждает суд · <b>проценты и пени остановлены</b></div>
+        <div class="planvs stg">
+          <div class="pl">Ежемесячный платёж по долгам</div>
+          <div class="row">
+            <div class="a"><i>Будете платить по утверждённому плану</i><b class="num">~<span id="planPay">—</span> ₽</b></div>
+            <div class="b"><i>Платите сейчас</i><b class="num" id="planNow">—</b></div>
           </div>
+          <div class="d num">Каждый месяц легче на <b2 id="planDiff">—</b2> · план на <span id="planTerm">36</span> мес утверждает суд, проценты и пени остановлены</div>
+        </div>
+
+        <p class="sub">Процедура по 127-ФЗ: реструктуризация долгов — суд фиксирует долг и утверждает посильный план. Здесь всё, о чём говорили с экспертом, — проверьте глазами.</p>
+
+        <div class="paysplit stg" style="grid-template-columns:1fr">
           <div class="price svc">
             <div class="pl">Услуги ДОНУЛЯ · нам</div>
             <div class="pv num" id="heroPay">13 500 <small>₽ / месяц</small></div>
@@ -710,14 +738,18 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   const interest=Math.max(0,noUs-CLIENT.debt);
   const withUs=CLIENT.debt*1.07+RASS_TOTAL;
   const save=noUs-withUs, saveM=Math.round(CLIENT_PAY-withUs/RDG_TERM);
+  const plan=Math.round(CLIENT.debt*1.07/RDG_TERM);
   const set=(id,v)=>document.getElementById(id).textContent=v;
-  set('cmpDebt',fmt(CLIENT.debt)+' ₽'); set('cmpPay','~'+fmt(CLIENT_PAY)+' ₽');
+  set('cmpDebt',fmt(CLIENT.debt)+' ₽');
   set('cmpTerm',RDG_TERM);
   set('cmpNoUs','~'+fmt(noUs)+' ₽'); set('cmpInterest',fmt(interest)+' ₽');
   set('cmpWithUs',fmt(withUs)+' ₽');
-  set('cmpSave','~'+fmt(save)+' ₽');
-  set('cmpSaveM','в месяц легче на ~'+fmt(saveM)+' ₽');
-  set('planPay',fmt(Math.round(CLIENT.debt*1.07/RDG_TERM))); set('planTerm',RDG_TERM);
+  set('cmpPayNow','~'+fmt(CLIENT_PAY)+' ₽/мес');
+  set('cmpSave','~'+fmt(save)+' ₽ всего');
+  set('cmpSaveM','в месяц у вас остаётся ~'+fmt(saveM)+' ₽');
+  set('planPay',fmt(plan)); set('planTerm',RDG_TERM);
+  set('planNow','~'+fmt(CLIENT_PAY)+' ₽');
+  set('planDiff','~'+fmt(CLIENT_PAY-plan)+' ₽');
 })();
 
 recalc(); show(0);
