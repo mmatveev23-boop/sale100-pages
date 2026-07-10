@@ -149,7 +149,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <div id="w_kvs"></div>
 
         <button class="abtn" onclick="writeToDeal()">Записать в сделку</button>
-        <a class="lbtn" href="./ki.html" target="_blank">Полный расчёт · загрузка КИ ↗</a>
+        <label class="lbtn" style="cursor:pointer">Загрузить КИ (PDF) → точный расчёт<input type="file" id="w_ki" accept="application/pdf" style="display:none"></label>
+        <a class="lbtn" id="w_kiPage" href="./ki.html" target="_blank" style="display:none;background:#0B3B2E;color:#F4C775;border-color:#0B3B2E">Открыть страницу клиента ↗</a>
         <div class="toast" id="w_toast"></div>
       </div>
     </div>
@@ -223,6 +224,71 @@ document.querySelectorAll('#w_prod button').forEach(b=>b.addEventListener('click
 }));
 ['w_debt','w_income','w_kids'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 calc();
+
+/* ===== загрузка КИ (отчёт ОКБ) прямо в виджете ===== */
+function parseOkb(fullText){
+  let flat=fullText.replace(/Сформирован[\s\S]{0,140}?из \d+/g,' ').replace(/\u00a0/g,' ').replace(/\s+/g,' ');
+  const num=s=>parseFloat(s.replace(/ /g,'').replace(',','.'));
+  const sumM=flat.match(/([\d ]+(?:,\d+)?) р\. Задолженности по обязательствам/);
+  const cntM=flat.match(/(\d+) Действующие кредиты\/займы/);
+  const dateM=fullText.match(/Кредитный отчет\s*на (.+?) года/);
+  let secIdx=flat.indexOf('ДЕЙСТВУЮЩИЕ КРЕДИТНЫЕ ДОГОВОРЫ Информация о действующих');
+  if(secIdx<0) secIdx=flat.lastIndexOf('ДЕЙСТВУЮЩИЕ КРЕДИТНЫЕ ДОГОВОРЫ');
+  if(secIdx>0) flat=flat.slice(secIdx);
+  const cut=flat.search(/ 1\. [А-ЯЁA-Z]/);
+  if(cut>0) flat=flat.slice(0,cut);
+  const fwd=/^Договор займа \(кредита\) - (.+?) ((?:\d[\d ]*)(?:,\d+)?) р\. ((?:\d[\d ]*)(?:,\d+)?) р\. ((?:\d[\d ]*)(?:,\d+)?) р\. (Без просрочек|Была просрочка по \d{2}\.\d{2}\.\d{4}|Просрочка с \d{2}\.\d{2}\.\d{4})/;
+  const credits=[]; const seen=new Set();
+  let idx=flat.indexOf('Договор займа (кредита) - ');
+  while(idx!==-1){
+    const back=flat.slice(Math.max(0,idx-110),idx);
+    const ms=[...back.matchAll(/(\d{1,2}) (?=[А-ЯЁA-Z«"])/g)];
+    const fm=flat.slice(idx).match(fwd);
+    if(ms.length&&fm){
+      const l=ms[ms.length-1];
+      const n=+l[1], lender=back.slice(l.index+l[0].length).trim(), kind=fm[1].trim();
+      if(!seen.has(n)){
+        seen.add(n);
+        const product=/микрозаем/i.test(kind)?'mfo':(/карт|овердрафт/i.test(kind)?'card':'loan');
+        credits.push({n,lender,kind,product,amount:num(fm[2]),debt:num(fm[3]),overdue:num(fm[4]),status:fm[5]});
+      }
+    }
+    idx=flat.indexOf('Договор займа (кредита) - ', idx+1);
+  }
+  credits.sort((a,b)=>a.n-b.n);
+  return {credits, summary:{debt:sumM?num(sumM[1]):null,count:cntM?+cntM[1]:null}, date:dateM?dateM[1]+' года':''};
+}
+async function parseKiFile(file){
+  const t=document.getElementById('w_toast');
+  t.style.display='block'; t.innerHTML='Читаю '+file.name+'…';
+  try{
+    if(!window.pdfjsLib) throw new Error('pdf.js не загрузился');
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    let text='';
+    for(let i=1;i<=Math.min(pdf.numPages,40);i++){
+      const pg=await pdf.getPage(i); const tc=await pg.getTextContent();
+      text+=tc.items.map(it=>it.str).join(' ')+'\n';
+    }
+    const parsed=parseOkb(text);
+    if(!parsed.credits.length) throw new Error('таблица договоров не найдена (поддерживается отчёт ОКБ)');
+    const total=parsed.credits.reduce((s,c)=>s+c.debt,0);
+    const ok=parsed.summary.debt!=null&&Math.abs(total-parsed.summary.debt)<1&&parsed.credits.length===parsed.summary.count;
+    /* точные данные в виджет и поля сделки */
+    document.getElementById('w_debt').value=Math.round(total); calc();
+    document.getElementById('f_debt').textContent=fmt(total)+' ₽ (по КИ)';
+    t.innerHTML=(ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+parsed.credits.length+' договоров, долг '+fmt(total)+' ₽'+(ok?' — сходится со сводкой отчёта.':'.');
+    const mfo=parsed.credits.filter(c=>c.product==='mfo').length;
+    localStorage.setItem('kiCalc', JSON.stringify({
+      name:document.querySelector('.deal h1').textContent.trim(),
+      date:parsed.date, term, credits:parsed.credits
+    }));
+    document.getElementById('w_kiPage').style.display='';
+  }catch(e){ t.innerHTML='Не удалось разобрать файл: '+e.message; }
+}
+document.getElementById('w_ki').addEventListener('change',e=>{ if(e.target.files[0]) parseKiFile(e.target.files[0]); });
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </body>
 </html>
