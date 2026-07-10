@@ -128,6 +128,7 @@ h2{font-size:14.5px;font-weight:800;margin:18px 0 8px}
         <option value="estate">есть: вторая недвижимость</option>
         <option value="mortgage">ипотека</option>
       </select></div>
+      <div class="p"><label>Срок плана РДГ</label><div class="seg" id="eTermSeg"><button class="on" data-t="36">36 мес</button><button data-t="60">60 мес</button></div></div>
     </div>
     <div class="verdict" id="verdict"></div>
     <div class="out" id="expOut"></div>
@@ -399,13 +400,16 @@ function expressCalc(){
   const free=income-family;
   const rdgTotal=debt*1.07;
   const p36=rdgTotal/36, p60=rdgTotal/60;
+  const chosen=expressTerm, pChosen=rdgTotal/chosen;
   let route,term=null,reason,warn='';
   if(debt<=0){route='self';reason='Введите сумму долга.';}
   else if(free>=debt/3){route='self';reason='Свободный доход '+fmt(free)+' ₽/мес: долг закрывается своими силами примерно за 3 месяца. Процедура не нужна.';}
   else if(free>=p60){
-    route='rdg'; term=free>=p36?36:60;
-    reason='Официального дохода хватает на план: свободно '+fmt(free)+' ₽/мес, платёж плана '+fmt(term===36?p36:p60)+' ₽/мес на '+term+' мес. Долг фиксируется, проценты останавливаются'+(assets!=='none'?', имущество сохраняется':'')+', клиент не признаётся банкротом.';
-    if(assets==='none') warn='Имущества нет: возможен и БФЛ (дешевле: '+fmt(BFL_COST)+' ₽ и долг списан). Проговорить оба варианта.';
+    route='rdg';
+    if(free>=pChosen){ term=chosen; }
+    else { term=60; warn='На выбранных '+chosen+' мес не проходит: платёж '+fmt(pChosen)+' ₽ больше свободных '+fmt(free)+' ₽. Показан план 60 мес.'; }
+    reason='Официального дохода хватает на план: свободно '+fmt(free)+' ₽/мес, платёж плана '+fmt(rdgTotal/term)+' ₽/мес на '+term+' мес. Долг фиксируется, проценты останавливаются'+(assets!=='none'?', имущество сохраняется':'')+', клиент не признаётся банкротом.';
+    if(!warn && assets==='none') warn='Имущества нет: возможен и БФЛ (дешевле: '+fmt(BFL_COST)+' ₽ и долг списан). Проговорить оба варианта.';
   }else{
     route='bfl';
     reason=income<=0?'Официального дохода нет: план РДГ утверждать не из чего. Путь: списание долга.':'Свободного дохода '+fmt(free)+' ₽/мес не хватает на план РДГ (минимум '+fmt(p60)+' ₽/мес на 60 мес). Путь: списание долга.';
@@ -421,17 +425,17 @@ function expressCalc(){
   if(route==='rdg'){
     out.innerHTML=`
       <div class="kpi"><div class="l">Долг со слов</div><div class="v num">${fmt(debt)} ₽</div><div class="s num">+ ФУ 7% = ${fmt(rdgTotal)} ₽</div></div>
-      <div class="kpi hero"><div class="l">Платёж по плану · ${term} мес</div><div class="v num">${fmt(term===36?p36:p60)} ₽/мес</div><div class="s">проценты и пени останавливаются</div></div>
-      <div class="kpi"><div class="l">Запас дохода</div><div class="v num">${fmt(free-(term===36?p36:p60))} ₽</div><div class="s num">свободно ${fmt(free)} ₽ после ПМ семьи ${fmt(family)} ₽</div></div>
+      <div class="kpi hero"><div class="l">Платёж по плану · ${term} мес</div><div class="v num">${fmt(rdgTotal/term)} ₽/мес</div><div class="s">проценты и пени останавливаются</div></div>
+      <div class="kpi"><div class="l">Запас дохода</div><div class="v num">${fmt(free-rdgTotal/term)} ₽</div><div class="s num">свободно ${fmt(free)} ₽ после ПМ семьи ${fmt(family)} ₽</div></div>
       <div class="kpi good"><div class="l">Услуги ДОНУЛЯ</div><div class="v num">13 500 ₽/мес</div><div class="s num">тариф «Выгодный» · 189 000 ₽ за 14 мес</div></div>`;
-    lastExport={stage:'экспресс',product:'РДГ',debtStated:debt,income,assets,term,rdgTotal:Math.round(rdgTotal),rdgMonthly:Math.round(term===36?p36:p60),freeIncome:Math.round(free)};
+    lastExport={stage:'экспресс',product:'РДГ',debtStated:debt,income,assets,term,rdgTotal:Math.round(rdgTotal),rdgMonthly:Math.round(rdgTotal/term),freeIncome:Math.round(free)};
     renderExport([
       ['В сделку amo (предварительные поля)',[
         ['Долг со слов клиента', fmt(debt)+' ₽'],
         ['Офиц. доход / свободный', fmt(income)+' / '+fmt(free)+' ₽'],
         ['Имущество', document.getElementById('e_assets').selectedOptions[0].textContent],
         ['Маршрут (Тип услуги)', 'РДГ · план '+term+' мес'],
-        ['Платёж по плану (предв.)', fmt(term===36?p36:p60)+' ₽/мес']]],
+        ['Платёж по плану (предв.)', fmt(rdgTotal/term)+' ₽/мес']]],
       ['Дальше',[
         ['Презентация', 'РДГ (client-presentation-rdg), цифры уточнить по КИ'],
         ['Точный расчёт', 'вкладка «Точный»: кредиты из КИ']]]
@@ -460,6 +464,12 @@ function expressCalc(){
     renderExport([['В сделку amo',[['Маршрут','не наш клиент (закроет сам)'],['Свободный доход',fmt(free)+' ₽/мес']]]]);
   }
 }
+let expressTerm=36;
+document.addEventListener('click',e=>{
+  const b=e.target.closest('#eTermSeg button'); if(!b) return;
+  document.querySelectorAll('#eTermSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); expressTerm=+b.dataset.t; expressCalc();
+});
 let mode='express';
 function setMode(m){
   mode=m;
