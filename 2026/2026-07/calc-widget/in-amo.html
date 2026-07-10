@@ -134,20 +134,16 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
     <div class="dw">
       <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор клиента</b><small>экспресс · первый звонок</small></div></div>
       <div class="body">
+        <div class="seg" id="w_prod" style="margin-bottom:2px"><button class="on" data-p="rdg">РДГ</button><button data-p="bfl">БФЛ</button></div>
         <label>Долг со слов, ₽</label><input id="w_debt" type="number" value="1150000">
-        <div class="two">
-          <div><label>Офиц. доход, ₽/мес</label><input id="w_income" type="number" value="80000"></div>
-          <div><label>Детей</label><input id="w_kids" type="number" value="1" min="0"></div>
+        <div id="w_rdgFields">
+          <div class="two">
+            <div><label>Офиц. доход, ₽/мес</label><input id="w_income" type="number" value="80000"></div>
+            <div><label>Детей</label><input id="w_kids" type="number" value="1" min="0"></div>
+          </div>
+          <label>Срок плана РДГ</label>
+          <div class="seg" id="w_term"><button class="on" data-t="36">36 мес</button><button data-t="60">60 мес</button></div>
         </div>
-        <label>Имущество</label>
-        <select id="w_assets">
-          <option value="none">нет (только единственное жильё)</option>
-          <option value="car">есть: авто</option>
-          <option value="estate">есть: вторая недвижимость</option>
-          <option value="mortgage">ипотека</option>
-        </select>
-        <label>Срок плана РДГ</label>
-        <div class="seg" id="w_term"><button class="on" data-t="36">36 мес</button><button data-t="60">60 мес</button></div>
 
         <div class="verdict rdg" id="w_verdict"></div>
         <div id="w_kvs"></div>
@@ -172,17 +168,22 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 'use strict';
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
 const PM_SELF=19329, PM_CHILD=17201, BFL_COST=239000;
-let term=36, last={};
+let term=36, prod='rdg', last={};
 function calc(){
   const debt=parseFloat(document.getElementById('w_debt').value)||0;
   const income=parseFloat(document.getElementById('w_income').value)||0;
   const kids=parseFloat(document.getElementById('w_kids').value)||0;
-  const assets=document.getElementById('w_assets').value;
   const free=income-(PM_SELF+kids*PM_CHILD);
   const rdgTotal=debt*1.07, pChosen=rdgTotal/term, p60=rdgTotal/60;
   const v=document.getElementById('w_verdict'), kvs=document.getElementById('w_kvs');
+  document.getElementById('w_rdgFields').style.display=prod==='rdg'?'':'none';
   let route, eff=term, kv=[];
-  if(debt<=0||free>=debt/3){
+  if(prod==='bfl'){
+    route='БФЛ';
+    v.className='verdict bfl';
+    v.innerHTML='<b>БФЛ · списание долга</b>Долг '+fmt(debt)+' ₽ списывается целиком, платёж только за процедуру.';
+    kv=[['Долг спишется',fmt(debt)+' ₽'],['Процедура','13 500 ₽/мес · ~14 мес'],['Услуги + госплатежи',fmt(BFL_COST)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
+  }else if(debt<=0||free>=debt/3){
     route='self';
     v.className='verdict self';
     v.innerHTML='<b>Мимо процедур</b>'+(debt<=0?'Введите долг.':'Свободных '+fmt(free)+' ₽/мес: закроет долг сам за ~3 месяца.');
@@ -194,19 +195,18 @@ function calc(){
     v.innerHTML='<b>РДГ · план '+eff+' мес</b>Платёж '+fmt(rdgTotal/eff)+' ₽/мес, проценты останавливаются, не банкрот.'+(free<pChosen?' На 36 мес не проходит.':'');
     kv=[['Долг + ФУ 7%',fmt(rdgTotal)+' ₽'],['Платёж по плану',fmt(rdgTotal/eff)+' ₽/мес'],['Свободный доход',fmt(free)+' ₽/мес'],['Услуги ДОНУЛЯ','13 500 ₽/мес']];
   }else{
-    route='БФЛ';
-    v.className='verdict bfl';
-    v.innerHTML='<b>БФЛ · списание долга</b>'+(income<=0?'Дохода нет: план не из чего утверждать.':'Свободных '+fmt(free)+' ₽ не хватает на план (мин. '+fmt(p60)+' ₽).')
-      +(assets==='mortgage'?' Ипотека: консультация юриста!':assets!=='none'?' Имущество под реализацию: проговорить.':'');
-    kv=[['Долг спишется',fmt(debt)+' ₽'],['Процедура','13 500 ₽/мес · ~14 мес'],['Услуги + госплатежи',fmt(BFL_COST)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
+    route='РДГ';
+    v.className='verdict self';
+    v.innerHTML='<b>РДГ не тянет</b>Свободных '+fmt(free)+' ₽/мес меньше платежа плана даже на 60 мес ('+fmt(p60)+' ₽). Переключите на вкладку БФЛ.';
+    kv=[['Свободный доход',fmt(free)+' ₽/мес'],['Мин. платёж плана (60 мес)',fmt(p60)+' ₽/мес']];
   }
   kvs.innerHTML=kv.map(([k,x])=>'<div class="kv"><span>'+k+'</span><b>'+x+'</b></div>').join('');
-  last={debt,income,route,eff,pay:route==='РДГ'?Math.round(rdgTotal/eff):null,benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null};
+  last={debt,income,route,eff,pay:route==='РДГ'&&free>=p60?Math.round(rdgTotal/eff):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null};
 }
 function writeToDeal(){
   document.getElementById('f_debt').textContent=fmt(last.debt)+' ₽';
   document.getElementById('f_income').textContent=fmt(last.income)+' ₽';
-  document.getElementById('f_route').textContent=last.route+(last.route==='РДГ'?' · '+last.eff+' мес':'');
+  document.getElementById('f_route').textContent=last.route==='РДГ'?'РДГ · '+last.eff+' мес':(last.route==='БФЛ'?'БФЛ · списание':'—');
   document.getElementById('f_pay').textContent=last.pay?fmt(last.pay)+' ₽/мес':'—';
   const t=document.getElementById('w_toast');
   t.style.display='block';
@@ -217,7 +217,11 @@ document.querySelectorAll('#w_term button').forEach(b=>b.addEventListener('click
   document.querySelectorAll('#w_term button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on'); term=+b.dataset.t; calc();
 }));
-['w_debt','w_income','w_kids','w_assets'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+document.querySelectorAll('#w_prod button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#w_prod button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); prod=b.dataset.p; calc();
+}));
+['w_debt','w_income','w_kids'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 calc();
 </script>
 </body>
