@@ -99,6 +99,14 @@ h1 .hl{color:var(--green)}
 .price .pv small{font-size:17px;font-weight:600;color:rgba(255,255,255,.65)}
 .price .ps{margin-top:9px;font-size:13px;color:rgba(255,255,255,.72)}
 .price .ps b{color:#F4C775;font-weight:700}
+.paysplit{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.paysplit .price{margin-top:0}
+.price.svc{background:var(--card);border:1.5px solid var(--green);color:var(--ink)}
+.price.svc .pl{color:var(--green-ink)}
+.price.svc .pv small{color:var(--muted)}
+.price.svc .ps{color:var(--muted)}
+.price.svc .ps b{color:var(--gold-ink)}
+@media (max-width:640px){ .paysplit{grid-template-columns:1fr} }
 
 /* тарифы */
 .tariffs{display:grid;gap:9px;margin-top:12px}
@@ -376,13 +384,18 @@ h1 .hl{color:var(--green)}
           <div class="cf"><div class="t">Ваша экономия</div><div class="v" id="cmpSave">—</div><div class="m num" id="cmpSaveM">—</div></div>
         </div>
 
-        <div class="price stg">
-          <div class="pl">Услуги ДОНУЛЯ · платёж нам</div>
-          <div class="pv num" id="heroPay">13 500 <small>₽ / месяц</small></div>
-          <div class="ps num" id="heroSub">14 платежей · услуги целиком 189 000 ₽ · <b>VIP при оплате сразу 169 000 ₽ (выгода 20 000 ₽)</b></div>
+        <div class="paysplit stg">
+          <div class="price">
+            <div class="pl">Платёж по плану РДГ · кредиторам</div>
+            <div class="pv num">~<span id="planPay">—</span> <small>₽ / месяц</small></div>
+            <div class="ps num">план на <span id="planTerm">36</span> мес · утверждает суд · <b>проценты и пени остановлены</b></div>
+          </div>
+          <div class="price svc">
+            <div class="pl">Услуги ДОНУЛЯ · нам</div>
+            <div class="pv num" id="heroPay">13 500 <small>₽ / месяц</small></div>
+            <div class="ps num" id="heroSub">14 платежей · услуги целиком 189 000 ₽ · <b>VIP при оплате сразу 169 000 ₽ (выгода 20 000 ₽)</b></div>
+          </div>
         </div>
-
-        <div class="notice stg"><b>Платёж по плану РДГ — отдельно:</b> ~<span class="num" id="planPay">—</span> ₽/мес кредиторам на <span class="num" id="planTerm">36</span> мес. Его утверждает суд, проценты и пени на это время остановлены.</div>
 
         <div class="tariffs stg">
           <button class="trf sel" id="trfR" onclick="setTariff('rassrochka')"><div><div class="tn">Рассрочка на 14 месяцев</div><small class="num">13 500 ₽/мес · без банка и процентов</small></div><span class="rad"></span></button>
