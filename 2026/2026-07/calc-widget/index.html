@@ -22,6 +22,22 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color
 h1{font-size:19px;font-weight:800;letter-spacing:-.01em}
 .sub{color:var(--muted);font-size:12.5px;margin-top:3px}
 
+/* переключатель режима и продукта */
+.modesw{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#EFEBE3;border-radius:12px;padding:4px;margin:14px 0 4px;max-width:560px}
+.modesw button{border:none;background:none;border-radius:9px;padding:9px 8px;font-family:inherit;font-weight:700;font-size:13.5px;color:var(--muted);cursor:pointer}
+.modesw button small{display:block;font-weight:500;font-size:10.5px;color:var(--faint)}
+.modesw button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(28,26,22,.12)}
+.verdict{margin-top:12px;border-radius:14px;padding:16px 18px}
+.verdict .vl{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.7}
+.verdict .vt{margin-top:3px;font-size:21px;font-weight:800;letter-spacing:-.01em}
+.verdict .vr{margin-top:4px;font-size:12.5px}
+.verdict.rdg{background:var(--pine);color:#fff}
+.verdict.bfl{background:var(--green-soft);color:var(--green-ink);border:1px solid rgba(15,107,79,.25)}
+.verdict.self{background:var(--alert-soft);color:var(--alert);border:1px solid rgba(168,68,46,.25)}
+.verdict .warn{margin-top:8px;font-size:12px;background:rgba(201,154,51,.16);border-radius:8px;padding:6px 10px;color:inherit}
+.tostage{margin-top:10px;border:1.5px dashed var(--line-2);background:none;border-radius:10px;padding:9px 14px;font-family:inherit;font-size:12.5px;font-weight:700;color:var(--green-ink);cursor:pointer;width:100%}
+.tostage:hover{border-color:var(--green)}
+
 /* переключатель продукта */
 .prodsw{display:grid;grid-template-columns:1fr 1fr;gap:5px;background:#EFEBE3;border-radius:12px;padding:4px;margin:14px 0 16px;max-width:420px}
 .prodsw button{border:none;background:none;border-radius:9px;padding:9px 8px;font-family:inherit;font-weight:700;font-size:13.5px;color:var(--muted);cursor:pointer}
@@ -92,8 +108,33 @@ h2{font-size:14.5px;font-weight:800;margin:18px 0 8px}
 <body>
 <div class="wrap">
   <h1>Калькулятор клиента <span style="color:var(--faint);font-weight:600">· виджет для карточки сделки amo · прототип</span></h1>
-  <p class="sub">Менеджер вносит кредиты (или они приходят из кредитной истории), выбирает продукт — виджет считает цифры клиента, пишет их в поля сделки, оттуда они попадают в презентацию и договор.</p>
+  <p class="sub">Две ступени: на первом звонке — экспресс по словам клиента (долг, доход, имущество) с маршрутом РДГ/БФЛ, дальше — точный расчёт по кредитной истории. Цифры пишутся в поля сделки и оттуда попадают в презентацию и договор.</p>
 
+  <div class="modesw" id="modesw">
+    <button class="on" data-mode="express">Экспресс · первый звонок<small>долг со слов + доход + имущество</small></button>
+    <button data-mode="detail">Точный · по кредитной истории<small>каждый кредит отдельно</small></button>
+  </div>
+
+  <div id="expressBlock">
+    <h2>Предварительный расчёт</h2>
+    <p class="hint">Клиент не знает своих ставок и МФО. Берём три вещи со слов: общий долг, официальный доход, имущество. Калькулятор показывает, куда идёт клиент, и даёт предварительные цифры. Точность — потом, по КИ.</p>
+    <div class="params">
+      <div class="p"><label>Долг со слов, ₽</label><input id="e_debt" type="number" value="1150000"></div>
+      <div class="p"><label>Офиц. доход, ₽/мес</label><input id="e_income" type="number" value="80000"></div>
+      <div class="p"><label>Детей</label><input id="e_kids" type="number" value="1" min="0"></div>
+      <div class="p"><label>Имущество</label><select id="e_assets">
+        <option value="none">нет (только единственное жильё)</option>
+        <option value="car">есть: авто</option>
+        <option value="estate">есть: вторая недвижимость</option>
+        <option value="mortgage">ипотека</option>
+      </select></div>
+    </div>
+    <div class="verdict" id="verdict"></div>
+    <div class="out" id="expOut"></div>
+    <button class="tostage" onclick="setMode('detail')">Уточнить по кредитной истории: перейти к точному расчёту</button>
+  </div>
+
+  <div id="detailBlock" style="display:none">
   <div class="prodsw" id="prodsw">
     <button class="on" data-prod="rdg">РДГ<small>реструктуризация: план 36/60 мес</small></button>
     <button data-prod="bfl">БФЛ<small>списание: переплата vs процедура</small></button>
@@ -121,6 +162,8 @@ h2{font-size:14.5px;font-weight:800;margin:18px 0 8px}
   <h2 id="outTitle">Расчёт РДГ</h2>
   <div class="out" id="out"></div>
   <div class="elig" id="elig" style="display:none"></div>
+
+  </div><!-- /detailBlock -->
 
   <div class="export">
     <div class="eh"><b>Что уходит из виджета</b><span style="font-size:11.5px;color:var(--faint)">поля сделки amo → презентация и договор</span><button onclick="copyJson(this)">Скопировать JSON</button></div>
@@ -345,6 +388,91 @@ function copyJson(btn){
     ()=>{btn.textContent='Скопировано ✓';},()=>{btn.textContent=text.slice(0,20)+'…';});
   setTimeout(()=>{btn.textContent='Скопировать JSON';},2000);
 }
+/* ===== экспресс: предварительный расчёт и маршрутизация ===== */
+const PM_SELF=19329, PM_CHILD=17201, BFL_COST=239000, BFL_M=14;
+function expressCalc(){
+  const debt=parseFloat(document.getElementById('e_debt').value)||0;
+  const income=parseFloat(document.getElementById('e_income').value)||0;
+  const kids=parseFloat(document.getElementById('e_kids').value)||0;
+  const assets=document.getElementById('e_assets').value;
+  const family=PM_SELF+kids*PM_CHILD;
+  const free=income-family;
+  const rdgTotal=debt*1.07;
+  const p36=rdgTotal/36, p60=rdgTotal/60;
+  let route,term=null,reason,warn='';
+  if(debt<=0){route='self';reason='Введите сумму долга.';}
+  else if(free>=debt/3){route='self';reason='Свободный доход '+fmt(free)+' ₽/мес: долг закрывается своими силами примерно за 3 месяца. Процедура не нужна.';}
+  else if(free>=p60){
+    route='rdg'; term=free>=p36?36:60;
+    reason='Официального дохода хватает на план: свободно '+fmt(free)+' ₽/мес, платёж плана '+fmt(term===36?p36:p60)+' ₽/мес на '+term+' мес. Долг фиксируется, проценты останавливаются'+(assets!=='none'?', имущество сохраняется':'')+', клиент не признаётся банкротом.';
+    if(assets==='none') warn='Имущества нет: возможен и БФЛ (дешевле: '+fmt(BFL_COST)+' ₽ и долг списан). Проговорить оба варианта.';
+  }else{
+    route='bfl';
+    reason=income<=0?'Официального дохода нет: план РДГ утверждать не из чего. Путь: списание долга.':'Свободного дохода '+fmt(free)+' ₽/мес не хватает на план РДГ (минимум '+fmt(p60)+' ₽/мес на 60 мес). Путь: списание долга.';
+    if(assets==='car'||assets==='estate') warn='Есть имущество: при списании оно попадает под реализацию. Проговорить отдельно.';
+    if(assets==='mortgage') warn='Ипотека: при списании залоговое жильё под риском. Обязательная консультация юриста, возможно РДГ с ипотечным механизмом.';
+  }
+  const v=document.getElementById('verdict');
+  v.className='verdict '+(route==='rdg'?'rdg':route==='bfl'?'bfl':'self');
+  v.innerHTML='<div class="vl">Куда идёт клиент · предварительно</div><div class="vt">'
+    +(route==='rdg'?'РДГ · реструктуризация'+(term?' · план '+term+' мес':''):route==='bfl'?'БФЛ · списание долга':'Мимо процедур')
+    +'</div><div class="vr">'+reason+'</div>'+(warn?'<div class="warn">'+warn+'</div>':'');
+  const out=document.getElementById('expOut');
+  if(route==='rdg'){
+    out.innerHTML=`
+      <div class="kpi"><div class="l">Долг со слов</div><div class="v num">${fmt(debt)} ₽</div><div class="s num">+ ФУ 7% = ${fmt(rdgTotal)} ₽</div></div>
+      <div class="kpi hero"><div class="l">Платёж по плану · ${term} мес</div><div class="v num">${fmt(term===36?p36:p60)} ₽/мес</div><div class="s">проценты и пени останавливаются</div></div>
+      <div class="kpi"><div class="l">Запас дохода</div><div class="v num">${fmt(free-(term===36?p36:p60))} ₽</div><div class="s num">свободно ${fmt(free)} ₽ после ПМ семьи ${fmt(family)} ₽</div></div>
+      <div class="kpi good"><div class="l">Услуги ДОНУЛЯ</div><div class="v num">13 500 ₽/мес</div><div class="s num">тариф «Выгодный» · 189 000 ₽ за 14 мес</div></div>`;
+    lastExport={stage:'экспресс',product:'РДГ',debtStated:debt,income,assets,term,rdgTotal:Math.round(rdgTotal),rdgMonthly:Math.round(term===36?p36:p60),freeIncome:Math.round(free)};
+    renderExport([
+      ['В сделку amo (предварительные поля)',[
+        ['Долг со слов клиента', fmt(debt)+' ₽'],
+        ['Офиц. доход / свободный', fmt(income)+' / '+fmt(free)+' ₽'],
+        ['Имущество', document.getElementById('e_assets').selectedOptions[0].textContent],
+        ['Маршрут (Тип услуги)', 'РДГ · план '+term+' мес'],
+        ['Платёж по плану (предв.)', fmt(term===36?p36:p60)+' ₽/мес']]],
+      ['Дальше',[
+        ['Презентация', 'РДГ (client-presentation-rdg), цифры уточнить по КИ'],
+        ['Точный расчёт', 'вкладка «Точный»: кредиты из КИ']]]
+    ]);
+  }else if(route==='bfl'){
+    out.innerHTML=`
+      <div class="kpi"><div class="l">Долг со слов</div><div class="v num">${fmt(debt)} ₽</div><div class="s">списывается целиком по 127-ФЗ</div></div>
+      <div class="kpi hero"><div class="l">Списание за ~${BFL_M} мес</div><div class="v num">13 500 ₽/мес</div><div class="s num">услуги 189 000 ₽ + госплатежи 50 000 ₽</div></div>
+      <div class="kpi good"><div class="l">Выгода (минимум)</div><div class="v num">${fmt(Math.max(0,debt-BFL_COST))} ₽</div><div class="s num">${fmt(debt)} ₽ долга против ${fmt(BFL_COST)} ₽ за процедуру</div></div>
+      <div class="kpi"><div class="l">Доход после ПМ</div><div class="v num">${fmt(Math.max(0,free))} ₽</div><div class="s num">ПМ семьи ${fmt(family)} ₽</div></div>`;
+    lastExport={stage:'экспресс',product:'БФЛ',debtStated:debt,income,assets,procCost:BFL_COST,benefitMin:Math.round(Math.max(0,debt-BFL_COST))};
+    renderExport([
+      ['В сделку amo (предварительные поля)',[
+        ['Долг со слов клиента', fmt(debt)+' ₽'],
+        ['Офиц. доход / свободный', fmt(income)+' / '+fmt(free)+' ₽'],
+        ['Имущество', document.getElementById('e_assets').selectedOptions[0].textContent],
+        ['Маршрут (Тип услуги)', 'БФЛ · списание долга'],
+        ['Выгода (предв., минимум)', fmt(Math.max(0,debt-BFL_COST))+' ₽']]],
+      ['Дальше',[
+        ['Презентация', 'БФЛ (client-presentation-v2), цифры уточнить по КИ'],
+        ['Точный расчёт', 'вкладка «Точный»: кредиты из КИ']]]
+    ]);
+  }else{
+    out.innerHTML='';
+    lastExport={stage:'экспресс',product:'мимо',debtStated:debt,income,freeIncome:Math.round(free)};
+    renderExport([['В сделку amo',[['Маршрут','не наш клиент (закроет сам)'],['Свободный доход',fmt(free)+' ₽/мес']]]]);
+  }
+}
+let mode='express';
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('#modesw button').forEach(b=>b.classList.toggle('on',b.dataset.mode===m));
+  document.getElementById('expressBlock').style.display=m==='express'?'':'none';
+  document.getElementById('detailBlock').style.display=m==='detail'?'':'none';
+  document.getElementById('outTitle').style.display=m==='detail'?'':'none';
+  if(m==='express'){document.getElementById('out').innerHTML='';document.getElementById('elig').style.display='none';expressCalc();}
+  else recalc();
+}
+document.querySelectorAll('#modesw button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+['e_debt','e_income','e_kids','e_assets'].forEach(id=>document.getElementById(id).addEventListener('input',expressCalc));
+
 /* переключатели */
 document.querySelectorAll('#prodsw button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('#prodsw button').forEach(x=>x.classList.remove('on'));
@@ -355,7 +483,7 @@ document.querySelectorAll('#termSeg button').forEach(b=>b.addEventListener('clic
   b.classList.add('on'); rdgTerm=+b.dataset.t; recalc();
 }));
 ['p_fu','p_load','p_income','p_self','p_kids','p_child'].forEach(id=>document.getElementById(id).addEventListener('input',recalc));
-renderCredits(); recalc();
+renderCredits(); setMode('express');
 </script>
 </body>
 </html>
