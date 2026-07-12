@@ -386,7 +386,7 @@ h1 .hl{color:var(--green)}
 
       <!-- 0 · СТАРТ -->
       <section class="scr on" data-name="Подготовка">
-        <h1>Виктория Юрьевна, ваши условия готовы</h1>
+        <h1><span id="helloName">Виктория Юрьевна</span>, ваши условия готовы</h1>
         <p class="sub">Останьтесь, пожалуйста, на линии — сейчас разберём условия вместе со Светланой: она объяснит каждый шаг голосом, а вы двигаетесь дальше кнопкой внизу.</p>
 
         <div class="expert stg">
@@ -409,7 +409,7 @@ h1 .hl{color:var(--green)}
 
       <!-- 1 · ВЫЖИМКА -->
       <section class="scr" data-name="Шаг 1 из 6 · Условия">
-        <h1>Реструктуризация вашего долга <span class="hl nowrap">1&nbsp;240&nbsp;000&nbsp;₽</span></h1>
+        <h1>Реструктуризация вашего долга <span class="hl nowrap" id="h1debt">1&nbsp;240&nbsp;000&nbsp;₽</span></h1>
         <p class="sub">Уберём переплату по процентам и снизим ежемесячный платёж.</p>
 
         <div class="save-hero stg">
@@ -634,7 +634,7 @@ h1 .hl{color:var(--green)}
       <section class="scr" data-name="Готово">
         <div class="done-wrap">
           <div class="seal"><svg width="42" height="42" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg></div>
-          <h1>Виктория Юрьевна, вы в работе</h1>
+          <h1><span id="doneName">Виктория Юрьевна</span>, вы в работе</h1>
           <p class="sub">Оплата получена, дело открыто. Юрист сопровождения свяжется с вами сегодня и расскажет первые шаги. Все документы — уже в вашем чате.</p>
           <div class="sec stg" style="width:100%;text-align:left">
             <div class="st">Что дальше</div>
@@ -666,9 +666,12 @@ h1 .hl{color:var(--green)}
 </div>
 
 <script>
-/* ============ ДАННЫЕ (в проде приходят из CRM) ============ */
-const CLIENT={name:'Виктория Юрьевна', debt:1240000};
-const CLIENT_PAY=61500, RDG_TERM=36; /* платёж сейчас со слов клиента и срок плана — в проде из CRM */
+/* ============ ДАННЫЕ (в проде приходят из CRM; для демо-ссылки из виджета — URL-параметры ?name&debt&pay&term) ============ */
+const Q=new URLSearchParams(location.search);
+const CLIENT={name:(Q.get('name')||'Виктория Юрьевна').slice(0,60), debt:Math.max(0,+Q.get('debt'))||1240000};
+const payParam=Math.max(0,+Q.get('pay')||0);
+/* платёж сейчас со слов клиента и срок плана — в проде из CRM; в персональной ссылке без платежа хиро экономии не считаем (не выдумываем цифру) */
+const CLIENT_PAY=payParam>0?payParam:(Q.has('debt')?0:61500), RDG_TERM=Q.get('term')==='60'?60:36;
 const RASS_TOTAL=189000, RASS_M=14, VIP=169000, PAY_DAY=25;
 const fmt=n=>n.toLocaleString('ru-RU');
 
@@ -759,11 +762,17 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   const save=noUs-withUs, saveM=CLIENT_PAY-usMonthly;
   const plan=Math.round(CLIENT.debt*1.07/RDG_TERM);
   const set=(id,v)=>document.getElementById(id).textContent=v;
-  set('cmpSave','~'+fmt(save)+' ₽');
-  set('cmpSaveM','~'+fmt(saveM)+' ₽');
+  /* платёж клиента неизвестен или экономии нет (платит меньше плана) — хиро и бары не показываем, честный расчёт остаётся в спойлере */
+  if(CLIENT_PAY<=0||save<=0){
+    document.querySelector('.save-hero').style.display='none';
+    document.querySelector('.bars').style.display='none';
+    if(CLIENT_PAY<=0){document.getElementById('calcBtn').style.display='none';}
+  }
+  set('cmpSave','~'+fmt(Math.max(0,save))+' ₽');
+  set('cmpSaveM','~'+fmt(Math.max(0,saveM))+' ₽');
   set('cmpPayNow','~'+fmt(CLIENT_PAY)+' ₽/мес');
   set('cmpUsMonthly','~'+fmt(usMonthly)+' ₽/мес');
-  document.getElementById('cmpUsBar').style.width=Math.round(usMonthly/CLIENT_PAY*100)+'%';
+  document.getElementById('cmpUsBar').style.width=(CLIENT_PAY>0?Math.min(100,Math.round(usMonthly/CLIENT_PAY*100)):100)+'%';
   set('cmpDebt',fmt(CLIENT.debt)+' ₽'); set('cmpPay2','~'+fmt(CLIENT_PAY)+' ₽');
   set('cmpTerm',RDG_TERM);
   set('cmpNoUs','~'+fmt(noUs)+' ₽'); set('cmpInterest',fmt(interest)+' ₽');
@@ -771,6 +780,16 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   set('planPay',fmt(plan)); set('planTerm',RDG_TERM);
 })();
 function toggleCalc(){const d=document.getElementById('calcDetail'),b=document.getElementById('calcBtn');const open=d.style.display==='none';d.style.display=open?'':'none';b.textContent=open?'Скрыть расчёт':'Как посчитана экономия';}
+
+/* подстановка клиента из URL-параметров (демо-связка из amo-виджета; в проде merge из CRM) */
+document.getElementById('h1debt').textContent=fmt(CLIENT.debt)+' ₽';
+document.getElementById('helloName').textContent=CLIENT.name;
+document.getElementById('doneName').textContent=CLIENT.name;
+if(Q.get('name')){
+  const f=document.getElementById('fio');
+  f.value=CLIENT.name;
+  document.getElementById('docFio').textContent=CLIENT.name;
+}
 
 recalc(); show(0);
 

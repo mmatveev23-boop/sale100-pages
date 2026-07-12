@@ -98,6 +98,35 @@ h1 .hl{color:var(--green)}
 .price .pv small{font-size:17px;font-weight:600;color:rgba(255,255,255,.65)}
 .price .ps{margin-top:9px;font-size:13px;color:rgba(255,255,255,.72)}
 .price .ps b{color:#F4C775;font-weight:700}
+/* хиро выгоды (как на РДГ-странице — единый дизайн) */
+.save-hero{background:radial-gradient(120% 90% at 85% -10%, #135741 0%, transparent 55%),linear-gradient(165deg,#0C4233 0%,#0B3B2E 60%,#082A21 100%);color:#fff;border-radius:var(--r-box);padding:22px 20px;margin-top:12px;text-align:center}
+.save-hero .sl{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.save-hero .sv{margin-top:6px;font-size:46px;font-weight:800;letter-spacing:-.02em;line-height:1;color:#F4C775}
+.save-hero .ss{margin-top:8px;font-size:14px;color:rgba(255,255,255,.82)}
+.save-hero .ss b{color:#9FE8C6}
+.bars{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);padding:15px 16px;margin-top:12px}
+.bar + .bar{margin-top:12px}
+.bar .bl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
+.bar .bl span{color:var(--muted)}
+.bar .bl b{font-weight:800}
+.bar i{display:block;height:14px;border-radius:7px}
+.bar.now i{background:#E4B8AC}
+.bar.now .bl b{color:var(--alert)}
+.bar.us i{background:var(--green)}
+.bar.us .bl b{color:var(--green-ink)}
+.bars .bnote{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+.cmp{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);overflow:hidden;margin-top:12px}
+.cmp .ch{padding:11px 15px;background:#FDFBF7;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.cmp .ch b{color:var(--ink)}
+.cmp .cr{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:11px 15px;font-size:13.5px}
+.cmp .cr + .cr{border-top:1px solid var(--line)}
+.cmp .cr span{color:var(--muted)}
+.cmp .cr small{display:block;font-size:11.5px;color:var(--faint)}
+.cmp .cr b{font-weight:800;white-space:nowrap}
+.cmp .cr.bad b{color:var(--alert)}
+.cmp .cf{background:var(--green-soft);padding:12px 15px;display:flex;justify-content:space-between;align-items:center}
+.cmp .cf .t{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-ink)}
+.cmp .cf .v{font-size:22px;font-weight:800;letter-spacing:-.01em;color:var(--green-ink)}
 
 /* тарифы */
 .tariffs{display:grid;gap:9px;margin-top:12px}
@@ -327,7 +356,7 @@ h1 .hl{color:var(--green)}
 
       <!-- 0 · СТАРТ -->
       <section class="scr on" data-name="Подготовка">
-        <h1>Виктория Юрьевна, ваши условия готовы</h1>
+        <h1><span id="helloName">Виктория Юрьевна</span>, ваши условия готовы</h1>
         <p class="sub">Останьтесь, пожалуйста, на линии — сейчас разберём условия вместе со Светланой: она объяснит каждый шаг голосом, а вы двигаетесь дальше кнопкой внизу.</p>
 
         <div class="expert stg">
@@ -350,8 +379,31 @@ h1 .hl{color:var(--green)}
 
       <!-- 1 · ВЫЖИМКА -->
       <section class="scr" data-name="Шаг 1 из 7 · Условия">
-        <h1>Спишем ваш долг <span class="hl nowrap">1&nbsp;240&nbsp;000&nbsp;₽</span> законно</h1>
+        <h1>Спишем ваш долг <span class="hl nowrap" id="h1debt">1&nbsp;240&nbsp;000&nbsp;₽</span> законно</h1>
         <p class="sub">Процедура по 127-ФЗ: списание долга. Здесь всё, о чём говорили с экспертом, — проверьте глазами.</p>
+
+        <div class="save-hero stg">
+          <div class="sl">Ваша выгода с нами</div>
+          <div class="sv num" id="bflSave">—</div>
+          <div class="ss num">долг <b id="bflDebt">—</b> спишется целиком — платите только за процедуру</div>
+        </div>
+
+        <div class="bars stg" id="barsWrap">
+          <div class="bar now"><div class="bl"><span>Платите сейчас</span><b class="num" id="barNow">—</b></div><i style="width:100%"></i></div>
+          <div class="bar us"><div class="bl"><span>Будете платить с нами</span><b class="num" id="barUs">13 500 ₽/мес</b></div><i id="barUsFill" style="width:22%"></i></div>
+          <div class="bnote">Платёж только за процедуру, <span id="barTerm">14</span> платежей — дальше долгов нет. Коллекторам и банкам звонить вам запрещено по 127-ФЗ.</div>
+        </div>
+
+        <button class="linkbtn stg" id="calcBtn" onclick="toggleCalc()">Как посчитана выгода</button>
+        <div id="calcDetail" style="display:none">
+          <div class="cmp">
+            <div class="ch">По вашим цифрам: долг <b class="num" id="cmpDebt">—</b> списывается судом целиком</div>
+            <div class="cr"><span>Услуги ДОНУЛЯ<small>рассрочка на 14 месяцев без банка и процентов</small></span><b class="num">189 000 ₽</b></div>
+            <div class="cr"><span>Госплатежи<small>напрямую государству: депозит суда, публикации, почтовые</small></span><b class="num">50 000 ₽</b></div>
+            <div class="cf"><div><div class="t">Ваша выгода</div><div style="font-size:11.5px;color:var(--green-ink)">долг − 239 000 ₽</div></div><div class="v num" id="cdSave">—</div></div>
+          </div>
+          <p class="sub" style="margin-top:8px">Выгода посчитана без переплаты по процентам, которую вы бы отдали, продолжая платить, — по факту она больше. Расчёт предварительный, итог фиксирует суд.</p>
+        </div>
 
         <div class="price stg">
           <div class="pl">Ваш платёж</div>
@@ -577,7 +629,7 @@ h1 .hl{color:var(--green)}
       <section class="scr" data-name="Готово">
         <div class="done-wrap">
           <div class="seal"><svg width="42" height="42" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg></div>
-          <h1>Виктория Юрьевна, вы в работе</h1>
+          <h1><span id="doneName">Виктория Юрьевна</span>, вы в работе</h1>
           <p class="sub">Оплата получена, дело открыто. Юрист сопровождения свяжется с вами сегодня и расскажет первые шаги. Все документы — уже в вашем чате.</p>
           <div class="sec stg" style="width:100%;text-align:left">
             <div class="st">Что дальше</div>
@@ -610,7 +662,16 @@ h1 .hl{color:var(--green)}
 
 <script>
 /* ============ ДАННЫЕ (в проде приходят из CRM) ============ */
-const CLIENT={name:'Виктория Юрьевна', debt:1240000};
+/* данные клиента: в проде из CRM; для демо-ссылки из виджета — URL-параметры ?name&debt&pay */
+const Q=new URLSearchParams(location.search);
+const payParam=Math.max(0,+Q.get('pay')||0);
+const CLIENT={
+  name:(Q.get('name')||'Виктория Юрьевна').slice(0,60), /* вставляется только через textContent/value — безопасно */
+  debt:Math.max(0,+Q.get('debt'))||1240000,
+  /* платёж сейчас со слов; без него бары сравнения не показываем (не выдумываем цифру) */
+  payNow:payParam>0?payParam:(Q.has('debt')?0:61500)
+};
+const BFL_TOTAL_COST=239000; /* услуги 189 000 + госплатежи 50 000 */
 const RASS_TOTAL=189000, RASS_M=14, VIP=169000, KD_PRICE=50000, KD_M=2, PAY_DAY=25;
 const fmt=n=>n.toLocaleString('ru-RU');
 
@@ -665,7 +726,28 @@ function recalc(){
   document.getElementById('payNext').style.display=vip?'none':'';
   document.getElementById('payNext').textContent='Следующий платёж — '+months(2)[1].replace(' г.','')+'. Напомним заранее в чате.';
   document.getElementById('payNote').textContent=(vip?'оплата по договору':'первый платёж по графику')+' · договор № ДН-2607-1418';
+  /* бары хиро: «с нами» = рассрочка услуг 13 500/мес; скрыты при VIP (разовая оплата) и без известного платежа клиента */
+  const barsEl=document.getElementById('barsWrap');
+  if(barsEl) barsEl.style.display=(CLIENT.payNow>0 && !vip)?'':'none';
   renderKdDelta();
+}
+/* хиро выгоды БФЛ (канон виджета: выгода = долг − услуги 189 000 − госплатежи 50 000) */
+function renderHero(){
+  const save=Math.max(0,CLIENT.debt-BFL_TOTAL_COST);
+  document.getElementById('bflSave').textContent='~'+fmt(save)+' ₽';
+  document.getElementById('bflDebt').textContent=fmt(CLIENT.debt)+' ₽';
+  document.getElementById('cmpDebt').textContent=fmt(CLIENT.debt)+' ₽';
+  document.getElementById('cdSave').textContent='~'+fmt(save)+' ₽';
+  if(CLIENT.payNow>0){
+    document.getElementById('barNow').textContent='~'+fmt(CLIENT.payNow)+' ₽/мес';
+    document.getElementById('barUsFill').style.width=Math.min(100,Math.round(13500/CLIENT.payNow*100))+'%';
+  }
+}
+function toggleCalc(){
+  const d=document.getElementById('calcDetail'),b=document.getElementById('calcBtn');
+  const open=d.style.display==='none';
+  d.style.display=open?'':'none';
+  b.textContent=open?'Скрыть расчёт':'Как посчитана выгода';
 }
 function setTariff(t){tariff=t;document.getElementById('trfR').classList.toggle('sel',t==='rassrochka');document.getElementById('trfV').classList.toggle('sel',t==='vip');recalc();}
 function setKd(v){kd=v;document.getElementById('kdY').classList.toggle('sel',v);document.getElementById('kdN').classList.toggle('sel',!v);recalc();}
@@ -713,6 +795,15 @@ document.querySelectorAll('.otp input').forEach((inp,i,all)=>{
 let tleft=60*60;
 setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padStart(2,'0'),s=String(tleft%60).padStart(2,'0');document.getElementById('simTimer').textContent=m+':'+s;}},1000);
 
+/* подстановка клиента из URL-параметров (демо-связка из amo-виджета; в проде merge из CRM) */
+document.getElementById('h1debt').textContent=fmt(CLIENT.debt)+' ₽';
+document.getElementById('helloName').textContent=CLIENT.name;
+document.getElementById('doneName').textContent=CLIENT.name;
+if(Q.get('name')){
+  const f=document.getElementById('fio');
+  if(f){ f.value=CLIENT.name; document.getElementById('docFio').textContent=CLIENT.name; }
+}
+renderHero();
 recalc(); show(0);
 
 /* ============ ДОГОВОР-PDF (вшит base64 — страница самодостаточна; в проде файл придёт из CRM) ============ */
