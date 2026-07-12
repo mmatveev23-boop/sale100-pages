@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Виджет-калькулятор · состояния · ДОНУЛЯ</title>
+<meta name="description" content="Состояния виджета в карточке сделки amoCRM: со слов → по КИ, отправлено/нет, загрузка и ошибки. Одна презентация, КИ переключает данные.">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4EFE6; --paper2:#ECE5D8; --card:#fff;
+  --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0B3B2E; --pine2:#0C4233; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
+  --gold:#C99A33; --gold-bright:#F4C775; --gold-soft:#FBF3DC; --gold-ink:#8A6212;
+  --blue:#4c8bf7; --alert:#A8442E; --alert-soft:#FAEDE8;
+  --line:#E4DCCD; --shadow:0 18px 44px -22px rgba(11,59,46,.42); --shadow-sm:0 8px 22px -14px rgba(11,59,46,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 18px 80px}
+
+/* ── ШАПКА ── */
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:28px 26px;box-shadow:var(--shadow)}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+.hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
+.hdr .brand b{font-size:15px;letter-spacing:.02em}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:26px;line-height:1.16;letter-spacing:-.02em;font-weight:800}
+.hdr p{margin-top:10px;font-size:14.5px;color:rgba(255,255,255,.8);max-width:66ch}
+/* принцип */
+.principle{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+.pchip{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--muted)}
+.pchip b{color:var(--ink);font-weight:700}
+.pchip .ic{width:9px;height:9px;border-radius:3px}
+
+/* ── СЕТКА СОСТОЯНИЙ ── */
+.grid{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;align-items:start}
+.state{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-sm);overflow:hidden}
+.state .lbl{display:flex;align-items:center;gap:9px;padding:14px 16px 0}
+.state .lbl .n{width:26px;height:26px;border-radius:8px;background:var(--pine);color:var(--gold-bright);display:grid;place-items:center;font-size:12.5px;font-weight:800;flex-shrink:0}
+.state .lbl b{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.state .cap{padding:6px 16px 14px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.state .cap b{color:var(--ink);font-weight:600}
+.wcanvas{background:#f7f8f9;border-top:1px solid var(--line);padding:14px}
+
+/* ── ВИДЖЕТ (как в amo, из in-amo.html) ── */
+.dw{background:#fff;border:1px solid #cfe0d8;border-radius:10px;overflow:hidden;box-shadow:0 4px 14px -8px rgba(11,59,46,.35)}
+.dw.hot{border:2px solid var(--gold);box-shadow:0 6px 18px -8px rgba(201,154,51,.5)}
+.dw .dh{display:flex;align-items:center;gap:8px;background:#0B3B2E;color:#fff;padding:10px 12px}
+.dw .dh .lg{width:22px;height:22px;border-radius:6px;background:#0F6B4F;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#F4C775}
+.dw .dh b{font-size:12.5px}
+.dw .dh small{display:block;font-size:10px;color:rgba(255,255,255,.6)}
+.dw .body{padding:10px 12px}
+.dw .seg{display:flex;gap:3px;background:#eef1f4;border-radius:8px;padding:3px;margin-bottom:2px}
+.dw .seg button{flex:1;border:none;background:none;border-radius:6px;padding:5px;font-family:inherit;font-weight:700;font-size:12px;color:#7c8894;cursor:default}
+.dw .seg button.on{background:#fff;color:#0B3B2E;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.dw label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#94a0ab;margin:8px 0 3px}
+.dw .fld{width:100%;border:1px solid #d8dee3;border-radius:7px;padding:7px 9px;font-size:13px;color:#2e3640;background:#fff}
+.dw .fld.ki{border-color:#C99A33;background:#FBF3DC;color:#8A6212;font-weight:700}
+.dw .verdict{margin-top:10px;border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.4}
+.dw .verdict b{display:block;font-size:13px;margin-bottom:2px}
+.dw .verdict.rdg{background:#0B3B2E;color:#fff}
+.dw .verdict.bfl{background:#E9F3EE;color:#0B5540}
+.dw .kv{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:12.5px;border-bottom:1px dashed #eef1f4}
+.dw .kv span{color:#94a0ab}
+.dw .kv b{font-variant-numeric:tabular-nums}
+/* строка данных (источник) */
+.dbadge{margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px}
+.dbadge.words{background:#eef1f4;color:#7c8894}
+.dbadge.ki{background:#FBF3DC;color:#8A6212}
+.dbadge.load{background:#E4F0FA;color:#2f6fb0}
+.dbadge.err{background:#FAEDE8;color:#A8442E}
+/* кнопка отправки — главная (зелёная) */
+.sbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:10px;border:none;border-radius:8px;background:#0F6B4F;color:#fff;padding:11px;font-family:inherit;font-size:13.5px;font-weight:800;cursor:default}
+.sbtn.dis{background:#c3ccd4;color:#fff}
+.sbtn.err{background:#A8442E}
+/* статус под кнопкой */
+.sstat{margin-top:6px;text-align:center;font-size:11.5px;font-weight:600}
+.sstat.none{color:#94a0ab}
+.sstat.sent{color:#0F6B4F}
+.sstat.warn{color:#A8442E}
+/* вторичные */
+.lrow{display:flex;gap:6px;margin-top:8px}
+.lbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid #d8dee3;border-radius:8px;background:#fff;color:#0B5540;padding:8px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:default;text-align:center}
+.lbtn.hi{border-color:#0F6B4F;background:#E9F3EE}
+.lbtn.mut{color:#7c8894}
+.note{margin-top:9px;font-size:11px;color:#94a0ab;line-height:1.5}
+.note b{color:#5c6874;font-weight:700}
+.prog{margin-top:10px;height:8px;border-radius:5px;background:#e4eaef;overflow:hidden}
+.prog i{display:block;height:100%;width:62%;background:#4c8bf7;border-radius:5px}
+
+/* низ */
+.foot{margin-top:26px;background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:18px 20px}
+.foot h3{font-size:15px;font-weight:800;margin-bottom:8px}
+.foot ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.foot li{font-size:13px;color:var(--muted);line-height:1.5;padding-left:16px;position:relative}
+.foot li::before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.foot li b{color:var(--ink);font-weight:600}
+@media (max-width:640px){ .foot ul{grid-template-columns:1fr} .principle{gap:8px} .hdr h1{font-size:22px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hdr">
+    <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор клиента</b><small>СОСТОЯНИЯ ВИДЖЕТА В amoCRM</small></div></div>
+    <h1>Как виджет выглядит на каждом шаге</h1>
+    <p>Одна презентация клиенту. Кредитная история (КИ) не создаёт второй документ — она переключает данные презентации со «со слов» на «точные». Ниже — все состояния виджета в карточке сделки.</p>
+    <div class="principle">
+      <span class="pchip"><span class="ic" style="background:#0F6B4F"></span><b>Одна кнопка</b> отправки презентации</span>
+      <span class="pchip"><span class="ic" style="background:#C99A33"></span>КИ переключает <b>данные</b>, не документ</span>
+      <span class="pchip"><span class="ic" style="background:#4c8bf7"></span>статус «отправлено» = <b>защита от «забыл»</b></span>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- 1 · СО СЛОВ · НЕ ОТПРАВЛЕНО -->
+    <div class="state">
+      <div class="lbl"><span class="n">1</span><b>Со слов · не отправлено</b></div>
+      <div class="cap">Клоузер посчитал со слов прямо на звонке. КИ ещё нет. Клиент увидит числа с пометкой <b>«предварительно»</b>.</div>
+      <div class="wcanvas">
+        <div class="dw">
+          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>экспресс · первый звонок</small></div></div>
+          <div class="body">
+            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
+            <label>Долг со слов, ₽</label><div class="fld num">1 150 000</div>
+            <div class="verdict rdg"><b>РДГ · план 36 мес</b>Платёж ~36 856 ₽/мес, проценты останавливаются, не банкрот.</div>
+            <div class="dbadge words">🎤 Данные: со слов</div>
+            <button class="sbtn">✈ Отправить презентацию клиенту</button>
+            <div class="sstat none">ещё не отправлено</div>
+            <div class="lrow"><span class="lbtn">⭱ Загрузить КИ</span><span class="lbtn mut">⧉ Скопировать</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 · СО СЛОВ · ОТПРАВЛЕНО -->
+    <div class="state">
+      <div class="lbl"><span class="n">2</span><b>Со слов · отправлено</b></div>
+      <div class="cap">Ссылка ушла клиенту в чат. Появится КИ — <b>та же ссылка</b> станет точной, пересылать заново не нужно.</div>
+      <div class="wcanvas">
+        <div class="dw">
+          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>экспресс · первый звонок</small></div></div>
+          <div class="body">
+            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
+            <label>Долг со слов, ₽</label><div class="fld num">1 150 000</div>
+            <div class="verdict rdg"><b>РДГ · план 36 мес</b>Платёж ~36 856 ₽/мес, проценты останавливаются, не банкрот.</div>
+            <div class="dbadge words">🎤 Данные: со слов</div>
+            <button class="sbtn">✈ Отправить снова</button>
+            <div class="sstat sent">✓ отправлено 14:32</div>
+            <div class="lrow"><span class="lbtn hi">⭱ Загрузить КИ → станет точной</span></div>
+            <div class="note">Клиент открыл презентацию · виден в ленте сделки.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 · КИ ЗАГРУЖАЕТСЯ -->
+    <div class="state">
+      <div class="lbl"><span class="n">3</span><b>КИ загружается</b></div>
+      <div class="cap">Парсинг PDF-отчёта БКИ <b>прямо в виджете</b>, без выхода из amo. Сверяет сумму со сводкой отчёта.</div>
+      <div class="wcanvas">
+        <div class="dw">
+          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>точный расчёт по КИ</small></div></div>
+          <div class="body">
+            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
+            <div class="dbadge load">⏳ Читаю отчёт БКИ… нашёл 12 договоров</div>
+            <div class="prog"><i></i></div>
+            <button class="sbtn dis">✈ Отправить презентацию клиенту</button>
+            <div class="sstat none">дождитесь расчёта…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 · ПО КИ · НЕ ОТПРАВЛЕНО (ранний КИ) -->
+    <div class="state">
+      <div class="lbl"><span class="n">4</span><b>По КИ · не отправлено</b></div>
+      <div class="cap"><b>Ранний КИ от охотника:</b> клоузер открыл виджет, а данные уже точные. Сразу шлёт сильную презентацию.</div>
+      <div class="wcanvas">
+        <div class="dw hot">
+          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>точный расчёт по КИ</small></div></div>
+          <div class="body">
+            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
+            <label>Долг по кредитной истории, ₽</label><div class="fld ki num">1 050 460</div>
+            <div class="verdict rdg"><b>РДГ · план 36 мес</b>22 договора · платёж по плану 31 210 ₽/мес.</div>
+            <div class="dbadge ki">✓ По кредитной истории · 22 договора</div>
+            <button class="sbtn">✈ Отправить презентацию клиенту</button>
+            <div class="sstat none">ещё не отправлено</div>
+            <div class="note"><b>КИ загружена охотником заранее.</b> Клиент увидит точные числа и список кредиторов.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5 · ПО КИ · ОТПРАВЛЕНО -->
+    <div class="state">
+      <div class="lbl"><span class="n">5</span><b>По КИ · отправлено</b></div>
+      <div class="cap">Точная презентация ушла. Отдельно можно скачать <b>файл выгод (PDF)</b> в сделку — на дожим.</div>
+      <div class="wcanvas">
+        <div class="dw">
+          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>точный расчёт по КИ</small></div></div>
+          <div class="body">
+            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
+            <label>Долг по кредитной истории, ₽</label><div class="fld ki num">1 050 460</div>
+            <div class="verdict rdg"><b>РДГ · план 36 мес</b>22 договора · платёж по плану 31 210 ₽/мес.</div>
+            <div class="dbadge ki">✓ По кредитной истории · 22 договора</div>
+            <button class="sbtn">✈ Отправить снова</button>
+            <div class="sstat sent">✓ отправлено 15:07</div>
+            <div class="lrow"><span class="lbtn mut">⧉ Скопировать</span><span class="lbtn mut">⤓ Файл выгод (PDF)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6 · ОШИБКА КИ -->
+    <div class="state">
+      <div class="lbl"><span class="n">6</span><b>КИ не распозналась</b></div>
+      <div class="cap">Не тот формат отчёта или скан. Виджет <b>остаётся на «со слов»</b> — расчёт не ломается, отправка доступна.</div>
+      <div class="wcanvas">
+        <div class="dw">
+          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>точный расчёт по КИ</small></div></div>
+          <div class="body">
+            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
+            <div class="dbadge err">⚠ Отчёт не распознан</div>
+            <div class="note">Поддерживается отчёт <b>ОКБ (текстовый PDF)</b>. Скан или другой формат не читается — проверьте файл или оставьте расчёт со слов.</div>
+            <div class="lrow"><span class="lbtn hi">⭱ Загрузить другой файл</span></div>
+            <button class="sbtn">✈ Отправить со слов</button>
+            <div class="sstat none">данные: со слов</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7 · АВТОПУШ НЕДОСТУПЕН -->
+    <div class="state">
+      <div class="lbl"><span class="n">7</span><b>Чат недоступен → фоллбэк</b></div>
+      <div class="cap">Нет интеграции с чатом или клиент в другом канале. Отправка не прошла — виджет предлагает <b>скопировать ссылку</b>.</div>
+      <div class="wcanvas">
+        <div class="dw">
+          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>экспресс · первый звонок</small></div></div>
+          <div class="body">
+            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
+            <div class="dbadge words">🎤 Данные: со слов</div>
+            <button class="sbtn err">✈ Не ушло в чат</button>
+            <div class="sstat warn">чат недоступен — отправьте ссылку сами</div>
+            <div class="lrow"><span class="lbtn hi">⧉ Скопировать ссылку</span></div>
+            <div class="note">Ссылка сформирована и лежит в сделке — вставьте её в любой канал клиента.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <h3>Что важно в этой логике</h3>
+    <ul>
+      <li><b>Одна презентация, два источника.</b> «Со слов» и «по КИ» — это одна и та же ссылка, меняются только числа и точность.</li>
+      <li><b>КИ прикрепляется в любой момент.</b> Рано (охотник) → сразу точно. Поздно → та же ссылка обновляется, клиенту не пересылаем.</li>
+      <li><b>Отправка гибридная.</b> Основное — автопуш в чат клиента; фоллбэк — «скопировать ссылку» (состояние 7).</li>
+      <li><b>Защита от «забыл».</b> Одна главная кнопка + статус «отправлено 14:32». Плюс на стороне CRM: статус «Договор на подписи» без презентации не наступает.</li>
+      <li><b>Маршрут (РДГ / БФЛ / мимо) — отдельная ось.</b> Он задаётся расчётом; на состояния отправки и КИ не влияет (здесь показан РДГ).</li>
+      <li><b>Страница выгод по КИ (дожим) — по желанию.</b> Файл выгод (PDF) в сделку остаётся для дожима на след. день, но это выгрузка, а не второй сайт.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
