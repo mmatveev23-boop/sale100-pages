@@ -218,7 +218,7 @@ function presentUrl(){
   const name=document.querySelector('.deal h1').textContent.trim();
   const pay=last.paynow>0?{pay:last.paynow}:{}; /* платёж не спросили — параметр не шлём, страница скроет сравнение, а не выдумает цифру */
   if(last.route==='РДГ') return '../presentation-rdg/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,term:last.eff});
-  if(last.route==='БФЛ') return '../presentation/index.html?'+new URLSearchParams({proc:'ri',name,debt:last.debt,...pay});
+  if(last.route==='БФЛ') return '../presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay});
   return null;
 }
 function writeToDeal(){
