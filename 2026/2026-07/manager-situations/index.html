@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Ситуации менеджера · какую презентацию показываем · ДОНУЛЯ</title>
+<meta name="description" content="Все ситуации менеджера и ссылки на нужное состояние презентации: охотник с КИ / без КИ, клиент прислал КИ, подписал не оплатил, оплатил.">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4EFE6; --paper2:#ECE5D8; --card:#fff;
+  --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0B3B2E; --pine2:#0C4233; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
+  --gold:#C99A33; --gold-bright:#F4C775; --gold-soft:#FBF3DC; --gold-ink:#8A6212;
+  --brick:#A8442E; --brick-soft:#F8E3DC;
+  --line:#E4DCCD; --shadow:0 18px 44px -22px rgba(11,59,46,.42); --shadow-sm:0 8px 22px -14px rgba(11,59,46,.4);
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:960px;margin:0 auto;padding:24px 18px 80px}
+
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:28px 26px;box-shadow:var(--shadow)}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+.hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
+.hdr .brand b{font-size:15px;letter-spacing:.02em}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:26px;line-height:1.16;letter-spacing:-.02em;font-weight:800}
+.hdr p{margin-top:10px;font-size:14.5px;color:rgba(255,255,255,.8);max-width:64ch}
+.principle{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
+.pchip{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:12.5px;font-weight:600;color:var(--muted)}
+.pchip b{color:var(--ink);font-weight:700}
+.pchip .ic{width:9px;height:9px;border-radius:3px}
+
+.group{margin-top:30px}
+.group-h{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.group-h .gn{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:5px 12px}
+.group-h span{font-size:13px;color:var(--faint)}
+
+.sit{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:16px 18px;margin-top:12px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.sit .l{min-width:0}
+.sit .when{font-size:15.5px;font-weight:800;letter-spacing:-.01em}
+.sit .when .em{color:var(--green-ink)}
+.sit .show{margin-top:5px;font-size:13px;color:var(--muted);line-height:1.5}
+.sit .show b{color:var(--ink);font-weight:600}
+.sit .tag{display:inline-block;margin-top:8px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px}
+.tag-slov{background:#eef1f4;color:#5c6874}
+.tag-ki{background:var(--gold-soft);color:var(--gold-ink)}
+.tag-pay{background:var(--green-soft);color:var(--green-ink)}
+.links{display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+.links a{display:inline-flex;align-items:center;justify-content:space-between;gap:10px;min-width:172px;text-decoration:none;border-radius:10px;padding:9px 13px;font-size:13px;font-weight:700;transition:transform .16s var(--ease),background .16s var(--ease)}
+.links a:active{transform:scale(.98)}
+.links a .arw{opacity:.6;font-weight:400}
+.links a.rdg{background:var(--pine);color:#fff}
+.links a.rdg:hover{background:var(--pine2)}
+.links a.bfl{background:#fff;color:var(--green-ink);border:1.5px solid var(--green)}
+.links a.bfl:hover{background:var(--green-soft)}
+.links .rl{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:1px}
+
+.foot{margin-top:30px;background:var(--card2, #fff);border:1px dashed var(--line);border-radius:16px;padding:18px 20px}
+.foot h3{font-size:15px;font-weight:800;margin-bottom:8px}
+.foot ul{list-style:none;display:grid;gap:8px}
+.foot li{font-size:13px;color:var(--muted);line-height:1.5;padding-left:16px;position:relative}
+.foot li::before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.foot li b{color:var(--ink);font-weight:600}
+.foot code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--paper2);padding:1px 6px;border-radius:5px;color:var(--green-ink)}
+
+@media (max-width:640px){
+  .wrap{padding:16px 13px 60px}
+  .hdr{padding:24px 20px;border-radius:20px} .hdr h1{font-size:22px}
+  .sit{grid-template-columns:1fr}
+  .links a{min-width:0;width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hdr">
+    <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · СИТУАЦИИ МЕНЕДЖЕРА</b><small>КАКУЮ ПРЕЗЕНТАЦИЮ ПОКАЗЫВАЕМ</small></div></div>
+    <h1>Ситуация → какое состояние презентации показываем</h1>
+    <p>Одна ссылка на клиента. Что она покажет — зависит от двух вещей: есть ли кредитная история (КИ) и на каком этапе сделка. Ниже — все ситуации менеджера и готовые ссылки. В бою эти ссылки собирает виджет автоматически; здесь — справочник соответствий.</p>
+    <div class="principle">
+      <span class="pchip"><span class="ic" style="background:#8A938A"></span>Данные: <b>со слов → по КИ</b></span>
+      <span class="pchip"><span class="ic" style="background:#0F6B4F"></span>Прогресс: <b>до подписи → подписал → оплатил</b></span>
+      <span class="pchip"><span class="ic" style="background:#C99A33"></span>Продукт: <b>РДГ / Списание</b></span>
+    </div>
+  </header>
+
+  <!-- ГРУППА 1 -->
+  <div class="group">
+    <div class="group-h"><span class="gn">Первый контакт</span><span>до подписи</span></div>
+
+    <div class="sit">
+      <div class="l">
+        <div class="when">1 · Охотник передал <span class="em">без КИ</span></div>
+        <div class="show">Считаем со слов в виджете. Клиент видит <b>приблизительную выгоду</b> с пометкой «предварительно, уточним по КИ».</div>
+        <span class="tag tag-slov">🎤 состояние: со слов</span>
+      </div>
+      <div class="links">
+        <div><div class="rl">Реструктуризация</div><a class="rdg" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/?name=Иван%20Петрович&debt=1150000&pay=58000" target="_blank" rel="noopener">РДГ · со слов <span class="arw">↗</span></a></div>
+        <div><div class="rl">Списание долга</div><a class="bfl" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-v2/?name=Иван%20Петрович&debt=1150000&pay=58000" target="_blank" rel="noopener">Списание · со слов <span class="arw">↗</span></a></div>
+      </div>
+    </div>
+
+    <div class="sit">
+      <div class="l">
+        <div class="when">2 · Охотник передал <span class="em">с КИ</span> (взял заранее)</div>
+        <div class="show">Виджет уже точный. Клиент сразу видит <b>точную выгоду</b>, «по вашей кредитной истории» и блок «ваши кредиторы».</div>
+        <span class="tag tag-ki">✓ состояние: по КИ</span>
+      </div>
+      <div class="links">
+        <div><div class="rl">Реструктуризация</div><a class="rdg" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/?name=Надежда%20Николаевна&ki=1" target="_blank" rel="noopener">РДГ · по КИ <span class="arw">↗</span></a></div>
+        <div><div class="rl">Списание долга</div><a class="bfl" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-v2/?name=Надежда%20Николаевна&ki=1" target="_blank" rel="noopener">Списание · по КИ <span class="arw">↗</span></a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ГРУППА 2 -->
+  <div class="group">
+    <div class="group-h"><span class="gn">Дожим</span><span>после первого звонка</span></div>
+
+    <div class="sit">
+      <div class="l">
+        <div class="when">3 · Клиент прислал КИ <span class="em">позже</span> (был со слов)</div>
+        <div class="show">Не шлём новую ссылку — <b>та же ссылка</b> теперь показывает точные числа и кредиторов. «Откройте снова, там ваши точные цифры».</div>
+        <span class="tag tag-ki">✓ состояние: по КИ (та же ссылка)</span>
+      </div>
+      <div class="links">
+        <div><div class="rl">Реструктуризация</div><a class="rdg" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/?name=Надежда%20Николаевна&ki=1" target="_blank" rel="noopener">РДГ · по КИ <span class="arw">↗</span></a></div>
+        <div><div class="rl">Списание долга</div><a class="bfl" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-v2/?name=Надежда%20Николаевна&ki=1" target="_blank" rel="noopener">Списание · по КИ <span class="arw">↗</span></a></div>
+      </div>
+    </div>
+
+    <div class="sit">
+      <div class="l">
+        <div class="when">4 · Подписал, но <span class="em">не оплатил</span> (был со слов)</div>
+        <div class="show">Открывается как <b>«договор подписан ✓ + оплата»</b>: подпись свёрнута, повторно не подписываем, остаётся выгода и кнопка оплаты.</div>
+        <span class="tag tag-pay">✍ состояние: подписал · оплата</span>
+      </div>
+      <div class="links">
+        <div><div class="rl">Реструктуризация</div><a class="rdg" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/?name=Иван%20Петрович&debt=1150000&pay=58000&signed=1" target="_blank" rel="noopener">РДГ · подписал <span class="arw">↗</span></a></div>
+        <div><div class="rl">Списание долга</div><a class="bfl" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-v2/?name=Иван%20Петрович&debt=1150000&pay=58000&signed=1" target="_blank" rel="noopener">Списание · подписал <span class="arw">↗</span></a></div>
+      </div>
+    </div>
+
+    <div class="sit">
+      <div class="l">
+        <div class="when">5 · Подписал со слов, не оплатил, <span class="em">прислал КИ</span></div>
+        <div class="show">Самый сильный дожим: <b>точная выгода по КИ + кредиторы + договор подписан ✓ + оплата</b>. Одна ссылка, без переподписи.</div>
+        <span class="tag tag-ki">✓ по КИ + ✍ подписал</span>
+      </div>
+      <div class="links">
+        <div><div class="rl">Реструктуризация</div><a class="rdg" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/?name=Надежда%20Николаевна&ki=1&signed=1" target="_blank" rel="noopener">РДГ · КИ + подписал <span class="arw">↗</span></a></div>
+        <div><div class="rl">Списание долга</div><a class="bfl" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-v2/?name=Надежда%20Николаевна&ki=1&signed=1" target="_blank" rel="noopener">Списание · КИ + подписал <span class="arw">↗</span></a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ГРУППА 3 -->
+  <div class="group">
+    <div class="group-h"><span class="gn">Финал</span><span>после оплаты</span></div>
+
+    <div class="sit">
+      <div class="l">
+        <div class="when">6 · <span class="em">Оплатил</span></div>
+        <div class="show">Клиент видит экран <b>«Готово · вы в работе»</b> — начало процедуры и передача в сопровождение.</div>
+        <span class="tag tag-pay">✓ состояние: оплачено</span>
+      </div>
+      <div class="links">
+        <div><div class="rl">Реструктуризация</div><a class="rdg" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/?paid=1" target="_blank" rel="noopener">РДГ · готово <span class="arw">↗</span></a></div>
+        <div><div class="rl">Списание долга</div><a class="bfl" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-v2/?paid=1" target="_blank" rel="noopener">Списание · готово <span class="arw">↗</span></a></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <h3>Как это устроено</h3>
+    <ul>
+      <li><b>Одна ссылка, а не набор документов.</b> Состояние = данные (есть ли КИ) × прогресс сделки (подписан? оплачен?). Клиенту всегда уходит одна и та же ссылка.</li>
+      <li><b>Ссылки собирает виджет автоматически.</b> Со слов — по умолчанию; загрузил КИ — добавляется <code>?ki=1</code>; статус подписи/оплаты — из сделки. Эта страница показывает, какая ссылка = какое состояние.</li>
+      <li><b>Параметры демо:</b> <code>?ki=1</code> — по кредитной истории; <code>?signed=1</code> — подписал, не оплатил; <code>?paid=1</code> — оплачено; <code>?name&debt&pay</code> — цифры клиента со слов. В проде их подставляет движок из сделки.</li>
+      <li><b>Продукт (РДГ / Списание)</b> выбирается на диагностике; здесь обе ссылки даны, чтобы посмотреть оба.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
