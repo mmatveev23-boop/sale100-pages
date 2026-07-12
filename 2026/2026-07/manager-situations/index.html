@@ -22,6 +22,11 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
 .num{font-variant-numeric:tabular-nums}
 .wrap{max-width:960px;margin:0 auto;padding:24px 18px 80px}
 
+.topnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.topnav a{font-size:13px;font-weight:700;text-decoration:none;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;transition:color .15s,border-color .15s}
+.topnav a:hover{color:var(--green-ink);border-color:var(--green)}
+.topnav a.cur{background:var(--pine);color:#fff;border-color:var(--pine)}
+
 .hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:28px 26px;box-shadow:var(--shadow)}
 .hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:16px}
 .hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
@@ -77,6 +82,12 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
 </head>
 <body>
 <div class="wrap">
+
+  <nav class="topnav">
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/sales-flow-map/">Карта связки</a>
+    <a class="cur" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/manager-situations/">Ситуации менеджера</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/widget-states/">Состояния виджета</a>
+  </nav>
 
   <header class="hdr">
     <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · СИТУАЦИИ МЕНЕДЖЕРА</b><small>КАКУЮ ПРЕЗЕНТАЦИЮ ПОКАЗЫВАЕМ</small></div></div>
@@ -159,19 +170,49 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
     </div>
   </div>
 
+    <div class="sit">
+      <div class="l">
+        <div class="when">6 · Оплатил <span class="em">часть</span> — дробит остаток</div>
+        <div class="show">Внёс 990–3 000 ₽ в зачёт. Экран показывает <b>«внесено N ✓, остаток к оплате»</b> — дожимаем на остаток.</div>
+        <span class="tag tag-pay">✍ подписал · частичная оплата</span>
+      </div>
+      <div class="links">
+        <div><div class="rl">Реструктуризация</div><a class="rdg" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/?name=Иван%20Петрович&debt=1150000&pay=58000&signed=1&part=990" target="_blank" rel="noopener">РДГ · остаток <span class="arw">↗</span></a></div>
+        <div><div class="rl">Списание долга</div><a class="bfl" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-v2/?name=Иван%20Петрович&debt=1150000&pay=58000&signed=1&part=990" target="_blank" rel="noopener">Списание · остаток <span class="arw">↗</span></a></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ГРУППА 3 -->
   <div class="group">
     <div class="group-h"><span class="gn">Финал</span><span>после оплаты</span></div>
 
     <div class="sit">
       <div class="l">
-        <div class="when">6 · <span class="em">Оплатил</span></div>
+        <div class="when">7 · <span class="em">Оплатил</span></div>
         <div class="show">Клиент видит экран <b>«Готово · вы в работе»</b> — начало процедуры и передача в сопровождение.</div>
         <span class="tag tag-pay">✓ состояние: оплачено</span>
       </div>
       <div class="links">
         <div><div class="rl">Реструктуризация</div><a class="rdg" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/?paid=1" target="_blank" rel="noopener">РДГ · готово <span class="arw">↗</span></a></div>
         <div><div class="rl">Списание долга</div><a class="bfl" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-v2/?paid=1" target="_blank" rel="noopener">Списание · готово <span class="arw">↗</span></a></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ГРУППА ВАРИАНТЫ -->
+  <div class="group">
+    <div class="group-h"><span class="gn">Варианты продукта</span><span>реже, по ситуации</span></div>
+
+    <div class="sit">
+      <div class="l">
+        <div class="when">РДГ на <span class="em">60 месяцев</span></div>
+        <div class="show">Когда на 36 месяцев платёж не тянет, план растягивается на 60. Всё то же, срок другой (только для реструктуризации).</div>
+        <span class="tag tag-slov">срок плана: 60 мес</span>
+      </div>
+      <div class="links">
+        <div><div class="rl">Со слов</div><a class="rdg" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/?name=Иван%20Петрович&debt=1150000&pay=48000&term=60" target="_blank" rel="noopener">РДГ 60 · со слов <span class="arw">↗</span></a></div>
+        <div><div class="rl">По КИ</div><a class="rdg" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/?name=Надежда%20Николаевна&ki=1&term=60" target="_blank" rel="noopener">РДГ 60 · по КИ <span class="arw">↗</span></a></div>
       </div>
     </div>
   </div>
