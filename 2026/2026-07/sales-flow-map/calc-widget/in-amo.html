@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Калькулятор в amoCRM: как виджет выглядит в карточке сделки · прототип</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Мокап карточки сделки amoCRM с виджетом ДОНУЛЯ в правой колонке. Хром amo — приближение по скриншоту заказчика. */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;color:#2e3640;font-size:13px;overflow-x:auto}
+.amo{display:grid;grid-template-columns:56px 330px 1fr 340px;min-height:100vh;min-width:1180px}
+
+/* левый тёмный рейл */
+.rail{background:#2b323b;display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:4px}
+.ri{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8b96a3;font-size:9px;text-align:center;line-height:1.1}
+.ri.on{background:#3b4551;color:#fff}
+
+/* колонка сделки */
+.deal{background:#fff;border-right:1px solid #e3e7ea;padding:14px 16px;overflow:hidden}
+.deal h1{font-size:17px;font-weight:700}
+.deal .id{margin-top:2px;font-size:11.5px;color:#94a0ab}
+.deal .pill{display:inline-block;margin-left:6px;background:#eef1f4;border-radius:4px;padding:1px 6px;font-size:11px;color:#5c6874}
+.deal .stage{margin-top:10px;font-size:11.5px;color:#94a0ab}
+.deal .stagebar{margin-top:4px;height:4px;border-radius:2px;background:#e3e7ea;position:relative}
+.deal .stagebar i{position:absolute;left:0;top:0;bottom:0;width:38%;background:#4c8bf7;border-radius:2px}
+.deal .tabs{display:flex;gap:12px;margin:14px 0 8px;border-bottom:1px solid #e3e7ea;font-size:12.5px;color:#7c8894}
+.deal .tabs b{color:#2e3640;border-bottom:2px solid #4c8bf7;padding-bottom:6px;font-weight:600}
+.frow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:12.5px;border-bottom:1px dashed #f0f2f4}
+.frow span{color:#94a0ab}
+.frow b{font-weight:600;text-align:right;color:#2e3640}
+.frow b.blue{color:#4c8bf7}
+
+/* центр: лента */
+.feed{padding:14px 18px;overflow:hidden}
+.feed .search{background:#fff;border:1px solid #e3e7ea;border-radius:8px;padding:9px 12px;color:#94a0ab;font-size:12.5px}
+.msgcard{margin-top:14px;background:#fff;border:1px solid #e3e7ea;border-radius:10px;padding:12px 14px}
+.msgcard .who{font-size:11.5px;color:#94a0ab}
+.bubble{margin-top:8px;background:#2ea7e0;color:#fff;border-radius:10px;padding:10px 12px;font-size:12.5px;max-width:520px;line-height:1.45}
+.bubble small{display:block;opacity:.8;margin-bottom:4px}
+.note{margin-top:14px;background:#fff;border:1px solid #e3e7ea;border-radius:8px;padding:9px 12px;color:#94a0ab;font-size:12.5px}
+
+/* правая колонка виджетов */
+.wcol{background:#f7f8f9;border-left:1px solid #e3e7ea;padding:12px 12px 30px;overflow:hidden}
+.wg{background:#fff;border:1px solid #e3e7ea;border-radius:8px;margin-bottom:8px}
+.wg .wh{display:flex;align-items:center;gap:8px;padding:9px 12px;font-size:12.5px;font-weight:600;color:#5c6874;cursor:default}
+.wg .wh .chev{margin-left:auto;color:#b6bfc7;font-size:10px}
+.wg .wh img,.wg .wh .lg{flex:none}
+
+/* наш виджет */
+.dw{background:#fff;border:1px solid #cfe0d8;border-radius:10px;margin-bottom:8px;overflow:hidden;box-shadow:0 4px 14px -8px rgba(11,59,46,.35)}
+.dw .dh{display:flex;align-items:center;gap:8px;background:#0B3B2E;color:#fff;padding:10px 12px}
+.dw .dh .lg{width:22px;height:22px;border-radius:6px;background:#0F6B4F;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#F4C775}
+.dw .dh b{font-size:12.5px}
+.dw .dh small{display:block;font-size:10px;color:rgba(255,255,255,.6)}
+.dw .body{padding:10px 12px}
+.dw label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#94a0ab;margin:8px 0 3px}
+.dw input,.dw select{width:100%;border:1px solid #d8dee3;border-radius:7px;padding:7px 9px;font-family:inherit;font-size:13px;color:#2e3640}
+.dw input:focus,.dw select:focus{outline:none;border-color:#0F6B4F}
+.dw .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dw .seg{display:flex;gap:3px;background:#eef1f4;border-radius:8px;padding:3px}
+.dw .seg button{flex:1;border:none;background:none;border-radius:6px;padding:5px;font-family:inherit;font-weight:700;font-size:12px;color:#7c8894;cursor:pointer}
+.dw .seg button.on{background:#fff;color:#0B3B2E;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.dw .verdict{margin-top:10px;border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.4}
+.dw .verdict b{display:block;font-size:13px}
+.dw .verdict.rdg{background:#0B3B2E;color:#fff}
+.dw .verdict.bfl{background:#E9F3EE;color:#0B5540}
+.dw .verdict.self{background:#FAEDE8;color:#A8442E}
+.dw .kv{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:12.5px;border-bottom:1px dashed #eef1f4}
+.dw .kv span{color:#94a0ab}
+.dw .kv b{font-variant-numeric:tabular-nums}
+.dw .abtn{display:block;width:100%;margin-top:10px;border:none;border-radius:8px;background:#4c8bf7;color:#fff;padding:9px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.dw .abtn:hover{background:#3d7ce8}
+.dw .lbtn{display:block;width:100%;margin-top:6px;border:1px solid #d8dee3;border-radius:8px;background:#fff;color:#0B5540;padding:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+.dw .toast{display:none;margin-top:8px;background:#E9F3EE;color:#0B5540;border-radius:8px;padding:8px 10px;font-size:11.5px;line-height:1.45}
+
+.cap{max-width:1180px;margin:0 auto;padding:10px 18px;font-size:12px;color:#7c8894}
+.cap b{color:#2e3640}
+</style>
+</head>
+<body>
+
+<p class="cap"><b>Прототип: виджет «ДОНУЛЯ · Калькулятор» в карточке сделки amoCRM.</b> Правая колонка, между остальными виджетами. Расчёт живой — можно крутить. «Записать в сделку» показывает, какие поля обновятся.</p>
+
+<div class="amo">
+  <div class="rail">
+    <div class="ri">Аккаунт</div><div class="ri">Рабочий стол</div><div class="ri on">Сделки</div>
+    <div class="ri">imBox</div><div class="ri">Задачи</div><div class="ri">Списки</div>
+    <div class="ri">Документы</div><div class="ri">Почта</div><div class="ri">Аналитика</div><div class="ri">Sensei</div>
+  </div>
+
+  <div class="deal">
+    <h1>Кристина</h1>
+    <div class="id">#25751361 <span class="pill">Рефинансирование</span></div>
+    <div class="stage">МПП 2 уровень · Возвращенный лид (1 день)</div>
+    <div class="stagebar"><i></i></div>
+    <div class="tabs"><b>Основное</b><span>МПП</span><span>Анкета</span><span>Сбор доков</span><span>Суд</span><span>Сохран</span></div>
+    <div class="frow"><span>Отв-ный</span><b>Гасанова Шафаг</b></div>
+    <div class="frow"><span>Бюджет</span><b>0 ₽</b></div>
+    <div class="frow"><span>Статус активности</span><b class="blue">Выбрать</b></div>
+    <div class="frow"><span>Договор</span><b>…</b></div>
+    <div class="frow"><span>Сумма долга (со слов)</span><b id="f_debt">—</b></div>
+    <div class="frow"><span>Офиц. доход</span><b id="f_income">—</b></div>
+    <div class="frow"><span>Тип услуги</span><b id="f_route">—</b></div>
+    <div class="frow"><span>Платёж по плану (предв.)</span><b id="f_pay">—</b></div>
+    <div class="frow"><span>Размер ежемесячного платежа</span><b>…</b></div>
+    <div class="frow"><span>Ссылка на КАД</span><b>…</b></div>
+    <div class="frow"><span>МПП 2 уровня</span><b>Гасанова Шафаг</b></div>
+    <div class="frow"><span>Руководитель ответственного</span><b>Смелов Никита</b></div>
+  </div>
+
+  <div class="feed">
+    <div class="search">Поиск и фильтр</div>
+    <div class="msgcard">
+      <div class="who">MAX Bot · 79997252633</div>
+      <div class="bubble"><small>Вчера 14:21 SalesBot (перенос встречи) ✓ Отправлено</small>
+        Зафиксировали новое время консультации: 09.07.2026 19:00<br><br>
+        Ваш специалист: Гасанова Шафаг<br>
+        Пожалуйста, будьте на связи в это время — звонок займёт примерно 30 минут.
+      </div>
+    </div>
+    <div class="msgcard">
+      <div class="who">Sensei для Гасанова Шафаг · вчера 19:29</div>
+      <div class="bubble" style="background:#f0f2f4;color:#2e3640"><small style="color:#94a0ab">задача</small>Провести консультацию 09.07 19:00. Перед звонком: открыть калькулятор, взять долг / доход / имущество, определить маршрут.</div>
+    </div>
+    <div class="note">Примечание: введите текст</div>
+  </div>
+
+  <div class="wcol">
+    <div class="wg"><div class="wh">Платежи<span class="chev">▾</span></div></div>
+
+    <!-- ═══ НАШ ВИДЖЕТ ═══ -->
+    <div class="dw">
+      <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор клиента</b><small>экспресс · первый звонок</small></div></div>
+      <div class="body">
+        <div class="seg" id="w_prod" style="margin-bottom:2px"><button class="on" data-p="rdg">РДГ</button><button data-p="bfl">БФЛ</button></div>
+        <label>Долг со слов, ₽</label><input id="w_debt" type="number" value="1150000">
+        <label>Платёж сейчас, ₽/мес (со слов)</label><input id="w_paynow" type="number" value="61500">
+        <div id="w_rdgFields">
+          <div class="two">
+            <div><label>Офиц. доход, ₽/мес</label><input id="w_income" type="number" value="80000"></div>
+            <div><label>Детей</label><input id="w_kids" type="number" value="1" min="0"></div>
+          </div>
+          <label>Срок плана РДГ</label>
+          <div class="seg" id="w_term"><button class="on" data-t="36">36 мес</button><button data-t="60">60 мес</button></div>
+        </div>
+
+        <div class="verdict rdg" id="w_verdict"></div>
+        <div id="w_kvs"></div>
+
+        <button class="abtn" onclick="writeToDeal()">Записать в сделку</button>
+        <a class="lbtn" id="w_present" target="_blank" style="display:none">Презентация с этими цифрами ↗</a>
+        <label class="lbtn" style="cursor:pointer">Загрузить КИ (PDF) → точный расчёт<input type="file" id="w_ki" accept="application/pdf" style="display:none"></label>
+        <a class="lbtn" id="w_kiPage" href="./ki.html" target="_blank" style="display:none;background:#0B3B2E;color:#F4C775;border-color:#0B3B2E">Открыть страницу клиента ↗</a>
+        <button class="lbtn" id="w_copy" style="display:none" onclick="copyClientLink()">Скопировать ссылку клиенту</button>
+        <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">Файл выгод (PDF) ⭳</a>
+        <div id="w_prodNote" style="display:none;margin-top:6px;font-size:10.5px;line-height:1.4;color:#94a0ab">в проде: файл прикрепляется к сделке, ссылка уходит клиенту в чат</div>
+        <div class="toast" id="w_toast"></div>
+      </div>
+    </div>
+    <!-- ═══ /виджет ═══ -->
+
+    <div class="wg"><div class="wh">Кнопки Salesbot<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">HyperScript<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">OkiDoki<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">Документы<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">Билайн<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">Передача в партнёры<span class="chev">▾</span></div></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const fmt=n=>Math.round(n).toLocaleString('ru-RU');
+const PM_SELF=19329, PM_CHILD=17201, BFL_COST=239000;
+let term=36, prod='rdg', last={};
+function calc(){
+  const debt=parseFloat(document.getElementById('w_debt').value)||0;
+  const paynow=parseFloat(document.getElementById('w_paynow').value)||0;
+  const income=parseFloat(document.getElementById('w_income').value)||0;
+  const kids=parseFloat(document.getElementById('w_kids').value)||0;
+  const free=income-(PM_SELF+kids*PM_CHILD);
+  const rdgTotal=debt*1.07, pChosen=rdgTotal/term, p60=rdgTotal/60;
+  const v=document.getElementById('w_verdict'), kvs=document.getElementById('w_kvs');
+  document.getElementById('w_rdgFields').style.display=prod==='rdg'?'':'none';
+  let route, eff=term, kv=[];
+  if(prod==='bfl'){
+    route='БФЛ';
+    v.className='verdict bfl';
+    v.innerHTML='<b>БФЛ · списание долга</b>Долг '+fmt(debt)+' ₽ списывается целиком, платёж только за процедуру.';
+    kv=[['Долг спишется',fmt(debt)+' ₽'],['Процедура','13 500 ₽/мес · ~14 мес'],['Услуги + госплатежи',fmt(BFL_COST)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
+  }else if(debt<=0||free>=debt/3){
+    route='self';
+    v.className='verdict self';
+    v.innerHTML='<b>Мимо процедур</b>'+(debt<=0?'Введите долг.':'Свободных '+fmt(free)+' ₽/мес: закроет долг сам за ~3 месяца.');
+    kv=[['Свободный доход',fmt(free)+' ₽/мес']];
+  }else if(free>=p60){
+    route='РДГ';
+    if(free<pChosen) eff=60;
+    v.className='verdict rdg';
+    v.innerHTML='<b>РДГ · план '+eff+' мес</b>Платёж '+fmt(rdgTotal/eff)+' ₽/мес, проценты останавливаются, не банкрот.'+(free<pChosen?' На 36 мес не проходит.':'');
+    kv=[['Долг + ФУ 7%',fmt(rdgTotal)+' ₽'],['Платёж по плану',fmt(rdgTotal/eff)+' ₽/мес'],['Свободный доход',fmt(free)+' ₽/мес'],['Услуги ДОНУЛЯ','13 500 ₽/мес']];
+  }else{
+    route='БФЛ'; /* РДГ не тянет → в сделку и ссылки идёт рекомендация БФЛ, не РДГ */
+    v.className='verdict self';
+    v.innerHTML='<b>РДГ не тянет</b>Свободных '+fmt(free)+' ₽/мес меньше платежа плана даже на 60 мес ('+fmt(p60)+' ₽). Переключите на вкладку БФЛ.';
+    kv=[['Свободный доход',fmt(free)+' ₽/мес'],['Мин. платёж плана (60 мес)',fmt(p60)+' ₽/мес']];
+  }
+  kvs.innerHTML=kv.map(([k,x])=>'<div class="kv"><span>'+k+'</span><b>'+x+'</b></div>').join('');
+  last={debt,paynow,income,route,eff,pay:route==='РДГ'&&free>=p60?Math.round(rdgTotal/eff):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null};
+  /* если ссылка на презентацию уже показана — держим её в актуальном состоянии при правке полей */
+  const pv=document.getElementById('w_present');
+  if(pv&&pv.style.display!=='none'){ const u=presentUrl(); if(u) pv.href=u; else pv.style.display='none'; }
+}
+/* ссылка на презентацию с цифрами клиента (демо-связка; в проде merge-поля CRM + короткая ссылка движка) */
+function presentUrl(){
+  const name=document.querySelector('.deal h1').textContent.trim();
+  const pay=last.paynow>0?{pay:last.paynow}:{}; /* платёж не спросили — параметр не шлём, страница скроет сравнение, а не выдумает цифру */
+  if(last.route==='РДГ') return '../presentation-rdg/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,term:last.eff});
+  if(last.route==='БФЛ') return '../presentation/index.html?'+new URLSearchParams({proc:'ri',name,debt:last.debt,...pay});
+  return null;
+}
+function writeToDeal(){
+  document.getElementById('f_debt').textContent=fmt(last.debt)+' ₽';
+  document.getElementById('f_income').textContent=fmt(last.income)+' ₽';
+  document.getElementById('f_route').textContent=last.route==='РДГ'?'РДГ · '+last.eff+' мес':(last.route==='БФЛ'?'БФЛ · списание':'—');
+  document.getElementById('f_pay').textContent=last.pay?fmt(last.pay)+' ₽/мес':'—';
+  const u=presentUrl(), p=document.getElementById('w_present');
+  if(u){p.href=u;p.style.display='';}else{p.style.display='none';}
+  const t=document.getElementById('w_toast');
+  t.style.display='block';
+  t.innerHTML='✓ Поля сделки обновлены (см. слева): долг, доход, тип услуги, платёж. Дальше эти merge-поля подставятся в презентацию ('+(last.route==='РДГ'?'РДГ':'БФЛ')+') и договор.'+(u?' Ссылка на презентацию с цифрами клиента — ниже.':'');
+  setTimeout(()=>{t.style.display='none';},6000);
+}
+document.querySelectorAll('#w_term button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#w_term button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); term=+b.dataset.t; calc();
+}));
+document.querySelectorAll('#w_prod button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#w_prod button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); prod=b.dataset.p; calc();
+}));
+['w_debt','w_paynow','w_income','w_kids'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+calc();
+
+/* ===== загрузка КИ (отчёт ОКБ) прямо в виджете ===== */
+function parseOkb(fullText){
+  let flat=fullText.replace(/Сформирован[\s\S]{0,140}?из \d+/g,' ').replace(/\u00a0/g,' ').replace(/\s+/g,' ');
+  const num=s=>parseFloat(s.replace(/ /g,'').replace(',','.'));
+  const sumM=flat.match(/([\d ]+(?:,\d+)?) р\. Задолженности по обязательствам/);
+  const cntM=flat.match(/(\d+) Действующие кредиты\/займы/);
+  const dateM=fullText.match(/Кредитный отчет\s*на (.+?) года/);
+  let secIdx=flat.indexOf('ДЕЙСТВУЮЩИЕ КРЕДИТНЫЕ ДОГОВОРЫ Информация о действующих');
+  if(secIdx<0) secIdx=flat.lastIndexOf('ДЕЙСТВУЮЩИЕ КРЕДИТНЫЕ ДОГОВОРЫ');
+  if(secIdx>0) flat=flat.slice(secIdx);
+  const cut=flat.search(/ 1\. [А-ЯЁA-Z]/);
+  if(cut>0) flat=flat.slice(0,cut);
+  const fwd=/^Договор займа \(кредита\) - (.+?) ((?:\d[\d ]*)(?:,\d+)?) р\. ((?:\d[\d ]*)(?:,\d+)?) р\. ((?:\d[\d ]*)(?:,\d+)?) р\. (Без просрочек|Была просрочка по \d{2}\.\d{2}\.\d{4}|Просрочка с \d{2}\.\d{2}\.\d{4})/;
+  const credits=[]; const seen=new Set();
+  let idx=flat.indexOf('Договор займа (кредита) - ');
+  while(idx!==-1){
+    const back=flat.slice(Math.max(0,idx-110),idx);
+    const ms=[...back.matchAll(/(\d{1,2}) (?=[А-ЯЁA-Z«"])/g)];
+    const fm=flat.slice(idx).match(fwd);
+    if(ms.length&&fm){
+      const l=ms[ms.length-1];
+      const n=+l[1], lender=back.slice(l.index+l[0].length).trim(), kind=fm[1].trim();
+      if(!seen.has(n)){
+        seen.add(n);
+        const product=/микрозаем/i.test(kind)?'mfo':(/карт|овердрафт/i.test(kind)?'card':'loan');
+        credits.push({n,lender,kind,product,amount:num(fm[2]),debt:num(fm[3]),overdue:num(fm[4]),status:fm[5]});
+      }
+    }
+    idx=flat.indexOf('Договор займа (кредита) - ', idx+1);
+  }
+  credits.sort((a,b)=>a.n-b.n);
+  return {credits, summary:{debt:sumM?num(sumM[1]):null,count:cntM?+cntM[1]:null}, date:dateM?dateM[1]+' года':''};
+}
+async function parseKiFile(file){
+  const t=document.getElementById('w_toast');
+  t.style.display='block'; t.innerHTML='Читаю '+file.name+'…';
+  try{
+    if(!window.pdfjsLib) throw new Error('pdf.js не загрузился');
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    let text='';
+    for(let i=1;i<=Math.min(pdf.numPages,40);i++){
+      const pg=await pdf.getPage(i); const tc=await pg.getTextContent();
+      text+=tc.items.map(it=>it.str).join(' ')+'\n';
+    }
+    const parsed=parseOkb(text);
+    if(!parsed.credits.length) throw new Error('таблица договоров не найдена (поддерживается отчёт ОКБ)');
+    const total=parsed.credits.reduce((s,c)=>s+c.debt,0);
+    const ok=parsed.summary.debt!=null&&Math.abs(total-parsed.summary.debt)<1&&parsed.credits.length===parsed.summary.count;
+    /* точные данные в виджет и поля сделки */
+    document.getElementById('w_debt').value=Math.round(total); calc();
+    document.getElementById('f_debt').textContent=fmt(total)+' ₽ (по КИ)';
+    t.innerHTML=(ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+parsed.credits.length+' договоров, долг '+fmt(total)+' ₽'+(ok?' — сходится со сводкой отчёта.':'.');
+    const payload={
+      name:document.querySelector('.deal h1').textContent.trim(),
+      date:parsed.date, term, credits:parsed.credits
+    };
+    localStorage.setItem('kiCalc', JSON.stringify(payload));
+    /* персональная ссылка: данные зашиты в URL (base64url) — страницу можно отправить клиенту.
+       В проде вместо этого движок сохраняет расчёт и отдаёт короткую ссылку + прикладывает PDF к сделке. */
+    const kiUrl='./ki.html#d='+b64url(JSON.stringify(payload));
+    const page=document.getElementById('w_kiPage');
+    page.href=kiUrl; page.style.display='';
+    document.getElementById('w_kiFile').href=kiUrl+'&print=1';
+    ['w_copy','w_kiFile','w_prodNote'].forEach(id=>document.getElementById(id).style.display='');
+  }catch(e){ t.innerHTML='Не удалось разобрать файл: '+e.message; }
+}
+function b64url(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function copyClientLink(){
+  const b=document.getElementById('w_copy');
+  const abs=new URL(document.getElementById('w_kiPage').getAttribute('href'),location.href).href;
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(abs):Promise.reject())
+    .then(()=>{b.textContent='✓ Ссылка скопирована';})
+    .catch(()=>{b.textContent='Скопируйте из адресной строки страницы';});
+  setTimeout(()=>{b.textContent='Скопировать ссылку клиенту';},3000);
+}
+document.getElementById('w_ki').addEventListener('change',e=>{ if(e.target.files[0]) parseKiFile(e.target.files[0]); });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</body>
+</html>

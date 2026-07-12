@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Связка продаж ДОНУЛЯ — одно окно от звонка до договора</title>
+<meta name="description" content="Карта сквозной связки: калькулятор в amoCRM → кредитная история → страница выгод → оплата → договор PDF. Что где считается и что куда передаётся.">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4EFE6; --paper2:#ECE5D8;
+  --card:#FFFFFF; --card2:#FBF8F2;
+  --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0B3B2E; --pine2:#0C4233; --pine-ink:#082A21;
+  --green:#0F6B4F; --green-soft:#E9F3EE; --green-ink:#0B5540;
+  --gold:#C99A33; --gold-bright:#F4C775; --gold-soft:#FBF3DC; --gold-ink:#8A6212;
+  --brick:#A8442E; --brick-soft:#F8E3DC;
+  --line:#E4DCCD; --line2:#D7CDBA;
+  --r:18px; --r-sm:12px;
+  --shadow:0 18px 44px -22px rgba(11,59,46,.42);
+  --shadow-sm:0 8px 22px -14px rgba(11,59,46,.4);
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Golos Text",system-ui,sans-serif;background:
+  radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),
+  var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 18px 80px}
+
+/* ── ШАПКА ── */
+.hdr{background:
+  radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),
+  linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,var(--pine-ink) 100%);
+  color:#fff;border-radius:24px;padding:30px 28px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+.hdr .lg{width:40px;height:40px;border-radius:11px;background:var(--green);display:grid;place-items:center;font-size:15px;font-weight:800;color:var(--gold-bright);flex-shrink:0}
+.hdr .brand b{font-size:16px;letter-spacing:.02em;line-height:1.1}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:29px;line-height:1.14;letter-spacing:-.02em;font-weight:800;max-width:20ch}
+.hdr h1 i{font-style:normal;color:var(--gold-bright)}
+.hdr p{margin-top:12px;font-size:15px;color:rgba(255,255,255,.8);max-width:64ch;line-height:1.55}
+.hdr .oneline{margin-top:18px;display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:8px 15px;font-size:13px;color:rgba(255,255,255,.9)}
+.hdr .oneline .dot{width:8px;height:8px;border-radius:50%;background:var(--gold-bright)}
+
+/* ── ЛЕГЕНДА ── */
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 6px}
+.lg-item{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:12.5px;color:var(--muted);font-weight:600}
+.lg-item .b{width:9px;height:9px;border-radius:3px}
+.b-ok{background:var(--green)} .b-pass{background:var(--gold)} .b-prod{background:var(--faint)}
+
+/* ── ЗАГОЛОВКИ СЕКЦИЙ ── */
+.sec-h{display:flex;align-items:baseline;gap:12px;margin:38px 0 4px;flex-wrap:wrap}
+.sec-h h2{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.sec-h span{font-size:13px;color:var(--faint)}
+
+/* ── СВИМЛЕЙН-ОБЗОР ── */
+.lanes{margin-top:16px;display:flex;flex-direction:column;gap:0}
+.lane{border-radius:var(--r);padding:16px 16px 18px;position:relative}
+.lane.mgr{background:linear-gradient(165deg,#0e4535,#0b3b2e);color:#fff}
+.lane.cli{background:var(--card);border:1.5px solid var(--green)}
+.lane.doc{background:var(--gold-soft);border:1.5px solid rgba(201,154,51,.5)}
+.lane-label{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.lane.mgr .lane-label{color:var(--gold-bright)} .lane.cli .lane-label{color:var(--green-ink)} .lane.doc .lane-label{color:var(--gold-ink)}
+.lane-label .ico{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:13px}
+.lane.mgr .lane-label .ico{background:rgba(255,255,255,.12)} .lane.cli .lane-label .ico{background:var(--green-soft)} .lane.doc .lane-label .ico{background:#fff}
+.nodes{display:flex;gap:12px;flex-wrap:wrap}
+.node{flex:1 1 220px;min-width:0;border-radius:var(--r-sm);padding:13px 14px}
+.lane.mgr .node{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14)}
+.lane.cli .node{background:var(--card2);border:1px solid var(--line)}
+.lane.doc .node{background:#fff;border:1px solid rgba(201,154,51,.35)}
+.node .st{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.7;margin-bottom:4px}
+.node .nt{font-size:14.5px;font-weight:700;line-height:1.2}
+.node .nd{margin-top:5px;font-size:12px;line-height:1.45;opacity:.82}
+.flow-down{display:flex;justify-content:center;align-items:center;gap:9px;padding:11px 0;color:var(--muted);font-size:12px;font-weight:600}
+.flow-down svg{flex-shrink:0}
+.flow-down .lbl{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:11.5px;color:var(--green-ink)}
+.lane.mgr + .flow-down .lbl,.flow-down.on-dark .lbl{background:var(--pine);color:var(--gold-bright);border-color:transparent}
+
+/* ── ДЕТАЛЬНЫЕ ШАГИ ── */
+.step{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden;margin-top:16px}
+.step-top{display:flex;gap:16px;padding:18px 20px;align-items:flex-start;flex-wrap:wrap}
+.step-num{width:44px;height:44px;border-radius:12px;background:var(--pine);color:var(--gold-bright);display:grid;place-items:center;font-size:20px;font-weight:800;flex-shrink:0}
+.step-main{flex:1 1 300px;min-width:0}
+.step-main .lane-tag{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;margin-bottom:7px}
+.tag-mgr{background:var(--green-soft);color:var(--green-ink)}
+.tag-cli{background:var(--gold-soft);color:var(--gold-ink)}
+.tag-doc{background:var(--brick-soft);color:var(--brick)}
+.step-main h3{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.step-main .desc{margin-top:6px;font-size:13.5px;color:var(--muted);line-height:1.55;max-width:62ch}
+.badges{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid}
+.badge .b{width:8px;height:8px;border-radius:2.5px}
+.badge.ok{border-color:rgba(15,107,79,.3);color:var(--green-ink);background:var(--green-soft)}
+.badge.pass{border-color:rgba(201,154,51,.4);color:var(--gold-ink);background:var(--gold-soft)}
+.badge.prod{border-color:var(--line2);color:var(--muted);background:var(--card2)}
+
+.io{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 4px}
+.io-box{background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 13px}
+.io-box .il{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.io-box.in .il{color:var(--green-ink)} .io-box.out .il{color:var(--gold-ink)}
+.io-box ul{list-style:none;font-size:12.5px;color:var(--ink);line-height:1.5}
+.io-box li{padding-left:15px;position:relative;margin:3px 0}
+.io-box li::before{content:"";position:absolute;left:2px;top:7px;width:5px;height:5px;border-radius:50%;background:var(--line2)}
+.io-box code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:var(--paper2);padding:1px 5px;border-radius:5px;color:var(--green-ink)}
+
+.frame-row{padding:14px 20px 20px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.frame{flex:1 1 340px;min-width:0;position:relative;border-radius:var(--r-sm);overflow:hidden;border:1px solid var(--line2);background:var(--paper2);height:360px}
+.frame iframe{border:0;transform-origin:top left;background:#fff;display:block;position:absolute;top:0}
+.frame .film{position:absolute;inset:0;cursor:pointer;background:transparent}
+.frame .open{position:absolute;right:10px;bottom:10px;z-index:3;background:var(--pine);color:#fff;border:none;border-radius:10px;padding:9px 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;text-decoration:none;box-shadow:0 6px 16px -8px rgba(11,59,46,.6);transition:transform 160ms var(--ease),background 160ms var(--ease)}
+.frame .open:active{transform:scale(.96)}
+.frame .tinylbl{position:absolute;left:10px;top:10px;z-index:3;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--muted)}
+.frame-side{flex:1 1 220px;min-width:0}
+.frame-side .fs-t{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.file{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--line)}
+.file:last-child{border-bottom:none}
+.file code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:var(--green-ink)}
+.file a{margin-left:auto;color:var(--green);font-weight:700;text-decoration:none;white-space:nowrap;font-size:12px}
+.file a:hover{text-decoration:underline}
+
+/* коннектор между шагами */
+.connector{display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 0 0}
+.connector .pill{background:var(--card);border:1px solid var(--line2);border-radius:999px;padding:7px 15px;font-size:12px;color:var(--green-ink);font-weight:600;display:inline-flex;align-items:center;gap:9px;box-shadow:var(--shadow-sm)}
+.connector .pill svg{color:var(--gold)}
+
+/* ── СКВОЗНОЙ ПРОГОН ── */
+.run{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden}
+.run-h{background:linear-gradient(165deg,var(--pine2),var(--pine));color:#fff;padding:16px 20px}
+.run-h b{font-size:16px;font-weight:800}
+.run-h span{display:block;margin-top:3px;font-size:12.5px;color:rgba(255,255,255,.72)}
+.tbl-scroll{overflow-x:auto}
+table.run-t{width:100%;border-collapse:collapse;font-size:13px;min-width:620px}
+.run-t th,.run-t td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line)}
+.run-t thead th{background:var(--card2);font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+.run-t tbody td:first-child,.run-t td:first-child{font-weight:700;color:var(--ink)}
+.run-t td b{color:var(--green-ink);font-weight:700}
+.run-t tr:last-child td{border-bottom:none}
+.run-note{padding:12px 20px 16px;font-size:12.5px;color:var(--muted);line-height:1.55}
+
+/* ── НА ПРОД ── */
+.todo{margin-top:16px;background:var(--card2);border:1px dashed var(--line2);border-radius:var(--r);padding:20px 22px}
+.todo h3{font-size:16px;font-weight:800;margin-bottom:4px}
+.todo p.sub{font-size:13px;color:var(--muted);margin-bottom:14px}
+.todo ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.todo li{background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;font-size:13px;line-height:1.5}
+.todo li b{color:var(--ink);display:block;margin-bottom:2px}
+.todo li span{color:var(--muted)}
+
+footer.ft{margin-top:34px;text-align:center;font-size:12px;color:var(--faint);line-height:1.6}
+
+@media (max-width:720px){
+  .wrap{padding:16px 13px 60px}
+  .hdr{padding:24px 20px;border-radius:20px}
+  .hdr h1{font-size:24px}
+  .io{grid-template-columns:1fr}
+  .todo ul{grid-template-columns:1fr}
+  .step-num{width:38px;height:38px;font-size:17px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ШАПКА -->
+  <header class="hdr">
+    <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ</b><small>СВЯЗКА ПРОДАЖ</small></div></div>
+    <h1>От звонка до договора — <i>в одном окне amoCRM</i></h1>
+    <p>Менеджер считает выгоду прямо на звонке, показывает её клиенту наглядно, подтягивает кредитную историю, проводит оплату и отдаёт договор — и в презентации, и в самом договоре клиент видит одни и те же цифры своей выгоды. Ниже — вся логика по звеньям: что где считается и что куда передаётся.</p>
+    <div class="oneline"><span class="dot"></span>Одни цифры клиента проходят через все звенья без повторного ввода</div>
+  </header>
+
+  <!-- ЛЕГЕНДА -->
+  <div class="legend">
+    <span class="lg-item"><span class="b b-ok"></span>Работает в прототипе — можно кликать</span>
+    <span class="lg-item"><span class="b b-pass"></span>Данные передаются (ссылка / файл) — демо-механизм</span>
+    <span class="lg-item"><span class="b b-prod"></span>На прод-интеграцию (движок / API amo / платёж)</span>
+  </div>
+
+  <!-- ОБЗОР: СВИМЛЕЙНЫ -->
+  <div class="sec-h"><h2>Как связка устроена</h2><span>три дорожки · менеджер → клиент → документ</span></div>
+  <div class="lanes">
+
+    <div class="lane mgr">
+      <div class="lane-label"><span class="ico">🖥️</span>Окно менеджера · карточка сделки amoCRM</div>
+      <div class="nodes">
+        <div class="node">
+          <div class="st">Шаг 1 · на звонке</div>
+          <div class="nt">Виджет-калькулятор</div>
+          <div class="nd">Долг, доход, платёж со слов → маршрут РДГ / БФЛ, выгода, поля сделки.</div>
+        </div>
+        <div class="node">
+          <div class="st">Шаг 3 · после звонка</div>
+          <div class="nt">Кредитная история → файл + ссылка</div>
+          <div class="nd">PDF отчёта БКИ в виджет → точный долг, персональная ссылка выгод и файл клиенту.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-down on-dark">
+      <svg width="16" height="20" viewBox="0 0 16 20" fill="none"><path d="M8 0v16M8 16l-6-6M8 16l6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="lbl">кнопка «Презентация с цифрами клиента» · ссылка с ?долг&amp;платёж</span>
+    </div>
+
+    <div class="lane cli">
+      <div class="lane-label"><span class="ico">📱</span>У клиента · свой телефон, ведёт эксперт голосом</div>
+      <div class="nodes">
+        <div class="node">
+          <div class="st">Шаг 2 · выгоды</div>
+          <div class="nt">Страница условий</div>
+          <div class="nd">На первом экране — «ваша экономия», платите сейчас vs с нами. РДГ и списание долга.</div>
+        </div>
+        <div class="node">
+          <div class="st">Шаг 4 · оплата</div>
+          <div class="nt">Оплата на той же странице</div>
+          <div class="nd">СБП / счёт в Сбере, сумма тарифа, подпись по СМС — не уходя со страницы.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flow-down">
+      <svg width="16" height="20" viewBox="0 0 16 20" fill="none"><path d="M8 0v16M8 16l-6-6M8 16l6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="lbl">merge-поля сделки: суммы, выгода, график платежей</span>
+    </div>
+
+    <div class="lane doc">
+      <div class="lane-label"><span class="ico">📄</span>Документ · после подписания</div>
+      <div class="nodes">
+        <div class="node" style="flex-basis:100%">
+          <div class="st">Шаг 5 · договор PDF</div>
+          <div class="nt">Обложка договора = та же выгода</div>
+          <div class="nd">Первая страница договора крупно показывает экономию и сравнение платежей — те же цифры, что клиент видел в презентации.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ДЕТАЛЬНЫЕ ШАГИ -->
+  <div class="sec-h"><h2>Звенья по порядку</h2><span>живые прототипы · можно листать прямо здесь</span></div>
+
+  <!-- ШАГ 1 -->
+  <section class="step">
+    <div class="step-top">
+      <div class="step-num">1</div>
+      <div class="step-main">
+        <span class="lane-tag tag-mgr">🖥️ окно amo · менеджер</span>
+        <h3>Виджет-калькулятор на звонке</h3>
+        <p class="desc">Менеджер по скрипту вводит со слов клиента долг, доход, детей, платёж сейчас — виджет сразу показывает маршрут (РДГ / списание долга / мимо процедур), выгоду и предварительный платёж, и пишет это в поля сделки. Есть загрузка кредитной истории для точного расчёта (шаг 3).</p>
+        <div class="badges">
+          <span class="badge ok"><span class="b b-ok"></span>расчёт живой</span>
+          <span class="badge pass"><span class="b b-pass"></span>ссылка на презентацию</span>
+          <span class="badge prod"><span class="b b-prod"></span>запись в поля сделки — API amo</span>
+        </div>
+      </div>
+    </div>
+    <div class="io">
+      <div class="io-box in"><div class="il">▸ получает</div><ul>
+        <li>Долг, офиц. доход, детей — со слов</li>
+        <li>Платёж сейчас (со слов) — для сравнения</li>
+        <li>Срок плана РДГ 36 / 60 мес</li>
+      </ul></div>
+      <div class="io-box out"><div class="il">отдаёт ▸</div><ul>
+        <li>Поля сделки: долг, доход, маршрут, платёж</li>
+        <li>Ссылку на презентацию с цифрами: <code>?name&amp;debt&amp;pay&amp;term</code></li>
+        <li>Дальше — загрузка КИ (шаг 3)</li>
+      </ul></div>
+    </div>
+    <div class="frame-row">
+      <div class="frame" data-w="980" data-src="calc-widget/in-amo.html">
+        <div class="tinylbl">виджет в карточке сделки</div>
+        <a class="open" href="calc-widget/in-amo.html" target="_blank" rel="noopener">Открыть ↗</a>
+        <a class="film" href="calc-widget/in-amo.html" target="_blank" rel="noopener" aria-label="Открыть виджет"></a>
+      </div>
+      <div class="frame-side">
+        <div class="fs-t">Файлы звена</div>
+        <div class="file">🖥️ <code>calc-widget/in-amo.html</code><a href="calc-widget/in-amo.html" target="_blank" rel="noopener">открыть ↗</a></div>
+        <div class="file">🧮 <code>calc-widget/index.html</code><a href="calc-widget/index.html" target="_blank" rel="noopener">открыть ↗</a></div>
+        <div class="file">📐 <code>docs/rdg-formula-spec.md</code><span style="margin-left:auto;color:var(--faint)">спека формул</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="connector"><span class="pill"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>ссылка с цифрами клиента</span></div>
+
+  <!-- ШАГ 2 -->
+  <section class="step">
+    <div class="step-top">
+      <div class="step-num">2</div>
+      <div class="step-main">
+        <span class="lane-tag tag-cli">📱 у клиента</span>
+        <h3>Презентация условий — выгоды на первом экране</h3>
+        <p class="desc">Клиент открывает ссылку на своём телефоне, эксперт ведёт голосом. Первый экран — «ваша экономия с нами» крупно и бары «платите сейчас vs будете платить с нами». Имя, долг и платёж подтягиваются из ссылки — у каждого клиента свои цифры, а не демо. Две версии: списание долга и реструктуризация (РДГ).</p>
+        <div class="badges">
+          <span class="badge ok"><span class="b b-ok"></span>обе версии готовы</span>
+          <span class="badge ok"><span class="b b-ok"></span>цифры из ссылки</span>
+          <span class="badge prod"><span class="b b-prod"></span>живой синхрон с менеджером — движок</span>
+        </div>
+      </div>
+    </div>
+    <div class="io">
+      <div class="io-box in"><div class="il">▸ получает</div><ul>
+        <li>Из ссылки: <code>?name&amp;debt&amp;pay&amp;term</code></li>
+        <li>В проде — merge-поля сделки из amo</li>
+      </ul></div>
+      <div class="io-box out"><div class="il">отдаёт ▸</div><ul>
+        <li>Клиент видит экономию и выбор тарифа</li>
+        <li>Ведёт к оплате на этой же странице (шаг 4)</li>
+      </ul></div>
+    </div>
+    <div class="frame-row">
+      <div class="frame" data-w="390" data-src="presentation-rdg/index.html?name=%D0%98%D0%B2%D0%B0%D0%BD%20%D0%9F%D0%B5%D1%82%D1%80%D0%BE%D0%B2%D0%B8%D1%87&debt=1150000&pay=58000&term=36">
+        <div class="tinylbl">РДГ · пример из ссылки</div>
+        <a class="open" href="presentation-rdg/index.html?name=%D0%98%D0%B2%D0%B0%D0%BD%20%D0%9F%D0%B5%D1%82%D1%80%D0%BE%D0%B2%D0%B8%D1%87&debt=1150000&pay=58000&term=36" target="_blank" rel="noopener">Открыть ↗</a>
+        <a class="film" href="presentation-rdg/index.html?name=%D0%98%D0%B2%D0%B0%D0%BD%20%D0%9F%D0%B5%D1%82%D1%80%D0%BE%D0%B2%D0%B8%D1%87&debt=1150000&pay=58000&term=36" target="_blank" rel="noopener" aria-label="Открыть презентацию РДГ"></a>
+      </div>
+      <div class="frame" data-w="390" data-src="presentation/index.html?proc=ri&name=%D0%98%D0%B2%D0%B0%D0%BD%20%D0%9F%D0%B5%D1%82%D1%80%D0%BE%D0%B2%D0%B8%D1%87&debt=900000&pay=44000">
+        <div class="tinylbl">списание долга · пример</div>
+        <a class="open" href="presentation/index.html?proc=ri&name=%D0%98%D0%B2%D0%B0%D0%BD%20%D0%9F%D0%B5%D1%82%D1%80%D0%BE%D0%B2%D0%B8%D1%87&debt=900000&pay=44000" target="_blank" rel="noopener">Открыть ↗</a>
+        <a class="film" href="presentation/index.html?proc=ri&name=%D0%98%D0%B2%D0%B0%D0%BD%20%D0%9F%D0%B5%D1%82%D1%80%D0%BE%D0%B2%D0%B8%D1%87&debt=900000&pay=44000" target="_blank" rel="noopener" aria-label="Открыть презентацию списания"></a>
+      </div>
+    </div>
+  </section>
+
+  <div class="connector"><span class="pill"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>клиент присылает кредитную историю</span></div>
+
+  <!-- ШАГ 3 -->
+  <section class="step">
+    <div class="step-top">
+      <div class="step-num">3</div>
+      <div class="step-main">
+        <span class="lane-tag tag-mgr">🖥️ окно amo · менеджер</span>
+        <h3>Кредитная история → точный расчёт, файл и персональная ссылка</h3>
+        <p class="desc">Менеджер загружает PDF отчёта БКИ прямо в виджет — тот разбирает все договоры, сверяет сумму со сводкой отчёта и подставляет точный долг. Дальше одной кнопкой генерит клиенту персональную страницу выгод (ссылку можно отправить в чат) и файл-PDF с расчётом — всё не выходя из карточки сделки.</p>
+        <div class="badges">
+          <span class="badge ok"><span class="b b-ok"></span>парсинг отчёта ОКБ живой</span>
+          <span class="badge pass"><span class="b b-pass"></span>персональная ссылка + файл</span>
+          <span class="badge prod"><span class="b b-prod"></span>НБКИ/Эквифакс, файл в сделку — прод</span>
+        </div>
+      </div>
+    </div>
+    <div class="io">
+      <div class="io-box in"><div class="il">▸ получает</div><ul>
+        <li>PDF-отчёт кредитной истории (ОКБ)</li>
+      </ul></div>
+      <div class="io-box out"><div class="il">отдаёт ▸</div><ul>
+        <li>Точный долг → в поля сделки и расчёт</li>
+        <li>Ссылку выгод <code>ki.html#d=…</code> — в чат клиенту</li>
+        <li>Файл-PDF с расчётом (кнопка «Файл выгод»)</li>
+      </ul></div>
+    </div>
+    <div class="frame-row">
+      <div class="frame" data-w="680" data-src="calc-widget/ki.html">
+        <div class="tinylbl">страница выгод по КИ (демо-данные)</div>
+        <a class="open" href="calc-widget/ki.html" target="_blank" rel="noopener">Открыть ↗</a>
+        <a class="film" href="calc-widget/ki.html" target="_blank" rel="noopener" aria-label="Открыть страницу выгод"></a>
+      </div>
+      <div class="frame-side">
+        <div class="fs-t">Файлы звена</div>
+        <div class="file">📄 <code>calc-widget/ki.html</code><a href="calc-widget/ki.html" target="_blank" rel="noopener">открыть ↗</a></div>
+        <div class="file">🖥️ загрузка КИ — в <code>in-amo.html</code><a href="calc-widget/in-amo.html" target="_blank" rel="noopener">открыть ↗</a></div>
+        <div class="file" style="color:var(--muted)">🔒 PDF кредитной истории в git не хранится (перс. данные)</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="connector"><span class="pill"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>клиент согласен → оплата на странице</span></div>
+
+  <!-- ШАГ 4 -->
+  <section class="step">
+    <div class="step-top">
+      <div class="step-num">4</div>
+      <div class="step-main">
+        <span class="lane-tag tag-cli">📱 у клиента</span>
+        <h3>Оплата на той же странице</h3>
+        <p class="desc">После выгод и подписи по СМС — оплата не уходя со страницы: кнопка СБП, копирование ссылки, реквизиты счёта в Сбере. Сумма берётся из выбранного тарифа (рассрочка 13 500 ₽/мес или VIP разом). Оплата = сделка закрыта, клиент уходит в сопровождение.</p>
+        <div class="badges">
+          <span class="badge ok"><span class="b b-ok"></span>экран оплаты готов</span>
+          <span class="badge prod"><span class="b b-prod"></span>сумма в ссылку/QR + проверка платежа — движок</span>
+        </div>
+      </div>
+    </div>
+    <div class="io">
+      <div class="io-box in"><div class="il">▸ получает</div><ul>
+        <li>Выбранный тариф и сумму со страницы условий</li>
+      </ul></div>
+      <div class="io-box out"><div class="il">отдаёт ▸</div><ul>
+        <li>Платёж на счёт компании → сделка закрыта</li>
+        <li>В проде — колбэк движка подтверждает оплату</li>
+      </ul></div>
+    </div>
+    <div class="frame-row">
+      <div class="frame" data-w="390" data-src="payment/index.html">
+        <div class="tinylbl">страница оплаты</div>
+        <a class="open" href="payment/index.html" target="_blank" rel="noopener">Открыть ↗</a>
+        <a class="film" href="payment/index.html" target="_blank" rel="noopener" aria-label="Открыть оплату"></a>
+      </div>
+      <div class="frame-side">
+        <div class="fs-t">Оплата встроена в презентацию</div>
+        <div class="file">💳 экран оплаты — шаг 6 РДГ-презентации<a href="presentation-rdg/index.html" target="_blank" rel="noopener">открыть ↗</a></div>
+        <div class="file">💳 отдельная страница <code>payment/index.html</code><a href="payment/index.html" target="_blank" rel="noopener">открыть ↗</a></div>
+        <div class="file" style="color:var(--muted)">🏦 оплата напрямую на счёт ДОНУЛЯ в Сбербанке</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="connector"><span class="pill"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>данные сделки → merge в договор</span></div>
+
+  <!-- ШАГ 5 -->
+  <section class="step">
+    <div class="step-top">
+      <div class="step-num">5</div>
+      <div class="step-main">
+        <span class="lane-tag tag-doc">📄 документ</span>
+        <h3>Договор PDF — выгода на обложке</h3>
+        <p class="desc">Первая страница договора, который клиент получает после подписания, крупно показывает его выгоду: экономию и сравнение «платили сейчас → будете платить с нами» — те же цифры, что он видел в презентации. Ниже — полный текст договора и график платежей. Две версии: списание долга и РДГ.</p>
+        <div class="badges">
+          <span class="badge ok"><span class="b b-ok"></span>обложка с выгодой — обе версии</span>
+          <span class="badge prod"><span class="b b-prod"></span>подстановка сумм из сделки (merge) — прод</span>
+        </div>
+      </div>
+    </div>
+    <div class="io">
+      <div class="io-box in"><div class="il">▸ получает</div><ul>
+        <li>Данные сделки: суммы, выгода, график</li>
+        <li>ФИО, паспорт, № и дата договора</li>
+      </ul></div>
+      <div class="io-box out"><div class="il">отдаёт ▸</div><ul>
+        <li>Готовый PDF с выгодой на обложке — клиенту в чат</li>
+      </ul></div>
+    </div>
+    <div class="frame-row">
+      <div class="frame" data-w="820" data-src="contract-print-rdg/index.html">
+        <div class="tinylbl">договор РДГ · обложка выгоды</div>
+        <a class="open" href="contract-print-rdg/index.html" target="_blank" rel="noopener">Открыть ↗</a>
+        <a class="film" href="contract-print-rdg/index.html" target="_blank" rel="noopener" aria-label="Открыть договор РДГ"></a>
+      </div>
+      <div class="frame" data-w="820" data-src="contract-print/index.html">
+        <div class="tinylbl">договор списания · обложка выгоды</div>
+        <a class="open" href="contract-print/index.html" target="_blank" rel="noopener">Открыть ↗</a>
+        <a class="film" href="contract-print/index.html" target="_blank" rel="noopener" aria-label="Открыть договор списания"></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- СКВОЗНОЙ ПРОГОН -->
+  <div class="sec-h"><h2>Сквозной прогон одного клиента</h2><span>РДГ · долг 1 240 000 ₽ · платит сейчас ~61 500 ₽/мес</span></div>
+  <div class="run">
+    <div class="run-h"><b>Одни цифры — три экрана, всё сходится</b><span>клиент вводится один раз в виджете, дальше цифра едет сама</span></div>
+    <div class="tbl-scroll">
+      <table class="run-t">
+        <thead><tr><th>Показатель</th><th>Шаг 1 · виджет</th><th>Шаг 2 · презентация</th><th>Шаг 5 · договор PDF</th></tr></thead>
+        <tbody>
+          <tr><td>Долг</td><td class="num">1 240 000 ₽<br><span style="color:var(--faint);font-size:11.5px">со слов / из КИ</span></td><td class="num">заголовок <b>1 240 000 ₽</b></td><td class="num">«весь долг <b>1 240 000 ₽</b>»</td></tr>
+          <tr><td>Платите сейчас</td><td class="num">~61 500 ₽/мес</td><td class="num">бар «сейчас <b>~61 500</b>»</td><td class="num">«платили <b>~61 500 ₽/мес</b>»</td></tr>
+          <tr><td>Будете платить с нами</td><td class="num">план ~36 856 + услуги 13 500</td><td class="num">бар «с нами <b>~42 106</b>»</td><td class="num">«будете платить <b>~42 106 ₽/мес</b>»</td></tr>
+          <tr><td>Ваша экономия</td><td class="num" style="color:var(--faint)">видна на карточке выгоды</td><td class="num">хиро <b>~698 200 ₽</b></td><td class="num">обложка <b>~698 200 ₽</b></td></tr>
+          <tr><td>Услуги ДОНУЛЯ</td><td class="num">13 500 ₽/мес</td><td class="num">карточка <b>13 500 ₽/мес</b></td><td class="num"><b>189 000 ₽</b> · 14×13 500</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="run-note">Экономия ~698 200 ₽ = «сколько выплатил бы, оставив всё как есть» (~2 214 000 ₽) минус «сколько выплатит с нами» (долг + 7% ФУ + услуги = 1 515 800 ₽). В презентации и на обложке договора — одна и та же цифра, потому что обе берут её из полей сделки. Для списания долга выгода считается иначе: долг − услуги 189 000 − госплатежи 50 000.</p>
+  </div>
+
+  <!-- НА ПРОД -->
+  <div class="todo">
+    <h3>Что достраивается при внедрении</h3>
+    <p class="sub">Логика связки собрана и проверена на прототипах. На боевую систему остаётся серверная часть — то, что нельзя показать в статичном прототипе.</p>
+    <ul>
+      <li><b>Запись в поля сделки amo</b><span>виджет пока обновляет мокап карточки — на проде это вызов API amoCRM.</span></li>
+      <li><b>Короткая ссылка вместо длинной</b><span>сейчас данные зашиты в URL; движок будет сохранять расчёт и отдавать короткую ссылку + класть файл в сделку.</span></li>
+      <li><b>Подстановка сумм в договор (merge)</b><span>обложка выгоды и график размечены под подстановку — нужен генератор PDF из полей сделки.</span></li>
+      <li><b>Оплата: сумма в ссылку и проверка платежа</b><span>СБП-ссылка/QR с зашитой суммой тарифа и колбэк «оплачено» от движка.</span></li>
+      <li><b>Другие бюро КИ</b><span>сейчас разбирается отчёт ОКБ; добавить НБКИ и Эквифакс, обработку сканов.</span></li>
+      <li><b>Единая формула выгоды в спеке</b><span>презентация и калькулятор считают «экономию» немного по-разному — свести к одному ТЗ.</span></li>
+    </ul>
+  </div>
+
+  <footer class="ft">
+    Внутренняя карта связки для обзора · ИП Плешаков Р. Т. · бренд ДОНУЛЯ<br>
+    прототипы в <code>site/</code> · не для клиентов
+  </footer>
+
+</div>
+
+<script>
+'use strict';
+/* Живые превью: iframe подгоняется под ширину контейнера (мобильный/натуральный вид со scale).
+   Ленивая загрузка — src ставится, когда карточка близко к экрану, чтобы не грузить всё сразу. */
+function fitFrame(f){
+  const w=+f.dataset.w||390;
+  const scale=Math.min(1,f.clientWidth/w); /* мобильные страницы не растягиваем — только уменьшаем широкие */
+  const ifr=f.querySelector('iframe');
+  if(!ifr) return;
+  ifr.style.width=w+'px';
+  ifr.style.height=Math.round(f.clientHeight/scale)+'px';
+  ifr.style.transform='scale('+scale+')';
+  ifr.style.left=Math.round((f.clientWidth-w*scale)/2)+'px'; /* центрируем по горизонтали */
+}
+/* презентации открываются экраном ожидания эксперта — в превью перелистываем на экран выгод (тот же origin) */
+function skipGate(ifr,src){
+  try{
+    const cw=ifr.contentWindow;
+    if(/presentation-rdg/.test(src)){ if(typeof cw.show==='function') cw.show(1); }
+    else if(/presentation\//.test(src)){
+      const b=[...cw.document.querySelectorAll('button')].find(x=>/менеджер на связи|начать/i.test(x.textContent));
+      if(b) b.click();
+    }
+  }catch(e){}
+}
+const frames=[...document.querySelectorAll('.frame')];
+const io=new IntersectionObserver((entries,obs)=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const f=e.target;
+    if(!f.querySelector('iframe')){
+      const ifr=document.createElement('iframe');
+      ifr.setAttribute('loading','lazy');
+      ifr.setAttribute('scrolling','no');
+      ifr.setAttribute('tabindex','-1');
+      ifr.src=f.dataset.src;
+      f.insertBefore(ifr,f.firstChild);
+      ifr.addEventListener('load',()=>{fitFrame(f);skipGate(ifr,f.dataset.src);});
+      fitFrame(f);
+    }
+    obs.unobserve(f);
+  });
+},{rootMargin:'240px'});
+frames.forEach(f=>io.observe(f));
+let t;addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(()=>frames.forEach(fitFrame),150);});
+</script>
+</body>
+</html>
