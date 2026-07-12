@@ -174,7 +174,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 'use strict';
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
 const PM_SELF=19329, PM_CHILD=17201, BFL_COST=239000;
-let term=36, prod='rdg', last={};
+let term=36, prod='rdg', last={}, kiLoaded=false;
 function calc(){
   const debt=parseFloat(document.getElementById('w_debt').value)||0;
   const paynow=parseFloat(document.getElementById('w_paynow').value)||0;
@@ -217,8 +217,9 @@ function calc(){
 function presentUrl(){
   const name=document.querySelector('.deal h1').textContent.trim();
   const pay=last.paynow>0?{pay:last.paynow}:{}; /* платёж не спросили — параметр не шлём, страница скроет сравнение, а не выдумает цифру */
-  if(last.route==='РДГ') return '../presentation-rdg/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,term:last.eff});
-  if(last.route==='БФЛ') return '../presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay});
+  const ki=kiLoaded?{ki:1}:{}; /* КИ загружена → презентация показывает точные числа + блок кредиторов */
+  if(last.route==='РДГ') return '../presentation-rdg/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,term:last.eff});
+  if(last.route==='БФЛ') return '../presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki});
   return null;
 }
 function writeToDeal(){
@@ -303,6 +304,7 @@ async function parseKiFile(file){
       date:parsed.date, term, credits:parsed.credits
     };
     localStorage.setItem('kiCalc', JSON.stringify(payload));
+    kiLoaded=true; /* презентация теперь пойдёт с ?ki=1 — точные числа + блок кредиторов */
     /* персональная ссылка: данные зашиты в URL (base64url) — страницу можно отправить клиенту.
        В проде вместо этого движок сохраняет расчёт и отдаёт короткую ссылку + прикладывает PDF к сделке. */
     const kiUrl='./ki.html#d='+b64url(JSON.stringify(payload));
@@ -310,6 +312,8 @@ async function parseKiFile(file){
     page.href=kiUrl; page.style.display='';
     document.getElementById('w_kiFile').href=kiUrl+'&print=1';
     ['w_copy','w_kiFile','w_prodNote'].forEach(id=>document.getElementById(id).style.display='');
+    /* обновить ссылку на презентацию — теперь с ki=1 */
+    const pv=document.getElementById('w_present'); if(pv&&pv.style.display!=='none'){ const u=presentUrl(); if(u) pv.href=u; }
   }catch(e){ t.innerHTML='Не удалось разобрать файл: '+e.message; }
 }
 function b64url(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}

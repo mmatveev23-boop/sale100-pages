@@ -115,6 +115,16 @@ h1 .hl{color:var(--green)}
 .bar.us i{background:var(--green)}
 .bar.us .bl b{color:var(--green-ink)}
 .bars .bnote{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+/* состояние «по КИ» и «подписал-не-оплатил» */
+.kibadge{margin-top:8px;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:5px 11px}
+.signedbanner{margin-top:10px;background:var(--green-soft);border:1px solid rgba(15,107,79,.3);border-radius:var(--r-box);padding:11px 14px;font-size:13px;color:var(--green-ink);font-weight:600}
+.creditors{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);padding:14px 15px;margin-top:12px}
+.creditors .crh{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-ink);margin-bottom:8px}
+.creditors .crrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.creditors .crrow span{color:var(--muted)}
+.creditors .crrow b{font-variant-numeric:tabular-nums;font-weight:700}
+.creditors .crrow.more span,.creditors .crrow.more b{color:var(--faint)}
+.creditors .crnote{margin-top:9px;padding-top:9px;border-top:1px solid var(--line);font-size:12px;color:var(--alert);line-height:1.5}
 .cmp{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);overflow:hidden;margin-top:12px}
 .cmp .ch{padding:11px 15px;background:#FDFBF7;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted)}
 .cmp .ch b{color:var(--ink)}
@@ -381,6 +391,8 @@ h1 .hl{color:var(--green)}
       <section class="scr" data-name="Шаг 1 из 7 · Условия">
         <h1>Спишем ваш долг <span class="hl nowrap" id="h1debt">1&nbsp;240&nbsp;000&nbsp;₽</span> законно</h1>
         <p class="sub">Процедура по 127-ФЗ: списание долга. Здесь всё, о чём говорили с экспертом, — проверьте глазами.</p>
+        <div class="kibadge stg" id="kiBadge" style="display:none">✓ Рассчитано по вашей кредитной истории · <b id="kiCount">22</b>&nbsp;договора</div>
+        <div class="signedbanner stg" id="signedBanner" style="display:none">✓ Договор № ДН-2607-1418 подписан — осталась оплата. Повторно подписывать не нужно.</div>
 
         <div class="save-hero stg">
           <div class="sl">Ваша выгода с нами</div>
@@ -392,6 +404,12 @@ h1 .hl{color:var(--green)}
           <div class="bar now"><div class="bl"><span>Платите сейчас</span><b class="num" id="barNow">—</b></div><i style="width:100%"></i></div>
           <div class="bar us"><div class="bl"><span>Будете платить с нами</span><b class="num" id="barUs">13 500 ₽/мес</b></div><i id="barUsFill" style="width:22%"></i></div>
           <div class="bnote">Платёж только за процедуру, <span id="barTerm">14</span> платежей — дальше долгов нет. Коллекторам и банкам звонить вам запрещено по 127-ФЗ.</div>
+        </div>
+
+        <div class="creditors stg" id="crBlock" style="display:none">
+          <div class="crh">Ваши кредиторы · <span id="crCount">22</span> договора</div>
+          <div id="crList"></div>
+          <div class="crnote">11 МФО под ставки до 292% · проценты съедают <b class="num">~46 140 ₽/мес</b> — долг не уменьшается.</div>
         </div>
 
         <button class="linkbtn stg" id="calcBtn" onclick="toggleCalc()">Как посчитана выгода</button>
@@ -552,7 +570,7 @@ h1 .hl{color:var(--green)}
 
       <!-- 5 · ДОГОВОР -->
       <section class="scr" data-name="Шаг 5 из 7 · Договор">
-        <h1>Договор готов. Прочитаем главное вместе</h1>
+        <h1 id="docH1">Договор готов. Прочитаем главное вместе</h1>
         <p class="sub">Эксперт проговорит каждый пункт голосом. Полный текст прикреплён ниже: скачайте, он ваш навсегда.</p>
 
         <div class="doc stg">
@@ -672,20 +690,30 @@ h1 .hl{color:var(--green)}
 /* ============ ДАННЫЕ (в проде приходят из CRM) ============ */
 /* данные клиента: в проде из CRM; для демо-ссылки из виджета — URL-параметры ?name&debt&pay */
 const Q=new URLSearchParams(location.search);
+/* два состояния: ДАННЫЕ (со слов → по КИ, ?ki=1) и ПРОГРЕСС (?signed=1 — подписал, не оплатил). В проде — из движка. */
+const KION=Q.get('ki')==='1', SIGNED=Q.get('signed')==='1';
+const KI={debt:1050460, count:22, interest:46140, payNow:55000,
+  top:[['СФО Сервис Финанс',237354],['Сбербанк',164479],['Ренессанс Кредит',97844]]};
 const payParam=Math.max(0,+Q.get('pay')||0);
+const debtParam=Math.max(0,+Q.get('debt'));
 const CLIENT={
   name:(Q.get('name')||'Виктория Юрьевна').slice(0,60), /* вставляется только через textContent/value — безопасно */
-  debt:Math.max(0,+Q.get('debt'))||1240000,
-  /* платёж сейчас со слов; без него бары сравнения не показываем (не выдумываем цифру) */
-  payNow:payParam>0?payParam:(Q.has('debt')?0:61500)
+  debt:debtParam||(KION?KI.debt:1240000),
+  /* платёж сейчас со слов; без него бары сравнения не показываем (не выдумываем цифру), при КИ — демо-платёж */
+  payNow:payParam>0?payParam:(KION?KI.payNow:(Q.has('debt')?0:61500))
 };
 const BFL_TOTAL_COST=239000; /* услуги 189 000 + госплатежи 50 000 */
 const RASS_TOTAL=189000, RASS_M=14, VIP=169000, KD_PRICE=50000, KD_M=2, PAY_DAY=25;
 const fmt=n=>n.toLocaleString('ru-RU');
 
 let step=0, tariff='rassrochka', kd=true, sim=true;
-const scrs=[...document.querySelectorAll('.scr')];
-const CTA=['Начали','Понятно, дальше','Дальше','Забираю подарок','Данные верны','Всё верно — подписываем','Подтвердить код','Оплатить через СБП',''];
+let scrs=[...document.querySelectorAll('.scr')];
+let CTA=['Начали','Понятно, дальше','Дальше','Забираю подарок','Данные верны','Всё верно — подписываем','Подтвердить код','Оплатить через СБП',''];
+if(SIGNED){ /* уже подписал — экран «Подпись» (индекс 6) выкидываем, «Договор» ведёт сразу к оплате */
+  CTA[5]='Перейти к оплате';
+  const keep=(_,i)=>i!==6;
+  scrs=scrs.filter(keep); CTA=CTA.filter(keep);
+}
 
 /* ============ НАВИГАЦИЯ ============ */
 function show(i){
@@ -810,6 +838,22 @@ document.getElementById('doneName').textContent=CLIENT.name;
 if(Q.get('name')){
   const f=document.getElementById('fio');
   if(f){ f.value=CLIENT.name; document.getElementById('docFio').textContent=CLIENT.name; }
+}
+/* состояние «по КИ»: бейдж + блок кредиторов из реального обезличенного отчёта */
+if(KION){
+  document.getElementById('kiBadge').style.display='';
+  document.getElementById('kiCount').textContent=KI.count;
+  document.getElementById('crCount').textContent=KI.count;
+  document.getElementById('crBlock').style.display='';
+  const topSum=KI.top.reduce((s,[,v])=>s+v,0);
+  document.getElementById('crList').innerHTML=
+    KI.top.map(([n,v])=>`<div class="crrow"><span>${n}</span><b class="num">${fmt(v)} ₽</b></div>`).join('')
+    +`<div class="crrow more"><span>…и ещё ${KI.count-KI.top.length} договоров</span><b class="num">${fmt(KI.debt-topSum)} ₽</b></div>`;
+}
+/* состояние «подписал, не оплатил»: баннер + экран договора помечаем подписанным */
+if(SIGNED){
+  document.getElementById('signedBanner').style.display='';
+  document.getElementById('docH1').textContent='Ваш договор подписан. Остался платёж';
 }
 renderHero();
 recalc(); show(0);
