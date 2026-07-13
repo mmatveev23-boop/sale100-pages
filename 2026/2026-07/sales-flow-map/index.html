@@ -202,9 +202,9 @@ footer.ft{margin-top:34px;text-align:center;font-size:12px;color:var(--faint);li
           <div class="nd">Долг, доход, платёж со слов → маршрут РДГ / БФЛ, выгода, поля сделки.</div>
         </div>
         <div class="node">
-          <div class="st">Шаг 3 · после звонка</div>
-          <div class="nt">Кредитная история → файл + ссылка</div>
-          <div class="nd">PDF отчёта БКИ в виджет → точный долг, персональная ссылка выгод и файл клиенту.</div>
+          <div class="st">Шаг 3 · дожим (не купил)</div>
+          <div class="nt">Запрос КИ → точный расчёт</div>
+          <div class="nd">КИ запрашиваем обязательно, даже без подписи. PDF отчёта в виджет → точный долг, та же ссылка становится точной + файл выгод.</div>
         </div>
       </div>
     </div>
@@ -275,7 +275,7 @@ footer.ft{margin-top:34px;text-align:center;font-size:12px;color:var(--faint);li
       <div class="io-box out"><div class="il">отдаёт ▸</div><ul>
         <li>Поля сделки: долг, доход, маршрут, платёж</li>
         <li>Ссылку на презентацию с цифрами: <code>?name&amp;debt&amp;pay&amp;term</code></li>
-        <li>Дальше — загрузка КИ (шаг 3)</li>
+        <li>Не купил → обязательный запрос КИ (шаг 3)</li>
       </ul></div>
     </div>
     <div class="frame-row">
@@ -334,7 +334,7 @@ footer.ft{margin-top:34px;text-align:center;font-size:12px;color:var(--faint);li
     </div>
   </section>
 
-  <div class="connector"><span class="pill"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>клиент присылает кредитную историю</span></div>
+  <div class="connector"><span class="pill"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>не купил → запросили КИ, клиент прислал</span></div>
 
   <!-- ШАГ 3 -->
   <section class="step">
@@ -342,11 +342,11 @@ footer.ft{margin-top:34px;text-align:center;font-size:12px;color:var(--faint);li
       <div class="step-num">3</div>
       <div class="step-main">
         <span class="lane-tag tag-mgr">🖥️ окно amo · менеджер</span>
-        <h3>Кредитная история → точный расчёт, файл и персональная ссылка</h3>
-        <p class="desc">Менеджер загружает PDF отчёта БКИ прямо в виджет — тот разбирает все договоры, сверяет сумму со сводкой отчёта и подставляет точный долг. Дальше одной кнопкой генерит клиенту персональную страницу выгод (ссылку можно отправить в чат) и файл-PDF с расчётом — всё не выходя из карточки сделки.</p>
+        <h3>Кредитная история → точный расчёт (обязательный шаг дожима)</h3>
+        <p class="desc">Первый звонок идёт целиком со слов — охотники КИ не берут. Не купил на первом звонке — <b>запрашиваем КИ у клиента обязательно, даже без подписанного договора</b>. Пришёл PDF отчёта БКИ — менеджер загружает его прямо в виджет: тот разбирает все договоры, сверяет сумму со сводкой и подставляет точный долг. Та же ссылка презентации становится точной; для дожима есть файл выгод (PDF) — всё не выходя из карточки сделки.</p>
         <div class="badges">
           <span class="badge ok"><span class="b b-ok"></span>парсинг отчёта ОКБ живой</span>
-          <span class="badge pass"><span class="b b-pass"></span>персональная ссылка + файл</span>
+          <span class="badge pass"><span class="b b-pass"></span>та же ссылка станет точной + файл выгод</span>
           <span class="badge prod"><span class="b b-prod"></span>НБКИ/Эквифакс, файл в сделку — прод</span>
         </div>
       </div>
@@ -357,13 +357,13 @@ footer.ft{margin-top:34px;text-align:center;font-size:12px;color:var(--faint);li
       </ul></div>
       <div class="io-box out"><div class="il">отдаёт ▸</div><ul>
         <li>Точный долг → в поля сделки и расчёт</li>
-        <li>Ссылку выгод <code>ki.html#d=…</code> — в чат клиенту</li>
-        <li>Файл-PDF с расчётом (кнопка «Файл выгод»)</li>
+        <li>Та же ссылка презентации — теперь с <code>?ki=1</code></li>
+        <li>Файл выгод (PDF, <code>ki.html#d=…&amp;print=1</code>) — для дожима</li>
       </ul></div>
     </div>
     <div class="frame-row">
       <div class="frame" data-w="680" data-src="calc-widget/ki.html">
-        <div class="tinylbl">страница выгод по КИ (демо-данные)</div>
+        <div class="tinylbl">файл выгод по КИ — печать/PDF (демо-данные)</div>
         <a class="open" href="calc-widget/ki.html" target="_blank" rel="noopener">Открыть ↗</a>
         <a class="film" href="calc-widget/ki.html" target="_blank" rel="noopener" aria-label="Открыть страницу выгод"></a>
       </div>

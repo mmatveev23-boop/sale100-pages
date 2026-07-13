@@ -103,7 +103,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 </head>
 <body>
 
-<p class="cap"><b>Прототип: виджет «ДОНУЛЯ · Калькулятор» в карточке сделки amoCRM.</b> Правая колонка, между остальными виджетами. Расчёт живой — можно крутить. «✈ Отправить презентацию клиенту» записывает поля в сделку и фиксирует отправку. Демо: <b>?ki=1</b> — КИ уже загружена охотником.</p>
+<p class="cap"><b>Прототип: виджет «ДОНУЛЯ · Калькулятор» в карточке сделки amoCRM.</b> Правая колонка, между остальными виджетами. Расчёт живой — можно крутить. «✈ Отправить презентацию клиенту» записывает поля в сделку и фиксирует отправку. Демо: <b>?ki=1</b> — клиент прислал КИ по запросу в дожиме.</p>
 
 <div class="amo">
   <div class="rail">
@@ -325,7 +325,7 @@ document.getElementById('w_debt').addEventListener('input',()=>{ if(kiLoaded) dr
 ['w_debt','w_paynow','w_income','w_kids'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 calc();
 
-/* демо состояния 4 «ранний КИ охотника»: ?ki=1 у самого виджета — КИ уже приложена к сделке до звонка клоузера */
+/* демо состояния 4 «КИ пришла в дожиме»: ?ki=1 у самого виджета — клиент прислал отчёт по обязательному запросу после первого звонка */
 if(new URLSearchParams(location.search).get('ki')==='1'){
   document.getElementById('w_debt').value=1050460; /* демо-набор КИ: 1 050 460 ₽ · 22 договора */
   markKi(22);
@@ -333,7 +333,7 @@ if(new URLSearchParams(location.search).get('ki')==='1'){
   const kf=document.getElementById('w_kiFile');
   kf.href='./ki.html#print=1'; kf.style.display=''; /* без #d= страница берёт тот же демо-набор */
   document.getElementById('f_debt').textContent=fmt(1050460)+' ₽ (по КИ)';
-  document.getElementById('w_noteTxt').innerHTML='<b>КИ загружена охотником заранее.</b> Клиент увидит точные числа и список кредиторов.';
+  document.getElementById('w_noteTxt').innerHTML='<b>Клиент прислал КИ по запросу в дожиме.</b> Клиент увидит точные числа и список кредиторов.';
   document.getElementById('w_note').style.display='';
   calc();
 }
