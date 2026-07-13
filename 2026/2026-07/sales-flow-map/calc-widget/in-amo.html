@@ -164,6 +164,12 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <div><label>Офиц. доход, ₽/мес</label><input id="w_income" type="number" value="80000"></div>
             <div><label>Детей</label><input id="w_kids" type="number" value="1" min="0"></div>
           </div>
+          <label>Регион (прожиточный минимум)</label>
+          <select id="w_region"></select>
+          <div class="two">
+            <div><label>ПМ клиента, ₽/мес</label><input id="w_pmSelf" type="number"></div>
+            <div><label>ПМ ребёнка, ₽/мес</label><input id="w_pmChild" type="number"></div>
+          </div>
           <label>Срок плана РДГ</label>
           <div class="seg" id="w_term"><button class="on" data-t="36">36 мес</button><button data-t="60">60 мес</button></div>
         </div>
@@ -194,10 +200,24 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
   </div>
 </div>
 
+<script src="./pm-regions.js"></script>
 <script>
 'use strict';
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
-const PM_SELF=19329, PM_CHILD=17201, BFL_COST=239000;
+const BFL_COST=239000;
+/* ПМ по регионам 2026 — таблица в ./pm-regions.js (PM_REGIONS + PM_FEDERAL); поля редактируемые, регион только автоподставляет */
+const DEFAULT_REGION='Омская область';
+function fillRegionSelect(){
+  const sel=document.getElementById('w_region');
+  sel.innerHTML='<option value="">РФ · федеральное значение</option>'+Object.keys(PM_REGIONS).map(r=>'<option'+(r===DEFAULT_REGION?' selected':'')+'>'+r+'</option>').join('');
+  applyRegionPM();
+}
+function applyRegionPM(){
+  const r=document.getElementById('w_region').value;
+  const pm=PM_REGIONS[r]||PM_FEDERAL;
+  document.getElementById('w_pmSelf').value=pm.self;
+  document.getElementById('w_pmChild').value=pm.child;
+}
 let term=36, prod='rdg', last={}, kiLoaded=false, kiCount=null, kiBusy=false, kiError=false, sentAt=null;
 /* склонение для бейджа: 1 договор / 2 договора / 22 договора / 11 договоров */
 const decl=n=>{const d=n%10,m=n%100;return m>=11&&m<=14?'договоров':d===1?'договор':d>=2&&d<=4?'договора':'договоров';};
@@ -206,7 +226,10 @@ function calc(){
   const paynow=parseFloat(document.getElementById('w_paynow').value)||0;
   const income=parseFloat(document.getElementById('w_income').value)||0;
   const kids=parseFloat(document.getElementById('w_kids').value)||0;
-  const free=income-(PM_SELF+kids*PM_CHILD);
+  /* свободный доход: минус ПМ клиента и полный ПМ ребёнка на КАЖДОГО ребёнка (правило заказчика) */
+  const pmSelf=parseFloat(document.getElementById('w_pmSelf').value)||PM_FEDERAL.self;
+  const pmChild=parseFloat(document.getElementById('w_pmChild').value)||PM_FEDERAL.child;
+  const free=income-(pmSelf+kids*pmChild);
   const rdgTotal=debt*1.07, pChosen=rdgTotal/term, p60=rdgTotal/60;
   const v=document.getElementById('w_verdict'), kvs=document.getElementById('w_kvs');
   document.getElementById('w_rdgFields').style.display=prod==='rdg'?'':'none';
@@ -322,7 +345,9 @@ document.querySelectorAll('#w_prod button').forEach(b=>b.addEventListener('click
   b.classList.add('on'); prod=b.dataset.p; calc();
 }));
 document.getElementById('w_debt').addEventListener('input',()=>{ if(kiLoaded) dropKi(); }); /* до calc — чтобы бейдж обновился сразу */
-['w_debt','w_paynow','w_income','w_kids'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+['w_debt','w_paynow','w_income','w_kids','w_pmSelf','w_pmChild'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+document.getElementById('w_region').addEventListener('change',()=>{applyRegionPM();calc();});
+fillRegionSelect();
 calc();
 
 /* демо состояния 4 «КИ пришла в дожиме»: ?ki=1 у самого виджета — клиент прислал отчёт по обязательному запросу после первого звонка */

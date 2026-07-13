@@ -122,6 +122,7 @@ h2{font-size:14.5px;font-weight:800;margin:18px 0 8px}
       <div class="p"><label>Долг со слов, ₽</label><input id="e_debt" type="number" value="1150000"></div>
       <div class="p"><label>Офиц. доход, ₽/мес</label><input id="e_income" type="number" value="80000"></div>
       <div class="p"><label>Детей</label><input id="e_kids" type="number" value="1" min="0"></div>
+      <div class="p"><label>Регион (прожиточный минимум)</label><select id="e_region"></select></div>
       <div class="p"><label>Имущество</label><select id="e_assets">
         <option value="none">нет (только единственное жильё)</option>
         <option value="car">есть: авто</option>
@@ -174,6 +175,7 @@ h2{font-size:14.5px;font-weight:800;margin:18px 0 8px}
   <p class="note">Расчёт предварительный, для оценки сценария (п. 10.6 спеки). Математика РДГ — по docs/rdg-formula-spec.md. Стоимость услуг в договоре — тариф «Выгодный» (189 000 / VIP 169 000 / 14×13 500), от расчёта не зависит.</p>
 </div>
 
+<script src="./pm-regions.js"></script>
 <script>
 'use strict';
 /* ===== математика по docs/rdg-formula-spec.md ===== */
@@ -390,13 +392,29 @@ function copyJson(btn){
   setTimeout(()=>{btn.textContent='Скопировать JSON';},2000);
 }
 /* ===== экспресс: предварительный расчёт и маршрутизация ===== */
-const PM_SELF=19329, PM_CHILD=17201, BFL_COST=239000, BFL_M=14;
+const BFL_COST=239000, BFL_M=14;
+/* ПМ по регионам 2026 — ./pm-regions.js; регион автоподставляет ПМ, детальные поля p_self/p_child остаются редактируемыми */
+const DEFAULT_REGION='Омская область';
+function currentPM(){
+  const r=document.getElementById('e_region').value;
+  return PM_REGIONS[r]||PM_FEDERAL;
+}
+function fillRegionSelect(){
+  document.getElementById('e_region').innerHTML='<option value="">РФ · федеральное значение</option>'+Object.keys(PM_REGIONS).map(r=>'<option'+(r===DEFAULT_REGION?' selected':'')+'>'+r+'</option>').join('');
+  applyRegionPM();
+}
+function applyRegionPM(){
+  const pm=currentPM();
+  document.getElementById('p_self').value=pm.self;
+  document.getElementById('p_child').value=pm.child;
+}
 function expressCalc(){
   const debt=parseFloat(document.getElementById('e_debt').value)||0;
   const income=parseFloat(document.getElementById('e_income').value)||0;
   const kids=parseFloat(document.getElementById('e_kids').value)||0;
   const assets=document.getElementById('e_assets').value;
-  const family=PM_SELF+kids*PM_CHILD;
+  const pm=currentPM();
+  const family=pm.self+kids*pm.child; /* полный ПМ ребёнка на каждого ребёнка */
   const free=income-family;
   const rdgTotal=debt*1.07;
   const p36=rdgTotal/36, p60=rdgTotal/60;
@@ -482,6 +500,7 @@ function setMode(m){
 }
 document.querySelectorAll('#modesw button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
 ['e_debt','e_income','e_kids','e_assets'].forEach(id=>document.getElementById(id).addEventListener('input',expressCalc));
+document.getElementById('e_region').addEventListener('change',()=>{applyRegionPM();expressCalc();recalc();});
 
 /* переключатели */
 document.querySelectorAll('#prodsw button').forEach(b=>b.addEventListener('click',()=>{
@@ -493,7 +512,7 @@ document.querySelectorAll('#termSeg button').forEach(b=>b.addEventListener('clic
   b.classList.add('on'); rdgTerm=+b.dataset.t; recalc();
 }));
 ['p_fu','p_load','p_income','p_self','p_kids','p_child'].forEach(id=>document.getElementById(id).addEventListener('input',recalc));
-renderCredits(); setMode('express');
+fillRegionSelect(); renderCredits(); setMode('express');
 </script>
 </body>
 </html>
