@@ -883,9 +883,11 @@ if(SIGNED||PART>0){
   document.getElementById('dozhimSub').textContent=KION?('рассчитано по вашей КИ · '+KI.count+' договоров'):'договор № ДН-2607-1418 подписан';
 }
 const payIdx=scrs.findIndex(s=>/Оплата/.test(s.dataset.name));
+const uslIdx=scrs.findIndex(s=>/Условия/.test(s.dataset.name));
 let openScr=0;
 if(Q.get('paid')==='1') openScr=scrs.length-1;            /* оплатил → Готово */
-else if(SIGNED||PART>0) openScr=payIdx>=0?payIdx:0;        /* дожим → сразу мини заключение с оплатой */
+else if(SIGNED||PART>0) openScr=payIdx>=0?payIdx:0;        /* дожим (подписал) → сразу мини заключение с оплатой */
+else if(Q.get('resume')==='1') openScr=uslIdx>=0?uslIdx:0;/* клиент открывает повторно (прислал КИ) → сразу на выгоде */
 show(openScr);
 
 /* ============ ДОГОВОР-PDF (вшит base64 — страница самодостаточна; в проде файл придёт из CRM) ============ */
