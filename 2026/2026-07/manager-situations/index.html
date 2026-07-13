@@ -39,6 +39,17 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
 .pchip b{color:var(--ink);font-weight:700}
 .pchip .ic{width:9px;height:9px;border-radius:3px}
 
+.onelink{margin-top:16px;background:var(--card);border:1.5px solid var(--green);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow-sm)}
+.onelink .ol-h{display:flex;align-items:center;gap:9px;font-size:15.5px;font-weight:800;letter-spacing:-.01em;color:var(--green-ink)}
+.onelink .ol-h .lk{width:26px;height:26px;border-radius:8px;background:var(--green-soft);display:grid;place-items:center;font-size:14px;flex-shrink:0}
+.onelink p{margin-top:7px;font-size:13.5px;color:var(--muted);line-height:1.55}
+.onelink p b{color:var(--ink);font-weight:600}
+.onelink .steps{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+.onelink .st{display:inline-flex;align-items:center;gap:7px;background:var(--card2,#FBF8F2);border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:12.5px}
+.onelink .st b{color:var(--ink);font-weight:700}
+.onelink .st span{color:var(--muted)}
+.onelink .st .a{color:var(--faint)}
+
 .group{margin-top:30px}
 .group-h{display:flex;align-items:center;gap:10px;margin-bottom:4px}
 .group-h .gn{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:5px 12px}
@@ -99,6 +110,17 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
       <span class="pchip"><span class="ic" style="background:#C99A33"></span>Продукт: <b>РДГ / Списание</b></span>
     </div>
   </header>
+
+  <div class="onelink">
+    <div class="ol-h"><span class="lk">🔗</span>Ссылка одна — на весь цикл клиента</div>
+    <p>Менеджер отправляет клиенту <b>одну ссылку на первом звонке</b> и больше её не пересобирает и не переотправляет. Она <b>сама меняет вид</b> по мере продвижения сделки — по статусу в CRM (подписан? оплачен?) и наличию КИ. Для дожима менеджер просто говорит: «откройте ту же ссылку».</p>
+    <div class="steps">
+      <span class="st"><b>Не подписал</b><span class="a">→</span><span>полная презентация (с подписью и оплатой)</span></span>
+      <span class="st"><b>Подписал, не оплатил</b><span class="a">→</span><span>мини заключение (только оплата)</span></span>
+      <span class="st"><b>Оплатил</b><span class="a">→</span><span>«Готово · вы в работе»</span></span>
+    </div>
+    <p style="margin-top:9px">Пришла КИ на любом этапе — та же ссылка показывает точные числа и кредиторов, ничего пересылать не надо. <b>Ниже разные ссылки — только для демо</b> (в проде это один короткий URL, состояние берётся из сделки).</p>
+  </div>
 
   <!-- ГРУППА 1 -->
   <div class="group">
