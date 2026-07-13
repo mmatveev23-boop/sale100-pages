@@ -238,9 +238,15 @@ h1 .hl{color:var(--green)}
 .creditors .crh{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--gold-ink);margin-bottom:8px}
 .creditors .crrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line)}
 .creditors .crrow span{color:var(--muted)}
-.creditors .crrow b{font-variant-numeric:tabular-nums;font-weight:700}
+.creditors .crrow b{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap;flex-shrink:0}
+.creditors .crrow span{min-width:0}
 .creditors .crrow.more span,.creditors .crrow.more b{color:var(--faint)}
 .creditors .crnote{margin-top:9px;padding-top:9px;border-top:1px solid var(--line);font-size:12px;color:var(--alert);line-height:1.5}
+.creditors .crrow .od{font-style:normal;font-size:10px;font-weight:700;color:var(--alert);background:#FAEDE8;padding:1px 6px;border-radius:5px;margin-left:6px;white-space:nowrap}
+.whatwedo{background:var(--green-soft);border:1px solid rgba(15,107,79,.25);border-radius:var(--r-box);padding:13px 15px;margin-top:12px}
+.whatwedo .wd-h{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--green-ink);margin-bottom:5px}
+.whatwedo .wd-t{font-size:13px;color:var(--ink);line-height:1.5}
+.whatwedo .wd-t b{color:var(--green-ink);font-weight:600}
 .cmp .duo{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
 .cmp .duo > div{padding:11px 15px}
 .cmp .duo > div + div{border-left:1px solid var(--line)}
@@ -633,6 +639,10 @@ h1 .hl{color:var(--green)}
           <div class="sv num" id="dozhimSave">—</div>
           <div class="ss num" id="dozhimSub">договор подписан</div>
         </div>
+        <div class="whatwedo stg" id="whatWeDo" style="display:none">
+          <div class="wd-h">Что делаем</div>
+          <div class="wd-t"><b>Реструктуризация долгов по 127-ФЗ.</b> Суд фиксирует ваш долг и утверждает посильный план: проценты и пени останавливаются, долг больше не растёт, вы не признаётесь банкротом. Юрист ведёт дело от заявления до утверждения плана.</div>
+        </div>
         <p class="sub">С него мы сразу начинаем работу: заявление, кредиторы, защита от звонков.</p>
 
         <div class="paycard stg">
@@ -705,8 +715,8 @@ const Q=new URLSearchParams(location.search);
    В проде статус сделки и данные КИ отдаёт движок; здесь — демо-параметры. */
 const KION=Q.get('ki')==='1', SIGNED=Q.get('signed')==='1', PART=Math.max(0,+Q.get('part')||0);
 /* демо-набор КИ = реальный обезличенный отчёт ОКБ (см. calc-widget/ki.html) */
-const KI={debt:1050460, count:22, interest:46140, payNow:55000,
-  top:[['СФО Сервис Финанс',237354],['Сбербанк',164479],['Ренессанс Кредит',97844]]};
+const KI={debt:1050460, count:22, interest:46140, payNow:55000, overdue:11,
+  top:[['СФО Сервис Финанс',237354,1],['Сбербанк',164479,1],['Ренессанс Кредит',97844,1]]};
 const debtParam=Math.max(0,+Q.get('debt'));
 const CLIENT={name:(Q.get('name')||'Виктория Юрьевна').slice(0,60), debt:debtParam||(KION?KI.debt:1240000)};
 const payParam=Math.max(0,+Q.get('pay')||0);
@@ -844,7 +854,7 @@ if(KION){
   document.getElementById('crBlock').style.display='';
   const topSum=KI.top.reduce((s,[,v])=>s+v,0);
   document.getElementById('crList').innerHTML=
-    KI.top.map(([n,v])=>`<div class="crrow"><span>${n}</span><b class="num">${fmt(v)} ₽</b></div>`).join('')
+    KI.top.map(([n,v,od])=>`<div class="crrow"><span>${n}${od?' <em class="od">была просрочка</em>':''}</span><b class="num">${fmt(v)} ₽</b></div>`).join('')
     +`<div class="crrow more"><span>…и ещё ${KI.count-KI.top.length} договоров</span><b class="num">${fmt(KI.debt-topSum)} ₽</b></div>`;
 }
 /* состояние «подписал, не оплатил»: баннер + экран договора помечаем подписанным */
@@ -874,6 +884,7 @@ if(SIGNED||PART>0){
   document.getElementById('dozhimSub').textContent=KION?('рассчитано по вашей кредитной истории'):'договор № ДН-2607-1418 подписан';
   /* при КИ — на мини заключение переносим полный блок «ваши кредиторы» (клиент прислал КИ, показываем картину, а не одну строку) */
   if(KION){ const cr=document.getElementById('crBlock'); document.getElementById('dozhimHero').after(cr); cr.style.display=''; }
+  document.getElementById('whatWeDo').style.display=''; /* «что делаем» — процедура по 127-ФЗ */
 }
 let openScr=0;
 if(Q.get('paid')==='1') openScr=scrs.length-1;      /* оплатил → Готово */
