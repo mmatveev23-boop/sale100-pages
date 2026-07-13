@@ -83,6 +83,13 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw .cr4 label{margin:0 0 2px;font-size:8.5px;letter-spacing:.02em}
 .dw .cr4 input{padding:5px 6px;font-size:12px;border-radius:6px}
 .dw .kv.total b{color:#0B5540}
+/* свёрнутый конструктор: строка-тогл с итогом, по клику раскрывается */
+.dw .crtoggle{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin-top:8px;border:1px solid #d8dee3;border-radius:8px;background:#fff;padding:8px 10px;font-family:inherit;font-size:12px;cursor:pointer;color:#2e3640}
+.dw .crtoggle .ct-l{font-weight:700;color:#5c6874;text-transform:uppercase;font-size:10px;letter-spacing:.03em}
+.dw .crtoggle .ct-l i{display:inline-block;font-style:normal;transition:transform .15s;margin-right:4px}
+.dw .crtoggle.open .ct-l i{transform:rotate(90deg)}
+.dw .crtoggle .ct-r{font-variant-numeric:tabular-nums;color:#0B5540;font-weight:700}
+.dw .crtoggle .ct-r small{color:#94a0ab;font-weight:600}
 /* строка данных (источник: со слов / по КИ / парсинг / ошибка) */
 .dw .dbadge{margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px}
 .dw .dbadge.words{background:#eef1f4;color:#7c8894}
@@ -168,10 +175,9 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
       <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор клиента</b><small id="dh_small">экспресс · первый звонок</small></div></div>
       <div class="body">
         <div class="seg" id="w_prod" style="margin-bottom:2px"><button class="on" data-p="rdg">РДГ</button><button data-p="bfl">БФЛ</button></div>
-        <!-- со слов: конструктор по типам кредитов (сумма/шт/ставка/срок); при КИ вместо него показывается точное поле долга -->
-        <label>Кредиты со слов</label>
-        <div id="w_credits"></div>
-        <div class="kv total"><span>Итого долг · <span id="w_nTotal">0</span> дог.</span><b id="w_debtTotal">—</b></div>
+        <!-- со слов: конструктор по типам кредитов (сумма/шт/ставка/срок), свёрнут в строку-итог; при КИ вместо него показывается точное поле долга -->
+        <button type="button" class="crtoggle" id="w_crToggle" onclick="toggleCredits()"><span class="ct-l"><i>▸</i>Кредиты со слов</span><span class="ct-r"><b id="w_debtTotal">—</b> <small>· <span id="w_nTotal">0</span> дог.</small></span></button>
+        <div id="w_credits" style="display:none"></div>
         <div id="w_debtWrap" style="display:none"><label id="w_debtLabel">Долг по кредитной истории, ₽</label><input id="w_debt" type="number" value="1050460"></div>
         <label>Платёж сейчас, ₽/мес (со слов — можно не заполнять, посчитаем по кредитам)</label><input id="w_paynow" type="number" placeholder="авто">
         <div id="w_rdgFields">
@@ -262,6 +268,12 @@ function creditCalc(k,amount,rate,months){
   /* loan / secured / mortgage — аннуитет */
   const pay=annuityPayment(amount,m,months);
   return {pay, total:Math.max(pay*months,amount)};
+}
+function toggleCredits(){
+  const box=document.getElementById('w_credits'), t=document.getElementById('w_crToggle');
+  const open=box.style.display==='none';
+  box.style.display=open?'':'none';
+  t.classList.toggle('open',open);
 }
 function renderCreditRows(){
   document.getElementById('w_credits').innerHTML=CREDIT_TYPES.map(t=>
@@ -426,7 +438,7 @@ function markKi(count){
   kiLoaded=true; kiError=false; kiCount=count;
   /* КИ точнее слов: конструктор типов прячем, показываем точное поле долга из отчёта */
   document.getElementById('w_credits').style.display='none';
-  document.querySelector('.kv.total').style.display='none';
+  document.getElementById('w_crToggle').style.display='none';
   document.getElementById('w_debtWrap').style.display='';
   document.getElementById('w_debt').classList.add('ki');
   document.getElementById('w_debtLabel').textContent='Долг по кредитной истории, ₽';
@@ -435,8 +447,9 @@ function markKi(count){
 /* ручная правка долга после КИ → честно возвращаемся на «со слов», ссылка перестаёт слать ki=1 */
 function dropKi(){
   kiLoaded=false; kiCount=null;
-  document.getElementById('w_credits').style.display='';
-  document.querySelector('.kv.total').style.display='';
+  document.getElementById('w_crToggle').style.display='';
+  document.getElementById('w_crToggle').classList.remove('open');
+  document.getElementById('w_credits').style.display='none'; /* возвращаемся свёрнутыми */
   document.getElementById('w_debtWrap').style.display='none';
   document.getElementById('w_debt').classList.remove('ki');
   document.getElementById('dh_small').textContent='экспресс · первый звонок';
