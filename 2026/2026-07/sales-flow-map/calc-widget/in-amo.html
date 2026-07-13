@@ -72,6 +72,17 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw .kv b{font-variant-numeric:tabular-nums}
 .dw.hot{border:2px solid #C99A33;box-shadow:0 6px 18px -8px rgba(201,154,51,.5)}
 .dw input.ki{border-color:#C99A33;background:#FBF3DC;color:#8A6212;font-weight:700}
+/* конструктор кредитов со слов: 5 типов, каждый — сумма/шт/ставка/срок (ставка и срок предзаполнены средними по РФ) */
+.dw .crt{border:1px solid #e4e9ed;border-radius:8px;padding:7px 8px;margin-top:6px}
+.dw .crt.on{border-color:#0F6B4F;background:#fbfdfc}
+.dw .crt .crh{display:flex;justify-content:space-between;align-items:baseline;font-size:12px}
+.dw .crt .crh b{color:#2e3640}
+.dw .crt .crh span{font-size:11.5px;color:#94a0ab;font-variant-numeric:tabular-nums}
+.dw .crt.on .crh span{color:#0B5540;font-weight:700}
+.dw .cr4{display:grid;grid-template-columns:1.5fr .8fr 1fr 1fr;gap:5px;margin-top:4px}
+.dw .cr4 label{margin:0 0 2px;font-size:8.5px;letter-spacing:.02em}
+.dw .cr4 input{padding:5px 6px;font-size:12px;border-radius:6px}
+.dw .kv.total b{color:#0B5540}
 /* строка данных (источник: со слов / по КИ / парсинг / ошибка) */
 .dw .dbadge{margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px}
 .dw .dbadge.words{background:#eef1f4;color:#7c8894}
@@ -157,8 +168,12 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
       <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор клиента</b><small id="dh_small">экспресс · первый звонок</small></div></div>
       <div class="body">
         <div class="seg" id="w_prod" style="margin-bottom:2px"><button class="on" data-p="rdg">РДГ</button><button data-p="bfl">БФЛ</button></div>
-        <label id="w_debtLabel">Долг со слов, ₽</label><input id="w_debt" type="number" value="1150000">
-        <label>Платёж сейчас, ₽/мес (со слов)</label><input id="w_paynow" type="number" value="61500">
+        <!-- со слов: конструктор по типам кредитов (сумма/шт/ставка/срок); при КИ вместо него показывается точное поле долга -->
+        <label>Кредиты со слов</label>
+        <div id="w_credits"></div>
+        <div class="kv total"><span>Итого долг · <span id="w_nTotal">0</span> дог.</span><b id="w_debtTotal">—</b></div>
+        <div id="w_debtWrap" style="display:none"><label id="w_debtLabel">Долг по кредитной истории, ₽</label><input id="w_debt" type="number" value="1050460"></div>
+        <label>Платёж сейчас, ₽/мес (со слов — можно не заполнять, посчитаем по кредитам)</label><input id="w_paynow" type="number" placeholder="авто">
         <div id="w_rdgFields">
           <div class="two">
             <div><label>Офиц. доход, ₽/мес</label><input id="w_income" type="number" value="80000"></div>
@@ -205,6 +220,82 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 'use strict';
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
 const BFL_COST=239000;
+/* ═══ типы кредитов со слов: ставка и срок предзаполнены средними по РФ на середину 2026, менеджер может поправить.
+   Источники дефолтов (сверка ЦБ ПСК I кв. 2026 × рыночные обзоры, июль 2026): потреб 30,7% / 28 мес (ПСК ЦБ, ОКБ);
+   карта 52% / 36 мес (ПСК ЦБ; срок = горизонт погашения мин. платежами, у карт договорного срока нет);
+   МФО 292% = потолок 0,8%/день / 4 мес (сдвиг рынка в installment); залоговый 25% / 96 мес; ипотека рыночная 18% / 282 мес (23,5 года). ═══ */
+const CREDIT_TYPES=[
+  {k:'loan',    name:'Кредит',          rate:30.7,months:28,  demo:700000, demoN:2},
+  {k:'card',    name:'Кредитная карта', rate:52,  months:36,  demo:250000, demoN:3},
+  {k:'mfo',     name:'МФО',             rate:292, months:4,   demo:200000, demoN:6},
+  {k:'secured', name:'Залоговый кредит',rate:25,  months:96,  demo:0,      demoN:0},
+  {k:'mortgage',name:'Ипотека',         rate:18,  months:282, demo:0,      demoN:0},
+];
+/* математика — по docs/rdg-formula-spec.md */
+function annuityPayment(principal,monthlyRate,months){
+  if(principal<=0||months<=0)return 0;
+  if(monthlyRate<=0)return principal/months;
+  const f=Math.pow(1+monthlyRate,months);
+  return principal*monthlyRate*f/(f-1);
+}
+function projectRevolving(balance,monthlyRate,payment,maxMonths){
+  let total=0,cur=balance;
+  for(let i=0;i<maxMonths&&cur>1;i++){
+    const interest=cur*monthlyRate;
+    const p=Math.min(payment,cur+interest);
+    cur=cur+interest-p; total+=p;
+  }
+  return total;
+}
+/* по типу: текущий платёж и «сколько выплатит без РДГ» (суммы со слов = текущий остаток, balanceMode current, paid=0) */
+function creditCalc(k,amount,rate,months){
+  const m=rate/100/12;
+  if(k==='card'){
+    const pay=Math.max(annuityPayment(amount,m,months), amount*0.07); /* мин. платёж карты 7% от долга */
+    return {pay, total:projectRevolving(amount,m,pay,months)};
+  }
+  if(k==='mfo'){
+    const cap=amount*2.3; /* дата договора со слов неизвестна → лимит ×2.3 */
+    const pay=cap/months;
+    return {pay, total:Math.min(projectRevolving(amount,m,pay,months),cap)};
+  }
+  /* loan / secured / mortgage — аннуитет */
+  const pay=annuityPayment(amount,m,months);
+  return {pay, total:Math.max(pay*months,amount)};
+}
+function renderCreditRows(){
+  document.getElementById('w_credits').innerHTML=CREDIT_TYPES.map(t=>
+    '<div class="crt" data-t="'+t.k+'"><div class="crh"><b>'+t.name+'</b><span id="crs_'+t.k+'">—</span></div>'+
+    '<div class="cr4">'+
+    '<div><label>Сумма, ₽</label><input class="c-am" type="number" min="0" value="'+(t.demo||'')+'"></div>'+
+    '<div><label>Шт</label><input class="c-n" type="number" min="0" value="'+(t.demoN||'')+'"></div>'+
+    '<div><label>Ставка %</label><input class="c-r" type="number" min="0" value="'+t.rate+'"></div>'+
+    '<div><label>Срок, мес</label><input class="c-m" type="number" min="1" value="'+t.months+'"></div>'+
+    '</div></div>').join('');
+  document.querySelectorAll('#w_credits input').forEach(i=>i.addEventListener('input',calc));
+}
+/* свод по конструктору: долг, число договоров, текущий платёж, «без РДГ» */
+function creditsTotals(){
+  let debt=0,n=0,monthly=0,noRdg=0;
+  document.querySelectorAll('#w_credits .crt').forEach(row=>{
+    const k=row.dataset.t;
+    const amount=parseFloat(row.querySelector('.c-am').value)||0;
+    const cnt=parseFloat(row.querySelector('.c-n').value)||0;
+    const rate=parseFloat(row.querySelector('.c-r').value)||0;
+    const months=Math.max(1,parseFloat(row.querySelector('.c-m').value)||1);
+    const s=row.querySelector('#crs_'+k);
+    if(amount>0){
+      const c=creditCalc(k,amount,rate,months);
+      debt+=amount; n+=cnt||1; monthly+=c.pay; noRdg+=c.total;
+      row.classList.add('on');
+      s.textContent='~'+fmt(c.pay)+' ₽/мес';
+    }else{
+      row.classList.remove('on');
+      s.textContent='—';
+    }
+  });
+  return {debt,n,monthly,noRdg};
+}
 /* ПМ по регионам 2026 — таблица в ./pm-regions.js (PM_REGIONS + PM_FEDERAL); поля редактируемые, регион только автоподставляет */
 const DEFAULT_REGION='Омская область';
 function fillRegionSelect(){
@@ -222,8 +313,16 @@ let term=36, prod='rdg', last={}, kiLoaded=false, kiCount=null, kiBusy=false, ki
 /* склонение для бейджа: 1 договор / 2 договора / 22 договора / 11 договоров */
 const decl=n=>{const d=n%10,m=n%100;return m>=11&&m<=14?'договоров':d===1?'договор':d>=2&&d<=4?'договора':'договоров';};
 function calc(){
-  const debt=parseFloat(document.getElementById('w_debt').value)||0;
-  const paynow=parseFloat(document.getElementById('w_paynow').value)||0;
+  /* источник долга: КИ (точное поле) или конструктор типов со слов */
+  const ct=creditsTotals();
+  const debt=kiLoaded?(parseFloat(document.getElementById('w_debt').value)||0):ct.debt;
+  document.getElementById('w_debtTotal').textContent=ct.debt>0?fmt(ct.debt)+' ₽':'—';
+  document.getElementById('w_nTotal').textContent=ct.n;
+  /* платёж сейчас: ручной ввод приоритетнее расчётного по кредитам (п.10.1 спеки) */
+  const payManual=parseFloat(document.getElementById('w_paynow').value)||0;
+  const payCalc=(!kiLoaded&&ct.monthly>0)?Math.round(ct.monthly):0;
+  const paynow=payManual>0?payManual:payCalc;
+  document.getElementById('w_paynow').placeholder=payCalc>0?('авто: '+fmt(payCalc)):'авто';
   const income=parseFloat(document.getElementById('w_income').value)||0;
   const kids=parseFloat(document.getElementById('w_kids').value)||0;
   /* свободный доход: минус ПМ клиента и полный ПМ ребёнка на КАЖДОГО ребёнка (правило заказчика) */
@@ -242,14 +341,17 @@ function calc(){
   }else if(debt<=0||free>=debt/3){
     route='self';
     v.className='verdict self';
-    v.innerHTML='<b>Мимо процедур</b>'+(debt<=0?'Введите долг.':'Свободных '+fmt(free)+' ₽/мес: закроет долг сам за ~3 месяца.');
+    v.innerHTML='<b>Мимо процедур</b>'+(debt<=0?'Введите кредиты клиента.':'Свободных '+fmt(free)+' ₽/мес: закроет долг сам за ~3 месяца.');
     kv=[['Свободный доход',fmt(free)+' ₽/мес']];
   }else if(free>=p60){
     route='РДГ';
     if(free<pChosen) eff=60;
     v.className='verdict rdg';
     v.innerHTML='<b>РДГ · план '+eff+' мес</b>Платёж '+fmt(rdgTotal/eff)+' ₽/мес, проценты останавливаются, не банкрот.'+(free<pChosen?' На 36 мес не проходит.':'');
-    kv=[['Долг + ФУ 7%',fmt(rdgTotal)+' ₽'],['Платёж по плану',fmt(rdgTotal/eff)+' ₽/мес'],['Свободный доход',fmt(free)+' ₽/мес'],['Услуги ДОНУЛЯ','13 500 ₽/мес']];
+    kv=[['Долг + ФУ 7%',fmt(rdgTotal)+' ₽'],['Платёж по плану',fmt(rdgTotal/eff)+' ₽/мес']];
+    if(paynow>0) kv.push(['Платит сейчас',fmt(paynow)+' ₽/мес'],['Нагрузка снизится на',fmt(Math.max(0,paynow-rdgTotal/eff))+' ₽/мес']);
+    if(!kiLoaded&&ct.noRdg>0) kv.push(['Без РДГ выплатит',fmt(ct.noRdg)+' ₽'],['Выгода РДГ',fmt(Math.max(0,ct.noRdg-rdgTotal))+' ₽']);
+    kv.push(['Свободный доход',fmt(free)+' ₽/мес'],['Услуги ДОНУЛЯ','13 500 ₽/мес']);
   }else{
     route='БФЛ'; /* РДГ не тянет → вердикт, запись и ссылка идут по БФЛ */
     v.className='verdict bfl';
@@ -257,7 +359,7 @@ function calc(){
     kv=[['Свободный доход',fmt(free)+' ₽/мес'],['Мин. платёж плана (60 мес)',fmt(p60)+' ₽/мес'],['Долг спишется',fmt(debt)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
   }
   kvs.innerHTML=kv.map(([k,x])=>'<div class="kv"><span>'+k+'</span><b>'+x+'</b></div>').join('');
-  last={debt,paynow,income,route,eff,pay:route==='РДГ'&&free>=p60?Math.round(rdgTotal/eff):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null};
+  last={debt,paynow,income,route,eff,contracts:kiLoaded?kiCount:ct.n,pay:route==='РДГ'&&free>=p60?Math.round(rdgTotal/eff):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null};
   updateSendUI();
 }
 /* ссылка на презентацию с цифрами клиента (демо-связка; в проде merge-поля CRM + короткая ссылка движка) */
@@ -304,7 +406,7 @@ function updateSendUI(){
 /* отправка = запись чисел в поля сделки + фиксация факта отправки (в проде: amo API + автопуш ссылки в чат) */
 function sendPresentation(){
   const u=presentUrl(); if(!u) return;
-  document.getElementById('f_debt').textContent=fmt(last.debt)+' ₽'+(kiLoaded?' (по КИ)':'');
+  document.getElementById('f_debt').textContent=fmt(last.debt)+' ₽ · '+(last.contracts||0)+' дог.'+(kiLoaded?' (по КИ)':'');
   document.getElementById('f_income').textContent=fmt(last.income)+' ₽';
   document.getElementById('f_route').textContent=last.route==='РДГ'?'РДГ · '+last.eff+' мес':'БФЛ · списание';
   document.getElementById('f_pay').textContent=last.pay?fmt(last.pay)+' ₽/мес':'—';
@@ -322,6 +424,10 @@ function sendPresentation(){
 /* пометить данные как «по КИ»: голд-поле долга, шапка, бейдж */
 function markKi(count){
   kiLoaded=true; kiError=false; kiCount=count;
+  /* КИ точнее слов: конструктор типов прячем, показываем точное поле долга из отчёта */
+  document.getElementById('w_credits').style.display='none';
+  document.querySelector('.kv.total').style.display='none';
+  document.getElementById('w_debtWrap').style.display='';
   document.getElementById('w_debt').classList.add('ki');
   document.getElementById('w_debtLabel').textContent='Долг по кредитной истории, ₽';
   document.getElementById('dh_small').textContent='точный расчёт по КИ';
@@ -329,8 +435,10 @@ function markKi(count){
 /* ручная правка долга после КИ → честно возвращаемся на «со слов», ссылка перестаёт слать ki=1 */
 function dropKi(){
   kiLoaded=false; kiCount=null;
+  document.getElementById('w_credits').style.display='';
+  document.querySelector('.kv.total').style.display='';
+  document.getElementById('w_debtWrap').style.display='none';
   document.getElementById('w_debt').classList.remove('ki');
-  document.getElementById('w_debtLabel').textContent='Долг со слов, ₽';
   document.getElementById('dh_small').textContent='экспресс · первый звонок';
   document.querySelector('.dw').classList.remove('hot');
   const f=document.getElementById('f_debt');
@@ -347,12 +455,14 @@ document.querySelectorAll('#w_prod button').forEach(b=>b.addEventListener('click
 document.getElementById('w_debt').addEventListener('input',()=>{ if(kiLoaded) dropKi(); }); /* до calc — чтобы бейдж обновился сразу */
 ['w_debt','w_paynow','w_income','w_kids','w_pmSelf','w_pmChild'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 document.getElementById('w_region').addEventListener('change',()=>{applyRegionPM();calc();});
+renderCreditRows();
 fillRegionSelect();
 calc();
 
 /* демо состояния 4 «КИ пришла в дожиме»: ?ki=1 у самого виджета — клиент прислал отчёт по обязательному запросу после первого звонка */
 if(new URLSearchParams(location.search).get('ki')==='1'){
   document.getElementById('w_debt').value=1050460; /* демо-набор КИ: 1 050 460 ₽ · 22 договора */
+  document.getElementById('w_paynow').value=61500; /* платёж со слов клиента — в демо задан */
   markKi(22);
   document.querySelector('.dw').classList.add('hot'); /* жёлтая кайма — «горячее», шлите сразу */
   const kf=document.getElementById('w_kiFile');
