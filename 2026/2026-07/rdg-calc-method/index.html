@@ -109,6 +109,33 @@ tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
 .foot li b{color:var(--ink);font-weight:600}
 .foot code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--paper2);padding:1px 6px;border-radius:5px;color:var(--green-ink)}
 
+/* тренажёр */
+.trainer{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.tr-col{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:16px 18px}
+.tr-col h3{font-size:13px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--green-ink);margin-bottom:10px}
+.tr-col label{display:block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--faint);margin:9px 0 3px}
+.tr-col input,.tr-col select{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:14px;color:var(--ink);background:#fff}
+.tr-col input:focus,.tr-col select:focus{outline:none;border-color:var(--green)}
+.tr2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tct{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:7px}
+.tct.on{border-color:var(--green);background:#FBFDFC}
+.tct .h{display:flex;justify-content:space-between;font-size:12.5px}
+.tct .h b{font-weight:700}
+.tct .h span{color:var(--faint);font-variant-numeric:tabular-nums}
+.tct.on .h span{color:var(--green-ink);font-weight:700}
+.tct .g{display:grid;grid-template-columns:1.6fr .9fr .9fr;gap:6px;margin-top:5px}
+.tct .g label{margin:0 0 2px;font-size:9px}
+.tct .g input{padding:6px 8px;font-size:13px}
+.tr-seg{display:flex;gap:4px;background:var(--paper2);border-radius:9px;padding:3px;margin-top:2px}
+.tr-seg button{flex:1;border:none;background:none;border-radius:7px;padding:7px;font-family:inherit;font-weight:700;font-size:12.5px;color:var(--muted);cursor:pointer}
+.tr-seg button.on{background:#fff;color:var(--pine);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.tr-verdict{border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.5;margin-bottom:10px}
+.tr-verdict b{display:block;font-size:14.5px;margin-bottom:3px}
+.tr-verdict.g{background:var(--pine);color:#fff}
+.tr-verdict.y{background:var(--gold-soft);color:var(--gold-ink);border:1px solid rgba(201,154,51,.45)}
+.tr-verdict.b{background:var(--green-soft);color:var(--green-ink);border:1px solid rgba(15,107,79,.3)}
+.tr-verdict.r{background:var(--brick-soft);color:var(--brick);border:1px solid rgba(168,68,46,.3)}
+@media (max-width:760px){.trainer{grid-template-columns:1fr}}
 @media (max-width:640px){
   .wrap{padding:16px 13px 60px}
   .hdr{padding:24px 20px;border-radius:20px} .hdr h1{font-size:22px}
@@ -235,6 +262,32 @@ tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
     Платёж 35 656 ₽/мес вместо банковских 123 528 ₽. Банковские проценты стоп, дальше ключевая 14,25% — не банкрот. 36 мес не тянет — только с одобрения кредиторов (60). Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ). Госплатежи 50 000 ₽ на старте, услуги ДОНУЛЯ 13 500 ₽/мес.
   </div>
 
+  <h2><span class="n">5</span>Тренажёр — подставьте свои цифры</h2>
+  <p style="font-size:13.5px;color:var(--muted);margin-top:-4px">Тот же расчёт, что в боевом виджете. Предзаполнен примером семьи выше — меняйте любые числа и смотрите, как меняется вердикт.</p>
+  <div class="trainer">
+    <div class="tr-col">
+      <h3>Вводные</h3>
+      <div id="t_credits"></div>
+      <div class="tr2">
+        <div><label>Офиц. доход, ₽/мес</label><input id="t_income" type="number" value="160000"></div>
+        <div><label>Детей</label><input id="t_kids" type="number" value="2" min="0"></div>
+      </div>
+      <label>Регион (прожиточный минимум)</label>
+      <select id="t_region"></select>
+      <div class="tr2">
+        <div><label>ПМ клиента, ₽/мес</label><input id="t_pmSelf" type="number"></div>
+        <div><label>ПМ ребёнка, ₽/мес</label><input id="t_pmChild" type="number"></div>
+      </div>
+      <label>Банкротство или реструктуризация раньше?</label>
+      <div class="tr-seg" id="t_prior"><button class="on" data-p="no">Нет</button><button data-p="yes">Было</button></div>
+    </div>
+    <div class="tr-col">
+      <h3>Расчёт виджета</h3>
+      <div class="tr-verdict g" id="t_verdict"></div>
+      <div class="calcflow" id="t_kvs"></div>
+    </div>
+  </div>
+
   <div class="foot">
     <h3>Служебное</h3>
     <ul>
@@ -245,5 +298,102 @@ tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
   </div>
 
 </div>
+<script src="../calc-widget/pm-regions.js"></script>
+<script>
+'use strict';
+/* тренажёр = математика боевого виджета (docs/rdg-law-calc-2026-07.md): держать в синхроне с calc-widget/in-amo.html */
+const fmt=n=>Math.round(n).toLocaleString('ru-RU');
+const KEY_RATE=14.25, GOS_START=50000, BFL_COST=239000;
+const CREDIT_TYPES=[
+  {k:'loan',    name:'Кредит',          rate:30.7,months:28,  demo:1000000, demoN:2},
+  {k:'card',    name:'Кредитная карта', rate:52,  months:36,  demo:500000,  demoN:3},
+  {k:'mfo',     name:'МФО',             rate:292, months:4,   demo:0,       demoN:0},
+  {k:'secured', name:'Залоговый кредит',rate:25,  months:96,  demo:0,       demoN:0},
+  {k:'mortgage',name:'Ипотека',         rate:18,  months:282, demo:2500000, demoN:1},
+];
+function annuityPayment(p,m,n){if(p<=0||n<=0)return 0;if(m<=0)return p/n;const f=Math.pow(1+m,n);return p*m*f/(f-1);}
+function projectRevolving(bal,m,pay,max){let t=0,c=bal;for(let i=0;i<max&&c>1;i++){const it=c*m;const p=Math.min(pay,c+it);c=c+it-p;t+=p;}return t;}
+function creditCalc(k,amount,rate,months){
+  const m=rate/100/12;
+  if(k==='card'){const pay=Math.max(annuityPayment(amount,m,months),amount*0.07);return {pay,total:projectRevolving(amount,m,pay,months)};}
+  if(k==='mfo'){const cap=amount*2.3;const pay=cap/months;return {pay,total:Math.min(projectRevolving(amount,m,pay,months),cap)};}
+  const pay=annuityPayment(amount,m,months);return {pay,total:Math.max(pay*months,amount)};
+}
+function planCalc(body,months){const interest=body*(KEY_RATE/100)*(months/12)/2;const fu=body*0.07;const total=body+interest+fu;return {interest,fu,total,monthly:total/months};}
+let prior='no';
+function renderT(){
+  document.getElementById('t_credits').innerHTML=CREDIT_TYPES.map(t=>
+    '<div class="tct" data-t="'+t.k+'"><div class="h"><b>'+t.name+'</b><span id="ts_'+t.k+'">—</span></div>'+
+    '<div class="g"><div><label>Сумма, ₽</label><input class="c-am" type="number" min="0" value="'+(t.demo||'')+'"></div>'+
+    '<div><label>Ставка %</label><input class="c-r" type="number" value="'+t.rate+'"></div>'+
+    '<div><label>Срок, мес</label><input class="c-m" type="number" min="1" value="'+t.months+'"></div></div></div>').join('');
+  document.getElementById('t_region').innerHTML='<option value="">РФ · федеральное значение</option>'+Object.keys(PM_REGIONS).map(r=>'<option'+(r==='Москва'?' selected':'')+'>'+r+'</option>').join('');
+  applyPM();
+  document.querySelectorAll('#t_credits input,#t_income,#t_kids,#t_pmSelf,#t_pmChild').forEach(e=>e.addEventListener('input',tcalc));
+  document.getElementById('t_region').addEventListener('change',()=>{applyPM();tcalc();});
+  document.querySelectorAll('#t_prior button').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('#t_prior button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); prior=b.dataset.p; tcalc();
+  }));
+}
+function applyPM(){const pm=PM_REGIONS[document.getElementById('t_region').value]||PM_FEDERAL;document.getElementById('t_pmSelf').value=pm.self;document.getElementById('t_pmChild').value=pm.child;}
+function tcalc(){
+  let debt=0,monthly=0,noRdg=0,mortAmount=0,mortPay=0,mortTotal=0;
+  document.querySelectorAll('#t_credits .tct').forEach(row=>{
+    const k=row.dataset.t;
+    const amount=parseFloat(row.querySelector('.c-am').value)||0;
+    const rate=parseFloat(row.querySelector('.c-r').value)||0;
+    const months=Math.max(1,parseFloat(row.querySelector('.c-m').value)||1);
+    const sp=row.querySelector('#ts_'+k);
+    if(amount>0){const c=creditCalc(k,amount,rate,months);debt+=amount;monthly+=c.pay;noRdg+=c.total;
+      if(k==='mortgage'){mortAmount+=amount;mortPay+=c.pay;mortTotal+=c.total;}
+      row.classList.add('on');sp.textContent='~'+fmt(c.pay)+' ₽/мес';}
+    else{row.classList.remove('on');sp.textContent='—';}
+  });
+  const income=parseFloat(document.getElementById('t_income').value)||0;
+  const kids=parseFloat(document.getElementById('t_kids').value)||0;
+  const pmSelf=parseFloat(document.getElementById('t_pmSelf').value)||PM_FEDERAL.self;
+  const pmChild=parseFloat(document.getElementById('t_pmChild').value)||PM_FEDERAL.child;
+  const free=income-(pmSelf+kids*pmChild)-mortPay;
+  const body=Math.max(0,debt-mortAmount);
+  const P60=planCalc(body,60),P36=planCalc(body,36);
+  const v=document.getElementById('t_verdict'),kvs=document.getElementById('t_kvs');
+  let kv=[];
+  const mfc=(body>=25000&&body<=1000000)?'<br>⚠ Долг 25 тыс.–1 млн: проверить бесплатное внесудебное через МФЦ (нужно оконченное исполнительное производство).':'';
+  if(prior==='yes'){
+    v.className='tr-verdict r';
+    v.innerHTML='<b>🔴 РДГ недоступна · ст. 213.13</b>Было банкротство (замок 5 лет) или план реструктуризации (замок 8 лет). Маршрут решает юрист.';
+    kv=[['Замок закона','банкротство — 5 лет · план — 8 лет']];
+  }else if(debt<=0||free>=debt/3){
+    v.className='tr-verdict b';
+    v.innerHTML='<b>Мимо процедур</b>'+(debt<=0?'Введите кредиты.':'Свободных '+fmt(free)+' ₽/мес: закроет долг сам за ~3 месяца — процедура не нужна.');
+    kv=[['Свободный доход',fmt(free)+' ₽/мес']];
+  }else if(free>=P60.monthly){
+    const margin=(free-P60.monthly)/free;
+    if(margin<0.1){v.className='tr-verdict y';v.innerHTML='<b>🟡 РДГ · пограничный — запас впритык</b>Платёж '+fmt(P60.monthly)+' ₽/мес при свободных '+fmt(free)+' ₽. Суд может не утвердить (Пленум ВС № 45).';}
+    else{v.className='tr-verdict g';v.innerHTML='<b>🟢 РДГ · подходит — план 60 мес</b>Платёж '+fmt(P60.monthly)+' ₽/мес вместо банковских '+fmt(monthly)+' ₽. Проценты банков стоп, дальше ключевая '+KEY_RATE+'%.'+(free<P36.monthly?' 36 мес не тянет — только с одобрения кредиторов.':'')+(mortAmount>0?' Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ).':'');}
+    kv=[['Тело плана'+(mortAmount>0?' (без ипотеки)':''),fmt(body)+' ₽'],
+        ['Проценты плана · ключевая '+KEY_RATE+'%','~'+fmt(P60.interest)+' ₽'],
+        ['ФУ 7% от выплаченного',fmt(P60.fu)+' ₽'],
+        ['Итого по плану',fmt(P60.total)+' ₽'],
+        ['Платёж · 60 мес (с кредиторами)',fmt(P60.monthly)+' ₽/мес'],
+        ['Платёж · 36 мес (через суд, ≥50%)',free>=P36.monthly?fmt(P36.monthly)+' ₽/мес':'не тянет'],
+        ['Госплатежи (старт, отдельно)',fmt(GOS_START)+' ₽']];
+    if(mortAmount>0)kv.push(['Ипотека — вне плана (298-ФЗ)',fmt(mortAmount)+' ₽ · ~'+fmt(mortPay)+' ₽/мес']);
+    kv.push(['Платит сейчас',fmt(monthly)+' ₽/мес'],
+        ['Нагрузка снизится на',fmt(Math.max(0,monthly-P60.monthly-mortPay))+' ₽/мес'],
+        ['Без РДГ выплатит (без ипотеки)',fmt(noRdg-mortTotal)+' ₽'],
+        ['Выгода РДГ',fmt(Math.max(0,noRdg-mortTotal-P60.total))+' ₽'],
+        ['Свободный доход (после ПМ'+(mortPay>0?' и ипотеки':'')+')',fmt(free)+' ₽/мес'],
+        ['Услуги ДОНУЛЯ','13 500 ₽/мес']);
+  }else{
+    v.className='tr-verdict b';
+    v.innerHTML='<b>Не тянет РДГ → кандидат на списание</b>Свободных '+fmt(free)+' ₽/мес меньше платежа плана даже на 60 мес ('+fmt(P60.monthly)+' ₽). Долг '+fmt(debt)+' ₽ спишется целиком.'+mfc;
+    kv=[['Свободный доход',fmt(free)+' ₽/мес'],['Мин. платёж плана (60 мес)',fmt(P60.monthly)+' ₽/мес'],['Долг спишется',fmt(debt)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
+  }
+  kvs.innerHTML=kv.map(([k,x])=>'<div class="cf"><span>'+k+'</span><b class="num">'+x+'</b></div>').join('');
+}
+renderT();tcalc();
+</script>
 </body>
 </html>
