@@ -12,7 +12,8 @@
 body{font-family:"Golos Text",system-ui,sans-serif;color:#1C1A16;font-size:10pt;line-height:1.45;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .num{font-variant-numeric:tabular-nums}
 /* ── СТРАНИЦА 1: ВЫГОДЫ ── */
-.cover{width:210mm;height:296mm;padding:16mm 15mm;color:#fff;page-break-after:always;display:flex;flex-direction:column;background:
+/* верхний паддинг 11мм (был 16): с полосой .eco контент упирался в низ листа, .cv-note держим ≥10мм от края */
+.cover{width:210mm;height:296mm;padding:11mm 15mm 16mm;color:#fff;page-break-after:always;display:flex;flex-direction:column;background:
  radial-gradient(120% 90% at 85% -10%, #135741 0%, transparent 55%),
  linear-gradient(165deg,#0C4233 0%, #0B3B2E 60%, #082A21 100%)}
 .cv-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
@@ -28,12 +29,14 @@ body{font-family:"Golos Text",system-ui,sans-serif;color:#1C1A16;font-size:10pt;
 .card .cs{margin-top:1.5mm;font-size:9pt;color:rgba(255,255,255,.78);line-height:1.4}
 .card .cs b{color:#F4C775}
 .cv-note{margin-top:auto;font-size:8pt;color:rgba(255,255,255,.55);line-height:1.5;border-top:1px solid rgba(255,255,255,.18);padding-top:4mm}
-/* полоса экономии клиента — те же цифры, что на шаге 1 презентации (merge из CRM) */
-.eco{margin-top:7mm;border:2.5px solid #C99A33;border-radius:5mm;padding:5mm 6mm;background:rgba(244,199,117,.10);display:flex;align-items:center;justify-content:space-between;gap:8mm}
+/* полоса экономии клиента — те же цифры, что на шаге 1 презентации (merge из CRM); в печати поджата по вертикали, чтобы .cv-note не уехал в зону обрезки */
+.eco{margin-top:3mm;border:2.5px solid #C99A33;border-radius:5mm;padding:3.5mm 6mm;background:rgba(244,199,117,.10);display:flex;align-items:center;justify-content:space-between;gap:8mm}
 .eco .el{font-size:8.5pt;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:#E9C883}
 .eco .ev{margin-top:1mm;font-size:25pt;font-weight:800;letter-spacing:-.01em;line-height:1;color:#F4C775;white-space:nowrap}
 .eco .es{max-width:88mm;font-size:9pt;color:rgba(255,255,255,.82);line-height:1.5}
 .eco .es b{color:#fff}
+/* mrg-чип на тёмной обложке: кремовая подсветка требует тёмного текста (как в теле договора) */
+.eco .ev.mrg,.eco .es b.mrg{color:#1C1A16}
 /* ── ТЕКСТ ДОГОВОРА ── */
 .doc{padding:14mm 17mm}
 .doc-title{font-size:15pt;font-weight:800;text-align:center}
@@ -71,6 +74,7 @@ li{margin:1mm 0;text-align:justify}
   .cv-h1{margin-top:24px}
   .cv-note{margin-top:24px;padding-top:14px}
   .cards{margin-top:20px;gap:10px}
+  .eco{margin-top:26px;padding:19px 23px} /* экран: прежние отступы, поджатие нужно только печати */
 }
 @media screen and (max-width:620px){
   .cards{grid-template-columns:1fr}
@@ -111,8 +115,8 @@ li{margin:1mm 0;text-align:justify}
   <div class="cv-sub">Коротко и крупно — главные условия. Полный текст со всеми деталями начинается со следующей страницы.</div>
   <!-- экономия клиента: числа = шаг 1 презентации; при внедрении merge из amoCRM (экономия / платёж сейчас / платёж с нами) -->
   <div class="eco">
-    <div><div class="el">Ваша экономия с нами</div><div class="ev num" data-mrg="Сделка|Экономия">~698 200 ₽</div></div>
-    <div class="es num">Платили <b data-mrg="Сделка|Платёж сейчас">~61 500 ₽/мес</b> — будете платить <b data-mrg="Сделка|Платёж с нами">~42 106 ₽/мес</b>: посильный план, который утвердит суд, плюс наши услуги. Проценты и пени остановлены — долг больше не растёт.</div>
+    <div><div class="el">Ваша экономия с нами</div><div class="ev num mrg" data-mrg="Сделка|Экономия">~698 200 ₽</div></div>
+    <div class="es num">Платили <b class="mrg" data-mrg="Сделка|Платёж сейчас">~61 500 ₽/мес</b> — будете платить <b class="mrg" data-mrg="Сделка|Платёж с нами">~42 106 ₽/мес</b>: посильный план, который утвердит суд, плюс наши услуги. Проценты и пени остановлены — долг больше не растёт.</div>
   </div>
   <div class="cards">
     <div class="card"><div class="cl">Что делаем</div><div class="cv num">Урегулируем весь долг:<br>1 240 000 ₽</div><div class="cs">процедура реструктуризации долгов по 127-ФЗ, ведём дело от заявления до утверждения плана судом</div></div>

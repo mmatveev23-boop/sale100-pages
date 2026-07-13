@@ -82,7 +82,7 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color
     <div class="way rdg" id="c_rdg"></div>
     <div class="way bfl" id="c_bfl"></div>
   </div>
-  <div class="c-cta"><b>Что дальше?</b> Эти цифры мы уже посчитали по вашей официальной кредитной истории. Осталось выбрать путь на консультации с экспертом — она у вас уже оплачена. Эксперт позвонит в назначенное время, либо напишите нам в чат.</div>
+  <div class="c-cta"><b>Что дальше?</b> Этот расчёт — материал к вашему разговору с экспертом ДОНУЛЯ. На консультации он сверит цифры с вашей ситуацией и поможет выбрать путь. Если появились вопросы до звонка — напишите нам в чат.</div>
   <p class="c-disc" id="c_disc"></p>
   <div class="c-actions"><button onclick="window.print()">Скачать PDF / распечатать</button></div>
 </div>
@@ -107,7 +107,7 @@ function render(d){
   const tRest=document.createElement('span'); tRest.innerHTML='вот что показала <i>ваша кредитная история</i>'; ttl.append(tRest);
   document.getElementById('c_facts').innerHTML=`
     <div class="fact"><div class="l">Ваш долг</div><div class="v num">${fmt(total)} ₽</div><div class="s num">${d.credits.length} действующих договоров</div></div>
-    <div class="fact bad"><div class="l">Из них МФО</div><div class="v num">${mfo.length}</div><div class="s num">${fmt(mfo.reduce((s,c)=>s+c.debt,0))} ₽ — ставки до 292% годовых</div></div>
+    <div class="fact bad"><div class="l">Из них МФО</div><div class="v num">${mfo.length}</div><div class="s num">${fmt(mfo.reduce((s,c)=>s+(+c.debt||0),0))} ₽ — ставки до 292% годовых</div></div>
     <div class="fact bad"><div class="l">Проценты съедают</div><div class="v num">~${fmt(interest)} ₽</div><div class="s">каждый месяц — долг при этом не уменьшается</div></div>
     <div class="fact ${over>0?'bad':''}"><div class="l">Просрочка</div><div class="v num">${over>0?fmt(over)+' ₽':'ещё нет'}</div><div class="s">${over>0?'уже в отчёте — дальше пени и коллекторы':'но запас прочности кончается'}</div></div>`;
   document.getElementById('c_rdg').innerHTML=`
@@ -124,7 +124,7 @@ function render(d){
     <ul><li>Списываются все ${d.credits.length} договоров, включая МФО</li><li>Коллекторам и банкам звонить вам запрещено</li><li>Гарантия в договоре: не спишем — вернём деньги</li></ul>`;
   document.getElementById('c_disc').textContent='Расчёт предварительный, по данным отчёта бюро кредитных историй'+(d.date?' от '+d.date:'')+'. Проценты по действующим договорам оценены по типам обязательств. Итоговые условия фиксируются в договоре; выбор процедуры — после консультации. ИП Плешаков Р. Т., ИНН 470516340503 · донуля.рф';
 }
-/* данные: 1) из ссылки #d=… (base64url — виджет формирует персональный URL, его можно отправить клиенту);
+/* данные: 1) из ссылки #d=… (base64url — виджет открывает так «Файл выгод (PDF)» с &print=1: печать/PDF-выгрузка для дожима, не второй клиентский сайт);
    2) localStorage (открытие из виджета в том же браузере); 3) демо. В проде — короткая ссылка движка. */
 function fromHash(){
   const m=location.hash.match(/[#&]d=([^&]+)/);

@@ -70,9 +70,31 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw .kv{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:12.5px;border-bottom:1px dashed #eef1f4}
 .dw .kv span{color:#94a0ab}
 .dw .kv b{font-variant-numeric:tabular-nums}
-.dw .abtn{display:block;width:100%;margin-top:10px;border:none;border-radius:8px;background:#4c8bf7;color:#fff;padding:9px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}
-.dw .abtn:hover{background:#3d7ce8}
-.dw .lbtn{display:block;width:100%;margin-top:6px;border:1px solid #d8dee3;border-radius:8px;background:#fff;color:#0B5540;padding:8px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+.dw.hot{border:2px solid #C99A33;box-shadow:0 6px 18px -8px rgba(201,154,51,.5)}
+.dw input.ki{border-color:#C99A33;background:#FBF3DC;color:#8A6212;font-weight:700}
+/* строка данных (источник: со слов / по КИ / парсинг / ошибка) */
+.dw .dbadge{margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px}
+.dw .dbadge.words{background:#eef1f4;color:#7c8894}
+.dw .dbadge.ki{background:#FBF3DC;color:#8A6212}
+.dw .dbadge.load{background:#E4F0FA;color:#2f6fb0}
+.dw .dbadge.err{background:#FAEDE8;color:#A8442E}
+/* кнопка отправки — главная (зелёная) */
+.dw .sbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:10px;border:none;border-radius:8px;background:#0F6B4F;color:#fff;padding:11px;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer}
+.dw .sbtn:hover{background:#0B5540}
+.dw .sbtn.dis,.dw .sbtn:disabled{background:#c3ccd4;color:#fff;cursor:default}
+/* статус под кнопкой */
+.dw .sstat{margin-top:6px;text-align:center;font-size:11.5px;font-weight:600}
+.dw .sstat.none{color:#94a0ab}
+.dw .sstat.sent{color:#0F6B4F}
+.dw .sstat.warn{color:#A8442E}
+/* вторичные */
+.dw .lrow{display:flex;gap:6px;margin-top:8px}
+.dw .lbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid #d8dee3;border-radius:8px;background:#fff;color:#0B5540;padding:8px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none}
+.dw .lbtn.hi{border-color:#0F6B4F;background:#E9F3EE}
+.dw .lbtn.mut,.dw .lbtn:disabled{color:#7c8894;cursor:default}
+.dw .wnote{margin-top:9px;font-size:11px;color:#94a0ab;line-height:1.5}
+.dw .wnote b{color:#5c6874;font-weight:700}
+.dw .wnote a{color:#0B5540;font-weight:700}
 .dw .toast{display:none;margin-top:8px;background:#E9F3EE;color:#0B5540;border-radius:8px;padding:8px 10px;font-size:11.5px;line-height:1.45}
 
 .cap{max-width:1180px;margin:0 auto;padding:10px 18px;font-size:12px;color:#7c8894}
@@ -81,7 +103,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 </head>
 <body>
 
-<p class="cap"><b>Прототип: виджет «ДОНУЛЯ · Калькулятор» в карточке сделки amoCRM.</b> Правая колонка, между остальными виджетами. Расчёт живой — можно крутить. «Записать в сделку» показывает, какие поля обновятся.</p>
+<p class="cap"><b>Прототип: виджет «ДОНУЛЯ · Калькулятор» в карточке сделки amoCRM.</b> Правая колонка, между остальными виджетами. Расчёт живой — можно крутить. «✈ Отправить презентацию клиенту» записывает поля в сделку и фиксирует отправку. Демо: <b>?ki=1</b> — КИ уже загружена охотником.</p>
 
 <div class="amo">
   <div class="rail">
@@ -132,10 +154,11 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 
     <!-- ═══ НАШ ВИДЖЕТ ═══ -->
     <div class="dw">
-      <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор клиента</b><small>экспресс · первый звонок</small></div></div>
+      <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор клиента</b><small id="dh_small">экспресс · первый звонок</small></div></div>
       <div class="body">
         <div class="seg" id="w_prod" style="margin-bottom:2px"><button class="on" data-p="rdg">РДГ</button><button data-p="bfl">БФЛ</button></div>
-        <label>Долг со слов, ₽</label><input id="w_debt" type="number" value="1150000">
+        <label id="w_debtLabel">Долг со слов, ₽</label><input id="w_debt" type="number" value="1150000">
+        <label>Платёж сейчас, ₽/мес (со слов)</label><input id="w_paynow" type="number" value="61500">
         <div id="w_rdgFields">
           <div class="two">
             <div><label>Офиц. доход, ₽/мес</label><input id="w_income" type="number" value="80000"></div>
@@ -148,9 +171,15 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <div class="verdict rdg" id="w_verdict"></div>
         <div id="w_kvs"></div>
 
-        <button class="abtn" onclick="writeToDeal()">Записать в сделку</button>
-        <label class="lbtn" style="cursor:pointer">Загрузить КИ (PDF) → точный расчёт<input type="file" id="w_ki" accept="application/pdf" style="display:none"></label>
-        <a class="lbtn" id="w_kiPage" href="./ki.html" target="_blank" style="display:none;background:#0B3B2E;color:#F4C775;border-color:#0B3B2E">Открыть страницу клиента ↗</a>
+        <div class="dbadge words" id="w_badge">🎤 Данные: со слов</div>
+        <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
+        <div class="sstat none" id="w_sstat">ещё не отправлено</div>
+        <div class="lrow">
+          <label class="lbtn" id="w_kiBtn" style="cursor:pointer">⭱ Загрузить КИ<input type="file" id="w_ki" accept="application/pdf" style="display:none"></label>
+          <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
+          <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">⤓ Файл выгод (PDF)</a>
+        </div>
+        <div class="wnote" id="w_note" style="display:none"><span id="w_noteTxt"></span> <a id="w_present" target="_blank" style="display:none">Открыть презентацию ↗</a></div>
         <div class="toast" id="w_toast"></div>
       </div>
     </div>
@@ -169,9 +198,12 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 'use strict';
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
 const PM_SELF=19329, PM_CHILD=17201, BFL_COST=239000;
-let term=36, prod='rdg', last={};
+let term=36, prod='rdg', last={}, kiLoaded=false, kiCount=null, kiBusy=false, kiError=false, sentAt=null;
+/* склонение для бейджа: 1 договор / 2 договора / 22 договора / 11 договоров */
+const decl=n=>{const d=n%10,m=n%100;return m>=11&&m<=14?'договоров':d===1?'договор':d>=2&&d<=4?'договора':'договоров';};
 function calc(){
   const debt=parseFloat(document.getElementById('w_debt').value)||0;
+  const paynow=parseFloat(document.getElementById('w_paynow').value)||0;
   const income=parseFloat(document.getElementById('w_income').value)||0;
   const kids=parseFloat(document.getElementById('w_kids').value)||0;
   const free=income-(PM_SELF+kids*PM_CHILD);
@@ -196,23 +228,90 @@ function calc(){
     v.innerHTML='<b>РДГ · план '+eff+' мес</b>Платёж '+fmt(rdgTotal/eff)+' ₽/мес, проценты останавливаются, не банкрот.'+(free<pChosen?' На 36 мес не проходит.':'');
     kv=[['Долг + ФУ 7%',fmt(rdgTotal)+' ₽'],['Платёж по плану',fmt(rdgTotal/eff)+' ₽/мес'],['Свободный доход',fmt(free)+' ₽/мес'],['Услуги ДОНУЛЯ','13 500 ₽/мес']];
   }else{
-    route='РДГ';
-    v.className='verdict self';
-    v.innerHTML='<b>РДГ не тянет</b>Свободных '+fmt(free)+' ₽/мес меньше платежа плана даже на 60 мес ('+fmt(p60)+' ₽). Переключите на вкладку БФЛ.';
-    kv=[['Свободный доход',fmt(free)+' ₽/мес'],['Мин. платёж плана (60 мес)',fmt(p60)+' ₽/мес']];
+    route='БФЛ'; /* РДГ не тянет → вердикт, запись и ссылка идут по БФЛ */
+    v.className='verdict bfl';
+    v.innerHTML='<b>РДГ не тянет → БФЛ · списание долга</b>Свободных '+fmt(free)+' ₽/мес меньше платежа плана даже на 60 мес ('+fmt(p60)+' ₽). Долг '+fmt(debt)+' ₽ спишется целиком.';
+    kv=[['Свободный доход',fmt(free)+' ₽/мес'],['Мин. платёж плана (60 мес)',fmt(p60)+' ₽/мес'],['Долг спишется',fmt(debt)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
   }
   kvs.innerHTML=kv.map(([k,x])=>'<div class="kv"><span>'+k+'</span><b>'+x+'</b></div>').join('');
-  last={debt,income,route,eff,pay:route==='РДГ'&&free>=p60?Math.round(rdgTotal/eff):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null};
+  last={debt,paynow,income,route,eff,pay:route==='РДГ'&&free>=p60?Math.round(rdgTotal/eff):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null};
+  updateSendUI();
 }
-function writeToDeal(){
-  document.getElementById('f_debt').textContent=fmt(last.debt)+' ₽';
+/* ссылка на презентацию с цифрами клиента (демо-связка; в проде merge-поля CRM + короткая ссылка движка) */
+function presentUrl(){
+  const name=document.querySelector('.deal h1').textContent.trim();
+  const pay=last.paynow>0?{pay:last.paynow}:{}; /* платёж не спросили — параметр не шлём, страница скроет сравнение, а не выдумает цифру */
+  const ki=kiLoaded?{ki:1}:{}; /* КИ загружена → презентация показывает точные числа + блок кредиторов */
+  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,term:last.eff});
+  if(last.route==='БФЛ') return '../client-presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki});
+  return null;
+}
+/* строка данных + primary-кнопка + статус отправки — единый рендер состояния */
+function updateSendUI(){
+  const badge=document.getElementById('w_badge'), btn=document.getElementById('w_send'),
+        st=document.getElementById('w_sstat'), copy=document.getElementById('w_copy'),
+        up=document.getElementById('w_kiBtn'), pv=document.getElementById('w_present');
+  if(kiBusy){ /* парсинг PDF — отправка заблокирована */
+    badge.className='dbadge load'; badge.textContent='⏳ Читаю отчёт…';
+    btn.className='sbtn dis'; btn.disabled=true; btn.textContent='✈ Отправить презентацию клиенту';
+    st.className='sstat none'; st.textContent='дождитесь расчёта…';
+    copy.disabled=true; up.classList.remove('hi');
+    return;
+  }
+  if(kiLoaded){ badge.className='dbadge ki'; badge.textContent='✓ По кредитной истории · '+kiCount+' '+decl(kiCount); }
+  else if(kiError){ badge.className='dbadge err'; badge.textContent='⚠ Отчёт не распознан — считаем со слов'; }
+  else{ badge.className='dbadge words'; badge.textContent='🎤 Данные: со слов'; }
+  const u=presentUrl();
+  if(!u){ /* «мимо процедур» или пустой долг — презентации нет, отправлять нечего */
+    btn.className='sbtn dis'; btn.disabled=true; btn.textContent='✈ Отправить презентацию клиенту';
+    st.className='sstat warn'; st.textContent=last.debt>0?'«мимо процедур» — презентации нет':'введите долг';
+    copy.disabled=true; up.classList.remove('hi');
+    if(pv) pv.style.display='none';
+    return;
+  }
+  btn.className='sbtn'; btn.disabled=false;
+  btn.textContent=sentAt?'✈ Отправить снова':(kiError?'✈ Отправить со слов':'✈ Отправить презентацию клиенту');
+  if(sentAt){ st.className='sstat sent'; st.textContent='✓ отправлено '+sentAt; }
+  else{ st.className='sstat none'; st.textContent='ещё не отправлено'; }
+  copy.disabled=false;
+  /* отправлено со слов → подсветить догрузку КИ: та же ссылка станет точной */
+  up.classList.toggle('hi', !!sentAt&&!kiLoaded&&!kiError);
+  if(pv&&pv.style.display!=='none') pv.href=u;
+}
+/* отправка = запись чисел в поля сделки + фиксация факта отправки (в проде: amo API + автопуш ссылки в чат) */
+function sendPresentation(){
+  const u=presentUrl(); if(!u) return;
+  document.getElementById('f_debt').textContent=fmt(last.debt)+' ₽'+(kiLoaded?' (по КИ)':'');
   document.getElementById('f_income').textContent=fmt(last.income)+' ₽';
-  document.getElementById('f_route').textContent=last.route==='РДГ'?'РДГ · '+last.eff+' мес':(last.route==='БФЛ'?'БФЛ · списание':'—');
+  document.getElementById('f_route').textContent=last.route==='РДГ'?'РДГ · '+last.eff+' мес':'БФЛ · списание';
   document.getElementById('f_pay').textContent=last.pay?fmt(last.pay)+' ₽/мес':'—';
+  sentAt=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  document.querySelector('.dw').classList.remove('hot'); /* «горячее» снято — презентация ушла */
+  const pv=document.getElementById('w_present'); pv.href=u; pv.style.display='';
+  document.getElementById('w_noteTxt').innerHTML='Поля сделки обновлены (см. слева). В проде ссылка уходит клиенту в чат автоматически и лежит в сделке.';
+  document.getElementById('w_note').style.display='';
+  updateSendUI();
   const t=document.getElementById('w_toast');
   t.style.display='block';
-  t.innerHTML='✓ Поля сделки обновлены (см. слева): долг, доход, тип услуги, платёж. Дальше эти merge-поля подставятся в презентацию ('+(last.route==='РДГ'?'РДГ':'БФЛ')+') и договор.';
+  t.innerHTML='✈ Презентация ('+last.route+') отправлена клиенту'+(kiLoaded?' — точные числа по КИ.':' — числа со слов, уточним по КИ.');
   setTimeout(()=>{t.style.display='none';},6000);
+}
+/* пометить данные как «по КИ»: голд-поле долга, шапка, бейдж */
+function markKi(count){
+  kiLoaded=true; kiError=false; kiCount=count;
+  document.getElementById('w_debt').classList.add('ki');
+  document.getElementById('w_debtLabel').textContent='Долг по кредитной истории, ₽';
+  document.getElementById('dh_small').textContent='точный расчёт по КИ';
+}
+/* ручная правка долга после КИ → честно возвращаемся на «со слов», ссылка перестаёт слать ki=1 */
+function dropKi(){
+  kiLoaded=false; kiCount=null;
+  document.getElementById('w_debt').classList.remove('ki');
+  document.getElementById('w_debtLabel').textContent='Долг со слов, ₽';
+  document.getElementById('dh_small').textContent='экспресс · первый звонок';
+  document.querySelector('.dw').classList.remove('hot');
+  const f=document.getElementById('f_debt');
+  f.textContent=f.textContent.replace(' (по КИ)','');
 }
 document.querySelectorAll('#w_term button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('#w_term button').forEach(x=>x.classList.remove('on'));
@@ -222,8 +321,22 @@ document.querySelectorAll('#w_prod button').forEach(b=>b.addEventListener('click
   document.querySelectorAll('#w_prod button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on'); prod=b.dataset.p; calc();
 }));
-['w_debt','w_income','w_kids'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+document.getElementById('w_debt').addEventListener('input',()=>{ if(kiLoaded) dropKi(); }); /* до calc — чтобы бейдж обновился сразу */
+['w_debt','w_paynow','w_income','w_kids'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 calc();
+
+/* демо состояния 4 «ранний КИ охотника»: ?ki=1 у самого виджета — КИ уже приложена к сделке до звонка клоузера */
+if(new URLSearchParams(location.search).get('ki')==='1'){
+  document.getElementById('w_debt').value=1050460; /* демо-набор КИ: 1 050 460 ₽ · 22 договора */
+  markKi(22);
+  document.querySelector('.dw').classList.add('hot'); /* жёлтая кайма — «горячее», шлите сразу */
+  const kf=document.getElementById('w_kiFile');
+  kf.href='./ki.html#print=1'; kf.style.display=''; /* без #d= страница берёт тот же демо-набор */
+  document.getElementById('f_debt').textContent=fmt(1050460)+' ₽ (по КИ)';
+  document.getElementById('w_noteTxt').innerHTML='<b>КИ загружена охотником заранее.</b> Клиент увидит точные числа и список кредиторов.';
+  document.getElementById('w_note').style.display='';
+  calc();
+}
 
 /* ===== загрузка КИ (отчёт ОКБ) прямо в виджете ===== */
 function parseOkb(fullText){
@@ -261,6 +374,7 @@ function parseOkb(fullText){
 async function parseKiFile(file){
   const t=document.getElementById('w_toast');
   t.style.display='block'; t.innerHTML='Читаю '+file.name+'…';
+  kiBusy=true; updateSendUI(); /* на время парсинга отправка заблокирована */
   try{
     if(!window.pdfjsLib) throw new Error('pdf.js не загрузился');
     pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
@@ -275,17 +389,33 @@ async function parseKiFile(file){
     if(!parsed.credits.length) throw new Error('таблица договоров не найдена (поддерживается отчёт ОКБ)');
     const total=parsed.credits.reduce((s,c)=>s+c.debt,0);
     const ok=parsed.summary.debt!=null&&Math.abs(total-parsed.summary.debt)<1&&parsed.credits.length===parsed.summary.count;
-    /* точные данные в виджет и поля сделки */
-    document.getElementById('w_debt').value=Math.round(total); calc();
+    /* точные данные в виджет и поля сделки; презентация теперь пойдёт с ?ki=1 */
+    document.getElementById('w_debt').value=Math.round(total);
+    markKi(parsed.credits.length);
+    kiBusy=false; calc();
     document.getElementById('f_debt').textContent=fmt(total)+' ₽ (по КИ)';
-    t.innerHTML=(ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+parsed.credits.length+' договоров, долг '+fmt(total)+' ₽'+(ok?' — сходится со сводкой отчёта.':'.');
-    const mfo=parsed.credits.filter(c=>c.product==='mfo').length;
-    localStorage.setItem('kiCalc', JSON.stringify({
+    t.innerHTML=(ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+parsed.credits.length+' '+decl(parsed.credits.length)+', долг '+fmt(total)+' ₽'+(ok?' — сходится со сводкой отчёта.':'.')+' В проде PDF прикрепляется к сделке.';
+    const payload={
       name:document.querySelector('.deal h1').textContent.trim(),
       date:parsed.date, term, credits:parsed.credits
-    }));
-    document.getElementById('w_kiPage').style.display='';
-  }catch(e){ t.innerHTML='Не удалось разобрать файл: '+e.message; }
+    };
+    localStorage.setItem('kiCalc', JSON.stringify(payload));
+    /* файл выгод: данные зашиты в URL (base64url) — печать/PDF той же выгоды на дожим.
+       В проде вместо этого движок сохраняет расчёт и отдаёт короткую ссылку + прикладывает PDF к сделке. */
+    const kf=document.getElementById('w_kiFile');
+    kf.href='./ki.html#d='+b64url(JSON.stringify(payload))+'&print=1'; kf.style.display='';
+  }catch(e){ kiBusy=false; kiError=true; updateSendUI(); t.innerHTML='Не удалось разобрать файл: '+e.message; }
+}
+function b64url(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+/* фоллбэк отправки (состояние 7): чат недоступен → менеджер копирует ссылку ПРЕЗЕНТАЦИИ и шлёт сам */
+function copyClientLink(){
+  const u=presentUrl(); if(!u) return;
+  const b=document.getElementById('w_copy');
+  const abs=new URL(u,location.href).href;
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(abs):Promise.reject())
+    .then(()=>{b.textContent='✓ Скопировано';})
+    .catch(()=>{b.textContent='не вышло — откройте презентацию';});
+  setTimeout(()=>{b.textContent='⧉ Скопировать';},3000);
 }
 document.getElementById('w_ki').addEventListener('change',e=>{ if(e.target.files[0]) parseKiFile(e.target.files[0]); });
 </script>

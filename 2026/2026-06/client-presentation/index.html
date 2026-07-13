@@ -189,11 +189,38 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
 .term .val{font-weight:700;font-size:13px;min-width:54px;text-align:right}
 
 /* госрасходы отдельно */
+/* «Что делаем и сроки» — единый блок с presentation-rdg / presentation-v2 */
+.whatwedo{background:var(--green-soft);border:1px solid rgba(19,122,83,.25);border-radius:16px;padding:13px 15px;margin-top:12px}
+.whatwedo .wd-h{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--green-ink);margin-bottom:5px}
+.whatwedo .wd-t{font-size:13px;color:var(--ink);line-height:1.5}
+.whatwedo .wd-t b{color:var(--green-ink);font-weight:600}
+.whatwedo .wd-facts{margin-top:10px;padding-top:10px;border-top:1px solid rgba(19,122,83,.2)}
+.whatwedo .wf{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:3px 0}
+.whatwedo .wf span{color:var(--muted);flex-shrink:0}
+.whatwedo .wf b{font-weight:600;text-align:right;color:var(--ink)}
+.whatwedo .wd-note{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5}
 .gos{margin-top:11px;background:var(--surface2);border:1px solid var(--line);border-radius:16px;padding:13px 15px}
 .gos-title{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--brick);margin-bottom:8px;display:flex;align-items:center;gap:7px}
 .gos-row{display:flex;justify-content:space-between;align-items:center;font-size:13.5px;color:var(--muted);padding:4px 0}
 .gos-row b{color:var(--ink);font-weight:600}
 .gos-row.total{border-top:1px solid var(--line);margin-top:5px;padding-top:8px}
+/* хиро выгоды (экран 1, паттерн РДГ-страницы в палитре этой) */
+.save-hero{margin:14px 0 0;background:linear-gradient(165deg,#11362a,#0c241d);color:#EAF2EC;border-radius:20px;padding:20px 17px 18px;text-align:center;position:relative;overflow:hidden;box-shadow:var(--shadow-sm)}
+.save-hero:after{content:"";position:absolute;right:-30px;top:-30px;width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(215,163,59,.4),transparent 65%)}
+.save-hero .shl{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#9fc0b1}
+.save-hero .shv{font-family:"Unbounded";font-weight:800;font-size:37px;line-height:1.05;margin:6px 0 4px;color:var(--gold)}
+.save-hero .shs{font-size:12.6px;color:#bcd4c7;position:relative}
+.save-hero .shs b{color:#EAF2EC}
+.bars{margin-top:10px;background:var(--surface2);border:1px solid var(--line);border-radius:16px;padding:14px 15px}
+.bar+.bar{margin-top:10px}
+.bar .bl{display:flex;justify-content:space-between;align-items:baseline;font-size:12.8px;margin-bottom:5px}
+.bar .bl span{color:var(--muted)}
+.bar.now .bl b{color:var(--brick)}
+.bar.us .bl b{color:var(--green-ink)}
+.bar i{display:block;height:10px;border-radius:6px}
+.bar.now i{background:#EFC7B8}
+.bar.us i{background:var(--green)}
+.bnote{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5;border-top:1px solid var(--line);padding-top:9px}
 .gos-row.total span{color:var(--ink);font-weight:700}
 .gos-row.total b{color:var(--brick);font-weight:800}
 
@@ -441,6 +468,30 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
     <h1 id="h1main">Виктория Юрьевна, спишем ваш долг <span class="hl" style="white-space:nowrap">1&nbsp;200&nbsp;000&nbsp;₽</span> законно по 127-ФЗ</h1>
     <p class="lead" id="lead1">Банкротство физлица под ключ — юрист ведёт всё от заявления до списания.</p>
 
+    <!-- 0. Ваша выгода (только для списания долга; на вкладке РДГ скрыт) -->
+    <div id="heroWrap">
+      <div class="save-hero">
+        <div class="shl">Ваша выгода с нами</div>
+        <div class="shv" id="bflSave">—</div>
+        <div class="shs">долг <b id="bflDebt">—</b> спишется целиком — платите только за процедуру</div>
+      </div>
+      <div class="bars">
+        <div class="bar now"><div class="bl"><span>Платите сейчас</span><b id="barNow">—</b></div><i style="width:100%"></i></div>
+        <div class="bar us"><div class="bl"><span>Будете платить с нами</span><b id="barUs">—</b></div><i id="barUsFill" style="width:22%"></i></div>
+        <div class="bnote">Платёж только за процедуру, <span id="barTerm">14</span> платежей — дальше долгов нет. Коллекторам и банкам звонить вам запрещено по 127-ФЗ.</div>
+      </div>
+      <button class="sched-toggle" id="calcBtn" onclick="toggleCalc()">Как посчитана выгода ▾</button>
+      <div id="calcDetail" style="display:none">
+        <div class="gos">
+          <div class="gos-row"><span>Ваш долг — списывается судом целиком</span><b id="cdDebt">—</b></div>
+          <div class="gos-row"><span>Услуги ДОНУЛЯ (рассрочка)</span><b>189 000 ₽</b></div>
+          <div class="gos-row"><span>Госплатежи — напрямую государству</span><b>50 000 ₽</b></div>
+          <div class="gos-row total"><span>Выгода: долг − 239 000 ₽</span><b id="cdSave">—</b></div>
+        </div>
+        <p class="sec-lead" style="margin-top:8px">Выгода посчитана без переплаты по процентам, которую вы бы отдали, продолжая платить, — по факту она больше. Расчёт предварительный, итог фиксирует суд.</p>
+      </div>
+    </div>
+
     <!-- 1. Что мы делаем -->
     <div class="sec">
       <div class="sec-h"><span class="sec-n">1</span>Что мы делаем</div>
@@ -448,6 +499,31 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
         <div class="st3"><div class="d">1</div><div class="t"><b>Готовим и подаём заявление</b> в арбитражный суд</div></div>
         <div class="st3"><div class="d">2</div><div class="t"><b>Ведём процедуру</b> — финуправляющий, суды, документы</div></div>
         <div class="st3"><div class="d">3</div><div class="t"><b>Доводим до результата</b> — <span id="s1do">списания долгов</span></div></div>
+      </div>
+
+      <!-- сроки процедуры — единый блок с новыми презентациями; вариант по продукту переключает setProc -->
+      <div class="whatwedo" id="wdRi">
+        <div class="wd-h">Что делаем и сроки</div>
+        <div class="wd-t"><b>Списание долга по 127-ФЗ.</b> Как только начинаем работу, платежи банкам прекращаются (ст. 213.4): вы платите только нам, а старые просрочки гасить не нужно. Суд освобождает вас от всех долгов, включая МФО — коллекторам звонить запрещено.</div>
+        <div class="wd-facts">
+          <div class="wf"><span>Выгода</span><b>сразу — платежи банкам прекращаются</b></div>
+          <div class="wf"><span>Подготовка и подача в суд</span><b>2–3 месяца</b></div>
+          <div class="wf"><span>Первое заседание</span><b>примерно через 3 месяца</b></div>
+          <div class="wf"><span>Процедура</span><b>стандартно ~6 мес (простое дело — от ~5)</b></div>
+          <div class="wf"><span>Сложное дело</span><b>имущество / торги — до ~9–12 месяцев</b></div>
+        </div>
+        <div class="wd-note">Расчёт предварительный, итог фиксирует суд. Сроки процедурные — не зависят от того, считаем со слов или по КИ.</div>
+      </div>
+      <div class="whatwedo" id="wdRdg" style="display:none">
+        <div class="wd-h">Что делаем и сроки</div>
+        <div class="wd-t"><b>Реструктуризация долгов по 127-ФЗ.</b> Как только суд принимает заявление, платежи банкам прекращаются (ст. 213.4): всё это время вы платите только нам, а не по кредитам. Дальше — по графику, утверждённому судом, вы не признаётесь банкротом.</div>
+        <div class="wd-facts">
+          <div class="wf"><span>Выгода</span><b>сразу — платежи банкам прекращаются</b></div>
+          <div class="wf"><span>К суду</span><b>2–3 месяца (госплатежи заранее — ~2)</b></div>
+          <div class="wf"><span>Заседание и процедура</span><b>~1 + ~6 месяцев</b></div>
+          <div class="wf"><span>Всего с подготовкой</span><b>~8–9 месяцев</b></div>
+        </div>
+        <div class="wd-note">Расчёт — по вашим цифрам, итог зафиксирует суд. Сроки процедурные — не зависят от того, считаем со слов или по КИ.</div>
       </div>
     </div>
 
@@ -592,12 +668,12 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
 
     <div class="sim-timer">
       <div class="timer-clock" id="simTimer">60:00</div>
-      <div class="timer-txt">Подпишите договор <b>в течение часа</b> — SIM-карта в подарок, <b>связь оплачена на год</b>.</div>
+      <div class="timer-txt">Подпишите договор и внесите любой платёж <b>в течение часа</b> — акция <b>закреплена за вами</b>: SIM-карта в подарок, связь оплачена на год.</div>
     </div>
 
     <div class="free-offer">
       <div class="free-badge">БЕСПЛАТНО</div>
-      <div>Дарим SIM на <b>12 месяцев</b>, пока идёт процедура — <b>если подпишете договор сегодня</b>. Заказать можно на Ozon или Wildberries.</div>
+      <div>Дарим SIM на <b>12 месяцев</b>, пока идёт процедура. Акция закрепляется, <b>если подпишете договор и внесёте любой платёж сегодня</b>; получаете SIM <b>с первым полным платежом 13 500 ₽</b> — сразу заказываем на Ozon. Мы компания официальная, у нас свои SIM-карты — <b>посмотрите отзывы на Ozon</b>.</div>
     </div>
     <div class="mp-row"><span class="mp-lbl">Заказ на:</span><span class="mp ozon">OZON</span><span class="mp wb">Wildberries</span></div>
 
@@ -770,7 +846,7 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
     <div class="done">
       <div class="seal"><svg viewBox="0 0 24 24" fill="none"><path d="M4 12.5l5 5L20 6.5" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <h1>Готово — вы <span class="hl">в работе</span></h1>
-      <p class="lead">Договор подписан, первый платёж получен. Передаём вас в сопровождение — личный юрист свяжется сегодня и начнёт работу.</p>
+      <p class="lead">Договор подписан, первый платёж получен. Передаём вас в сопровождение — юрист сопровождения свяжется сегодня и начнёт работу.</p>
     </div>
   </div>
   </div><!-- /.screens -->
@@ -795,11 +871,24 @@ h1 .hl{color:var(--green-ink);background:linear-gradient(transparent 62%, var(--
 </div><!-- /.shell -->
 
 <script>
+/* ---------- данные клиента (в проде из CRM; для демо-ссылки из виджета — URL-параметры ?name&debt&pay&proc) ---------- */
+const Q=new URLSearchParams(location.search);
+const esc=s=>s.replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); /* имя идёт в innerHTML заголовков */
+const payParam=Math.max(0,+Q.get('pay')||0);
+const CLIENT={
+  name:esc((Q.get('name')||'Виктория Юрьевна').slice(0,60)),
+  debt:Math.max(0,+Q.get('debt'))||1200000,
+  /* платёж сейчас со слов клиента; в персональной ссылке без платежа бары сравнения не показываем (не выдумываем цифру) */
+  payNow:payParam>0?payParam:(Q.has('debt')?0:61500)
+};
+const fmtN=n=>n.toLocaleString('ru-RU');
+const debtHl='<span class="hl" style="white-space:nowrap">'+fmtN(CLIENT.debt)+'&nbsp;₽</span>';
+
 /* ---------- данные процедур ---------- */
 const PROC = {
   ri:{
     ey:'списание долгов · 127-ФЗ',
-    h1:'Виктория Юрьевна, спишем ваш долг <span class="hl" style="white-space:nowrap">1&nbsp;200&nbsp;000&nbsp;₽</span> законно по 127-ФЗ',
+    h1:CLIENT.name+', спишем ваш долг '+debtHl+' законно по 127-ФЗ',
     lead:'Банкротство физлица под ключ — юрист ведёт всё от заявления до списания.',
     docProc:'Реализация имущества (РИ) · 127-ФЗ',
     do:'списания долгов',
@@ -807,11 +896,11 @@ const PROC = {
   },
   rdg:{
     ey:'реструктуризация · 127-ФЗ',
-    h1:'Виктория Юрьевна, посильный план по долгу <span class="hl" style="white-space:nowrap">1&nbsp;200&nbsp;000&nbsp;₽</span> — без статуса банкрота',
+    h1:CLIENT.name+', посильный план по долгу '+debtHl+' — без статуса банкрота',
     lead:'Суд утверждает посильный план. Юрист ведёт всё от заявления до утверждения.',
     docProc:'Реструктуризация долгов (РДГ) · 127-ФЗ',
     do:'утверждения плана судом',
-    after:'Суд утверждает посильный план — платите по силам, банкротом не становитесь.'
+    after:'Суд утверждает посильный план — платите по силам, банкротом не становитесь. Захотите остаться с нами после утверждения плана — продолжим вести за 5 000 ₽/мес (по желанию).'
   }
 };
 
@@ -830,7 +919,28 @@ function setProc(p){
   const s1=document.getElementById('s1do'); if(s1) s1.textContent=d.do;
   const s7=document.getElementById('s7after'); if(s7) s7.textContent=d.after;
   document.getElementById('termWrap').style.display = (tariff==='rassrochka' && p!=='rdg') ? '':'none';
+  /* хиро выгоды — только для списания долга; РДГ-выгоды считает своя страница (presentation-rdg) */
+  document.getElementById('heroWrap').style.display = p==='ri' ? '' : 'none';
+  /* «что делаем и сроки» — вариант по продукту */
+  document.getElementById('wdRi').style.display = p==='ri' ? '' : 'none';
+  document.getElementById('wdRdg').style.display = p==='rdg' ? '' : 'none';
   recalc();
+}
+/* ---------- хиро выгоды (канон виджета: выгода-минимум = долг − услуги 189 000 − госплатежи 50 000) ---------- */
+const BFL_TOTAL_COST=239000;
+function renderHero(){
+  const save=Math.max(0,CLIENT.debt-BFL_TOTAL_COST);
+  document.getElementById('bflSave').textContent='~'+fmtN(save)+' ₽';
+  document.getElementById('bflDebt').textContent=fmtN(CLIENT.debt)+' ₽';
+  document.getElementById('cdDebt').textContent=fmtN(CLIENT.debt)+' ₽';
+  document.getElementById('cdSave').textContent='~'+fmtN(save)+' ₽';
+  if(CLIENT.payNow>0) document.getElementById('barNow').textContent='~'+fmtN(CLIENT.payNow)+' ₽/мес';
+}
+function toggleCalc(){
+  const d=document.getElementById('calcDetail'),b=document.getElementById('calcBtn');
+  const open=d.style.display==='none';
+  d.style.display=open?'':'none';
+  b.textContent=open?'Скрыть расчёт ▴':'Как посчитана выгода ▾';
 }
 function setTariff(t){
   tariff=t;
@@ -877,6 +987,13 @@ function recalc(){
   const sf=document.getElementById('schFirst'); if(sf) sf.textContent=fmt(mb);
   const sr=document.getElementById('schRest'); if(sr) sr.textContent=(bt-1)+' × '+fmt(mb);
   const st=document.getElementById('schTerm'); if(st) st.textContent=bt;
+  /* бары хиро: «с нами» = ежемесячный платёж рассрочки услуг (реагирует на ползунок срока);
+     скрыты при VIP (разовая оплата — помесячное сравнение неприменимо) и без известного платежа клиента */
+  const barsEl=document.querySelector('#heroWrap .bars');
+  if(barsEl) barsEl.style.display=(CLIENT.payNow>0&&tariff!=='odnim')?'':'none';
+  const bu=document.getElementById('barUs'); if(bu) bu.textContent=fmt(mb)+' ₽/мес';
+  const bf=document.getElementById('barUsFill'); if(bf&&CLIENT.payNow>0) bf.style.width=Math.min(100,Math.round(mb/CLIENT.payNow*100))+'%';
+  const btm=document.getElementById('barTerm'); if(btm) btm.textContent=bt;
 }
 // total = стоимость УСЛУГ (показывается в строке «Стоимость услуг»); first = ежемесячный/первый платёж (включает доктора)
 function setDoc(total, first, graf, firstLbl){
@@ -924,7 +1041,7 @@ const CTA=[
 const REASSURE=[
   'Подписание не требует оплаты прямо сейчас — платёж по выбранному графику.',
   'Допуслуга по желанию — можно оформить только банкротство.',
-  'SIM в подарок — бесплатно на 12 месяцев при подписании сегодня.',
+  'SIM в подарок — акция закрепляется платежом сегодня, выдача с первым полным платежом 13 500 ₽.',
   'Данные защищены и нужны только для договора.',
   'Договор фиксирует условия и защищает вас.',
   'Оплата через СБП на счёт ДОНУЛЯ в Сбербанке — безопасно.',
@@ -996,7 +1113,7 @@ function startSimTimer(){
 document.querySelector('.screens').addEventListener('scroll', updateFoot, {passive:true});
 window.addEventListener('resize', updateFoot);
 startSimTimer();
-setProc('ri'); paint();
+renderHero(); setProc(Q.get('proc')==='rdg'?'rdg':'ri'); paint();
 </script>
 </body>
 </html>
