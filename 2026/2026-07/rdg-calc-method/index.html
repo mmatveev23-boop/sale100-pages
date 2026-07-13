@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Как считает калькулятор РДГ · пример семьи · ДОНУЛЯ</title>
+<meta name="description" content="Методика расчёта РДГ по 127-ФЗ в виджете: тело без ипотеки, проценты по ключевой ставке, ФУ 7%, рекомендация менеджеру. Пример: семья в Москве с 2 детьми, долг 1,5 млн и ипотека.">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4EFE6; --paper2:#ECE5D8; --card:#fff; --card2:#FBF8F2;
+  --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0B3B2E; --pine2:#0C4233; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
+  --gold:#C99A33; --gold-bright:#F4C775; --gold-soft:#FBF3DC; --gold-ink:#8A6212;
+  --brick:#A8442E; --brick-soft:#F8E3DC;
+  --line:#E4DCCD; --shadow:0 18px 44px -22px rgba(11,59,46,.42); --shadow-sm:0 8px 22px -14px rgba(11,59,46,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:960px;margin:0 auto;padding:24px 18px 80px}
+
+.topnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.topnav a{font-size:13px;font-weight:700;text-decoration:none;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;transition:color .15s,border-color .15s}
+.topnav a:hover{color:var(--green-ink);border-color:var(--green)}
+.topnav a.cur{background:var(--pine);color:#fff;border-color:var(--pine)}
+
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:28px 26px;box-shadow:var(--shadow)}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+.hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
+.hdr .brand b{font-size:15px;letter-spacing:.02em}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:26px;line-height:1.16;letter-spacing:-.02em;font-weight:800}
+.hdr p{margin-top:10px;font-size:14.5px;color:rgba(255,255,255,.8);max-width:66ch}
+.hdr .lawchips{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.hdr .lc{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 12px;font-size:12px;color:rgba(255,255,255,.85)}
+.hdr .lc b{color:var(--gold-bright);font-weight:700}
+
+h2{font-size:19px;font-weight:800;letter-spacing:-.01em;margin:30px 0 12px}
+h2 .n{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:8px;background:var(--pine);color:#fff;font-size:13px;margin-right:8px;vertical-align:-4px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:18px 20px;margin-top:12px}
+
+/* входы менеджера */
+.inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+.inp{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.inp b{display:block;font-size:13.5px;margin-bottom:3px}
+.inp span{font-size:12.5px;color:var(--muted);line-height:1.5}
+
+/* шаги формулы */
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:13px 0;border-bottom:1px dashed var(--line)}
+.step:last-child{border-bottom:none}
+.step .sn{width:34px;height:34px;border-radius:10px;background:var(--green-soft);color:var(--green-ink);display:grid;place-items:center;font-weight:800;font-size:14px}
+.step b{font-size:14.5px}
+.step p{margin-top:3px;font-size:13px;color:var(--muted);line-height:1.55}
+.step p code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--paper2);padding:1px 6px;border-radius:5px;color:var(--green-ink);white-space:nowrap}
+.step .law{display:inline-block;margin-top:5px;font-size:11px;font-weight:700;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:2px 9px}
+
+/* вердикты */
+.verdicts{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px;margin-top:12px}
+.vd{border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.5}
+.vd b{display:block;font-size:13.5px;margin-bottom:3px}
+.vd.g{background:var(--pine);color:#fff}
+.vd.g small{color:rgba(255,255,255,.75)}
+.vd.y{background:var(--gold-soft);color:var(--gold-ink);border:1px solid rgba(201,154,51,.45)}
+.vd.b{background:var(--green-soft);color:var(--green-ink);border:1px solid rgba(15,107,79,.3)}
+.vd.r{background:var(--brick-soft);color:var(--brick);border:1px solid rgba(168,68,46,.3)}
+
+/* пример */
+.ex-hero{background:linear-gradient(165deg,var(--pine2) 0%,var(--pine) 70%);color:#fff;border-radius:16px;padding:16px 18px;box-shadow:var(--shadow-sm);margin-top:12px}
+.ex-hero b{font-size:15.5px}
+.ex-hero .facts{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+.ex-hero .f{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:7px 12px;font-size:12.5px}
+.ex-hero .f b{display:block;font-size:14px;color:var(--gold-bright)}
+
+table{width:100%;border-collapse:collapse;margin-top:6px}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+td{font-size:13.5px;padding:8px;border-bottom:1px dashed var(--line)}
+td.r,th.r{text-align:right}
+tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2px solid var(--green)}
+.tnote{margin-top:8px;font-size:12px;color:var(--muted)}
+
+.calcflow{margin-top:6px}
+.cf{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.cf span{color:var(--muted)}
+.cf b{font-weight:700;white-space:nowrap}
+.cf.total{border-bottom:none}
+.cf.total span,.cf.total b{color:var(--green-ink);font-weight:800;font-size:15px}
+.cf .sub{display:block;font-size:11.5px;color:var(--faint)}
+
+.benefits{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-top:12px}
+.bf{background:var(--card);border:1.5px solid var(--green);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-sm)}
+.bf .bl{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--green-ink)}
+.bf .bv{font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:2px}
+.bf .bs{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.5}
+.bf.gold{border-color:var(--gold)}
+.bf.gold .bl{color:var(--gold-ink)}
+
+.wverdict{margin-top:14px;background:var(--pine);color:#fff;border-radius:14px;padding:14px 16px;font-size:13.5px;line-height:1.55;box-shadow:var(--shadow-sm)}
+.wverdict b{display:block;font-size:15px;margin-bottom:4px}
+.wverdict .tag{display:inline-block;margin-bottom:8px;background:rgba(244,199,117,.15);color:var(--gold-bright);border-radius:999px;padding:3px 10px;font-size:11px;font-weight:700;letter-spacing:.04em}
+
+.foot{margin-top:30px;background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:18px 20px}
+.foot h3{font-size:15px;font-weight:800;margin-bottom:8px}
+.foot ul{list-style:none;display:grid;gap:8px}
+.foot li{font-size:13px;color:var(--muted);line-height:1.5;padding-left:16px;position:relative}
+.foot li::before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.foot li b{color:var(--ink);font-weight:600}
+.foot code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:var(--paper2);padding:1px 6px;border-radius:5px;color:var(--green-ink)}
+
+@media (max-width:640px){
+  .wrap{padding:16px 13px 60px}
+  .hdr{padding:24px 20px;border-radius:20px} .hdr h1{font-size:22px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topnav">
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/sales-flow-map/">Карта связки</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/manager-situations/">Ситуации менеджера</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/widget-states/">Состояния виджета</a>
+    <a class="cur" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/rdg-calc-method/">Как считает калькулятор</a>
+  </nav>
+
+  <header class="hdr">
+    <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · КАЛЬКУЛЯТОР РДГ</b><small>КАК СЧИТАЕТ И ПОЧЕМУ ЕМУ МОЖНО ВЕРИТЬ</small></div></div>
+    <h1>Как виджет считает РДГ — по закону, а не «на глаз»</h1>
+    <p>Менеджер вводит кредиты со слов клиента — виджет считает план реструктуризации так, как его будет считать суд, и сразу отвечает: подходит клиенту РДГ или нет. Ниже — методика по шагам и живой пример: семья в Москве с двумя детьми, долгом 1,5 млн и ипотекой.</p>
+    <div class="lawchips">
+      <span class="lc">Проценты плана: <b>ключевая ЦБ 14,25%</b> · ст. 213.19</span>
+      <span class="lc">Срок: <b>60 / 36 мес</b> · ст. 213.14, 213.17</span>
+      <span class="lc">Допуск: <b>ст. 213.13</b></span>
+      <span class="lc">Ипотека вне плана: <b>298-ФЗ</b></span>
+    </div>
+  </header>
+
+  <h2><span class="n">1</span>Что вводит менеджер (всё — со слов, первый звонок)</h2>
+  <div class="card">
+    <div class="inputs">
+      <div class="inp"><b>Кредиты по типам</b><span>Кредит · карта · МФО · залоговый · ипотека. По каждому: сумма, сколько штук. Ставка и срок уже стоят средние по РФ — можно поправить, если клиент знает свои.</span></div>
+      <div class="inp"><b>Доход и семья</b><span>Официальный доход (тот, что можно подтвердить суду), количество детей.</span></div>
+      <div class="inp"><b>Регион</b><span>Подставляет прожиточный минимум клиента и ребёнка — суд оставляет семье эти деньги в первую очередь.</span></div>
+      <div class="inp"><b>Один стоп-вопрос</b><span>«Банкротились раньше или проходили реструктуризацию?» Если да — РДГ закрыта законом: банкротство — замок 5 лет, прошлый план — 8 лет (ст. 213.13).</span></div>
+    </div>
+  </div>
+
+  <h2><span class="n">2</span>Формула плана — шаг за шагом</h2>
+  <div class="card">
+    <div class="step"><div class="sn">1</div><div>
+      <b>Тело плана = все долги, кроме ипотеки</b>
+      <p>Ипотека в план не входит: по закону с ипотечным банком заключается отдельное соглашение, единственное жильё сохраняется. Но платёж по ипотеке продолжается — виджет вычитает его из свободных денег семьи.</p>
+      <span class="law">298-ФЗ · ст. 213.10-1</span>
+    </div></div>
+    <div class="step"><div class="sn">2</div><div>
+      <b>Плюс проценты плана — по ключевой ставке ЦБ, не по банковским</b>
+      <p>С момента процедуры банковские проценты и пени останавливаются. Вместо них на долг капает ключевая ставка ЦБ — сейчас <b>14,25%</b> — на убывающий остаток: <code>тело × 14,25% × (срок в годах ÷ 2)</code>. Это главный смысл РДГ: заменить 30–52% банковских на 14,25% государственных.</p>
+      <span class="law">ст. 213.11, 213.19 п. 2</span>
+    </div></div>
+    <div class="step"><div class="sn">3</div><div>
+      <b>Плюс вознаграждение финансового управляющего — 7%</b>
+      <p>7% от выплаченного по плану (<code>тело × 7%</code> при полном погашении) + депозит 25 000 ₽ и публикации — они в стартовых госплатежах 50 000 ₽, в ежемесячный платёж не входят. Госпошлина для должника — 0 ₽.</p>
+      <span class="law">ст. 20.6 п. 3 и 17 · 259-ФЗ</span>
+    </div></div>
+    <div class="step"><div class="sn">4</div><div>
+      <b>Делим на срок — и это юридическая вилка, а не выбор</b>
+      <p><b>60 месяцев</b> — план, который одобрило собрание кредиторов (базовый путь). <b>36 месяцев</b> — суд утверждает без одобрения кредиторов, но только если гасится не меньше половины долга. Виджет показывает оба платежа.</p>
+      <span class="law">ст. 213.14 п. 2 · ст. 213.17 п. 4</span>
+    </div></div>
+    <div class="step"><div class="sn">5</div><div>
+      <b>Сравниваем с деньгами семьи</b>
+      <p><code>свободный доход = доход − ПМ клиента − ПМ ребёнка × детей − платёж по ипотеке</code>. Суд не утвердит план, который оставляет семье меньше прожиточного минимума — поэтому и регион, и дети в расчёте обязательны.</p>
+      <span class="law">Пленум ВС № 45</span>
+    </div></div>
+  </div>
+
+  <h2><span class="n">3</span>Рекомендация менеджеру — одна из четырёх</h2>
+  <div class="verdicts">
+    <div class="vd g"><b>🟢 РДГ · подходит</b>Свободного дохода хватает на платёж плана с запасом. Виджет пишет платёж и срок — можно вести к презентации.</div>
+    <div class="vd y"><b>🟡 Пограничный</b>Хватает, но впритык (запас меньше 10%) — суд может не утвердить. Усилить подтверждённый доход и показать честно.</div>
+    <div class="vd b"><b>Не тянет → списание</b>Платёж плана больше свободных денег — кандидат на второй продукт: списание долга. Если долг до 1 млн — виджет подскажет проверить бесплатное внесудебное через МФЦ.</div>
+    <div class="vd r"><b>🔴 РДГ недоступна</b>Было банкротство (5 лет) или план реструктуризации (8 лет) — ст. 213.13. Отправка презентации блокируется, маршрут решает юрист.</div>
+  </div>
+
+  <h2><span class="n">4</span>Пример: семья в Москве · 2 детей · долг 1,5 млн + ипотека</h2>
+  <div class="ex-hero">
+    <b>Дано (со слов на первом звонке)</b>
+    <div class="facts">
+      <div class="f"><b>160 000 ₽</b>доход в месяц</div>
+      <div class="f"><b>2 детей</b>ПМ ребёнка 21 903 ₽</div>
+      <div class="f"><b>Москва</b>ПМ клиента 28 940 ₽</div>
+      <div class="f"><b>1 500 000 ₽</b>кредиты и карты · 5 договоров</div>
+      <div class="f"><b>2 500 000 ₽</b>остаток ипотеки</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead><tr><th>Что должны</th><th class="r">Сумма</th><th class="r">Платёж сейчас*</th></tr></thead>
+      <tbody>
+        <tr><td>Потребкредиты · 2 шт (30,7% · 28 мес)</td><td class="r num">1 000 000 ₽</td><td class="r num">~50 456 ₽/мес</td></tr>
+        <tr><td>Кредитные карты · 3 шт (52%, мин. платёж 7%)</td><td class="r num">500 000 ₽</td><td class="r num">~35 000 ₽/мес</td></tr>
+        <tr><td>Ипотека (18% · 23,5 года) — вне плана, платится дальше</td><td class="r num">2 500 000 ₽</td><td class="r num">~38 072 ₽/мес</td></tr>
+        <tr class="sum"><td>Всего обязательств</td><td class="r num">4 000 000 ₽</td><td class="r num">~123 528 ₽/мес</td></tr>
+      </tbody>
+    </table>
+    <div class="tnote">* по средним ставкам РФ 2026 — виджет считает аннуитет, минимальный платёж карты 7% от долга, лимит МФО. Семья столько платить не может — поэтому и звонит нам.</div>
+  </div>
+
+  <div class="card">
+    <div class="calcflow">
+      <div class="cf"><span>Свободный доход <span class="sub">160 000 − ПМ 28 940 − 2 × 21 903 − ипотека 38 072</span></span><b class="num">49 182 ₽/мес</b></div>
+      <div class="cf"><span>Тело плана <span class="sub">кредиты и карты, без ипотеки</span></span><b class="num">1 500 000 ₽</b></div>
+      <div class="cf"><span>Проценты плана <span class="sub">14,25% (ключевая ЦБ) на убывающий остаток, 5 лет</span></span><b class="num">~534 375 ₽</b></div>
+      <div class="cf"><span>Вознаграждение ФУ <span class="sub">7% от выплаченного</span></span><b class="num">105 000 ₽</b></div>
+      <div class="cf"><span>Итого по плану</span><b class="num">2 139 375 ₽</b></div>
+      <div class="cf"><span>Платёж · 60 мес <span class="sub">с одобрения кредиторов</span></span><b class="num">35 656 ₽/мес ✓ тянет</b></div>
+      <div class="cf"><span>Платёж · 36 мес <span class="sub">через суд, без одобрения</span></span><b class="num">53 490 ₽/мес — не тянет</b></div>
+      <div class="cf total"><span>Вердикт виджета</span><b>🟢 РДГ · подходит — план 60 мес</b></div>
+    </div>
+  </div>
+
+  <div class="benefits">
+    <div class="bf"><div class="bl">Нагрузка в месяц</div><div class="bv num">−49 800 ₽</div><div class="bs">Должны были платить ~123 528 ₽/мес. Станет: план 35 656 + ипотека 38 072 = <b>73 728 ₽/мес</b>. Минус 40%.</div></div>
+    <div class="bf gold"><div class="bl">Квартира</div><div class="bv">Сохраняется</div><div class="bs">Ипотека — отдельным соглашением с банком (298-ФЗ), в процедуру не попадает. При списании долга с торгами так бы не вышло.</div></div>
+    <div class="bf"><div class="bl">Ставка на долг</div><div class="bv num">14,25%</div><div class="bs">Вместо 30,7% по кредитам и 52% по картам. Пени и коллекторы — стоп с первого дня процедуры (ст. 213.11).</div></div>
+    <div class="bf"><div class="bl">Статус</div><div class="bv">Не банкрот</div><div class="bs">План исполнен — семья рассчиталась и не получила статус банкрота и его последствий. Плюс переплата по кредитам меньше на ~70 000 ₽ даже против «дотянуть самим».</div></div>
+  </div>
+
+  <div class="wverdict">
+    <span class="tag">ТАК ЭТО ВИДИТ МЕНЕДЖЕР В ВИДЖЕТЕ</span>
+    <b>🟢 РДГ · подходит — план 60 мес</b>
+    Платёж 35 656 ₽/мес вместо банковских 123 528 ₽. Банковские проценты стоп, дальше ключевая 14,25% — не банкрот. 36 мес не тянет — только с одобрения кредиторов (60). Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ). Госплатежи 50 000 ₽ на старте, услуги ДОНУЛЯ 13 500 ₽/мес.
+  </div>
+
+  <div class="foot">
+    <h3>Служебное</h3>
+    <ul>
+      <li><b>Методология и источники</b> — <code>docs/rdg-law-calc-2026-07.md</code> в репо (127-ФЗ ст. 20.6, 213.11–213.19, 213.10-1, 223.2; Пленум ВС № 45; 474-ФЗ, 298-ФЗ, 259-ФЗ). Живой расчёт — <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/calc-widget/in-amo.html" style="color:var(--green-ink)">виджет в amo</a>: пример выше можно повторить руками.</li>
+      <li><b>Обновляемые константы:</b> ключевая ставка <code>KEY_RATE = 14,25%</code> — после каждого заседания ЦБ (~раз в 6 недель, следующее 24.07.2026); средние ставки типов кредитов — раз в квартал (ПСК ЦБ); прожиточные минимумы — раз в год.</li>
+      <li><b>Осознанные упрощения прототипа:</b> лаг «введение процедуры → утверждение плана» (~4–7 мес) не считаем; залоговые не-ипотечные кредиторы в плане не моделируются; судимость (ст. 213.13) — вопрос анкеты передачи, не первого звонка.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
