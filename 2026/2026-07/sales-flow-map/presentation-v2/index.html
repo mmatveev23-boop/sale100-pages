@@ -716,21 +716,21 @@ const fmt=n=>n.toLocaleString('ru-RU');
 let step=0, tariff='rassrochka', kd=true, sim=true;
 let scrs=[...document.querySelectorAll('.scr')];
 let CTA=['Начали','Понятно, дальше','Дальше','Забираю подарок','Данные верны','Всё верно — подписываем','Подтвердить код','Оплатить через СБП',''];
-if(SIGNED){ /* уже подписал — экран «Подпись» (индекс 6) выкидываем, «Договор» ведёт сразу к оплате */
-  CTA[5]='Перейти к оплате';
-  const keep=(_,i)=>i!==6;
-  scrs=scrs.filter(keep); CTA=CTA.filter(keep);
+if(SIGNED||PART>0){ /* дожим: клиент уже подписал — показываем ТОЛЬКО мини юр заключение (оплата) + Готово, без подготовки / симки / повторной подписи */
+  const payI=scrs.findIndex(s=>/Оплата/.test(s.dataset.name));
+  scrs=[scrs[payI], scrs[scrs.length-1]];
+  CTA=['Оплатить через СБП',''];
 }
 
 /* ============ НАВИГАЦИЯ ============ */
 function show(i){
   step=Math.max(0,Math.min(scrs.length-1,i));
-  scrs.forEach((s,n)=>s.classList.toggle('on',n===step));
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on')); scrs[step].classList.add('on');
   document.getElementById('bar').style.transform='scaleX('+(step/(scrs.length-1))+')';
   document.getElementById('stepName').textContent=scrs[step].dataset.name;
   const cta=document.getElementById('ctaBtn'), back=document.getElementById('backBtn'), cap=document.getElementById('ctaCap');
   if(step===scrs.length-1){cta.style.display='none';back.style.display='none';cap.textContent='Хорошего дня — дальше вас ведёт сопровождение';}
-  else{cta.style.display='';const lbl=(scrs[step].dataset.name.includes('Подарок')&&!sim)?'Дальше':CTA[step];if(lbl==='Оплатить через СБП'){cta.innerHTML='<span class="sbp-chip"><img src="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzQ2IDM5OSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9ItCh0JHQnyI+CjxwYXRoIGZpbGw9IiM4RjQ3OTQiIGQ9Ik0xMDAuMywxOTkuNGwtNTIsMzBMMCwzMTMuMWwxOTYuOS0xMTMuN0wxMDAuMywxOTkuNHoiLz4KPHBhdGggZmlsbD0iI0U0MDY0NiIgZD0iTTI0OC45LDExMy43bC01MiwzMGwtNDguMyw4My43bDE5Ni45LTExMy43TDI0OC45LDExMy43eiIvPgo8cG9seWdvbiBmaWxsPSIjRjlCNDI5IiBwb2ludHM9IjE5Ni45LDgzLjcgMTQ4LjYsMCAxNDguNiwxNzEuNSAxNDguNiwyMjcuNCAxNDguNiwzOTguOSAxOTYuOSwzMTUuMiIvPgo8cG9seWdvbiBmaWxsPSIjRUY4MDE5IiBwb2ludHM9IjE0OC42LDAgMTk2LjksODMuNyAyNDguOSwxMTMuNyAzNDUuNSwxMTMuNyIvPgo8cG9seWdvbiBmaWxsPSIjNzhCNzJBIiBwb2ludHM9IjE0OC42LDE3MS41IDE0OC42LDM5OC45IDE5Ni45LDMxNS4yIDE5Ni45LDI1NS4yIi8+CjxwYXRoIGZpbGw9IiMwMDg1M0YiIGQ9Ik0yNDguOSwyODUuMmwtNTIsMzBsLTQ4LjMsODMuN2wxOTYuOS0xMTMuN0wyNDguOSwyODUuMnoiLz4KPHBvbHlnb24gZmlsbD0iIzVCNTdBMiIgcG9pbnRzPSIwLDg1LjggMCwzMTMuMSA0OC4zLDIyOS41IDQ4LjMsMTY5LjQiLz4KPHBvbHlnb24gZmlsbD0iIzA2OThENiIgcG9pbnRzPSIxNDguNiwxNzEuNSAxNDguNywxNzEuNiAwLDg1LjggNDguMywxNjkuNCAyNDguOSwyODUuMiAzNDUuNSwyODUuMiIvPgo8L3N2Zz4K" alt=""></span>Оплатить через СБП';}else{cta.textContent=lbl;}back.style.display=step>0?'':'none';cap.textContent=step===0?'Обсудили экран — жмите кнопку и идите дальше':(scrs[step].dataset.name.includes('Оплата')?'Платёж защищён договором: гарантия возврата — п. 6':'');}
+  else{cta.style.display='';const lbl=(scrs[step].dataset.name.includes('Подарок')&&!sim)?'Дальше':CTA[step];if(lbl==='Оплатить через СБП'){cta.innerHTML='<span class="sbp-chip"><img src="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzQ2IDM5OSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9ItCh0JHQnyI+CjxwYXRoIGZpbGw9IiM4RjQ3OTQiIGQ9Ik0xMDAuMywxOTkuNGwtNTIsMzBMMCwzMTMuMWwxOTYuOS0xMTMuN0wxMDAuMywxOTkuNHoiLz4KPHBhdGggZmlsbD0iI0U0MDY0NiIgZD0iTTI0OC45LDExMy43bC01MiwzMGwtNDguMyw4My43bDE5Ni45LTExMy43TDI0OC45LDExMy43eiIvPgo8cG9seWdvbiBmaWxsPSIjRjlCNDI5IiBwb2ludHM9IjE5Ni45LDgzLjcgMTQ4LjYsMCAxNDguNiwxNzEuNSAxNDguNiwyMjcuNCAxNDguNiwzOTguOSAxOTYuOSwzMTUuMiIvPgo8cG9seWdvbiBmaWxsPSIjRUY4MDE5IiBwb2ludHM9IjE0OC42LDAgMTk2LjksODMuNyAyNDguOSwxMTMuNyAzNDUuNSwxMTMuNyIvPgo8cG9seWdvbiBmaWxsPSIjNzhCNzJBIiBwb2ludHM9IjE0OC42LDE3MS41IDE0OC42LDM5OC45IDE5Ni45LDMxNS4yIDE5Ni45LDI1NS4yIi8+CjxwYXRoIGZpbGw9IiMwMDg1M0YiIGQ9Ik0yNDguOSwyODUuMmwtNTIsMzBsLTQ4LjMsODMuN2wxOTYuOS0xMTMuN0wyNDguOSwyODUuMnoiLz4KPHBvbHlnb24gZmlsbD0iIzVCNTdBMiIgcG9pbnRzPSIwLDg1LjggMCwzMTMuMSA0OC4zLDIyOS41IDQ4LjMsMTY5LjQiLz4KPHBvbHlnb24gZmlsbD0iIzA2OThENiIgcG9pbnRzPSIxNDguNiwxNzEuNSAxNDguNywxNzEuNiAwLDg1LjggNDguMywxNjkuNCAyNDguOSwyODUuMiAzNDUuNSwyODUuMiIvPgo8L3N2Zz4K" alt=""></span>Оплатить через СБП';}else{cta.textContent=lbl;}back.style.display=step>0?'':'none';cap.textContent=scrs[step].dataset.name.includes('Оплата')?'Платёж защищён договором: гарантия возврата — п. 6':(step===0?'Обсудили экран — жмите кнопку и идите дальше':'');}
   window.scrollTo({top:0});
 }
 function next(){show(step+1)}
@@ -880,14 +880,11 @@ if(SIGNED||PART>0){
   const save2=Math.max(0,CLIENT.debt-BFL_TOTAL_COST);
   document.getElementById('dozhimHero').style.display='';
   document.getElementById('dozhimSave').textContent='~'+fmt(save2)+' ₽';
-  document.getElementById('dozhimSub').textContent=KION?('рассчитано по вашей КИ · '+KI.count+' договоров'):'договор № ДН-2607-1418 подписан';
+  document.getElementById('dozhimSub').textContent=KION?('по вашей КИ · '+KI.count+' договора · проценты ~'+fmt(KI.interest)+' ₽/мес'):'договор № ДН-2607-1418 подписан';
 }
-const payIdx=scrs.findIndex(s=>/Оплата/.test(s.dataset.name));
-const uslIdx=scrs.findIndex(s=>/Условия/.test(s.dataset.name));
 let openScr=0;
-if(Q.get('paid')==='1') openScr=scrs.length-1;            /* оплатил → Готово */
-else if(SIGNED||PART>0) openScr=payIdx>=0?payIdx:0;        /* дожим (подписал) → сразу мини заключение с оплатой */
-else if(Q.get('resume')==='1') openScr=uslIdx>=0?uslIdx:0;/* клиент открывает повторно (прислал КИ) → сразу на выгоде */
+if(Q.get('paid')==='1') openScr=scrs.length-1;      /* оплатил → Готово */
+else if(SIGNED||PART>0) openScr=0;                    /* дожим → мини заключение (оплата) — первый из двух экранов */
 show(openScr);
 
 /* ============ ДОГОВОР-PDF (вшит base64 — страница самодостаточна; в проде файл придёт из CRM) ============ */
