@@ -83,9 +83,11 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw .cr4 label{margin:0 0 2px;font-size:8.5px;letter-spacing:.02em}
 .dw .cr4 input{padding:5px 6px;font-size:12px;border-radius:6px}
 .dw .kv.total b{color:#0B5540}
-/* свёрнутый конструктор: строка-тогл с итогом, по клику раскрывается */
-.dw .crtoggle{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin-top:8px;border:1px solid #d8dee3;border-radius:8px;background:#fff;padding:8px 10px;font-family:inherit;font-size:12px;cursor:pointer;color:#2e3640}
-.dw .crtoggle .ct-l{font-weight:700;color:#5c6874;text-transform:uppercase;font-size:10px;letter-spacing:.03em}
+/* свёрнутый конструктор: строка-тогл с итогом, по клику раскрывается. Выделена зелёным — это главный ввод виджета */
+.dw .crtoggle{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;margin-top:8px;border:1.5px solid #0F6B4F;border-radius:8px;background:#E9F3EE;padding:9px 11px;font-family:inherit;font-size:12px;cursor:pointer;color:#0B5540}
+.dw .crtoggle:hover{background:#DEEDE5}
+.dw .crtoggle.open{background:#fff;border-color:#0F6B4F}
+.dw .crtoggle .ct-l{font-weight:800;color:#0B5540;text-transform:uppercase;font-size:10px;letter-spacing:.03em}
 .dw .crtoggle .ct-l i{display:inline-block;font-style:normal;transition:transform .15s;margin-right:4px}
 .dw .crtoggle.open .ct-l i{transform:rotate(90deg)}
 .dw .crtoggle .ct-r{font-variant-numeric:tabular-nums;color:#0B5540;font-weight:700}
