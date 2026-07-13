@@ -304,6 +304,7 @@ tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
 /* тренажёр = математика боевого виджета (docs/rdg-law-calc-2026-07.md): держать в синхроне с calc-widget/in-amo.html */
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
 const KEY_RATE=14.25, GOS_START=50000, BFL_COST=239000;
+const KEY_RATE_TXT=KEY_RATE.toLocaleString('ru-RU');
 const CREDIT_TYPES=[
   {k:'loan',    name:'Кредит',          rate:30.7,months:28,  demo:1000000, demoN:2},
   {k:'card',    name:'Кредитная карта', rate:52,  months:36,  demo:500000,  demoN:3},
@@ -371,9 +372,9 @@ function tcalc(){
   }else if(free>=P60.monthly){
     const margin=(free-P60.monthly)/free;
     if(margin<0.1){v.className='tr-verdict y';v.innerHTML='<b>🟡 РДГ · пограничный — запас впритык</b>Платёж '+fmt(P60.monthly)+' ₽/мес при свободных '+fmt(free)+' ₽. Суд может не утвердить (Пленум ВС № 45).';}
-    else{v.className='tr-verdict g';v.innerHTML='<b>🟢 РДГ · подходит — план 60 мес</b>Платёж '+fmt(P60.monthly)+' ₽/мес вместо банковских '+fmt(monthly)+' ₽. Проценты банков стоп, дальше ключевая '+KEY_RATE+'%.'+(free<P36.monthly?' 36 мес не тянет — только с одобрения кредиторов.':'')+(mortAmount>0?' Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ).':'');}
+    else{v.className='tr-verdict g';v.innerHTML='<b>🟢 РДГ · подходит — план 60 мес</b>Платёж '+fmt(P60.monthly)+' ₽/мес вместо банковских '+fmt(monthly)+' ₽. Проценты банков стоп, дальше ключевая '+KEY_RATE_TXT+'%.'+(free<P36.monthly?' 36 мес не тянет — только с одобрения кредиторов.':'')+(mortAmount>0?' Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ).':'');}
     kv=[['Тело плана'+(mortAmount>0?' (без ипотеки)':''),fmt(body)+' ₽'],
-        ['Проценты плана · ключевая '+KEY_RATE+'%','~'+fmt(P60.interest)+' ₽'],
+        ['Проценты · ключевая '+KEY_RATE_TXT+'%','~'+fmt(P60.interest)+' ₽'],
         ['ФУ 7% от выплаченного',fmt(P60.fu)+' ₽'],
         ['Итого по плану',fmt(P60.total)+' ₽'],
         ['Платёж · 60 мес (с кредиторами)',fmt(P60.monthly)+' ₽/мес'],

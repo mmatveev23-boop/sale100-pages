@@ -67,9 +67,9 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw .verdict.rdg{background:#0B3B2E;color:#fff}
 .dw .verdict.bfl{background:#E9F3EE;color:#0B5540}
 .dw .verdict.self{background:#FAEDE8;color:#A8442E}
-.dw .kv{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:12.5px;border-bottom:1px dashed #eef1f4}
-.dw .kv span{color:#94a0ab}
-.dw .kv b{font-variant-numeric:tabular-nums}
+.dw .kv{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 0;font-size:12.5px;border-bottom:1px dashed #eef1f4}
+.dw .kv span{color:#94a0ab;flex:1;min-width:0}
+.dw .kv b{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
 .dw.hot{border:2px solid #C99A33;box-shadow:0 6px 18px -8px rgba(201,154,51,.5)}
 .dw input.ki{border-color:#C99A33;background:#FBF3DC;color:#8A6212;font-weight:700}
 /* конструктор кредитов со слов: 5 типов, каждый — сумма/шт/ставка/срок (ставка и срок предзаполнены средними по РФ) */
@@ -235,6 +235,7 @@ const BFL_COST=239000;
    14,25% с 22.06.2026 (решение ЦБ 19.06.2026) — обновлять после заседаний ЦБ (~раз в 6 недель).
    GOS_START — стартовые госплатежи (канон заказчика): депозит ФУ 25 000 (ст. 20.6 п.3) + публикации 15 000 + почта 10 000. Госпошлина должника 0 ₽ (259-ФЗ). */
 const KEY_RATE=14.25, GOS_START=50000;
+const KEY_RATE_TXT=KEY_RATE.toLocaleString('ru-RU'); /* «14,25» — русская запятая в интерфейсе */
 /* план РДГ по закону: тело (без ипотеки) + проценты по ключевой на убывающий остаток + 7% ФУ от выплаченного (ст. 20.6 п.17; при 100%-плане = от тела) */
 function planCalc(body,months){
   const interest=body*(KEY_RATE/100)*(months/12)/2;
@@ -392,10 +393,10 @@ function calc(){
     if(margin<0.1){
       v.innerHTML='<b>РДГ · пограничный — запас впритык</b>Платёж '+fmt(PLAN.monthly)+' ₽/мес при свободных '+fmt(free)+' ₽. Суд может не утвердить (Пленум ВС № 45) — усилить подтверждённый доход или добавить созаёмный.';
     }else{
-      v.innerHTML='<b>РДГ · подходит — план '+eff+' мес</b>Платёж '+fmt(PLAN.monthly)+' ₽/мес вместо банковских '+(paynow>0?fmt(paynow)+' ₽':'платежей')+'. Банковские проценты стоп, дальше ключевая '+KEY_RATE+'% — не банкрот.'+(free<P36.monthly?' 36 мес не тянет — только с одобрения кредиторов (60).':'')+(mortAmount>0?' Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ).':'');
+      v.innerHTML='<b>РДГ · подходит — план '+eff+' мес</b>Платёж '+fmt(PLAN.monthly)+' ₽/мес вместо банковских '+(paynow>0?fmt(paynow)+' ₽':'платежей')+'. Банковские проценты стоп, дальше ключевая '+KEY_RATE_TXT+'% — не банкрот.'+(free<P36.monthly?' 36 мес не тянет — только с одобрения кредиторов (60).':'')+(mortAmount>0?' Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ).':'');
     }
     kv=[['Тело плана'+(mortAmount>0?' (без ипотеки)':''),fmt(body)+' ₽'],
-        ['Проценты плана · ключевая '+KEY_RATE+'%','~'+fmt(PLAN.interest)+' ₽'],
+        ['Проценты · ключевая '+KEY_RATE_TXT+'%','~'+fmt(PLAN.interest)+' ₽'],
         ['ФУ 7% от выплаченного',fmt(PLAN.fu)+' ₽'],
         ['Итого по плану',fmt(PLAN.total)+' ₽'],
         ['Платёж · 60 мес (с кредиторами)',fmt(P60.monthly)+' ₽/мес'],
