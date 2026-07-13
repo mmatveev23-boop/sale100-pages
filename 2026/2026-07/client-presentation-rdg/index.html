@@ -285,8 +285,10 @@ h1 .hl{color:var(--green)}
 .cm-hd b{flex:1;min-width:0;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cm-dl{flex:none;display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#2A1F08;text-decoration:none;font-size:12.5px;font-weight:700;border-radius:999px;padding:7px 13px;transition:filter .18s ease, transform .16s var(--ease)}
 .cm-dl:active{transform:scale(.96)}
+.cm-sign{flex:none;display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#fff;border:none;cursor:pointer;font-family:inherit;font-size:12.5px;font-weight:700;border-radius:999px;padding:7px 14px;transition:filter .18s ease}
+.cm-sign:active{transform:scale(.96)}
 .cm-x{flex:none;width:34px;height:34px;border:none;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background-color .18s ease}
-@media (hover:hover) and (pointer:fine){ .cm-dl:hover{filter:brightness(1.06)} .cm-x:hover{background:rgba(255,255,255,.22)} }
+@media (hover:hover) and (pointer:fine){ .cm-dl:hover{filter:brightness(1.06)} .cm-sign:hover{filter:brightness(1.08)} .cm-x:hover{background:rgba(255,255,255,.22)} }
 .cm-frame{flex:1;width:100%;border:none;background:#EDE9E0}
 
 /* код подписи */
@@ -724,6 +726,7 @@ h1 .hl{color:var(--green)}
     <div class="cm-hd">
       <b>Договор № ДН-2607-1418</b>
       <a class="cm-dl" data-dl-contract href="#" download="Договор ДОНУЛЯ (РДГ) № ДН-2607-1418.pdf"><svg width="15" height="15" viewBox="0 0 256 256" fill="currentColor"><path d="M224,152v56a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V152a8,8,0,0,1,16,0v56H208V152a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40a8,8,0,0,0-11.32-11.32L136,132.69V40a8,8,0,0,0-16,0v92.69L93.66,106.34a8,8,0,0,0-11.32,11.32Z"/></svg>Скачать PDF</a>
+      <button class="cm-sign" id="cmSign" onclick="signFromContract()"><svg width="14" height="14" viewBox="0 0 256 256" fill="currentColor"><path d="M232,92.68a15.86,15.86,0,0,0-4.69-11.31L174.63,28.68a16,16,0,0,0-22.63,0L36.69,144A15.86,15.86,0,0,0,32,155.31V208a16,16,0,0,0,16,16h52.69A15.86,15.86,0,0,0,112,219.31l115.31-115.32A15.86,15.86,0,0,0,232,92.68ZM100.69,208H48V155.31l88-88L188.69,120ZM200,108.68,147.31,56l16-16L216,92.68Z"/></svg>Подписать</button>
       <button class="cm-x" id="cmClose" onclick="closeContract()" aria-label="Закрыть просмотр"><svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></svg></button>
     </div>
     <iframe class="cm-frame" id="cFrame" title="Договор — предпросмотр"></iframe>
@@ -945,6 +948,12 @@ function closeContract(){
   document.getElementById('cModal').hidden=true;
   document.documentElement.style.overflow='';
   document.getElementById('attCard').focus();
+}
+/* «Подписать» из просмотра договора: прочитал → сразу на шаг подписи, крестик не нужен */
+function signFromContract(){
+  closeContract();
+  const i=scrs.findIndex(s=>/Подпись/.test(s.dataset.name||''));
+  if(i>=0)show(i);else next();
 }
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.getElementById('cModal').hidden)closeContract();});
 </script>
