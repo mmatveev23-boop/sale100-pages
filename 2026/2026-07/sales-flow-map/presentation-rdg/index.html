@@ -439,7 +439,7 @@ h1 .hl{color:var(--green)}
         <div class="creditors stg" id="crBlock" style="display:none">
           <div class="crh">Ваши кредиторы · <span id="crCount">22</span> договора</div>
           <div id="crList"></div>
-          <div class="crnote">11 МФО под ставки до 292% · проценты съедают <b class="num">~46 140 ₽/мес</b> — долг не уменьшается.</div>
+          <div class="crnote">11 МФО под ставки до 292% · проценты съедают <b class="num">~46 140 ₽/мес</b> — долг не уменьшается. По 11 договорам уже была просрочка — дальше пени и коллекторы.</div>
         </div>
 
         <button class="linkbtn stg" id="calcBtn" onclick="toggleCalc()">Как посчитана экономия</button>
@@ -871,7 +871,9 @@ if(SIGNED||PART>0){
   const save2=Math.max(0,Math.round(noUs2-(CLIENT.debt*1.07+RASS_TOTAL)));
   document.getElementById('dozhimHero').style.display='';
   document.getElementById('dozhimSave').textContent='~'+fmt(save2)+' ₽';
-  document.getElementById('dozhimSub').textContent=KION?('по вашей КИ · '+KI.count+' договора · проценты ~'+fmt(KI.interest)+' ₽/мес'):'договор № ДН-2607-1418 подписан';
+  document.getElementById('dozhimSub').textContent=KION?('рассчитано по вашей кредитной истории'):'договор № ДН-2607-1418 подписан';
+  /* при КИ — на мини заключение переносим полный блок «ваши кредиторы» (клиент прислал КИ, показываем картину, а не одну строку) */
+  if(KION){ const cr=document.getElementById('crBlock'); document.getElementById('dozhimHero').after(cr); cr.style.display=''; }
 }
 let openScr=0;
 if(Q.get('paid')==='1') openScr=scrs.length-1;      /* оплатил → Готово */
