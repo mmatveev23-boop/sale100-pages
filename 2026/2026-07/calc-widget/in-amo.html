@@ -176,10 +176,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
 /* ── вкладки Расчёт / Действия ── */
-.wtabs{display:flex;gap:4px;background:#eef1f4;border-radius:9px;padding:3px;margin-top:12px}
-.wtabs button{position:relative;flex:1;border:none;background:none;border-radius:7px;padding:7px;font-family:inherit;font-weight:700;font-size:12px;color:#7c8894;cursor:pointer;transition:background .15s ease-out,color .15s ease-out}
-.wtabs button.on{background:#fff;color:#0B3B2E;box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.wtabs button:active{transform:scale(.97)}
+.actsep{margin-top:14px;padding-top:11px;border-top:1px dashed #d8dee3;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#7c8894}
 /* бейдж-пульс на «Действия»: вердикт готов, не отправлено — одна мягкая opacity-анимация, без автопереключения */
 .tdot{position:absolute;top:5px;right:8px;width:7px;height:7px;border-radius:50%;background:#C99A33;opacity:0;transition:opacity .2s ease-out}
 .tdot.show{opacity:1}
@@ -335,7 +332,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         </div>
 
         <!-- вкладка «Действия» -->
-        <div id="pane_act" style="display:none">
+        <div class="actsep">Действия ⚡</div>
+        <div id="pane_act">
           <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
           <div class="sstat none" id="w_sstat">ещё не отправлено</div>
           <div class="lrow">
@@ -350,11 +348,6 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <button class="lbtn" onclick="copyDz('think',this)">✉ Не подписал</button>
             <button class="lbtn" id="w_dzKi" onclick="copyDz('ki',this)">✉ По КИ</button>
           </div>
-        </div>
-
-        <div class="wtabs">
-          <button class="on" id="tab_calc" onclick="showTab('calc')">Расчёт</button>
-          <button id="tab_act" onclick="showTab('act')">Действия ⚡<span class="tdot" id="w_tdot"></span></button>
         </div>
 
         <div class="wnote" id="w_note" style="display:none"><span id="w_noteTxt"></span> <a id="w_present" target="_blank" style="display:none">Открыть презентацию ↗</a></div>
@@ -710,24 +703,11 @@ function kidStep(d){
   i.value=Math.max(0,(parseFloat(i.value)||0)+d);
   calc();
 }
-/* ── V2: вкладки Расчёт / Действия ── */
-function showTab(t){
-  document.getElementById('pane_calc').style.display=t==='calc'?'':'none';
-  document.getElementById('pane_act').style.display=t==='act'?'':'none';
-  document.getElementById('tab_calc').classList.toggle('on',t==='calc');
-  document.getElementById('tab_act').classList.toggle('on',t==='act');
-  if(t==='act'&&last.debt>0) collapseDebts(true);
-  setPanel(false);
-}
+/* вкладки убраны (правка заказчика 15.07 «лишний клик»): «Действия» всегда развёрнуты под расчётом */
+function showTab(){}
 /* бейдж-пульс «Действия»: вердикт готов, не отправлено — одна ненавязчивая opacity-анимация, без автопереключения */
 let pulsed=false;
-function updateTabDot(valid){
-  const d=document.getElementById('w_tdot');
-  const show=!!valid&&!sentAt;
-  d.classList.toggle('show',show);
-  if(show&&!pulsed){ pulsed=true; d.classList.add('pulse'); setTimeout(()=>d.classList.remove('pulse'),2200); }
-  if(!show) pulsed=false;
-}
+function updateTabDot(){}
 /* ссылка на презентацию с цифрами клиента (демо-связка; в проде merge-поля CRM + короткая ссылка движка) */
 function presentUrl(){
   if(last.noPresent) return null; /* допуск по ст. 213.13 не пройден — маршрут решает юрист, презентацию не шлём */
