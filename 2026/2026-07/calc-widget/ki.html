@@ -81,6 +81,10 @@ tr.tot td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
 .qual{font-size:13px;margin-bottom:10px;line-height:1.55}
 
 /* сценарии */
+.ovdseg{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 10px;font-size:12px;color:var(--muted,#5E675F)}
+.ovdseg button{border:1px solid #E4DCCD;background:#fff;border-radius:999px;padding:5px 12px;font:inherit;font-size:12px;font-weight:700;color:#5E675F;cursor:pointer;transition:background 150ms ease,color 150ms ease,transform 160ms cubic-bezier(0.23,1,0.32,1)}
+.ovdseg button:active{transform:scale(0.97)}
+.ovdseg button.on{background:#0B3B2E;border-color:#0B3B2E;color:#fff}
 .scen{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .sc{border-radius:12px;padding:13px 15px;font-size:12.5px}
 .sc.bad{background:var(--alert-soft);color:#6E2E1F}
@@ -142,7 +146,7 @@ tr.tot td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
 @media print{
   body{background:#fff;font-size:12px}
   .wrap{padding:0;max-width:none}
-  .ctabar,.printbtn{display:none!important}
+  .ctabar,.printbtn,.ovdseg{display:none!important}
   .sec,.doc-hd{border-radius:0;border-left:none;border-right:none;break-inside:avoid}
   table{break-inside:auto} tr{break-inside:avoid}
   .mainv,.sc.good,.steps li.hero::before{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -204,9 +208,10 @@ tr.tot td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
 
   <div class="sec">
     <h2><span class="sn">5</span>Финансовые последствия: сценарии</h2>
+    <div class="ovdseg" id="d_ovdSeg"><span>Платёжная ситуация клиента:</span><button type="button" data-o="1" onclick="drawScen(true)">просрочки уже есть</button><button type="button" data-o="0" onclick="drawScen(false)">платит исправно</button></div>
     <div class="scen">
       <div class="sc bad">
-        <div class="st">Если не предпринимать действий · 12 мес</div>
+        <div class="st" id="d_badTitle">Если не предпринимать действий · 12 мес</div>
         <ul id="d_bad"></ul>
       </div>
       <div class="sc good">
@@ -219,11 +224,7 @@ tr.tot td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
 
   <div class="sec">
     <h2><span class="sn">6</span>Оценка судебной перспективы</h2>
-    <div class="src">Исходя из состава обязательств и подтверждаемого дохода, перспектива утверждения плана оценивается как <b>высокая</b>. Суд проверит: достоверность сведений, указанных при получении кредитов; сделки с имуществом за последние 3 года; добросовестность заёмщика.</div>
-    <div class="risk" style="margin-top:9px">
-      <div class="rk"><b>Сделки за 3 года.</b> Продажа/дарение имущества до подачи может быть оспорена.<span class="cl">Закрываем: юрист анализирует сделки до подачи заявления и выстраивает корректную позицию.</span></div>
-      <div class="rk"><b>Свежие кредиты перед обращением.</b> Несколько займов незадолго до процедуры суд может расценить как недобросовестность.<span class="cl">Закрываем: обосновываем целевое использование в заявлении — это стандартная работа сопровождения.</span></div>
-    </div>
+    <div class="src">Исходя из состава обязательств и подтверждаемого дохода, перспектива утверждения плана оценивается как <b>высокая</b>. Вашей ситуации соответствует процедура — <b>судебная реструктуризация долгов (гл. X 127-ФЗ)</b>: долг фиксируется, взыскания останавливаются, размер платежа утверждает суд. Подготовку документов и правовой позиции полностью берёт на себя юрист сопровождения — это стандартная работа в рамках договора.</div>
   </div>
 
   <div class="sec">
@@ -314,6 +315,31 @@ const DEMO={name:'Светлана Викторовна',date:'10 июля 2026'
 const RATE={mfo:2.92,card:0.52,loan:0.307,secured:0.25,mortgage:0.18};
 const PNAME={mfo:'МФО',card:'карта',loan:'кредит',secured:'залоговый',mortgage:'ипотека'};
 function monthlyInterest(c){const b=+c.debt||0;const r=RATE[c.product]??0.307;return c.product==='mortgage'?0:b*r/12;}
+/* п.5: два сценария левой колонки — данные кладёт render(), перерисовка по переключателю (скрыт на печати) */
+let SCEN=null;
+function drawScen(over){
+  if(!SCEN) return;
+  const {interest,growth,total,income,planPay,mort}=SCEN;
+  document.querySelectorAll('#d_ovdSeg button').forEach(b=>b.classList.toggle('on',(b.dataset.o==='1')===over));
+  document.getElementById('d_badTitle').textContent=over?'Если не предпринимать действий · 12 мес':'Если продолжать платить как сейчас · 12 мес';
+  document.getElementById('d_bad').innerHTML=over?(
+    '<li>Долг растёт: +~'+fmt(growth)+' ₽ процентов за год по ставкам ваших договоров</li>'+
+    '<li>Судебный приказ / исполнительная надпись — обычно через ~6 месяцев просрочки</li>'+
+    '<li>+7% исполнительский сбор ('+fmt(total*0.07)+' ₽, ст. 112 229-ФЗ)</li>'+
+    '<li>Удержание до 50% дохода'+(income>0?' — до '+fmt(income/2)+' ₽/мес':'')+' (ст. 99 229-ФЗ), арест счетов, запрет выезда</li>'
+  ):(
+    '<li>~'+fmt(interest)+' ₽ в месяц уходит банкам на проценты — ~'+fmt(growth)+' ₽ за год в пустоту</li>'+
+    '<li>Тело долга при этом почти не уменьшается: платежи съедают проценты</li>'+
+    '<li>Любой сбой — задержка зарплаты, болезнь — и включается сценарий взыскания: пени, приказы, приставы</li>'+
+    '<li>Горизонт полного погашения по текущим ставкам — годы переплаты</li>'
+  );
+  document.getElementById('d_good').innerHTML=
+    '<li>Рост долга остановлен с даты введения процедуры (ст. 213.11)</li>'+
+    '<li>С введения процедуры до утверждения плана — на практике ~6–8 месяцев — платежи по кредитам не вносятся: деньги остаются у вас</li>'+
+    '<li>Единый платёж ~'+fmt(planPay)+' ₽/мес по плану, утверждённому судом</li>'+
+    '<li>Исполнительные производства приостановлены, коллекторам звонить запрещено</li>'+
+    (mort>0?'<li>Ипотечное жильё — сохраняется (отдельное соглашение, 298-ФЗ)</li>':'<li>Статус банкрота не присваивается — план исполнен, долг закрыт</li>');
+}
 function render(d){
   /* числа приводим принудительно, имя — только текстом */
   const cr=d.credits;
@@ -360,18 +386,11 @@ function render(d){
   /* 4. квалификация */
   document.getElementById('d_qual').innerHTML='Совокупность обязательств и текущая платёжная нагрузка дают право на обращение в арбитражный суд с заявлением о реструктуризации долгов в порядке <b>ст. 213.4 127-ФЗ «О несостоятельности (банкротстве)»</b>. Условия допуска по ст. 213.13 (источник дохода; отсутствие банкротства за 5 лет и утверждённого плана за 8 лет) — проверяются юристом при подписании.';
 
-  /* 5. сценарии */
+  /* 5. сценарии: левая колонка делится по платёжной ситуации (правка Виктории 14.07) —
+     «просрочки уже есть» (взыскание) / «платит исправно» (переплата в пустоту). Флаг из payload d.overdue, дефолт — просрочки. */
   const growth=interest*12;
-  document.getElementById('d_bad').innerHTML=
-    '<li>Долг растёт: +~'+fmt(growth)+' ₽ процентов за год по ставкам ваших договоров</li>'+
-    '<li>Судебный приказ / исполнительная надпись — обычно через ~6 месяцев просрочки</li>'+
-    '<li>+7% исполнительский сбор ('+fmt(total*0.07)+' ₽, ст. 112 229-ФЗ)</li>'+
-    '<li>Удержание до 50% дохода'+(+d.income>0?' — до '+fmt((+d.income)/2)+' ₽/мес':'')+' (ст. 99 229-ФЗ), арест счетов, запрет выезда</li>';
-  document.getElementById('d_good').innerHTML=
-    '<li>Рост долга остановлен с даты введения процедуры (ст. 213.11)</li>'+
-    '<li>Единый платёж ~'+fmt(planPay)+' ₽/мес по плану, утверждённому судом</li>'+
-    '<li>Исполнительные производства приостановлены, коллекторам звонить запрещено</li>'+
-    (mort>0?'<li>Ипотечное жильё — сохраняется (отдельное соглашение, 298-ФЗ)</li>':'<li>Статус банкрота не присваивается — план исполнен, долг закрыт</li>');
+  SCEN={interest,growth,total,income:+d.income||0,planPay,mort};
+  drawScen(d.overdue!==undefined?String(d.overdue)==='1':true);
 
   /* 9. якорь цены */
   document.getElementById('d_anchor').innerHTML='<b>Для сравнения:</b> без процедуры долг прирастает на ~'+fmt(growth)+' ₽ в год — стоимость всего сопровождения меньше '+(growth>189000?'годового':'двухлетнего')+' роста долга. Гарантия возврата — в договоре (п. 6).';
