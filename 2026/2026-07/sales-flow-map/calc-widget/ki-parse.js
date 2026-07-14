@@ -43,3 +43,132 @@ function parseSb(text){
     ok:itog?Math.abs(total-num(itog[1]))<1:false,
   };
 }
+
+/* ═══ Мульти-КИ (решение заказчика 2026-07-15): клиент может прислать ДВА отчёта разных бюро.
+   Парсеры НБКИ и «Кредистории» (АО «ОКБ») + слияние с дедупликацией по УИД сделки
+   (единый идентификатор договора одинаков во всех бюро — надёжнее любых эвристик по названиям).
+   Проверено на реальной паре отчётов одного клиента: НБКИ 12.07.2026 (8 действующих, 309 891,47)
+   + Кредистория 09.07.2026 (5 действующих, 265 112,52) → 9 уникальных, 4 дубля, 386 233,61. */
+
+function kiTypeOf(lender,kind){
+  const k=(kind||'')+'', l=(lender||'')+'';
+  if(/Ипотек/i.test(k)) return 'mortgage';
+  if(/микрозаем|микрозайм/i.test(k)||/МФО|МКК|МФК|ПКО/i.test(l)) return 'mfo';
+  if(/карт|линия|Овердрафт/i.test(k)) return 'card';
+  if(/Автокредит|Лизинг/i.test(k)||(/обеспеченн/i.test(k)&&!/необеспеченн/i.test(k))) return 'secured';
+  return 'loan';
+}
+function kiBuildTypes(rows){
+  const types={loan:{amount:0,n:0},card:{amount:0,n:0},mfo:{amount:0,n:0},secured:{amount:0,n:0},mortgage:{amount:0,n:0}};
+  rows.forEach(r=>{const t=types[r.type]||types.loan;t.amount+=r.debt;t.n++;});
+  return types;
+}
+const KI_MONTHS={'января':'01','февраля':'02','марта':'03','апреля':'04','мая':'05','июня':'06','июля':'07','августа':'08','сентября':'09','октября':'10','ноября':'11','декабря':'12'};
+
+/* НБКИ: строки берём из «Сводки по кредитной истории» (таблица действующих с УИД),
+   вид сделки — из детальных блоков («// Договор … — Необеспеченный микрозаем», рядом «УИД договора») */
+function parseNbki(text){
+  const num=s=>parseFloat(String(s).replace(/\s/g,'').replace(',','.'));
+  const sIdx=text.search(/Сводка по кредитной истории\s+В сводке содержится/);
+  if(sIdx<0) return null;
+  /* конец не режем: форма строки действующих уникальна (после RUB идут два числа и дни),
+     закрытые/переуступленные/детальные блоки под regex не попадают */
+  const sec=text.slice(sIdx);
+  const rowRe=/(\d{1,2})\.\s+(.+?)\s+—\s+Договор[^У]{0,80}?УИД:\s*([0-9a-fа-яё-]{10,})\s+(\d{2}\.\d{2}\.\d{4})\s+([\d\s]+,\d{2})\s+RUB\s+([\d\s]+,\d{2})\s+([\d\s]+,\d{2})\s+(\d+)\s+(Была|Не было)/g;
+  const rows=[]; let m;
+  while((m=rowRe.exec(sec))){
+    rows.push({n:+m[1],lender:m[2].replace(/\s+/g,' ').trim().slice(0,90),uid:m[3].toLowerCase(),opened:m[4],
+      limit:num(m[5]),debt:num(m[6]),overdueAmt:num(m[7]),days:+m[8],kind:''});
+  }
+  if(!rows.length) return null;
+  /* вид сделки из детальных блоков — привязка по УИД */
+  const kinds=[]; const hdRe=/\d{1,2}\.\s[^]{2,90}?\/\/\s*Договор[^—]{0,60}—\s*([А-Яа-яё() -]{3,45})/g;
+  let h; while((h=hdRe.exec(text))) kinds.push({pos:h.index,kind:h[1].trim()});
+  const uidRe=/УИД договора\s+([0-9a-fа-яё-]{10,})/g;
+  let u; const kindByUid={};
+  while((u=uidRe.exec(text))){
+    let best=null; for(const k of kinds){ if(k.pos<u.index) best=k; else break; }
+    if(best) kindByUid[u[1].toLowerCase()]=best.kind;
+  }
+  rows.forEach(r=>{r.kind=kindByUid[r.uid]||'';r.type=kiTypeOf(r.lender,r.kind);});
+  const itog=text.match(/Текущая задолженность\s+([\d\s]+,\d{2})\s*RUB/);
+  const dm=text.match(/Сформирован\s+(\d{2}\.\d{2}\.\d{4})/);
+  const total=rows.reduce((s,r)=>s+r.debt,0);
+  return {bureau:'НБКИ',date:dm?dm[1]:null,rows,types:kiBuildTypes(rows),total,count:rows.length,
+    itogo:itog?num(itog[1]):null,avgMonthly:null,
+    ok:itog?Math.abs(total-num(itog[1]))<1:false,
+    hasOverdue:rows.some(r=>r.overdueAmt>0)};
+}
+
+/* «Кредистория» (АО «ОКБ»): суммы из сводной таблицы раздела «ДЕЙСТВУЮЩИЕ КРЕДИТНЫЕ ДОГОВОРЫ»,
+   УИД и дата сделки — из детальных блоков того же раздела (идут в том же порядке) */
+function parseCredistory(text){
+  const num=s=>parseFloat(String(s).replace(/\s/g,'').replace(',','.'));
+  if(!/АО «ОКБ»|кредистория/i.test(text)) return null;
+  const idx=text.search(/ДЕЙСТВУЮЩИЕ КРЕДИТНЫЕ ДОГОВОРЫ\s+Информация/);
+  if(idx<0) return null;
+  let end=text.indexOf('ЗАКРЫТЫЕ КРЕДИТНЫЕ ДОГОВОРЫ',idx); if(end<0) end=text.length;
+  const sec=text.slice(idx,end);
+  const tblEnd=sec.indexOf('Внимательно проверьте');
+  const tbl=tblEnd>0?sec.slice(0,tblEnd):sec.slice(0,6000);
+  const rowRe=/(\d{1,2})\s+(.+?)\s+Договор [^-]{0,40}- ([А-Яа-яё() ,]{3,45})\s+([\d\s]+(?:,\d+)?) р\.\s+([\d\s]+(?:,\d+)?) р\.\s+([\d\s]+(?:,\d+)?) р\.\s+(Просрочка с \d{2}\.\d{2}\.\d{4}|Без просрочек)/g;
+  const rows=[]; let m;
+  while((m=rowRe.exec(tbl))){
+    rows.push({n:+m[1],lender:m[2].replace(/\s+/g,' ').trim().slice(0,90),kind:m[3].trim(),
+      limit:num(m[4]),debt:num(m[5]),overdueAmt:num(m[6]),uid:'',opened:'',
+      status:m[7]});
+  }
+  if(!rows.length) return null;
+  /* УИД и дата — из детальных блоков раздела, по порядку номеров */
+  const uids=[]; const idRe=/Идентификатор сделки\s+([0-9a-fа-яё-]{10,})/g;
+  let u; while((u=idRe.exec(sec))) uids.push(u[1].toLowerCase());
+  const dates=[]; const dRe=/Дата совершения сделки\s+(\d{1,2}) ([а-яё]+) (\d{4})/g;
+  let d; while((d=dRe.exec(sec))) dates.push(('0'+d[1]).slice(-2)+'.'+(KI_MONTHS[d[2]]||'01')+'.'+d[3]);
+  rows.forEach((r,i)=>{r.uid=uids[i]||'';r.opened=dates[i]||'';r.type=kiTypeOf(r.lender,r.kind);});
+  const itog=text.match(/([\d\s]+,\d{2})\s*р\.\s+Задолженности по обязательствам/);
+  const dm=text.match(/на (\d{1,2}) ([а-яё]+) (\d{4}) года/);
+  const total=rows.reduce((s,r)=>s+r.debt,0);
+  return {bureau:'ОКБ (Кредистория)',date:dm?('0'+dm[1]).slice(-2)+'.'+(KI_MONTHS[dm[2]]||'01')+'.'+dm[3]:null,
+    rows,types:kiBuildTypes(rows),total,count:rows.length,
+    itogo:itog?num(itog[1]):null,avgMonthly:null,
+    ok:itog?Math.abs(total-num(itog[1]))<1:false,
+    hasOverdue:rows.some(r=>r.overdueAmt>0||/Просрочка/.test(r.status||''))};
+}
+
+/* распознать любой поддерживаемый отчёт */
+function parseAnyKi(text){
+  const sb=parseSb(text);
+  if(sb){ sb.rows.forEach(r=>{r.uid=r.uid||'';}); sb.hasOverdue=sb.hasOverdue||false; return sb; }
+  return parseNbki(text)||parseCredistory(text);
+}
+
+/* слияние 1..N отчётов: дедуп по УИД (fallback: дата открытия + сумма обязательства).
+   При дубле побеждает более свежий отчёт (дата формирования), при равенстве — больший долг. */
+function mergeKiReports(reports){
+  const parseDate=s=>{const m=String(s||'').match(/(\d{2})\.(\d{2})\.(\d{4})/);return m?+(m[3]+m[2]+m[1]):0;};
+  const sorted=[...reports].sort((a,b)=>parseDate(a.date)-parseDate(b.date));
+  const byKey=new Map(); let dupes=0;
+  for(const rep of sorted){
+    for(const row of rep.rows){
+      const key=row.uid||((row.opened||'?')+'|'+Math.round(row.limit||0));
+      if(byKey.has(key)){
+        dupes++;
+        const prev=byKey.get(key);
+        /* rep новее (sorted) → замещает; сохраняем больший долг как консервативный */
+        byKey.set(key,{...row,debt:Math.max(prev.debt,row.debt)});
+      }else byKey.set(key,{...row});
+    }
+  }
+  const rows=[...byKey.values()].sort((a,b)=>b.debt-a.debt).map((r,i)=>({...r,n:i+1}));
+  const total=rows.reduce((s,r)=>s+r.debt,0);
+  return {
+    bureau:sorted.map(r=>r.bureau).join(' + '),
+    date:(sorted[sorted.length-1]||{}).date||null, /* самая свежая дата — для «отчёт от X» */
+    srcLabel:sorted.map(r=>r.bureau+' от '+(r.date||'—')).join(' и '),
+    rows,types:kiBuildTypes(rows),total,count:rows.length,
+    itogo:null,avgMonthly:sorted.map(r=>r.avgMonthly).filter(Boolean).pop()||null,
+    ok:sorted.every(r=>r.ok),
+    hasOverdue:sorted.some(r=>r.hasOverdue),
+    dupes,sources:sorted.map(r=>({bureau:r.bureau,date:r.date,count:r.count,total:r.total,ok:r.ok}))
+  };
+}

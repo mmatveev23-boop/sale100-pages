@@ -336,7 +336,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
           <div class="sstat none" id="w_sstat">ещё не отправлено</div>
           <div class="lrow">
-            <label class="lbtn" id="w_kiBtn" style="cursor:pointer">⭱ Загрузить КИ<input type="file" id="w_ki" accept="application/pdf" style="display:none"></label>
+            <label class="lbtn" id="w_kiBtn" style="cursor:pointer">⭱ Загрузить КИ · 1–2 отчёта<input type="file" id="w_ki" accept="application/pdf" multiple style="display:none"></label>
             <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
             <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">⚖ Юр. заключение (PDF)</a>
           </div>
@@ -370,8 +370,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 
 <p class="cap"><b>Прототип V2: виджет «ДОНУЛЯ · Калькулятор» в карточке сделки amoCRM.</b> Sticky-вердикт, чипы долгов, секции без «Далее», вкладки Расчёт/Действия. Расчёт живой. Демо: <b>?ki=1</b> — клиент прислал КИ по запросу в дожиме.</p>
 
-<script src="./pm-regions.js"></script>
-<script src="./ki-parse.js"></script>
+<script src="./pm-regions.js?v=20260715"></script>
+<script src="./ki-parse.js?v=20260715"></script>
 <script>
 'use strict';
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
@@ -546,7 +546,7 @@ function applyRegionPM(){
   document.getElementById('w_pmSelf').value=pm.self;
   document.getElementById('w_pmChild').value=pm.child;
 }
-let term=60, prior='no', prod='rdg', last={}, kiLoaded=false, kiTypes=false, kiCount=null, kiBusy=false, kiError=false, sentAt=null;
+let term=60, prior='no', prod='rdg', last={}, kiLoaded=false, kiTypes=false, kiCount=null, kiBusy=false, kiError=false, sentAt=null, kiReports=[]; /* загруженные отчёты бюро (1–2) */
 /* склонение для бейджа: 1 договор / 2 договора / 22 договора / 11 договоров */
 const decl=n=>{const d=n%10,m=n%100;return m>=11&&m<=14?'договоров':d===1?'договор':d>=2&&d<=4?'договора':'договоров';};
 function calc(){
@@ -820,7 +820,7 @@ function markKi(count){
 }
 /* ручная правка после КИ → честно возвращаемся на «со слов», ссылка перестаёт слать ki=1 */
 function dropKi(){
-  kiLoaded=false; kiTypes=false; kiCount=null;
+  kiLoaded=false; kiTypes=false; kiCount=null; kiReports=[];
   document.getElementById('w_paynow').value=''; /* платёж из отчёта недействителен после правки данных — назад к расчёту по кредитам */
   document.getElementById('w_chips').style.display='';
   document.getElementById('w_credits').style.display='';
@@ -902,23 +902,44 @@ function parseOkb(fullText){
   credits.sort((a,b)=>a.n-b.n);
   return {credits, summary:{debt:sumM?num(sumM[1]):null,count:cntM?+cntM[1]:null}, date:dateM?dateM[1]+' года':''};
 }
-async function parseKiFile(file){
+async function extractPdfText(file){
+  if(!window.pdfjsLib) throw new Error('pdf.js не загрузился');
+  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  let text='';
+  for(let i=1;i<=Math.min(pdf.numPages,140);i++){ /* 140: у НБКИ виды сделок в детальных блоках до ~70-й страницы */
+    const pg=await pdf.getPage(i); const tc=await pg.getTextContent();
+    text+=tc.items.map(it=>it.str).join(' ')+'\n';
+  }
+  return text;
+}
+function setOvd(v){document.querySelectorAll('#w_ovd button').forEach(b=>b.classList.toggle('on',b.dataset.o===String(v)));}
+/* мульти-КИ (заказчик 2026-07-15): 1–2 отчёта разных бюро, склейка с дедупом по УИД (mergeKiReports).
+   Повторная загрузка того же бюро заменяет его отчёт; третий отчёт вытесняет самый старый. */
+async function parseKiFiles(files){
   const t=document.getElementById('w_toast');
-  t.style.display='block'; t.innerHTML='Читаю '+file.name+'…';
-  kiBusy=true; updateSendUI(); /* на время парсинга отправка заблокирована */
+  t.style.display='block'; t.innerHTML='Читаю '+files.map(f=>f.name).join(' + ')+'…';
+  kiBusy=true; updateSendUI();
   try{
-    if(!window.pdfjsLib) throw new Error('pdf.js не загрузился');
-    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    const buf=await file.arrayBuffer();
-    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
-    let text='';
-    for(let i=1;i<=Math.min(pdf.numPages,40);i++){
-      const pg=await pdf.getPage(i); const tc=await pg.getTextContent();
-      text+=tc.items.map(it=>it.str).join(' ')+'\n';
+    for(const f of files){
+      const text=await extractPdfText(f);
+      const rep=(typeof parseAnyKi==='function')?parseAnyKi(text):null;
+      if(!rep){
+        if(files.length===1&&kiReports.length===0){ parseOkbLegacy(text); return; } /* старый ОКБ-формат без сводной таблицы */
+        throw new Error('«'+f.name+'»: формат не распознан (поддерживаются Скоринг Бюро, НБКИ, Кредистория/ОКБ)');
+      }
+      kiReports=kiReports.filter(r=>r.bureau!==rep.bureau).concat([rep]);
     }
-    /* сначала канонный формат заказчика — «Скоринг Бюро» (ki-parse.js), затем фоллбэк ОКБ */
-    const sb=(typeof parseSb==='function')?parseSb(text):null;
-    if(sb){ applyKiTypes(sb); return; }
+    if(kiReports.length>2) kiReports=kiReports.slice(-2);
+    const merged=kiReports.length>1?mergeKiReports(kiReports):kiReports[0];
+    setOvd(merged.hasOverdue?1:0); /* просрочки видны из отчёта — тогл ставится сам */
+    applyKiTypes(merged);
+  }catch(e){ kiBusy=false; kiError=true; updateSendUI(); t.innerHTML='Не удалось разобрать файл: '+e.message; }
+}
+function parseOkbLegacy(text){
+  const t=document.getElementById('w_toast');
+  try{
     const parsed=parseOkb(text);
     if(!parsed.credits.length) throw new Error('таблица договоров не найдена (поддерживаются отчёты «Скоринг Бюро» и ОКБ)');
     const total=parsed.credits.reduce((s,c)=>s+c.debt,0);
@@ -941,7 +962,7 @@ async function parseKiFile(file){
     kf.href='./ki.html#d='+b64url(JSON.stringify(payload))+'&print=1'; kf.style.display='';
   }catch(e){ kiBusy=false; kiError=true; updateSendUI(); t.innerHTML='Не удалось разобрать файл: '+e.message; }
 }
-/* «Скоринг Бюро»: раскладываем точные тела по типам прямо в конструктор — ставки/сроки остаются средними, ипотека уйдёт «вне плана» сама.
+/* «Скоринг Бюро» / НБКИ / Кредистория (и склейка): раскладываем точные тела по типам прямо в конструктор — ставки/сроки остаются средними, ипотека уйдёт «вне плана» сама.
    Расписка (receipt) в КИ не отражается — поле не заполняется из отчёта, остаётся ручным со слов
    (расписки — только со слов, суд включает требования физлиц в реестр). */
 function applyKiTypes(sb,demo){
@@ -964,11 +985,15 @@ function applyKiTypes(sb,demo){
   document.getElementById('f_debt').textContent=fmt(sb.total)+' ₽ · '+sb.count+' дог. (по КИ)';
   const t=document.getElementById('w_toast');
   t.style.display='block';
-  t.innerHTML=(sb.ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+sb.count+' '+decl(sb.count)+', долг '+fmt(sb.total)+' ₽'+(sb.ok?' — сходится с «Итого» отчёта.':'.')+(sb.types.mortgage.amount>0?' Ипотека '+fmt(sb.types.mortgage.amount)+' ₽ — вне плана (298-ФЗ).':'')+' В проде PDF прикрепляется к сделке.';
+  t.innerHTML=(sb.sources&&sb.sources.length>1
+    ?'✓ Объединены отчёты: '+sb.sources.map(s=>s.bureau+' ('+(s.date||'—')+') — '+s.count+' дог').join(' + ')+' → '+sb.count+' уникальных, дублей объединено '+(sb.dupes||0)+'. Долг '+fmt(sb.total)+' ₽.'
+    :(sb.ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+sb.count+' '+decl(sb.count)+', долг '+fmt(sb.total)+' ₽'+(sb.ok?' — сходится с «Итого» отчёта.':'.'))
+    +(sb.types.mortgage.amount>0?' Ипотека '+fmt(sb.types.mortgage.amount)+' ₽ — вне плана (298-ФЗ).':'')+' В проде PDF прикрепляется к сделке.';
   const kf=document.getElementById('w_kiFile');
   if(sb.rows&&sb.rows.length){
     /* заключение считает платёж и ПДН само — передаём доход/семью/ПМ и ссылку дожим-презентации */
     const payload={name:document.querySelector('.deal h1').textContent.trim(),date:sb.date,term,overdue:ovdFlag(),
+      src:sb.srcLabel||null, /* «НБКИ от 12.07.2026 и ОКБ (Кредистория) от 09.07.2026» */
       income:parseFloat(document.getElementById('w_income').value)||0,
       kids:parseFloat(document.getElementById('w_kids').value)||0,
       pmSelf:parseFloat(document.getElementById('w_pmSelf').value)||0,
@@ -1051,7 +1076,7 @@ function copyClientLink(){
     .catch(()=>{b.textContent='не вышло — откройте презентацию';});
   setTimeout(()=>{b.textContent='⧉ Скопировать';},3000);
 }
-document.getElementById('w_ki').addEventListener('change',e=>{ if(e.target.files[0]) parseKiFile(e.target.files[0]); });
+document.getElementById('w_ki').addEventListener('change',e=>{ const fs=[...e.target.files].slice(0,2); if(fs.length) parseKiFiles(fs); e.target.value=''; });
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </body>
