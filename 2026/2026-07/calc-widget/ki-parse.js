@@ -111,7 +111,7 @@ function parseCredistory(text){
   const sec=text.slice(idx,end);
   const tblEnd=sec.indexOf('Внимательно проверьте');
   const tbl=tblEnd>0?sec.slice(0,tblEnd):sec.slice(0,6000);
-  const rowRe=/(\d{1,2})\s+(.+?)\s+Договор [^-]{0,40}- ([А-Яа-яё() ,]{3,45})\s+([\d\s]+(?:,\d+)?) р\.\s+([\d\s]+(?:,\d+)?) р\.\s+([\d\s]+(?:,\d+)?) р\.\s+(Просрочка с \d{2}\.\d{2}\.\d{4}|Без просрочек)/g;
+  const rowRe=/(\d{1,2})\s+(.+?)\s+Договор [^-]{0,40}- ([А-Яа-яё() ,]{3,45})\s+([\d\s]+(?:,\d+)?) р\.\s+([\d\s]+(?:,\d+)?) р\.\s+([\d\s]+(?:,\d+)?) р\.\s+(Просрочка с\s+\d{2}\.\d{2}\.\d{4}|Без просрочек)/g;
   const rows=[]; let m;
   while((m=rowRe.exec(tbl))){
     rows.push({n:+m[1],lender:m[2].replace(/\s+/g,' ').trim().slice(0,90),kind:m[3].trim(),
@@ -142,24 +142,35 @@ function parseAnyKi(text){
   return parseNbki(text)||parseCredistory(text);
 }
 
-/* слияние 1..N отчётов: дедуп по УИД (fallback: дата открытия + сумма обязательства).
-   При дубле побеждает более свежий отчёт (дата формирования), при равенстве — больший долг. */
+/* слияние 1..N отчётов. Дубль договора = совпадение УИД сделки (железный ключ, одинаков во всех бюро)
+   ИЛИ совпадение даты открытия + (суммы обязательства ИЛИ «ядра» имени кредитора) — для отчётов без УИД
+   в строках (Скоринг Бюро). При дубле побеждает более свежий отчёт, долг берём больший (консервативно). */
 function mergeKiReports(reports){
   const parseDate=s=>{const m=String(s||'').match(/(\d{2})\.(\d{2})\.(\d{4})/);return m?+(m[3]+m[2]+m[1]):0;};
+  const STOP={'ООО':1,'ПАО':1,'БАНК':1,'БАНКА':1,'МКК':1,'МФК':1,'МФО':1,'ПКО':1,'КПК':1,'ЛИЗИНГ':1,'АГЕНТ':1,'ИПОТЕЧНЫЙ':1,'РАНЕЕ':1};
+  const core=s=>String(s||'').toUpperCase().replace(/[«»"'().,:]/g,' ').split(/\s+/).filter(w=>w.length>3&&!STOP[w]).sort().join(' ');
   const sorted=[...reports].sort((a,b)=>parseDate(a.date)-parseDate(b.date));
-  const byKey=new Map(); let dupes=0;
+  const entries=[]; let dupes=0;
+  const sameDeal=(a,b)=>{
+    if(a.uid&&b.uid) return a.uid===b.uid;
+    if(!a.opened||!b.opened||a.opened!==b.opened) return a.uid&&b.uid?false:(a.uid===b.uid&&!!a.uid);
+    if(a.limit>0&&b.limit>0&&Math.abs(a.limit-b.limit)<=1) return true;
+    const ca=core(a.lender),cb=core(b.lender);
+    return !!ca&&(ca===cb||ca.indexOf(cb)>=0||cb.indexOf(ca)>=0);
+  };
   for(const rep of sorted){
     for(const row of rep.rows){
-      const key=row.uid||((row.opened||'?')+'|'+Math.round(row.limit||0));
-      if(byKey.has(key)){
+      const hit=entries.find(e=>sameDeal(e,row));
+      if(hit){
         dupes++;
-        const prev=byKey.get(key);
-        /* rep новее (sorted) → замещает; сохраняем больший долг как консервативный */
-        byKey.set(key,{...row,debt:Math.max(prev.debt,row.debt)});
-      }else byKey.set(key,{...row});
+        hit.debt=Math.max(hit.debt,row.debt);
+        hit.uid=hit.uid||row.uid; hit.opened=hit.opened||row.opened;
+        hit.kind=row.kind||hit.kind; hit.lender=row.lender||hit.lender;
+        hit.type=row.type||hit.type; hit.overdueAmt=Math.max(hit.overdueAmt||0,row.overdueAmt||0);
+      }else entries.push({...row});
     }
   }
-  const rows=[...byKey.values()].sort((a,b)=>b.debt-a.debt).map((r,i)=>({...r,n:i+1}));
+  const rows=entries.sort((a,b)=>b.debt-a.debt).map((r,i)=>({...r,n:i+1}));
   const total=rows.reduce((s,r)=>s+r.debt,0);
   return {
     bureau:sorted.map(r=>r.bureau).join(' + '),
