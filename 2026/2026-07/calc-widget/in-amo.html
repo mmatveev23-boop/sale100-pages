@@ -308,6 +308,9 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <div class="rowf freeline"><span class="rlab">Останется на план: доход − прожиточный минимум семьи</span><b id="w_freeLine" class="num">—</b></div>
           </div>
 
+          <!-- нижняя часть свёрнута до первых цифр со слов (правка заказчика 15.07); раскрывается сама при вводе долга или кнопкой -->
+          <button type="button" class="advtg" id="w_moreTg" onclick="openMore()">⌄ Развернуть: срок плана · просрочки · действия</button>
+          <div id="w_more" style="display:none">
           <!-- advanced: ставки/сроки типов + ПМ-поля (регион автозаполняет) -->
           <button type="button" class="advtg" id="w_advTg" onclick="toggleAdv()">⚙ Уточнить ставки, сроки и ПМ</button>
           <div class="advpm">
@@ -348,6 +351,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <button class="lbtn" id="w_dzKi" onclick="copyDz('ki',this)">✉ По КИ</button>
           </div>
         </div>
+
+        </div><!-- /w_more -->
 
         <div class="wnote" id="w_note" style="display:none"><span id="w_noteTxt"></span> <a id="w_present" target="_blank" style="display:none">Открыть презентацию ↗</a></div>
         <div class="toast" id="w_toast"></div>
@@ -542,7 +547,11 @@ function applyRegionPM(){
   document.getElementById('w_pmSelf').value=pm.self;
   document.getElementById('w_pmChild').value=pm.child;
 }
-let term=60, prior='no', prod='rdg', last={}, kiLoaded=false, kiTypes=false, kiCount=null, kiBusy=false, kiError=false, sentAt=null, kiReports=[]; /* загруженные отчёты бюро (1–2) */
+let term=60, prior='no', prod='rdg', last={}, kiLoaded=false, kiTypes=false, kiCount=null, kiBusy=false, kiError=false, sentAt=null, kiReports=[]; /* загруженные отчёты бюро (1–3) */
+/* нижняя часть виджета: свёрнута, пока нет цифр со слов; открывается сама или кнопкой, обратно не сворачивается.
+   ВАЖНО: объявление до первого calc() — иначе TDZ валит инициализацию */
+let moreOpen=false;
+function openMore(){moreOpen=true;document.getElementById('w_more').style.display='';document.getElementById('w_moreTg').style.display='none';}
 /* склонение для бейджа: 1 договор / 2 договора / 22 договора / 11 договоров */
 const decl=n=>{const d=n%10,m=n%100;return m>=11&&m<=14?'договоров':d===1?'договор':d>=2&&d<=4?'договора':'договоров';};
 function calc(){
@@ -553,6 +562,7 @@ function calc(){
   const debt=(kiLoaded&&!kiTypes)?((parseFloat(document.getElementById('w_debt').value)||0)+rc.amount):ct.debt;
   document.getElementById('w_debtTotal').textContent=debt>0?fmt(debt)+' ₽':'—';
   document.getElementById('w_debtLiveRow').style.display=debt>0?'':'none';
+  if(!moreOpen&&debt>0) openMore();
   document.getElementById('w_debtLive').textContent=debt>0?fmt(debt)+' ₽ · '+(kiLoaded?(kiCount||0)+rc.n:ct.n)+' дог':'—';
   /* число договоров при КИ: счётчик отчёта + шт. расписки (в отчётах бюро её нет); бейдж «по КИ» не трогаем */
   document.getElementById('w_nTotal').textContent=kiLoaded?(kiCount||0)+rc.n:ct.n;
@@ -908,6 +918,7 @@ async function extractPdfText(file){
   return text;
 }
 function setOvd(v){document.querySelectorAll('#w_ovd button').forEach(b=>b.classList.toggle('on',b.dataset.o===String(v)));}
+
 /* мульти-КИ (заказчик 2026-07-15): 1–2 отчёта разных бюро, склейка с дедупом по УИД (mergeKiReports).
    Повторная загрузка того же бюро заменяет его отчёт; третий отчёт вытесняет самый старый. */
 async function parseKiFiles(files){
