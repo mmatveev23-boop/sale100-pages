@@ -129,7 +129,6 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .sec{scroll-margin-top:110px}
 .chips{display:flex;flex-wrap:wrap;gap:5px;transition:background .3s ease-out;border-radius:8px}
 .chips.urge{background:#FBF3DC}
-.chips-hint{margin-top:6px;font-size:11px;color:#8A6212;background:#FBF3DC;border-radius:7px;padding:5px 9px;line-height:1.4}
 .kinote{margin-top:7px;font-size:10.5px;color:#8b96a3;line-height:1.5}
 .kinote b{color:#5c6874}
 .kinote a{color:#0B5540;font-weight:700}
@@ -286,7 +285,6 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <div id="w_debtBody">
               <label style="margin-top:0">Долги клиента — что есть?</label>
               <div class="chips" id="w_chips"></div>
-              <div class="chips-hint" id="w_chipsHint">↑ Тапните тип долга и введите сумму — вердикт появится сразу</div>
               <div id="w_credits"></div>
               <div id="w_debtWrap" style="display:none"><label id="w_debtLabel">Долг по кредитной истории, ₽</label><input id="w_debt" type="number"></div>
               <!-- живое «итого» при открытой секции (фидбек заказчика: «почему не считаем общую сумму?») -->
@@ -573,8 +571,6 @@ function calc(){
   const free=income-(pmSelf+kids*pmChild)-mortPay;
   /* живая строка у степпера детей: эффект семьи виден сразу (убрана только при пустом доходе) */
   document.getElementById('w_freeLine').textContent=income>0?fmt(free)+' ₽/мес':'— введите доход';
-  /* подсказка под чипами: видна, пока долгов нет (фидбек заказчика — «вердикта нету») */
-  document.getElementById('w_chipsHint').style.display=debt>0?'none':'';
   /* тело плана — без ипотеки (298-ФЗ: отдельное мировое с ипотечным банком, жильё сохраняется) */
   const body=Math.max(0,debt-mortAmount);
   const P60=planCalc(body,60), P36=planCalc(body,36), PE=planCalc(body,term);
