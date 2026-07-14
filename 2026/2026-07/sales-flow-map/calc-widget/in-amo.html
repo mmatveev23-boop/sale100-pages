@@ -210,6 +210,12 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
           <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">⚖ Юр. заключение (PDF)</a>
         </div>
+        <label style="margin-top:9px">Дожим-сообщения — копируются с цифрами клиента</label>
+        <div class="lrow" style="margin-top:4px">
+          <button class="lbtn" onclick="copyDz('open',this)">✉ Не открыл</button>
+          <button class="lbtn" onclick="copyDz('think',this)">✉ Не подписал</button>
+          <button class="lbtn" id="w_dzKi" onclick="copyDz('ki',this)">✉ По КИ</button>
+        </div>
         <div class="wnote" id="w_note" style="display:none"><span id="w_noteTxt"></span> <a id="w_present" target="_blank" style="display:none">Открыть презентацию ↗</a></div>
         <div class="toast" id="w_toast"></div>
       </div>
@@ -640,6 +646,53 @@ function applyKiTypes(sb,demo){
   if(!demo) setTimeout(()=>{t.style.display='none';},12000);
 }
 function b64url(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+/* ═══ дожим-сообщения: готовые тексты с цифрами клиента (канон: не купил → запрос КИ обязателен) ═══ */
+function monthlyGrowth(){
+  /* проценты в месяц по конструктору (без ипотеки): со слов — по средним ставкам, по КИ — точные тела */
+  let g=0;
+  document.querySelectorAll('#w_credits .crt').forEach(row=>{
+    if(row.dataset.t==='mortgage') return;
+    const amount=parseFloat(row.querySelector('.c-am').value)||0;
+    const rate=parseFloat(row.querySelector('.c-r').value)||0;
+    g+=amount*rate/100/12;
+  });
+  return Math.round(g);
+}
+function dzText(kind){
+  const name=document.querySelector('.deal h1').textContent.trim();
+  const abs=u=>u?new URL(u,location.href).href:'';
+  const pres=abs(presentUrl());
+  const guide=abs('../ki-guide/');
+  const sample=abs('./ki.html');
+  const grow=monthlyGrowth();
+  const plan=last.pay?fmt(last.pay):null;
+  if(kind==='open'){
+    return name+', добрый день! Это ДОНУЛЯ. Посчитали по вашим цифрам: платёж можно снизить до ~'+(plan||'—')+' ₽/мес вместо нынешних ~'+fmt(last.paynow||0)+' ₽. Всё уже готово на вашей персональной странице: '+pres+'\nОткройте — это 2 минуты. Если удобнее голосом — наберу.';
+  }
+  if(kind==='think'){
+    return name+', пока решение откладывается — долг растёт: ~+'+fmt(grow)+' ₽ процентов в месяц (+'+fmt(grow*12)+' ₽ за год). Предлагаю проверить точно по официальным данным: скачайте свою кредитную историю, это бесплатно и займёт 5 минут — инструкция: '+guide+'\nПришлёте PDF сюда — юрист подготовит юридическое заключение по всем вашим договорам, вот пример: '+sample+'\nЭто бесплатно и ни к чему не обязывает. Ваш расчёт: '+pres;
+  }
+  /* ki: заключение по реальному отчёту готово; главная фраза — по маршруту */
+  const opinion=abs((document.getElementById('w_kiFile').getAttribute('href')||'./ki.html').replace(/[#&]print=1/,''));
+  const main=last.route==='БФЛ'
+    ?'Главное: долг списывается целиком, платёж только за процедуру — 13 500 ₽/мес'
+    :'Главное: единый платёж ~'+(plan||'—')+' ₽/мес по плану, утверждённому судом'+(last.debt>last.body?', ипотека сохраняется':'');
+  return name+', юрист разобрал вашу кредитную историю: '+(kiCount||'—')+' договоров на '+fmt(last.debt||0)+' ₽. Юридическое заключение готово: '+opinion+'\n'+main+'. Договор и оплата — на вашей странице: '+pres+'\nКаждый месяц ожидания — ещё ~+'+fmt(grow)+' ₽ процентов.';
+}
+function copyDz(kind,btn){
+  if(kind==='ki'&&!kiLoaded){
+    const t=document.getElementById('w_toast');
+    t.style.display='block'; t.innerHTML='Сначала загрузите КИ — сообщение «По КИ» собирается по реальному отчёту.';
+    setTimeout(()=>{t.style.display='none';},4000);
+    return;
+  }
+  const txt=dzText(kind);
+  const old=btn.textContent;
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject())
+    .then(()=>{btn.textContent='✓ Скопировано';})
+    .catch(()=>{btn.textContent='не вышло';});
+  setTimeout(()=>{btn.textContent=old;},2500);
+}
 /* фоллбэк отправки (состояние 7): чат недоступен → менеджер копирует ссылку ПРЕЗЕНТАЦИИ и шлёт сам */
 function copyClientLink(){
   const u=presentUrl(); if(!u) return;
