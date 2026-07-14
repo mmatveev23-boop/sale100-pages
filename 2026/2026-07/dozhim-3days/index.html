@@ -61,6 +61,15 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
 .touch .tool.w{background:var(--green-soft);color:var(--green-ink)}
 .msg{margin-top:9px;background:var(--card2);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--ink);line-height:1.55;white-space:pre-line}
 .msg .ph{color:var(--gold-ink);font-weight:700}
+.msg a{color:inherit;word-break:break-all}
+
+.modebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin:16px 0 0;box-shadow:var(--shadow-sm)}
+.modebar .mb-l{font-size:13px;font-weight:700;color:var(--muted)}
+.modebar .seg{display:flex;background:var(--paper2);border-radius:999px;padding:3px}
+.modebar .seg button{border:0;background:transparent;border-radius:999px;padding:6px 14px;font:inherit;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;transition:background 150ms ease,color 150ms ease,transform 160ms cubic-bezier(0.23,1,0.32,1)}
+.modebar .seg button:active{transform:scale(0.97)}
+.modebar .seg button.on{background:var(--pine);color:#fff}
+.modebar .mb-note{font-size:12px;color:var(--faint);line-height:1.4}
 .copy{margin-top:7px;border:1px solid var(--green);background:#fff;color:var(--green-ink);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
 .copy:hover{background:var(--green-soft)}
 .branch{margin-top:9px;border-left:none;background:var(--green-soft);border-radius:10px;padding:9px 12px;font-size:12.5px;color:var(--green-ink);line-height:1.5}
@@ -115,6 +124,15 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
     <h1>Дожим: не подписал — 3 дня · подписал, не оплатил — ежедневный ритм</h1>
     <p><b>Часть 1 (не подписал):</b> потолок «контакт → договор» — 3 дня активного времени, абсолютный (свод §0), дальше лид уходит другому с мерджем. <b>Часть 2 (подписал, не оплатил):</b> потолка нет — лид ваш, пока ведёте по-настоящему, но попытка обязательна КАЖДЫЙ день первые 3 дня, и с первого дня сделка висит в «застрявших деньгах» РОПа. Каждое касание обязано двигать сделку, а не «напоминать о себе».</p>
   </header>
+
+  <div class="modebar">
+    <span class="mb-l">Тексты сообщений:</span>
+    <div class="seg" role="group" aria-label="Режим текстов">
+      <button type="button" id="mb_tpl" class="on" onclick="setMode('tpl')">Шаблоны {…}</button>
+      <button type="button" id="mb_demo" onclick="setMode('demo')">Пример: Светлана</button>
+    </div>
+    <span class="mb-note">Пример заполнен цифрами демо-клиента (13 договоров, долг 3 029 037 ₽) и живыми ссылками — как выглядит реальное сообщение.</span>
+  </div>
 
   <div class="kiking">
     <h2>⚖ Запрос кредитной истории — главный дожимный ход. Для всех</h2>
@@ -396,9 +414,11 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
 </div>
 <script>
 'use strict';
+let MODE='tpl';
+const idleLabel=()=>MODE==='demo'?'Скопировать пример':'Скопировать шаблон';
 function cp(btn){
   const t=btn.previousElementSibling.textContent.trim();
-  const ok=()=>{btn.textContent='✓ Скопировано';setTimeout(()=>{btn.textContent='Скопировать шаблон';},2000);};
+  const ok=()=>{btn.textContent='✓ Скопировано';setTimeout(()=>{btn.textContent=idleLabel();},2000);};
   /* фоллбэк без Clipboard API — execCommand работает по клику без разрешений */
   const legacy=()=>{try{
     const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='position:fixed;opacity:0';
@@ -408,6 +428,32 @@ function cp(btn){
   }catch(e){btn.textContent='выделите текст вручную';}};
   if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok).catch(legacy);
   else legacy();
+}
+
+/* «Пример»: демо-клиент из заключения ki.html (Скоринг Бюро, 13 договоров, долг 3 029 037 ₽).
+   Цифры = формулы виджета: платит сейчас 101 797 (проценты 72 045 + 2% тела), план 35 361/60 мес. */
+const PAGES='https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/';
+const lnk=u=>'<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>';
+const DEMO=[
+  ['{Имя}','<span class="ph">Светлана Викторовна</span>'],
+  ['{платёж по плану}','35 361'],
+  ['{платёж}','35 361'],
+  ['{платит сейчас}','101 797'],
+  ['{рост за день}','2 400'],
+  ['{рост}','72 045'],
+  ['{ссылка на пример}',lnk(PAGES+'calc-widget/ki.html')],
+  ['{ссылка на инструкцию}',lnk(PAGES+'ki-guide/')],
+  ['{ссылка}',lnk(PAGES+'client-presentation-rdg/')]
+];
+const MSGS=[...document.querySelectorAll('.msg')].map(el=>({el,tpl:el.innerHTML}));
+function setMode(m){
+  MODE=m;
+  document.getElementById('mb_tpl').classList.toggle('on',m==='tpl');
+  document.getElementById('mb_demo').classList.toggle('on',m==='demo');
+  MSGS.forEach(({el,tpl})=>{
+    el.innerHTML=m==='tpl'?tpl:DEMO.reduce((h,[k,v])=>h.split(k).join(v),tpl);
+  });
+  document.querySelectorAll('button.copy').forEach(b=>{b.textContent=idleLabel();});
 }
 </script>
 </body>
