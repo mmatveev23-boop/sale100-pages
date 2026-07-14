@@ -292,14 +292,14 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             </div>
           </div>
 
-          <!-- в) ПЛАТЁЖ СЕЙЧАС -->
+          <!-- в) ДОХОД (РДГ-only) → ПЛАТЁЖ (всегда): порядок по правке заказчика 15.07 -->
+          <div class="rowf" id="row_income"><span class="rlab">Офиц. доход, ₽/мес</span><input id="w_income" class="rin" type="number"></div>
           <!-- платёж руками не вводится (правка заказчика 14.07): всегда считается по кредитам, при КИ — из отчёта -->
           <div class="rowf freeline"><span class="rlab">Платёж сейчас — считаем по кредитам</span><b id="w_paynowLine" class="num">—</b></div>
           <input id="w_paynow" type="hidden">
 
-          <!-- г) ДОХОД · ДЕТИ · РЕГИОН — только для РДГ (допуск к плану); в БФЛ на расчёт не влияют и скрыты -->
+          <!-- г) ДЕТИ · РЕГИОН — только для РДГ (допуск к плану); в БФЛ на расчёт не влияют и скрыты -->
           <div id="w_rdgIncome">
-          <div class="rowf" id="row_income"><span class="rlab">Офиц. доход, ₽/мес</span><input id="w_income" class="rin" type="number"></div>
           <div class="rowf"><span class="rlab">Детей</span>
             <div class="stpr"><button type="button" onclick="kidStep(-1)">−</button><input id="w_kids" type="number" value="1" min="0"><button type="button" onclick="kidStep(1)">+</button></div>
           </div>
@@ -577,6 +577,7 @@ function calc(){
   const v=document.getElementById('w_verdict'), kvs=document.getElementById('w_kvs');
   document.getElementById('w_rdgFields').style.display=prod==='rdg'?'':'none';
   document.getElementById('w_rdgIncome').style.display=prod==='rdg'?'':'none';
+  document.getElementById('row_income').style.display=prod==='rdg'?'':'none';
   let route, eff=term, kv=[], voice=[]; /* voice — строки Камрана «Клиенту голосом»: переплата · выгода · платёж */
   const mfcHint=(body>=25000&&body<=1000000)?'<br>⚠ Долг 25 тыс.–1 млн: возможно бесплатное внесудебное через МФЦ (нужно оконченное исполнительное производство, ст. 223.2) — проверит юрист.':'';
   if(prod==='bfl'){
