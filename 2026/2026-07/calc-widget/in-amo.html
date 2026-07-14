@@ -305,7 +305,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           </div>
           <div class="rowf"><span class="rlab">Регион (ПМ)</span><select id="w_region" class="rin"></select></div>
           <!-- живой отклик на доход/детей/регион: видно, что дети считаются (ПМ ребёнка минусуется за каждого) -->
-          <div class="rowf freeline"><span class="rlab">Останется на план: доход − прожиточный минимум семьи</span><b id="w_freeLine" class="num">—</b></div>
+          <div class="rowf freeline"><span class="rlab" id="w_freeLab">Останется на план: доход − прожиточный минимум семьи</span><b id="w_freeLine" class="num">—</b></div>
           </div>
 
           <!-- нижняя часть свёрнута до первых цифр со слов (правка заказчика 15.07); раскрывается сама при вводе долга или кнопкой -->
@@ -580,14 +580,16 @@ function calc(){
   const mortPay=(kiLoaded&&!kiTypes)?0:ct.mortPay, mortAmount=(kiLoaded&&!kiTypes)?0:ct.mortAmount;
   const free=income-(pmSelf+kids*pmChild)-mortPay;
   /* живая строка у степпера детей: эффект семьи виден сразу (убрана только при пустом доходе) */
-  document.getElementById('w_freeLine').textContent=income>0?fmt(free)+' ₽/мес':'— введите доход';
+  document.getElementById('w_freeLab').textContent=prod==='rdg'?'Останется на план: доход − прожиточный минимум семьи':'Сверх ПМ семьи — удержат в процедуре (ст. 213.25)';
+  document.getElementById('w_freeLine').textContent=income>0?fmt(prod==='rdg'?free:Math.max(0,income-(pmSelf+kids*pmChild)))+' ₽/мес':'— введите доход';
   /* тело плана — без ипотеки (298-ФЗ: отдельное мировое с ипотечным банком, жильё сохраняется) */
   const body=Math.max(0,debt-mortAmount);
   const P60=planCalc(body,60), P36=planCalc(body,36), PE=planCalc(body,term);
   const v=document.getElementById('w_verdict'), kvs=document.getElementById('w_kvs');
   document.getElementById('w_rdgFields').style.display=prod==='rdg'?'':'none';
-  document.getElementById('w_rdgIncome').style.display=prod==='rdg'?'':'none';
-  document.getElementById('row_income').style.display=prod==='rdg'?'':'none';
+  /* доход/дети/регион нужны в ОБОИХ продуктах: в РДГ — допуск к плану, в БФЛ — удержания сверх ПМ семьи (ст. 213.25) */
+  document.getElementById('w_rdgIncome').style.display='';
+  document.getElementById('row_income').style.display='';
   let route, eff=term, kv=[], voice=[]; /* voice — строки Камрана «Клиенту голосом»: переплата · выгода · платёж */
   const mfcHint=(body>=25000&&body<=1000000)?'<br>⚠ Долг 25 тыс.–1 млн: возможно бесплатное внесудебное через МФЦ (нужно оконченное исполнительное производство, ст. 223.2) — проверит юрист.':'';
   if(prod==='bfl'){
@@ -595,6 +597,12 @@ function calc(){
     v.className='verdict bfl';
     v.innerHTML='<b>БФЛ · списание долга</b>Долг '+fmt(debt)+' ₽ списывается целиком, платёж только за процедуру.';
     kv=[['Долг спишется',fmt(debt)+' ₽'],['Процедура','13 500 ₽/мес · ~14 мес'],['Услуги + госплатежи',fmt(BFL_COST)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
+    /* белый доход в списании: сверх ПМ семьи ~6 мес процедуры уходит кредиторам (ст. 213.25) — итог уточняет юрист */
+    const massM=income>0?Math.max(0,income-(pmSelf+kids*pmChild)):0;
+    if(massM>0){
+      kv.push(['Из дохода в процедуре (сверх ПМ семьи)','~'+fmt(massM)+' ₽/мес · ~6 мес ≈ '+fmt(massM*6)+' ₽'],['Выгода с учётом удержаний',fmt(Math.max(0,debt-BFL_COST-massM*6))+' ₽']);
+      v.innerHTML+='<br>⚠ Белый доход: ~'+fmt(massM)+' ₽/мес сверх ПМ семьи в процедуре уйдёт кредиторам — сравните с РДГ.';
+    }
     /* переплата банкам «в пустоту» (правка Виктории 14.07): проценты по конструктору без ипотеки */
     const intYear=monthlyGrowth()*12;
     if(intYear>0) kv.splice(1,0,['Проценты банкам за год, если тянуть','~'+fmt(intYear)+' ₽ — в пустоту'],['Экономия с процентами за год',fmt(Math.max(0,debt+intYear-BFL_COST))+' ₽']);
@@ -642,6 +650,8 @@ function calc(){
     v.className='verdict bfl';
     v.innerHTML='<b>Не тянет РДГ → кандидат на списание</b>Свободных '+fmt(free)+' ₽/мес меньше платежа плана даже на 60 мес ('+fmt(P60.monthly)+' ₽). Долг '+fmt(debt)+' ₽ спишется целиком.'+mfcHint;
     kv=[['Свободный доход',fmt(free)+' ₽/мес'],['Мин. платёж плана (60 мес)',fmt(P60.monthly)+' ₽/мес'],['Долг спишется',fmt(debt)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
+    const massB=income>0?Math.max(0,income-(pmSelf+kids*pmChild)):0;
+    if(massB>0) kv.push(['Из дохода в процедуре (сверх ПМ семьи)','~'+fmt(massB)+' ₽/мес · ~6 мес ≈ '+fmt(massB*6)+' ₽']);
     const intYearB=monthlyGrowth()*12;
     if(intYearB>0) kv.splice(3,0,['Проценты банкам за год, если тянуть','~'+fmt(intYearB)+' ₽ — в пустоту'],['Экономия с процентами за год',fmt(Math.max(0,debt+intYearB-BFL_COST))+' ₽']);
     if(paynow>0) kv.splice(3,0,['Платит сейчас',fmt(paynow)+' ₽/мес'],['Станет — только процедура','13 500 ₽/мес · ~14 мес']);
@@ -652,7 +662,7 @@ function calc(){
   kvs.innerHTML=kv.map(([k,x])=>'<div class="kv"><span>'+k+'</span><b>'+x+'</b></div>').join('');
   /* блок «Клиенту голосом» (правка заказчика по фидбеку Камрана): три опорные цифры отдельно, без раскрытия раскладки */
   const vb=document.getElementById('w_voice');
-  if(voice.length){vb.style.display='';vb.innerHTML='<div class="vh">Клиенту голосом</div>'+voice.map(([k,x])=>'<div class="vr"><span>'+k+'</span><b class="num">'+x+'</b></div>').join('');}
+  if(voice.length&&debt>0){vb.style.display='';vb.innerHTML='<div class="vh">Клиенту голосом</div>'+voice.map(([k,x])=>'<div class="vr"><span>'+k+'</span><b class="num">'+x+'</b></div>').join('');}
   else{vb.style.display='none';}
   const planOk=route==='РДГ';
   last={debt,body,paynow,income,route,eff,contracts:kiLoaded?(kiCount||0)+rc.n:ct.n,pay:planOk?Math.round(planCalc(body,eff).monthly):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null,noPresent:prior==='yes',
