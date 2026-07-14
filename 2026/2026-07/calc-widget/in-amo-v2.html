@@ -281,6 +281,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
               <div class="chips-hint" id="w_chipsHint">↑ Тапните тип долга и введите сумму — вердикт появится сразу</div>
               <div id="w_credits"></div>
               <div id="w_debtWrap" style="display:none"><label id="w_debtLabel">Долг по кредитной истории, ₽</label><input id="w_debt" type="number"></div>
+              <!-- живое «итого» при открытой секции (фидбек заказчика: «почему не считаем общую сумму?») -->
+              <div class="rowf freeline" id="w_debtLiveRow" style="display:none"><span class="rlab">Итого долг</span><b id="w_debtLive" class="num">—</b></div>
             </div>
           </div>
 
@@ -529,6 +531,8 @@ function calc(){
   /* kiTypes: «Скоринг Бюро» разложен по типам — конструктор и есть точный источник; старый ОКБ-путь держит одно число в w_debt + расписку поверх */
   const debt=(kiLoaded&&!kiTypes)?((parseFloat(document.getElementById('w_debt').value)||0)+rc.amount):ct.debt;
   document.getElementById('w_debtTotal').textContent=debt>0?fmt(debt)+' ₽':'—';
+  document.getElementById('w_debtLiveRow').style.display=debt>0?'':'none';
+  document.getElementById('w_debtLive').textContent=debt>0?fmt(debt)+' ₽ · '+(kiLoaded?(kiCount||0)+rc.n:ct.n)+' дог':'—';
   /* число договоров при КИ: счётчик отчёта + шт. расписки (в отчётах бюро её нет); бейдж «по КИ» не трогаем */
   document.getElementById('w_nTotal').textContent=kiLoaded?(kiCount||0)+rc.n:ct.n;
   /* платёж сейчас: ручной ввод приоритетнее расчётного по кредитам (п.10.1 спеки) */
