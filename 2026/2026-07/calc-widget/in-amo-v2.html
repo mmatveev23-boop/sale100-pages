@@ -323,7 +323,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <!-- е) СРОК ПЛАНА РДГ (только при prod=rdg) -->
           <div id="w_rdgFields">
             <label>Срок плана РДГ</label>
-            <div class="seg" id="w_term"><button class="on" data-t="60">60 мес · с кредиторами</button><button data-t="36">36 мес · через суд</button></div>
+            <div class="seg" id="w_term"><button class="on" data-t="60">60 мес · одобряют кредиторы</button><button data-t="36">36 мес · суд без одобрения</button></div>
           </div>
         </div>
 
@@ -590,8 +590,8 @@ function calc(){
     /* снижение платежа — п.3 Камрана: платил банкам N → платит только процедуру */
     if(paynow>0) kv.splice(1,0,['Платит сейчас',fmt(paynow)+' ₽/мес'],['Станет — только процедура','13 500 ₽/мес · ~14 мес']);
     voice.push(['Долг спишется целиком',fmt(debt)+' ₽']);
-    if(intYear>0) voice.push(['Проценты банкам за год, если тянуть','~'+fmt(intYear)+' ₽'],['Экономия с нами — с процентами',fmt(Math.max(0,debt+intYear-BFL_COST))+' ₽']);
-    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → 13 500 ₽/мес']);
+    if(intYear>0) voice.push(['Проценты банкам за год, если тянуть','~'+fmt(intYear)+' ₽']);
+    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → 13 500 ₽/мес'],['Выгода с нами — в месяц','~'+fmt(Math.max(0,paynow-13500))+' ₽']);
   }else if(prior==='yes'){
     route='self'; /* допуск по ст. 213.13 не пройден — без презентации, маршрут решает юрист */
     v.className='verdict self';
@@ -617,16 +617,16 @@ function calc(){
         ['Проценты · ключевая '+KEY_RATE_TXT+'%','~'+fmt(PLAN.interest)+' ₽'],
         ['ФУ 7% от выплаченного',fmt(PLAN.fu)+' ₽'],
         ['Итого по плану',fmt(PLAN.total)+' ₽'],
-        ['Платёж · 60 мес (с кредиторами)',fmt(P60.monthly)+' ₽/мес'],
-        ['Платёж · 36 мес (через суд, ≥50%)',free>=P36.monthly?fmt(P36.monthly)+' ₽/мес':'не тянет'],
+        ['Платёж · 60 мес (одобряет собрание кредиторов)',fmt(P60.monthly)+' ₽/мес'],
+        ['Платёж · 36 мес (суд без одобрения, ≥50%)',free>=P36.monthly?fmt(P36.monthly)+' ₽/мес':'не тянет'],
         ['Госплатежи (старт, отдельно)',fmt(GOS_START)+' ₽']];
     if(mortAmount>0) kv.push(['Ипотека — вне плана (298-ФЗ)',fmt(mortAmount)+' ₽ · ~'+fmt(mortPay)+' ₽/мес']);
     if(paynow>0) kv.push(['Платит сейчас',fmt(paynow)+' ₽/мес'],['Нагрузка снизится на',fmt(Math.max(0,paynow-PLAN.monthly-mortPay))+' ₽/мес']);
     if((!kiLoaded||kiTypes)&&ct.noRdg>0){const noRdgPlan=ct.noRdg-ct.mortTotal; kv.push(['Без РДГ выплатит (без ипотеки)',fmt(noRdgPlan)+' ₽'],['— из них проценты банкам, в пустоту',fmt(Math.max(0,noRdgPlan-body))+' ₽'],['Выгода РДГ (с учётом переплаты)',fmt(Math.max(0,noRdgPlan-PLAN.total))+' ₽']);}
     kv.push(['Свободный доход (после ПМ'+(mortPay>0?' и ипотеки':'')+')',fmt(free)+' ₽/мес'],['Услуги ДОНУЛЯ','13 500 ₽/мес']);
     if((!kiLoaded||kiTypes)&&ct.noRdg>0){const nrp=ct.noRdg-ct.mortTotal;
-      voice.push(['Вернёте банкам без нас — долг + проценты',fmt(nrp)+' ₽'],['— из них переплата, в пустоту',fmt(Math.max(0,nrp-body))+' ₽'],['Выгода с нами',fmt(Math.max(0,nrp-PLAN.total))+' ₽']);}
-    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → '+fmt(PLAN.monthly+mortPay)+' ₽/мес']);
+      voice.push(['Вернёте банкам без нас — долг + проценты',fmt(nrp)+' ₽'],['— из них переплата, в пустоту',fmt(Math.max(0,nrp-body))+' ₽']);}
+    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → '+fmt(PLAN.monthly+mortPay)+' ₽/мес'],['Выгода с нами — в месяц','~'+fmt(Math.max(0,paynow-PLAN.monthly-mortPay))+' ₽']);
   }else{
     route='БФЛ'; /* РДГ не тянет → кандидат на списание; вердикт, запись и ссылка идут по БФЛ */
     v.className='verdict bfl';
@@ -636,8 +636,8 @@ function calc(){
     if(intYearB>0) kv.splice(3,0,['Проценты банкам за год, если тянуть','~'+fmt(intYearB)+' ₽ — в пустоту'],['Экономия с процентами за год',fmt(Math.max(0,debt+intYearB-BFL_COST))+' ₽']);
     if(paynow>0) kv.splice(3,0,['Платит сейчас',fmt(paynow)+' ₽/мес'],['Станет — только процедура','13 500 ₽/мес · ~14 мес']);
     voice.push(['Долг спишется целиком',fmt(debt)+' ₽']);
-    if(intYearB>0) voice.push(['Проценты банкам за год, если тянуть','~'+fmt(intYearB)+' ₽'],['Экономия с нами — с процентами',fmt(Math.max(0,debt+intYearB-BFL_COST))+' ₽']);
-    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → 13 500 ₽/мес']);
+    if(intYearB>0) voice.push(['Проценты банкам за год, если тянуть','~'+fmt(intYearB)+' ₽']);
+    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → 13 500 ₽/мес'],['Выгода с нами — в месяц','~'+fmt(Math.max(0,paynow-13500))+' ₽']);
   }
   kvs.innerHTML=kv.map(([k,x])=>'<div class="kv"><span>'+k+'</span><b>'+x+'</b></div>').join('');
   /* блок «Клиенту голосом» (правка заказчика по фидбеку Камрана): три опорные цифры отдельно, без раскрытия раскладки */
