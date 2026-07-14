@@ -447,9 +447,9 @@ h1 .hl{color:var(--green)}
         <div class="kibadge words stg" id="wordsBadge">🎤 Предварительный расчёт со слов — уточним по кредитной истории</div>
 
         <div class="save-hero stg">
-          <div class="sl">Ваша экономия с нами</div>
+          <div class="sl">Ваша выгода с нами — каждый месяц</div>
           <div class="sv num" id="cmpSave">—</div>
-          <div class="ss num">и каждый месяц у вас остаётся <b id="cmpSaveM">—</b></div>
+          <div class="ss num" id="cmpSaveSub">—</div>
         </div>
 
         <div class="bars stg">
@@ -479,7 +479,7 @@ h1 .hl{color:var(--green)}
         <div id="calcDetail" style="display:none">
         <div class="cmp">
           <div class="ch">По вашим цифрам: долг <b class="num" id="cmpDebt">—</b>, платите <b class="num" id="cmpPay2">—</b> в месяц</div>
-          <div class="cr bad"><span>Выплатите, если оставить всё как есть<small>из них переплата по процентам ~<span class="num" id="cmpInterest">—</span> за <span class="num" id="cmpTerm">36</span> мес</small></span><b class="num" id="cmpNoUs">—</b></div>
+          <div class="cr bad"><span>Вернёте банкам, если платить по своим договорам<small>долг + проценты по вашим ставкам и срокам · из них переплата ~<span class="num" id="cmpInterest">—</span></small></span><b class="num" id="cmpNoUs">—</b></div>
           <div class="cr"><span>Выплатите, если пойдёте с нами<small>план ~<span class="num" id="planPay">—</span> ₽/мес на <span class="num" id="planTerm">36</span> мес — тело долга, проценты по ключевой ставке ЦБ 14,25% и вознаграждение управляющего 7% (утверждает суд) + услуги 189 000 ₽</small></span><b class="num" id="cmpWithUs">—</b></div>
         </div>
         </div>
@@ -672,7 +672,7 @@ h1 .hl{color:var(--green)}
         <div class="signedbanner stg" id="partBanner" style="display:none">✓ Внесено <span id="partIn"></span>&nbsp;₽ — дробим остаток. Всё идёт в зачёт по договору.</div>
         <!-- мини юр заключение (только в дожиме): выгода сверху над оплатой -->
         <div class="save-hero stg" id="dozhimHero" style="display:none">
-          <div class="sl">Ваша выгода с нами</div>
+          <div class="sl">Ваша выгода с нами — каждый месяц</div>
           <div class="sv num" id="dozhimSave">—</div>
           <div class="ss num" id="dozhimSub">договор подписан</div>
         </div>
@@ -860,31 +860,32 @@ document.querySelectorAll('.otp input').forEach((inp,i,all)=>{
 let tleft=60*60;
 setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padStart(2,'0'),s=String(tleft%60).padStart(2,'0');document.getElementById('simTimer').textContent=m+':'+s;}},1000);
 
-/* сравнение «по вашим цифрам»: без нас vs с нами (горизонт = срок плана РДГ) */
+/* сравнение «по вашим цифрам». Честная база «без нас» = долг + проценты по ставкам и срокам договоров —
+   приходит из виджета параметром nous (со слов — средние ставки, по КИ — точные тела).
+   Суррогат «текущий платёж × срок плана» убран (правка заказчика 15.07): он давал «экономию» в разы больше долга. */
 (function(){
-  const noUs=Math.max(CLIENT_PAY*RDG_TERM, CLIENT.debt);
-  const interest=Math.max(0,noUs-CLIENT.debt);
+  const NOUS=Math.max(0,Math.round(+Q.get('nous')||0));
+  const noUs=NOUS>CLIENT.debt?NOUS:0;
+  const interest=noUs>0?noUs-CLIENT.debt:0;
   const withUs=planTotal(CLIENT.debt,RDG_TERM)+RASS_TOTAL;
   const plan=Math.round(planTotal(CLIENT.debt,RDG_TERM)/RDG_TERM);
-  /* бар «с нами» = платёж по плану (канон скрипта: услуги 13 500 называются отдельно; виджет и заключение считают так же).
-     Общая экономия (hero) по-прежнему честно учитывает услуги целиком. Было: план+услуги/срок — цифра расходилась с виджетом. */
-  const usMonthly=plan;
-  const save=noUs-withUs, saveM=CLIENT_PAY-usMonthly;
+  const usMonthly=plan; /* бар «с нами» = платёж по плану; услуги 13 500 — отдельно (канон скрипта) */
+  const saveM=CLIENT_PAY-usMonthly;
   const set=(id,v)=>document.getElementById(id).textContent=v;
-  /* платёж клиента неизвестен или экономии нет (платит меньше плана) — хиро и бары не показываем, честный расчёт остаётся в спойлере */
-  if(CLIENT_PAY<=0||save<=0){
+  /* платёж клиента неизвестен или выгоды нет — хиро и бары не показываем (не выдумываем цифру) */
+  if(CLIENT_PAY<=0||saveM<=0){
     document.querySelector('.save-hero').style.display='none';
     document.querySelector('.bars').style.display='none';
     if(CLIENT_PAY<=0){document.getElementById('calcBtn').style.display='none';}
   }
-  set('cmpSave','~'+fmt(Math.round(Math.max(0,save)))+' ₽');
-  set('cmpSaveM','~'+fmt(Math.round(Math.max(0,saveM)))+' ₽');
+  set('cmpSave','~'+fmt(Math.round(Math.max(0,saveM)))+' ₽/мес');
+  document.getElementById('cmpSaveSub').innerHTML='платёж снижается: ~'+fmt(CLIENT_PAY)+' → ~'+fmt(usMonthly)+' ₽/мес'+(interest>0?' · переплата банкам ~<b>'+fmt(interest)+' ₽</b> останавливается':'');
   set('cmpPayNow','~'+fmt(CLIENT_PAY)+' ₽/мес');
   set('cmpUsMonthly','~'+fmt(usMonthly)+' ₽/мес');
   document.getElementById('cmpUsBar').style.width=(CLIENT_PAY>0?Math.min(100,Math.round(usMonthly/CLIENT_PAY*100)):100)+'%';
   set('cmpDebt',fmt(CLIENT.debt)+' ₽'); set('cmpPay2','~'+fmt(CLIENT_PAY)+' ₽');
-  set('cmpTerm',RDG_TERM);
-  set('cmpNoUs','~'+fmt(Math.round(noUs))+' ₽'); set('cmpInterest',fmt(Math.round(interest))+' ₽');
+  if(noUs>0){ set('cmpNoUs','~'+fmt(noUs)+' ₽'); set('cmpInterest',fmt(interest)+' ₽'); }
+  else{ document.querySelector('.cmp .cr.bad').style.display='none'; } /* без честной базы строку не выдумываем */
   set('cmpWithUs',fmt(Math.round(withUs))+' ₽');
   set('planPay',fmt(plan)); set('planTerm',RDG_TERM);
 })();
@@ -950,12 +951,11 @@ if(PART>0){
 })();
 /* ДОЖИМ (подписал, не доплатил): открываем сразу на экране оплаты + мини юр заключение с выгодой сверху */
 if((SIGNED||PART>0)&&!paidAll){
-  const noUs2=Math.max(CLIENT_PAY*RDG_TERM, CLIENT.debt);
-  const save2=Math.round(noUs2-(planTotal(CLIENT.debt,RDG_TERM)+RASS_TOTAL));
+  const save2=CLIENT_PAY-Math.round(planTotal(CLIENT.debt,RDG_TERM)/RDG_TERM); /* выгода в месяц — та же, что в виджете */
   /* платёж клиента неизвестен или выгоды нет — хиро не показываем (не выдумываем цифру); факт «договор подписан» остаётся в payH1 */
   if(CLIENT_PAY>0&&save2>0){
     document.getElementById('dozhimHero').style.display='';
-    document.getElementById('dozhimSave').textContent='~'+fmt(save2)+' ₽';
+    document.getElementById('dozhimSave').textContent='~'+fmt(save2)+' ₽/мес';
     document.getElementById('dozhimSub').textContent=KION?('рассчитано по вашей кредитной истории'):'договор № ДН-2607-1418 подписан';
   }
   /* при КИ — на мини заключение переносим полный блок «ваши кредиторы» (клиент прислал КИ, показываем картину, а не одну строку) */

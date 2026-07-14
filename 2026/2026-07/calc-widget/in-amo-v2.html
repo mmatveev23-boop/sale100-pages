@@ -650,7 +650,8 @@ function calc(){
   if(voice.length){vb.style.display='';vb.innerHTML='<div class="vh">Клиенту голосом</div>'+voice.map(([k,x])=>'<div class="vr"><span>'+k+'</span><b class="num">'+x+'</b></div>').join('');}
   else{vb.style.display='none';}
   const planOk=route==='РДГ';
-  last={debt,body,paynow,income,route,eff,contracts:kiLoaded?(kiCount||0)+rc.n:ct.n,pay:planOk?Math.round(planCalc(body,eff).monthly):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null,noPresent:prior==='yes'};
+  last={debt,body,paynow,income,route,eff,contracts:kiLoaded?(kiCount||0)+rc.n:ct.n,pay:planOk?Math.round(planCalc(body,eff).monthly):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null,noPresent:prior==='yes',
+    nous:(!kiLoaded||kiTypes)&&ct.noRdg>0?Math.round(ct.noRdg-ct.mortTotal):0}; /* честная база «без нас» для презентации */
   updateHeader();
   updateSendUI();
 }
@@ -729,7 +730,7 @@ function presentUrl(){
   const name=document.querySelector('.deal h1').textContent.trim();
   const pay=last.paynow>0?{pay:last.paynow}:{}; /* платёж не спросили — параметр не шлём, страница скроет сравнение, а не выдумает цифру */
   const ki=kiLoaded?{ki:1}:{}; /* КИ загружена → презентация показывает точные числа + блок кредиторов */
-  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,term:last.eff}); /* РДГ идёт по телу плана (без ипотеки) */
+  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,term:last.eff,...(last.nous>0?{nous:last.nous}:{})}); /* РДГ идёт по телу плана (без ипотеки) */
   if(last.route==='БФЛ') return '../client-presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki});
   return null;
 }
