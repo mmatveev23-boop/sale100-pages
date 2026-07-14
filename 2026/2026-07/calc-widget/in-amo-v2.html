@@ -1014,6 +1014,18 @@ function dzText(kind){
     :'Главное: единый платёж ~'+(plan||'—')+' ₽/мес по плану, утверждённому судом'+(last.debt>last.body?', ипотека сохраняется':'');
   return name+', юрист разобрал вашу кредитную историю: '+(kiCount||'—')+' договоров на '+fmt(last.debt||0)+' ₽. Юридическое заключение готово: '+opinion+'\n'+main+'. Договор и оплата — на вашей странице: '+pres+'\nКаждый месяц ожидания — ещё ~+'+fmt(grow)+' ₽ процентов.';
 }
+/* тренажёр: дожим-сообщение падает в ленту чата (как презентация) — по одному пузырю на тип касания */
+function dzChatMsg(kind,txt){
+  const feed=document.querySelector('.feed');
+  let m=document.getElementById('tr_dz_'+kind);
+  if(!m){m=document.createElement('div');m.className='msgcard';m.id='tr_dz_'+kind;feed.insertBefore(m,feed.querySelector('.note'));}
+  const time=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  const names={open:'Не открыл',think:'Не подписал',ki:'По КИ'};
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const html=esc(txt).replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline;word-break:break-all">$1</a>').replace(/\n/g,'<br>');
+  m.innerHTML='<div class="who">Salebot → клиенту · дожим «'+names[kind]+'» · тренажёр</div><div class="bubble"><small>'+time+' ✓ Отправлено</small>'+html+'</div>';
+  m.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function copyDz(kind,btn){
   if(kind==='ki'&&!kiLoaded){
     const t=document.getElementById('w_toast');
@@ -1022,10 +1034,11 @@ function copyDz(kind,btn){
     return;
   }
   const txt=dzText(kind);
+  dzChatMsg(kind,txt);
   const old=btn.textContent;
   (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject())
-    .then(()=>{btn.textContent='✓ Скопировано';})
-    .catch(()=>{btn.textContent='не вышло';});
+    .then(()=>{btn.textContent='✓ В чате · скопировано';})
+    .catch(()=>{btn.textContent='✓ В чате';});
   setTimeout(()=>{btn.textContent=old;},2500);
 }
 /* фоллбэк отправки (состояние 7): чат недоступен → менеджер копирует ссылку ПРЕЗЕНТАЦИИ и шлёт сам */
