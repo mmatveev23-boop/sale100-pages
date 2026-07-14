@@ -130,6 +130,12 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .chips{display:flex;flex-wrap:wrap;gap:5px;transition:background .3s ease-out;border-radius:8px}
 .chips.urge{background:#FBF3DC}
 .chips-hint{margin-top:6px;font-size:11px;color:#8A6212;background:#FBF3DC;border-radius:7px;padding:5px 9px;line-height:1.4}
+.voice{margin:10px 0 2px;background:linear-gradient(165deg,#FBF3DC,#F7EAC8);border:1px solid rgba(201,154,51,.45);border-radius:12px;padding:9px 12px}
+.voice .vh{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8A6212;margin-bottom:2px}
+.voice .vr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;padding:4px 0;border-top:1px dashed rgba(201,154,51,.3)}
+.voice .vr:first-of-type{border-top:none}
+.voice .vr span{color:#7A6220;line-height:1.35}
+.voice .vr b{color:#16231D;white-space:nowrap;font-size:12.5px}
 .chip{border:1px solid #d8dee3;border-radius:999px;background:#fff;padding:5px 10px;font-family:inherit;font-size:11.5px;font-weight:600;color:#5c6874;cursor:pointer;transition:background .15s ease-out,color .15s ease-out,border-color .15s ease-out}
 .chip:hover{border-color:#0F6B4F;color:#0B5540}
 .chip:active{transform:scale(.97)}
@@ -269,6 +275,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 
       <div class="body" id="w_body">
         <div id="pane_calc">
+          <!-- «Клиенту голосом» — строки Камрана: появляются вместе с вердиктом -->
+          <div class="voice" id="w_voice" style="display:none"></div>
 
           <!-- а) ДОЛГИ: чипы типов, поля только включённых; заполнил и ушёл дальше → схлопывается в summary -->
           <div class="sec" id="sec_debts">
@@ -508,16 +516,28 @@ function receiptTotals(){
   const c=creditCalc('receipt',amount,rate,months);
   return {amount,n:cnt||1,pay:c.pay};
 }
-/* ПМ по регионам 2026 — таблица в ./pm-regions.js (PM_REGIONS + PM_FEDERAL); поля редактируемые (advanced), регион только автоподставляет */
+/* ПМ по регионам 2026 — таблица в ./pm-regions.js (PM_REGIONS + PM_FEDERAL); поля редактируемые (advanced), регион только автоподставляет.
+   pmFed() — встроенный дубль федеральных значений: если pm-regions.js не загрузился, виджет живёт, а не падает молча */
+const PM_FB={self:20644,child:18371};
+const pmFed=()=>typeof PM_FEDERAL!=='undefined'?PM_FEDERAL:PM_FB;
 const DEFAULT_REGION='Омская область';
 function fillRegionSelect(){
   const sel=document.getElementById('w_region');
+  /* защита от несгруженного pm-regions.js (сеть моргнула — виджет не должен падать молча):
+     подставляем федеральное значение и пробуем ещё раз, пока таблица не приедет */
+  if(typeof PM_REGIONS==='undefined'){
+    sel.innerHTML='<option value="">РФ · федеральное значение</option>';
+    document.getElementById('w_pmSelf').value=pmFed().self;
+    document.getElementById('w_pmChild').value=pmFed().child;
+    setTimeout(fillRegionSelect,1500);
+    return;
+  }
   sel.innerHTML='<option value="">РФ · федеральное значение</option>'+Object.keys(PM_REGIONS).map(r=>'<option'+(r===DEFAULT_REGION?' selected':'')+'>'+r+'</option>').join('');
   applyRegionPM();
 }
 function applyRegionPM(){
   const r=document.getElementById('w_region').value;
-  const pm=PM_REGIONS[r]||PM_FEDERAL;
+  const pm=(typeof PM_REGIONS!=='undefined'&&PM_REGIONS[r])||pmFed();
   document.getElementById('w_pmSelf').value=pm.self;
   document.getElementById('w_pmChild').value=pm.child;
 }
@@ -543,8 +563,8 @@ function calc(){
   const income=parseFloat(document.getElementById('w_income').value)||0;
   const kids=parseFloat(document.getElementById('w_kids').value)||0;
   /* свободный доход: минус ПМ клиента и полный ПМ ребёнка на КАЖДОГО ребёнка (правило заказчика) */
-  const pmSelf=parseFloat(document.getElementById('w_pmSelf').value)||PM_FEDERAL.self;
-  const pmChild=parseFloat(document.getElementById('w_pmChild').value)||PM_FEDERAL.child;
+  const pmSelf=parseFloat(document.getElementById('w_pmSelf').value)||pmFed().self;
+  const pmChild=parseFloat(document.getElementById('w_pmChild').value)||pmFed().child;
   /* свободный доход: минус ПМ семьи и платёж по ипотеке (она вне плана, но платить её продолжаем — 298-ФЗ) */
   const mortPay=(kiLoaded&&!kiTypes)?0:ct.mortPay, mortAmount=(kiLoaded&&!kiTypes)?0:ct.mortAmount;
   const free=income-(pmSelf+kids*pmChild)-mortPay;
@@ -557,7 +577,7 @@ function calc(){
   const P60=planCalc(body,60), P36=planCalc(body,36), PE=planCalc(body,term);
   const v=document.getElementById('w_verdict'), kvs=document.getElementById('w_kvs');
   document.getElementById('w_rdgFields').style.display=prod==='rdg'?'':'none';
-  let route, eff=term, kv=[];
+  let route, eff=term, kv=[], voice=[]; /* voice — строки Камрана «Клиенту голосом»: переплата · выгода · платёж */
   const mfcHint=(body>=25000&&body<=1000000)?'<br>⚠ Долг 25 тыс.–1 млн: возможно бесплатное внесудебное через МФЦ (нужно оконченное исполнительное производство, ст. 223.2) — проверит юрист.':'';
   if(prod==='bfl'){
     route='БФЛ';
@@ -569,6 +589,9 @@ function calc(){
     if(intYear>0) kv.splice(1,0,['Проценты банкам за год, если тянуть','~'+fmt(intYear)+' ₽ — в пустоту'],['Экономия с процентами за год',fmt(Math.max(0,debt+intYear-BFL_COST))+' ₽']);
     /* снижение платежа — п.3 Камрана: платил банкам N → платит только процедуру */
     if(paynow>0) kv.splice(1,0,['Платит сейчас',fmt(paynow)+' ₽/мес'],['Станет — только процедура','13 500 ₽/мес · ~14 мес']);
+    voice.push(['Долг спишется целиком',fmt(debt)+' ₽']);
+    if(intYear>0) voice.push(['Проценты банкам за год, если тянуть','~'+fmt(intYear)+' ₽'],['Экономия с нами — с процентами',fmt(Math.max(0,debt+intYear-BFL_COST))+' ₽']);
+    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → 13 500 ₽/мес']);
   }else if(prior==='yes'){
     route='self'; /* допуск по ст. 213.13 не пройден — без презентации, маршрут решает юрист */
     v.className='verdict self';
@@ -601,6 +624,9 @@ function calc(){
     if(paynow>0) kv.push(['Платит сейчас',fmt(paynow)+' ₽/мес'],['Нагрузка снизится на',fmt(Math.max(0,paynow-PLAN.monthly-mortPay))+' ₽/мес']);
     if((!kiLoaded||kiTypes)&&ct.noRdg>0){const noRdgPlan=ct.noRdg-ct.mortTotal; kv.push(['Без РДГ выплатит (без ипотеки)',fmt(noRdgPlan)+' ₽'],['— из них проценты банкам, в пустоту',fmt(Math.max(0,noRdgPlan-body))+' ₽'],['Выгода РДГ (с учётом переплаты)',fmt(Math.max(0,noRdgPlan-PLAN.total))+' ₽']);}
     kv.push(['Свободный доход (после ПМ'+(mortPay>0?' и ипотеки':'')+')',fmt(free)+' ₽/мес'],['Услуги ДОНУЛЯ','13 500 ₽/мес']);
+    if((!kiLoaded||kiTypes)&&ct.noRdg>0){const nrp=ct.noRdg-ct.mortTotal;
+      voice.push(['Вернёте банкам без нас — долг + проценты',fmt(nrp)+' ₽'],['— из них переплата, в пустоту',fmt(Math.max(0,nrp-body))+' ₽'],['Выгода с нами',fmt(Math.max(0,nrp-PLAN.total))+' ₽']);}
+    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → '+fmt(PLAN.monthly+mortPay)+' ₽/мес']);
   }else{
     route='БФЛ'; /* РДГ не тянет → кандидат на списание; вердикт, запись и ссылка идут по БФЛ */
     v.className='verdict bfl';
@@ -609,8 +635,15 @@ function calc(){
     const intYearB=monthlyGrowth()*12;
     if(intYearB>0) kv.splice(3,0,['Проценты банкам за год, если тянуть','~'+fmt(intYearB)+' ₽ — в пустоту'],['Экономия с процентами за год',fmt(Math.max(0,debt+intYearB-BFL_COST))+' ₽']);
     if(paynow>0) kv.splice(3,0,['Платит сейчас',fmt(paynow)+' ₽/мес'],['Станет — только процедура','13 500 ₽/мес · ~14 мес']);
+    voice.push(['Долг спишется целиком',fmt(debt)+' ₽']);
+    if(intYearB>0) voice.push(['Проценты банкам за год, если тянуть','~'+fmt(intYearB)+' ₽'],['Экономия с нами — с процентами',fmt(Math.max(0,debt+intYearB-BFL_COST))+' ₽']);
+    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → 13 500 ₽/мес']);
   }
   kvs.innerHTML=kv.map(([k,x])=>'<div class="kv"><span>'+k+'</span><b>'+x+'</b></div>').join('');
+  /* блок «Клиенту голосом» (правка заказчика по фидбеку Камрана): три опорные цифры отдельно, без раскрытия раскладки */
+  const vb=document.getElementById('w_voice');
+  if(voice.length){vb.style.display='';vb.innerHTML='<div class="vh">Клиенту голосом</div>'+voice.map(([k,x])=>'<div class="vr"><span>'+k+'</span><b class="num">'+x+'</b></div>').join('');}
+  else{vb.style.display='none';}
   const planOk=route==='РДГ';
   last={debt,body,paynow,income,route,eff,contracts:kiLoaded?(kiCount||0)+rc.n:ct.n,pay:planOk?Math.round(planCalc(body,eff).monthly):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null,noPresent:prior==='yes'};
   updateHeader();
