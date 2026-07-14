@@ -260,10 +260,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <button type="button" class="vline" id="w_vline" style="display:none" onclick="togglePanel()">
           <span class="dotc" id="w_dot"></span><span class="vtxt" id="w_vshort"></span><span class="vchev">▾</span>
         </button>
-        <div class="hint" id="w_hint">Для вердикта не хватает:
-          <button type="button" id="w_needDebt" onclick="gotoDebts()">долги</button>
-          <button type="button" id="w_needInc" onclick="gotoIncome()">доход</button>
-        </div>
+        <!-- хинт «не хватает…» убран (правка заказчика 14.07): до вердикта шапка — только тоглы, подсказка живёт под чипами долгов -->
         <div class="vpanel" id="w_panel">
           <div class="verdict rdg" id="w_verdict"></div>
           <div id="w_kvs"></div>
@@ -612,20 +609,17 @@ function calc(){
   updateHeader();
   updateSendUI();
 }
-/* ── V2: sticky-шапка — живой вердикт одной строкой или хинт «Не хватает…» ── */
+/* ── V2: sticky-шапка — живой вердикт одной строкой; до готовности данных пусто (хинт убран заказчиком) ── */
 function updateHeader(){
-  const vl=document.getElementById('w_vline'), hint=document.getElementById('w_hint');
+  const vl=document.getElementById('w_vline');
   let needDebt=false, needInc=false;
   if(prod==='bfl'){ needDebt=!(last.debt>0); }
   else if(prior!=='yes'){ needDebt=!(last.debt>0); needInc=!(last.income>0); }
   if(needDebt||needInc){
-    hint.style.display='';
-    document.getElementById('w_needDebt').style.display=needDebt?'':'none';
-    document.getElementById('w_needInc').style.display=needInc?'':'none';
     vl.style.display='none'; setPanel(false);
     return;
   }
-  hint.style.display='none'; vl.style.display='';
+  vl.style.display='';
   const v=document.getElementById('w_verdict');
   const cls=v.className.replace('verdict','').trim(); /* rdg | bfl | self */
   document.getElementById('w_dot').className='dotc '+cls;
@@ -646,18 +640,6 @@ function setPanel(open){
 function togglePanel(){setPanel(!panelOpen);}
 document.addEventListener('click',e=>{ if(panelOpen&&!e.target.closest('.dws')) setPanel(false); });
 /* хинт-кнопки: плавный скролл к полю + фокус */
-function gotoDebts(){
-  showTab('calc'); collapseDebts(false);
-  document.getElementById('sec_debts').scrollIntoView({behavior:'smooth',block:'start'});
-  const f=document.querySelector('#w_credits .crt.en .c-am');
-  if(f) f.focus({preventScroll:true});
-  else{ const c=document.getElementById('w_chips'); c.classList.add('urge'); setTimeout(()=>c.classList.remove('urge'),900); }
-}
-function gotoIncome(){
-  showTab('calc');
-  document.getElementById('row_income').scrollIntoView({behavior:'smooth',block:'center'});
-  document.getElementById('w_income').focus({preventScroll:true});
-}
 /* ── V2: секция «Долги» схлопывается в summary, когда заполнена и фокус ушёл дальше ── */
 function collapseDebts(c){
   document.getElementById('w_debtBody').style.display=c?'none':'';
