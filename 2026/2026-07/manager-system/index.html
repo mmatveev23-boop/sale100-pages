@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Система работы менеджера · один звонок — один экран · ДОНУЛЯ</title>
+<meta name="description" content="Единая система клоузера: скрипт + виджет + презентация + КИ + заключение. Восемь шагов, три правила заключения, почему покупают.">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* СИСТЕМА РАБОТЫ МЕНЕДЖЕРА — входная страница справочников. Канон: свод §0, плейбук дожима, канон КИ 13.07
+   (первый звонок целиком со слов; не купил → запрос КИ обязателен; заключение — только из PDF КИ). */
+:root{
+  --paper:#F4EFE6; --paper2:#ECE5D8; --card:#fff; --card2:#FBF8F2;
+  --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0B3B2E; --pine2:#0C4233; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
+  --gold:#C99A33; --gold-bright:#F4C775; --gold-soft:#FBF3DC; --gold-ink:#8A6212;
+  --brick:#A8442E; --brick-soft:#F8E3DC;
+  --line:#E4DCCD; --shadow:0 18px 44px -22px rgba(11,59,46,.42); --shadow-sm:0 8px 22px -14px rgba(11,59,46,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:960px;margin:0 auto;padding:24px 18px 80px}
+
+.topnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.topnav a{font-size:13px;font-weight:700;text-decoration:none;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+.topnav a:hover{color:var(--green-ink);border-color:var(--green)}
+.topnav a.cur{background:var(--pine);color:#fff;border-color:var(--pine)}
+
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:28px 26px;box-shadow:var(--shadow)}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+.hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
+.hdr .brand b{font-size:15px}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:26px;line-height:1.16;letter-spacing:-.02em;font-weight:800}
+.hdr p{margin-top:10px;font-size:14.5px;color:rgba(255,255,255,.8);max-width:72ch}
+.hdr p b{color:#fff}
+.formula{margin-top:14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;font-weight:800;letter-spacing:.02em}
+.formula span{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:5px 11px;color:#fff;white-space:nowrap}
+.formula span.money{background:var(--gold);border-color:var(--gold);color:#082A21}
+.formula i{font-style:normal;color:rgba(255,255,255,.45)}
+
+h2.sect{margin:26px 0 10px;font-size:17px;letter-spacing:-.01em}
+.steps{display:grid;gap:10px}
+.step{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:15px 18px;display:grid;grid-template-columns:44px 1fr;gap:14px}
+.step .n{width:34px;height:34px;border-radius:10px;background:var(--pine);color:var(--gold-bright);display:grid;place-items:center;font-size:15px;font-weight:800}
+.step h3{font-size:14.5px;letter-spacing:-.01em}
+.step p{margin-top:3px;font-size:12.5px;color:var(--muted);line-height:1.55}
+.step p b{color:var(--ink)}
+.step .say{margin-top:8px;background:var(--card2);border:1px dashed var(--line);border-radius:10px;padding:9px 12px;font-size:12.5px;color:var(--ink);line-height:1.55}
+.step .say::before{content:"Голосом: ";font-weight:800;color:var(--green-ink)}
+.step.hero{border:1.5px solid var(--gold);background:linear-gradient(165deg,#FBF3DC 0%,#F7EAC8 100%)}
+.step.hero .n{background:var(--gold);color:#082A21}
+.step.hero p{color:#7A6220}
+.step.hero p b,.step.hero h3{color:var(--ink)}
+
+.three{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+.card3{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;font-size:12.5px;color:var(--muted);line-height:1.55;box-shadow:var(--shadow-sm)}
+.card3 b{display:block;color:var(--ink);font-size:13px;margin-bottom:4px}
+.card3.g{background:var(--green-soft);border-color:rgba(15,107,79,.25)}
+.card3.g b{color:var(--green-ink)}
+
+.why{background:var(--pine);color:#fff;border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+.why h2{font-size:16px;margin-bottom:10px}
+.why ul{list-style:none;display:grid;gap:8px}
+.why li{font-size:13px;color:rgba(255,255,255,.85);line-height:1.55;padding-left:18px;position:relative}
+.why li::before{content:"→";position:absolute;left:0;font-weight:800;color:var(--gold-bright)}
+.why li b{color:#fff}
+
+.lims{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px}
+.lim{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.lim b{color:var(--ink)}
+
+.tools{display:flex;flex-wrap:wrap;gap:8px}
+.tools a{font-size:12.5px;font-weight:700;text-decoration:none;color:var(--green-ink);background:var(--green-soft);border:1px solid rgba(15,107,79,.25);border-radius:999px;padding:8px 14px;transition:transform 160ms cubic-bezier(0.23,1,0.32,1)}
+.tools a:active{transform:scale(0.97)}
+
+@media(max-width:640px){
+  .wrap{padding:16px 13px 60px}
+  .hdr{padding:24px 20px;border-radius:20px}
+  .hdr h1{font-size:22px}
+  .step{grid-template-columns:38px 1fr;gap:10px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topnav">
+    <a class="cur" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/manager-system/">Система</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/sales-flow-map/">Карта связки</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/manager-situations/">Ситуации менеджера</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/widget-states/">Состояния виджета</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/rdg-calc-method/">Как считает калькулятор</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/dozhim-3days/">Дожим · 3 дня</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/lead-map/">Карта сценариев</a>
+  </nav>
+
+  <header class="hdr">
+    <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · СИСТЕМА РАБОТЫ МЕНЕДЖЕРА</b><small>ОДИН ЗВОНОК — ОДИН ЭКРАН</small></div></div>
+    <h1>Вся система — восемь шагов. Одинаково для каждого менеджера</h1>
+    <p>Клиент слышит выгоду голосом в первые минуты, видит свои цифры по ссылке, подписывает кодом из СМС — а кредитная история превращает «подумаю» в закрытую сделку. Ничего не изобретаем на ходу: <b>скрипт ведёт разговор, виджет считает, страница закрывает, КИ дожимает</b>.</p>
+    <div class="formula" aria-label="Формула работы менеджера"><span>Со слов</span><i>→</i><span>Расчёт в виджете</span><i>→</i><span>Презентация голосом</span><i>→</i><span>Попытка закрыть</span><i>→</i><span>Запрос КИ</span><i>→</i><span>Заключение</span><i>→</i><span>Звонок-разбор</span><i>→</i><span class="money">Деньги</span></div>
+  </header>
+
+  <h2 class="sect">Восемь шагов — от набора до денег</h2>
+  <div class="steps">
+    <div class="step"><span class="n">1</span><div>
+      <h3>Перед звонком — открыть сделку</h3>
+      <p>Виджет «ДОНУЛЯ · Калькулятор» уже в карточке справа. Ничего не готовим заранее — все данные соберутся голосом за разговор.</p>
+    </div></div>
+    <div class="step"><span class="n">2</span><div>
+      <h3>Звонок по скрипту — цифры со слов, параллельно в виджет</h3>
+      <p>Диагностика по скрипту, и пока клиент рассказывает — вбиваем: <b>кредиты по типам</b> (МФО / карты / кредиты / залог / ипотека), платёж сейчас, доход, детей, регион. Ставки виджет подставит средние сам. Отдельно: тогл «Просрочки уже есть?» — от него зависят сценарии заключения.</p>
+    </div></div>
+    <div class="step"><span class="n">3</span><div>
+      <h3>Расчёт появился сам — озвучить картину ДО презентации продукта</h3>
+      <p>Виджет мгновенно даёт вердикт (<b>РДГ · план</b> или <b>БФЛ · списание</b>) и всю раскладку: платит сейчас, проценты банкам «в пустоту», платёж с нами, экономия с учётом переплаты.</p>
+      <div class="say">«Смотрите, что получается по вашим цифрам: сейчас вы платите ~168 000 в месяц, и больше 500 000 из них — просто проценты банкам, в пустоту. По закону платёж можно снизить до ~27 000 — давайте покажу, как это работает».</div>
+    </div></div>
+    <div class="step"><span class="n">4</span><div>
+      <h3>Презентация голосом + персональная страница</h3>
+      <p>Кнопка <b>«✈ Отправить презентацию клиенту»</b> — у клиента открывается его страница: те же цифры, выгоды, договор и подпись по СМС. Ведём по экранам голосом, не «посмотрите сами».</p>
+    </div></div>
+    <div class="step"><span class="n">5</span><div>
+      <h3>Попытка закрыть на линии</h3>
+      <p>Подпись кодом из СМС → оплата по СБП, 15 секунд. «Денег нет сейчас» → <b>частичка от 1 000 ₽</b> фиксирует условия и закрепляет лид. Совсем нет → <b>точная дата платежа</b> вслух и в сделку (дата = артефакт).</p>
+    </div></div>
+    <div class="step hero"><span class="n">6</span><div>
+      <h3>Запрос КИ — в этом же звонке. Всем, при любом исходе</h3>
+      <p>Не «пришлите документы», а <b>обмен</b>: отчёт за 5 минут ↔ бесплатное юридическое заключение по всем договорам. Показать пример заключения. <b>Купил</b> — юрист стартует с заключения, отчёт нужен для работы. <b>Не купил</b> — это главный дожимный ход. КИ не запрошена за 3 дня = провал гейта.</p>
+      <div class="say">«Скачайте свой кредитный отчёт — 5 минут по инструкции, бесплатно. Юрист подготовит по нему юридическое заключение: все ваши договоры с вердиктами, точный платёж, что с ипотекой. Вот пример, как это выглядит».</div>
+    </div></div>
+    <div class="step"><span class="n">7</span><div>
+      <h3>≤ 15 минут после звонка — резюме + ссылка (Д0)</h3>
+      <p>Каждому, кто не отказался: две цифры и персональная ссылка. «Не назвал дату» и «не готов подписать» — не причина не слать. Вечером SMS-дубль, если не открыл. Дальше — плейбук дожима: Д1 звонок №2, Д2 «бронь условий», Д3 «да или нет».</p>
+    </div></div>
+    <div class="step"><span class="n">8</span><div>
+      <h3>КИ пришла = всё бросаем</h3>
+      <p>PDF в виджет → <b>заключение готово автоматически</b> → немедленно звонок-разбор: все его кредиторы с вердиктами, точный платёж, «ипотека сохраняется». Закрытие на подпись прямо на звонке — это самый сильный звонок воронки, не откладывать ни на час.</p>
+    </div></div>
+  </div>
+
+  <h2 class="sect">Юридическое заключение: три правила</h2>
+  <div class="three">
+    <div class="card3"><b>Генерится автоматически</b>PDF отчёта «Скоринг Бюро» загружается в виджет — заключение готово за секунды. Руками никто ничего не пишет. КИ одна, вторую не запрашиваем.</div>
+    <div class="card3"><b>Со слов заключение не делаем</b>Со слов — расчёт и презентация. До получения КИ показываем обезличенный пример: «вот такой документ юрист подготовит по вам».</div>
+    <div class="card3 g"><b>КИ — повод касаться и закрывать</b>Пока отчёта нет — запрос повторяется в каждом касании. Пришёл — заключение заменяет расчёт со слов, и это повод для самого сильного звонка.</div>
+  </div>
+
+  <h2 class="sect">Почему это продаёт</h2>
+  <div class="why">
+    <ul>
+      <li><b>Якорь за две минуты.</b> Клиенту не нужны документы, чтобы услышать свою выгоду цифрами — порог входа в разговор минимальный.</li>
+      <li><b>Переплата «в пустоту».</b> Сумма процентов банкам — деньги, которые он не брал, — переводит разговор из «услуга за деньги» в «прекратить терять».</li>
+      <li><b>Взаимность.</b> Бесплатное заключение по его реальным банкам = «мной уже занялись». После этого пропасть неудобно — и есть о чём звонить.</li>
+      <li><b>Честный дедлайн.</b> Потолок 3 дня и «бронь условий» — не манипуляция, а правило системы, о котором говорим прямо.</li>
+      <li><b>Каждое касание — новая ценность.</b> Не «ну что, решили?», а заключение, кейс, семейный ход, дата. Скучных напоминаний в системе нет.</li>
+    </ul>
+  </div>
+
+  <h2 class="sect">Границы — коротко</h2>
+  <div class="lims">
+    <div class="lim"><b>Ритм:</b> максимум 1 звонок + 2 сообщения в день. Попытка = телефонный набор, сообщение — дополнение.</div>
+    <div class="lim"><b>Потолок:</b> «контакт → договор» = 3 дня активного времени. Подписал — потолка нет, но попытка каждый день первые 3 дня.</div>
+    <div class="lim"><b>Отказ:</b> только «прекратите контакт» с цитатой = закрытие с причиной, DNC. Право закрыть есть.</div>
+    <div class="lim"><b>Передача:</b> потолок вышел — лид другому с мерджем всей истории. КИ не запрошена = провал гейта.</div>
+  </div>
+
+  <h2 class="sect">Инструменты</h2>
+  <div class="tools">
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/calc-widget/in-amo.html" target="_blank" rel="noopener">Виджет-калькулятор</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/" target="_blank" rel="noopener">Презентация РДГ</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/calc-widget/ki.html" target="_blank" rel="noopener">Пример юр. заключения</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/ki-guide/" target="_blank" rel="noopener">Инструкция «КИ за 5 минут»</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/dozhim-3days/" target="_blank" rel="noopener">Плейбук дожима</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/lead-map/" target="_blank" rel="noopener">Карта сценариев (тренажёр)</a>
+  </div>
+
+</div>
+</body>
+</html>
