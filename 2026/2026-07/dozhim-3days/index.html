@@ -66,6 +66,15 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
 .branch{margin-top:9px;border-left:none;background:var(--green-soft);border-radius:10px;padding:9px 12px;font-size:12.5px;color:var(--green-ink);line-height:1.5}
 .branch b{display:block}
 
+/* сквозной блок «КИ — главный дожимный ход» */
+.kiking{margin-top:16px;background:linear-gradient(165deg,#FBF3DC 0%,#F7EAC8 100%);border:1.5px solid var(--gold);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+.kiking h2{font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--gold-ink);margin-bottom:4px}
+.kiking .sub{font-size:13px;color:#7A6220;line-height:1.55}
+.kiking .kk-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:12px}
+.kiking .kk{background:rgba(255,255,255,.75);border:1px solid rgba(201,154,51,.35);border-radius:11px;padding:10px 12px;font-size:12.5px;line-height:1.5;color:var(--ink)}
+.kiking .kk b{display:block;color:var(--gold-ink);font-size:12.5px}
+.kiking .kk a{color:var(--green-ink);font-weight:700}
+.kiking .msg{background:#fff}
 .newtag{display:inline-block;margin-left:6px;font-size:9.5px;font-weight:800;letter-spacing:.05em;background:var(--brick);color:#fff;border-radius:999px;padding:2px 7px;vertical-align:2px}
 
 .final{margin-top:28px;background:var(--brick-soft);border:1px solid rgba(168,68,46,.3);border-radius:16px;padding:16px 18px}
@@ -106,6 +115,20 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
     <h1>Дожим: не подписал — 3 дня · подписал, не оплатил — ежедневный ритм</h1>
     <p><b>Часть 1 (не подписал):</b> потолок «контакт → договор» — 3 дня активного времени, абсолютный (свод §0), дальше лид уходит другому с мерджем. <b>Часть 2 (подписал, не оплатил):</b> потолка нет — лид ваш, пока ведёте по-настоящему, но попытка обязательна КАЖДЫЙ день первые 3 дня, и с первого дня сделка висит в «застрявших деньгах» РОПа. Каждое касание обязано двигать сделку, а не «напоминать о себе».</p>
   </header>
+
+  <div class="kiking">
+    <h2>⚖ Запрос кредитной истории — главный дожимный ход. Для всех</h2>
+    <div class="sub">Работает в каждой ветке: <b>не подписал · подписал без оплаты · оплатил частичку</b>. Пока КИ не в руках — повторяем запрос в каждом касании. Логика хода: показать, что клиент получит → попросить 5 минут → надавить временем.</div>
+    <div class="kk-steps">
+      <div class="kk"><b>1 · Показать демо</b>Отправить <a href="../calc-widget/ki.html" target="_blank" rel="noopener">пример юридического заключения</a>: «вот такой документ юрист подготовит по вашей истории — все кредиторы, точный платёж, что с ипотекой».</div>
+      <div class="kk"><b>2 · «Сделаем такое же по вам»</b>Бесплатно и ни к чему не обязывает. Нужен только отчёт — <a href="../ki-guide/" target="_blank" rel="noopener">инструкция «КИ за 5 минут»</a> (scoring.ru через Госуслуги).</div>
+      <div class="kk"><b>3 · Нельзя тянуть</b>«Пока думаем — долг растёт на ~{рост} ₽ каждый месяц по ставкам ваших договоров. Заключение покажет точную цифру».</div>
+      <div class="kk"><b>4 · КИ пришла = всё бросаем</b>PDF в виджет → заключение готово → немедленно звонок-разбор. Это самый сильный звонок воронки: не откладывать ни на час.</div>
+    </div>
+    <div class="msg" style="margin-top:12px">{Имя}, покажу, что вы получите: вот пример юридического заключения, которое юрист готовит по кредитной истории — <span class="ph">{ссылка на пример}</span>. Все договоры с вердиктами, точный платёж по плану, что с ипотекой. Давайте сделаем такое же по вам — бесплатно, ни к чему не обязывает. Нужен только ваш отчёт: скачивается за 5 минут, инструкция — <span class="ph">{ссылка на инструкцию}</span>. Тянуть не стоит: долг растёт на ~<span class="ph">{рост}</span> ₽ в месяц, и с каждой неделей план дороже. Пришлёте PDF сюда — завтра заключение будет у вас.</div>
+    <button class="copy" onclick="cp(this)">Скопировать шаблон</button>
+    <div class="sub" style="margin-top:8px"><b>Где в виджете:</b> кнопка ✉ «Не подписал» шлёт этот ход с цифрами клиента автоматически. Канон: не купил на первом звонке → запрос КИ ОБЯЗАТЕЛЕН, даже без подписи. КИ не запрошена за 3 дня = провал гейта.</div>
+  </div>
 
   <div class="day" style="margin-top:22px"><div class="day-h"><span class="dn" style="background:var(--gold);color:#fff">Часть 1</span><b>Не подписал договор — 3 дня до потолка</b></div></div>
 
@@ -270,6 +293,7 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
     <div class="rule"><b>Психология другая:</b> решение уже принято (подпись есть). Дожимаем не «нужно ли», а инерцию, страх платежа и «нет денег сейчас».</div>
     <div class="rule"><b>Факт неоплаты не штрафуется</b> — рейтинг бьёт только заброс (ноль попыток) и пустой дожим. Ведите честно, лид никуда не денется.</div>
     <div class="rule"><b>Оплатил частичку → другой режим</b> (статус «добор»: раз в сутки первые 5 дней). Этот раздел — про ноль оплат после подписи.</div>
+    <div class="rule" style="border-color:var(--gold);background:var(--gold-soft)"><b>⚖ КИ обязательна и после подписи.</b> Если отчёта ещё нет — запрос КИ в каждом касании (блок «главный дожимный ход» выше): «юрист стартует с заключения по вашей истории — пришлите отчёт, пока идёт оплата». Заключение по КИ здесь удваивает уверенность в платеже.</div>
   </div>
 
   <div class="day">
@@ -292,7 +316,7 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
       <div class="tw"><div class="tt">Утро</div><span class="tc call">звонок</span></div>
       <div>
         <h3>Гарантии вместо уговоров</h3>
-        <div class="aim">Не пересказывать выгоду заново — снять страх денег: <b>гарантия возврата в договоре (п. 6, возврат за 7 рабочих дней)</b>, оплата напрямую на счёт компании в Сбербанке, спишется ровно сумма. Если КИ ещё не прислал — напомнить: «юрист начнёт с заключения по вашей истории, пришлите отчёт» (обязательный шаг).</div>
+        <div class="aim">Не пересказывать выгоду заново — снять страх денег: <b>гарантия возврата в договоре (п. 6, возврат за 7 рабочих дней)</b>, оплата напрямую на счёт компании в Сбербанке, спишется ровно сумма. Если КИ ещё не прислал — полный ход из блока «⚖ главный дожимный ход»: пример заключения + «сделаем такое же по вам» + инструкция. После подписи это работает ещё сильнее: «юрист уже ваш, он стартует с заключения — не тяните с отчётом».</div>
       </div>
     </div>
     <div class="touch">
