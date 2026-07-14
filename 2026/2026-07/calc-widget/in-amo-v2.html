@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Калькулятор в amoCRM · V2: sticky-вердикт, чипы долгов, вкладка «Действия» · прототип</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Мокап карточки сделки amoCRM с виджетом ДОНУЛЯ V2 в правой колонке.
+   V2 (UX-исследование 2026-07-14): sticky-шапка с живым вердиктом, чипы типов долгов,
+   секции в порядке скрипта без «Далее», вкладки Расчёт/Действия. Математика — без изменений (V1). */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;color:#2e3640;font-size:13px;overflow-x:auto}
+/* колонки скроллятся независимо (как в реальном amo) — sticky-шапка виджета живёт в скролле правой колонки */
+.amo{display:grid;grid-template-columns:56px 330px 1fr 340px;height:100vh;min-width:1180px}
+
+/* левый тёмный рейл */
+.rail{background:#2b323b;display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:4px}
+.ri{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#8b96a3;font-size:9px;text-align:center;line-height:1.1}
+.ri.on{background:#3b4551;color:#fff}
+
+/* колонка сделки */
+.deal{background:#fff;border-right:1px solid #e3e7ea;padding:14px 16px;overflow-y:auto}
+.deal h1{font-size:17px;font-weight:700}
+.deal .id{margin-top:2px;font-size:11.5px;color:#94a0ab}
+.deal .pill{display:inline-block;margin-left:6px;background:#eef1f4;border-radius:4px;padding:1px 6px;font-size:11px;color:#5c6874}
+.deal .stage{margin-top:10px;font-size:11.5px;color:#94a0ab}
+.deal .stagebar{margin-top:4px;height:4px;border-radius:2px;background:#e3e7ea;position:relative}
+.deal .stagebar i{position:absolute;left:0;top:0;bottom:0;width:38%;background:#4c8bf7;border-radius:2px}
+.deal .tabs{display:flex;gap:12px;margin:14px 0 8px;border-bottom:1px solid #e3e7ea;font-size:12.5px;color:#7c8894}
+.deal .tabs b{color:#2e3640;border-bottom:2px solid #4c8bf7;padding-bottom:6px;font-weight:600}
+.frow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:12.5px;border-bottom:1px dashed #f0f2f4}
+.frow span{color:#94a0ab}
+.frow b{font-weight:600;text-align:right;color:#2e3640}
+.frow b.blue{color:#4c8bf7}
+
+/* центр: лента */
+.feed{padding:14px 18px;overflow-y:auto}
+.feed .search{background:#fff;border:1px solid #e3e7ea;border-radius:8px;padding:9px 12px;color:#94a0ab;font-size:12.5px}
+.msgcard{margin-top:14px;background:#fff;border:1px solid #e3e7ea;border-radius:10px;padding:12px 14px}
+.msgcard .who{font-size:11.5px;color:#94a0ab}
+.bubble{margin-top:8px;background:#2ea7e0;color:#fff;border-radius:10px;padding:10px 12px;font-size:12.5px;max-width:520px;line-height:1.45}
+.bubble small{display:block;opacity:.8;margin-bottom:4px}
+.note{margin-top:14px;background:#fff;border:1px solid #e3e7ea;border-radius:8px;padding:9px 12px;color:#94a0ab;font-size:12.5px}
+
+/* правая колонка виджетов — собственный скролл: в нём и работает sticky-шапка виджета */
+.wcol{background:#f7f8f9;border-left:1px solid #e3e7ea;padding:12px 12px 30px;overflow-y:auto}
+.wg{background:#fff;border:1px solid #e3e7ea;border-radius:8px;margin-bottom:8px}
+.wg .wh{display:flex;align-items:center;gap:8px;padding:9px 12px;font-size:12.5px;font-weight:600;color:#5c6874;cursor:default}
+.wg .wh .chev{margin-left:auto;color:#b6bfc7;font-size:10px}
+
+/* ═══ наш виджет V2 ═══ */
+/* overflow НЕ hidden — иначе position:sticky внутри не работает; скругления руками на шапке */
+.dw{background:#fff;border:1px solid #cfe0d8;border-radius:10px;margin-bottom:8px;box-shadow:0 4px 14px -8px rgba(11,59,46,.35)}
+.dw .dh{display:flex;align-items:center;gap:8px;background:#0B3B2E;color:#fff;padding:10px 12px;border-radius:9px 9px 0 0}
+.dw .dh .lg{width:22px;height:22px;border-radius:6px;background:#0F6B4F;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#F4C775;flex:none}
+.dw .dh b{font-size:12.5px}
+.dw .dh small{display:block;font-size:10px;color:rgba(255,255,255,.6)}
+.dw.hot{border:2px solid #C99A33;box-shadow:0 6px 18px -8px rgba(201,154,51,.5)}
+
+/* ── sticky-шапка: тогл продукта + бейдж + живой вердикт + выпадающая полная раскладка ── */
+.dws{position:sticky;top:-12px;z-index:6;background:#fff;padding:8px 12px;border-bottom:1px solid #eef1f4;box-shadow:0 6px 12px -10px rgba(11,59,46,.25)}
+.dwsr{display:flex;align-items:center;gap:6px}
+.dwsr .seg{flex:1}
+.dw .seg{display:flex;gap:3px;background:#eef1f4;border-radius:8px;padding:3px}
+.dw .seg button{flex:1;border:none;background:none;border-radius:6px;padding:5px;font-family:inherit;font-weight:700;font-size:12px;color:#7c8894;cursor:pointer;transition:background .15s ease-out,color .15s ease-out}
+.dw .seg button.on{background:#fff;color:#0B3B2E;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.dw .seg button:active{transform:scale(.97)}
+.dw .seg.sm button{padding:4px 6px;font-size:11px}
+/* бейдж источника данных: со слов / по КИ / парсинг / ошибка */
+.dw .dbadge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:999px;white-space:nowrap;flex:none;transition:background .2s ease-out,color .2s ease-out}
+.dw .dbadge.words{background:#eef1f4;color:#7c8894}
+.dw .dbadge.ki{background:#FBF3DC;color:#8A6212}
+.dw .dbadge.load{background:#E4F0FA;color:#2f6fb0}
+.dw .dbadge.err{background:#FAEDE8;color:#A8442E}
+/* живой вердикт — одна строка, тап раскрывает полную раскладку */
+.vline{display:flex;align-items:center;gap:5px;width:100%;margin-top:7px;border:1px solid #e4e9ed;border-radius:8px;background:#f7f9f8;padding:7px 5px 7px 7px;font-family:inherit;font-size:12px;font-weight:700;color:#2e3640;cursor:pointer;text-align:left;transition:background .15s ease-out,border-color .15s ease-out}
+.vline:hover{background:#f0f4f2}
+.vline:active{transform:scale(.97)}
+.dotc{width:8px;height:8px;border-radius:50%;flex:none;background:#b6bfc7;transition:background .2s ease-out}
+.dotc.rdg{background:#0F9F63}
+.dotc.bfl{background:#C99A33}
+.dotc.self{background:#94a0ab}
+.vtxt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.vchev{flex:none;color:#94a0ab;font-size:10px;transition:transform .15s ease-out}
+.vline.open .vchev{transform:rotate(180deg)}
+/* хинт «Не хватает: …» — каждое слово ведёт к полю */
+.hint{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-top:7px;font-size:11.5px;color:#7c8894;font-weight:600}
+.hint button{border:1px dashed #C99A33;background:#FBF3DC;color:#8A6212;border-radius:999px;padding:3px 10px;font-family:inherit;font-weight:700;font-size:11.5px;cursor:pointer;transition:background .15s ease-out}
+.hint button:hover{background:#F6E9C8}
+.hint button:active{transform:scale(.97)}
+/* выпадающая панель с полной раскладкой (вердикт + kv-строки) */
+.vpanel{display:none;position:absolute;left:8px;right:8px;top:100%;margin-top:-1px;background:#fff;border:1px solid #e4e9ed;border-top:none;border-radius:0 0 10px 10px;box-shadow:0 16px 28px -14px rgba(11,59,46,.45);padding:6px 12px 12px;max-height:55vh;overflow-y:auto}
+.vpanel.open{display:block;animation:pin .18s ease-out}
+@keyframes pin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.dw .verdict{margin-top:6px;border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.4}
+.dw .verdict b{display:block;font-size:13px}
+.dw .verdict.rdg{background:#0B3B2E;color:#fff}
+.dw .verdict.bfl{background:#E9F3EE;color:#0B5540}
+.dw .verdict.self{background:#FAEDE8;color:#A8442E}
+.dw .kv{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 0;font-size:12.5px;border-bottom:1px dashed #eef1f4}
+.dw .kv span{color:#94a0ab;flex:1;min-width:0}
+.dw .kv b{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+
+/* ── тело: секции ввода ── */
+.dw .body{padding:10px 12px 12px}
+.dw label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#94a0ab;margin:10px 0 4px}
+.dw input,.dw select{width:100%;border:1px solid #d8dee3;border-radius:7px;padding:6px 8px;font-family:inherit;font-size:12.5px;color:#2e3640;transition:border-color .15s ease-out}
+.dw input:focus,.dw select:focus{outline:none;border-color:#0F6B4F}
+.dw input.ki{border-color:#C99A33;background:#FBF3DC;color:#8A6212;font-weight:700}
+/* компактные строки: label слева, поле справа */
+.rowf{display:flex;align-items:center;gap:8px;margin-top:8px;min-height:30px;scroll-margin-top:110px}
+.dw .rowf .rlab{flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#5c6874;text-transform:none;letter-spacing:0;margin:0;line-height:1.3}
+.dw .rowf input.rin{width:126px;flex:none}
+.dw .rowf select.rin{width:170px;flex:none}
+.dw .rowf .seg{flex:none}
+/* степпер детей — без клавиатуры */
+.stpr{display:flex;align-items:center;border:1px solid #d8dee3;border-radius:7px;overflow:hidden;flex:none}
+.stpr button{width:28px;height:28px;border:none;background:#f4f6f7;color:#0B5540;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s ease-out}
+.stpr button:hover{background:#E9F3EE}
+.stpr button:active{transform:scale(.97)}
+.dw .stpr input{width:36px;border:none;border-radius:0;text-align:center;font-weight:700;padding:5px 2px}
+.dw .stpr input:focus{border:none}
+/* секция «Долги»: чипы типов */
+.sec{scroll-margin-top:110px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;transition:background .3s ease-out;border-radius:8px}
+.chips.urge{background:#FBF3DC}
+.chip{border:1px solid #d8dee3;border-radius:999px;background:#fff;padding:5px 10px;font-family:inherit;font-size:11.5px;font-weight:600;color:#5c6874;cursor:pointer;transition:background .15s ease-out,color .15s ease-out,border-color .15s ease-out}
+.chip:hover{border-color:#0F6B4F;color:#0B5540}
+.chip:active{transform:scale(.97)}
+.chip.on{background:#0F6B4F;border-color:#0F6B4F;color:#fff}
+/* строки включённых типов: имя+платёж | сумма (шире) | шт (узкая) */
+.crt{display:none;margin-top:6px;border:1px solid #e4e9ed;border-radius:8px;padding:6px 8px}
+.crt.en{display:block;animation:pin .15s ease-out}
+.crt.on{border-color:#cfe0d8;background:#fbfdfc}
+.crmain{display:grid;grid-template-columns:84px 1fr 46px;gap:6px;align-items:center}
+.crlab b{display:block;font-size:11px;color:#2e3640;line-height:1.2}
+.crlab span{display:block;font-size:9.5px;color:#94a0ab;font-variant-numeric:tabular-nums;line-height:1.2}
+.crt.on .crlab span{color:#0B5540;font-weight:700}
+.dw .crmain input{padding:5px 6px;font-size:12px;border-radius:6px}
+/* advanced: ставка/срок каждого типа + ПМ — под общим экспандером «⚙ Уточнить…» */
+.cradv{display:none;grid-template-columns:1fr 1fr;gap:6px;margin-top:5px}
+.body.adv .cradv{display:grid}
+.dw .cradv label{margin:0 0 2px;font-size:8.5px;letter-spacing:.02em}
+.dw .cradv input{padding:4px 6px;font-size:11.5px;border-radius:6px}
+.cravnote{grid-column:1/-1;font-size:9.5px;color:#94a0ab;line-height:1.4}
+.advtg{display:block;width:100%;margin-top:10px;border:1px dashed #d8dee3;border-radius:8px;background:none;padding:6px;font-family:inherit;font-size:11px;font-weight:600;color:#7c8894;cursor:pointer;transition:color .15s ease-out,border-color .15s ease-out}
+.advtg:hover{color:#0B5540;border-color:#0F6B4F}
+.advtg:active{transform:scale(.97)}
+.advpm{display:none;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.body.adv .advpm{display:grid}
+.dw .advpm label{margin:0 0 3px}
+/* свёрнутая секция долгов — строка-summary */
+.ssum{display:none;align-items:center;gap:6px;width:100%;border:1px solid #cfe0d8;background:#f2f8f5;border-radius:8px;padding:8px 10px;font-family:inherit;font-size:12px;font-weight:600;color:#0B5540;cursor:pointer;text-align:left;transition:background .15s ease-out}
+.ssum.show{display:flex;animation:pin .15s ease-out}
+.ssum:hover{background:#E9F3EE}
+.ssum:active{transform:scale(.97)}
+.ssum b{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.ssum i{font-style:normal;color:#94a0ab;font-size:10px}
+.dw .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+/* ── вкладки Расчёт / Действия ── */
+.wtabs{display:flex;gap:4px;background:#eef1f4;border-radius:9px;padding:3px;margin-top:12px}
+.wtabs button{position:relative;flex:1;border:none;background:none;border-radius:7px;padding:7px;font-family:inherit;font-weight:700;font-size:12px;color:#7c8894;cursor:pointer;transition:background .15s ease-out,color .15s ease-out}
+.wtabs button.on{background:#fff;color:#0B3B2E;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.wtabs button:active{transform:scale(.97)}
+/* бейдж-пульс на «Действия»: вердикт готов, не отправлено — одна мягкая opacity-анимация, без автопереключения */
+.tdot{position:absolute;top:5px;right:8px;width:7px;height:7px;border-radius:50%;background:#C99A33;opacity:0;transition:opacity .2s ease-out}
+.tdot.show{opacity:1}
+.tdot.pulse{animation:tp 1s ease-out 2}
+@keyframes tp{50%{opacity:.15}}
+
+/* ── вкладка «Действия» ── */
+.dw .sbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:10px;border:none;border-radius:8px;background:#0F6B4F;color:#fff;padding:11px;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;transition:background .15s ease-out}
+.dw .sbtn:hover{background:#0B5540}
+.dw .sbtn:active{transform:scale(.97)}
+.dw .sbtn.dis,.dw .sbtn:disabled{background:#c3ccd4;color:#fff;cursor:default}
+.dw .sstat{margin-top:6px;text-align:center;font-size:11.5px;font-weight:600}
+.dw .sstat.none{color:#94a0ab}
+.dw .sstat.sent{color:#0F6B4F}
+.dw .sstat.warn{color:#A8442E}
+.dw .lrow{display:flex;gap:6px;margin-top:8px}
+.dw .lbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid #d8dee3;border-radius:8px;background:#fff;color:#0B5540;padding:8px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:background .15s ease-out,border-color .15s ease-out}
+.dw .lbtn:active{transform:scale(.97)}
+.dw .lbtn.hi{border-color:#0F6B4F;background:#E9F3EE}
+.dw .lbtn.mut,.dw .lbtn:disabled{color:#7c8894;cursor:default}
+.dw .wnote{margin-top:9px;font-size:11px;color:#94a0ab;line-height:1.5}
+.dw .wnote b{color:#5c6874;font-weight:700}
+.dw .wnote a{color:#0B5540;font-weight:700}
+.dw .toast{display:none;margin-top:8px;background:#E9F3EE;color:#0B5540;border-radius:8px;padding:8px 10px;font-size:11.5px;line-height:1.45}
+
+.cap{max-width:1180px;margin:0 auto;padding:10px 18px;font-size:12px;color:#7c8894}
+.cap b{color:#2e3640}
+</style>
+</head>
+<body>
+
+<div class="amo">
+  <div class="rail">
+    <div class="ri">Аккаунт</div><div class="ri">Рабочий стол</div><div class="ri on">Сделки</div>
+    <div class="ri">imBox</div><div class="ri">Задачи</div><div class="ri">Списки</div>
+    <div class="ri">Документы</div><div class="ri">Почта</div><div class="ri">Аналитика</div><div class="ri">Sensei</div>
+  </div>
+
+  <div class="deal">
+    <h1>Кристина</h1>
+    <div class="id">#25751361 <span class="pill">Рефинансирование</span></div>
+    <div class="stage">МПП 2 уровень · Возвращенный лид (1 день)</div>
+    <div class="stagebar"><i></i></div>
+    <div class="tabs"><b>Основное</b><span>МПП</span><span>Анкета</span><span>Сбор доков</span><span>Суд</span><span>Сохран</span></div>
+    <div class="frow"><span>Отв-ный</span><b>Гасанова Шафаг</b></div>
+    <div class="frow"><span>Бюджет</span><b>0 ₽</b></div>
+    <div class="frow"><span>Статус активности</span><b class="blue">Выбрать</b></div>
+    <div class="frow"><span>Договор</span><b>…</b></div>
+    <div class="frow"><span>Сумма долга (со слов)</span><b id="f_debt">—</b></div>
+    <div class="frow"><span>Офиц. доход</span><b id="f_income">—</b></div>
+    <div class="frow"><span>Тип услуги</span><b id="f_route">—</b></div>
+    <div class="frow"><span>Платёж по плану (предв.)</span><b id="f_pay">—</b></div>
+    <div class="frow"><span>Размер ежемесячного платежа</span><b>…</b></div>
+    <div class="frow"><span>Ссылка на КАД</span><b>…</b></div>
+    <div class="frow"><span>МПП 2 уровня</span><b>Гасанова Шафаг</b></div>
+    <div class="frow"><span>Руководитель ответственного</span><b>Смелов Никита</b></div>
+  </div>
+
+  <div class="feed">
+    <div class="search">Поиск и фильтр</div>
+    <div class="msgcard">
+      <div class="who">MAX Bot · 79997252633</div>
+      <div class="bubble"><small>Вчера 14:21 SalesBot (перенос встречи) ✓ Отправлено</small>
+        Зафиксировали новое время консультации: 09.07.2026 19:00<br><br>
+        Ваш специалист: Гасанова Шафаг<br>
+        Пожалуйста, будьте на связи в это время — звонок займёт примерно 30 минут.
+      </div>
+    </div>
+    <div class="msgcard">
+      <div class="who">Sensei для Гасанова Шафаг · вчера 19:29</div>
+      <div class="bubble" style="background:#f0f2f4;color:#2e3640"><small style="color:#94a0ab">задача</small>Провести консультацию 09.07 19:00. Перед звонком: открыть калькулятор, взять долг / доход / имущество, определить маршрут.</div>
+    </div>
+    <div class="note">Примечание: введите текст</div>
+  </div>
+
+  <div class="wcol">
+    <div class="wg"><div class="wh">Платежи<span class="chev">▾</span></div></div>
+
+    <!-- ═══ НАШ ВИДЖЕТ V2 ═══ -->
+    <div class="dw">
+      <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор клиента</b><small id="dh_small">экспресс · первый звонок</small></div></div>
+
+      <!-- sticky-шапка: всегда видна в скролле колонки -->
+      <div class="dws" id="w_sticky">
+        <div class="dwsr">
+          <div class="seg sm" id="w_prod"><button class="on" data-p="rdg">РДГ</button><button data-p="bfl">БФЛ</button></div>
+          <div class="dbadge words" id="w_badge">🎤 со слов · предварительно</div>
+        </div>
+        <button type="button" class="vline" id="w_vline" style="display:none" onclick="togglePanel()">
+          <span class="dotc" id="w_dot"></span><span class="vtxt" id="w_vshort"></span><span class="vchev">▾</span>
+        </button>
+        <div class="hint" id="w_hint">Не хватает:
+          <button type="button" id="w_needDebt" onclick="gotoDebts()">долги</button>
+          <button type="button" id="w_needInc" onclick="gotoIncome()">доход</button>
+        </div>
+        <div class="vpanel" id="w_panel">
+          <div class="verdict rdg" id="w_verdict"></div>
+          <div id="w_kvs"></div>
+        </div>
+      </div>
+
+      <div class="body" id="w_body">
+        <div id="pane_calc">
+
+          <!-- а) ДОЛГИ: чипы типов, поля только включённых; заполнил и ушёл дальше → схлопывается в summary -->
+          <div class="sec" id="sec_debts">
+            <button type="button" class="ssum" id="w_debtSum" onclick="collapseDebts(false)">
+              <span>Долги</span><b><span id="w_nTotal">0</span> дог · <span id="w_debtTotal">—</span></b><i>▸</i>
+            </button>
+            <div id="w_debtBody">
+              <label style="margin-top:0">Долги клиента — что есть?</label>
+              <div class="chips" id="w_chips"></div>
+              <div id="w_credits"></div>
+              <div id="w_debtWrap" style="display:none"><label id="w_debtLabel">Долг по кредитной истории, ₽</label><input id="w_debt" type="number"></div>
+            </div>
+          </div>
+
+          <!-- б) ПРОСРОЧКИ (сценарии юр. заключения — payload overdue) -->
+          <div class="rowf"><span class="rlab">Просрочки</span>
+            <div class="seg sm" id="w_ovd" style="width:158px"><button class="on" data-o="1">есть</button><button data-o="0">платит исправно</button></div>
+          </div>
+
+          <!-- в) ПЛАТЁЖ СЕЙЧАС -->
+          <div class="rowf"><span class="rlab">Платёж сейчас, ₽/мес</span><input id="w_paynow" class="rin" type="number" placeholder="авто"></div>
+
+          <!-- г) ДОХОД · ДЕТИ · РЕГИОН -->
+          <div class="rowf" id="row_income"><span class="rlab">Офиц. доход, ₽/мес</span><input id="w_income" class="rin" type="number"></div>
+          <div class="rowf"><span class="rlab">Детей</span>
+            <div class="stpr"><button type="button" onclick="kidStep(-1)">−</button><input id="w_kids" type="number" value="1" min="0"><button type="button" onclick="kidStep(1)">+</button></div>
+          </div>
+          <div class="rowf"><span class="rlab">Регион (ПМ)</span><select id="w_region" class="rin"></select></div>
+
+          <!-- advanced: ставки/сроки типов + ПМ-поля (регион автозаполняет) -->
+          <button type="button" class="advtg" id="w_advTg" onclick="toggleAdv()">⚙ Уточнить ставки, сроки и ПМ</button>
+          <div class="advpm">
+            <div><label>ПМ клиента, ₽/мес</label><input id="w_pmSelf" type="number"></div>
+            <div><label>ПМ ребёнка, ₽/мес</label><input id="w_pmChild" type="number"></div>
+          </div>
+
+          <!-- д) ДОПУСК ст. 213.13 -->
+          <div class="rowf"><span class="rlab">Банкротство или реструктуризация раньше?</span>
+            <div class="seg sm" id="w_prior" style="width:110px"><button class="on" data-p="no">Нет</button><button data-p="yes">Было</button></div>
+          </div>
+
+          <!-- е) СРОК ПЛАНА РДГ (только при prod=rdg) -->
+          <div id="w_rdgFields">
+            <label>Срок плана РДГ</label>
+            <div class="seg" id="w_term"><button class="on" data-t="60">60 мес · с кредиторами</button><button data-t="36">36 мес · через суд</button></div>
+          </div>
+        </div>
+
+        <!-- вкладка «Действия» -->
+        <div id="pane_act" style="display:none">
+          <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
+          <div class="sstat none" id="w_sstat">ещё не отправлено</div>
+          <div class="lrow">
+            <label class="lbtn" id="w_kiBtn" style="cursor:pointer">⭱ Загрузить КИ<input type="file" id="w_ki" accept="application/pdf" style="display:none"></label>
+            <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
+            <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">⚖ Юр. заключение (PDF)</a>
+          </div>
+          <label style="margin-top:10px">Дожим-сообщения — копируются с цифрами клиента</label>
+          <div class="lrow" style="margin-top:4px">
+            <button class="lbtn" onclick="copyDz('open',this)">✉ Не открыл</button>
+            <button class="lbtn" onclick="copyDz('think',this)">✉ Не подписал</button>
+            <button class="lbtn" id="w_dzKi" onclick="copyDz('ki',this)">✉ По КИ</button>
+          </div>
+        </div>
+
+        <div class="wtabs">
+          <button class="on" id="tab_calc" onclick="showTab('calc')">Расчёт</button>
+          <button id="tab_act" onclick="showTab('act')">Действия ⚡<span class="tdot" id="w_tdot"></span></button>
+        </div>
+
+        <div class="wnote" id="w_note" style="display:none"><span id="w_noteTxt"></span> <a id="w_present" target="_blank" style="display:none">Открыть презентацию ↗</a></div>
+        <div class="toast" id="w_toast"></div>
+      </div>
+    </div>
+    <!-- ═══ /виджет ═══ -->
+
+    <div class="wg"><div class="wh">Кнопки Salesbot<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">HyperScript<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">OkiDoki<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">Документы<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">Билайн<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">Передача в партнёры<span class="chev">▾</span></div></div>
+  </div>
+</div>
+
+<p class="cap"><b>Прототип V2: виджет «ДОНУЛЯ · Калькулятор» в карточке сделки amoCRM.</b> Sticky-вердикт, чипы долгов, секции без «Далее», вкладки Расчёт/Действия. Расчёт живой. Демо: <b>?ki=1</b> — клиент прислал КИ по запросу в дожиме.</p>
+
+<script src="./pm-regions.js"></script>
+<script src="./ki-parse.js"></script>
+<script>
+'use strict';
+const fmt=n=>Math.round(n).toLocaleString('ru-RU');
+const BFL_COST=239000;
+/* ═══ закон (докс: docs/rdg-law-calc-2026-07.md) ═══
+   KEY_RATE — ключевая ставка ЦБ (проценты плана, ст. 213.19 п.2 127-ФЗ; фиксируется на дату утверждения плана).
+   14,25% с 22.06.2026 (решение ЦБ 19.06.2026) — обновлять после заседаний ЦБ (~раз в 6 недель).
+   GOS_START — стартовые госплатежи (канон заказчика): депозит ФУ 25 000 (ст. 20.6 п.3) + публикации 15 000 + почта 10 000. Госпошлина должника 0 ₽ (259-ФЗ). */
+const KEY_RATE=14.25, GOS_START=50000;
+const KEY_RATE_TXT=KEY_RATE.toLocaleString('ru-RU'); /* «14,25» — русская запятая в интерфейсе */
+/* план РДГ по закону: тело (без ипотеки) + проценты по ключевой на убывающий остаток + 7% ФУ от выплаченного (ст. 20.6 п.17; при 100%-плане = от тела) */
+function planCalc(body,months){
+  const interest=body*(KEY_RATE/100)*(months/12)/2;
+  const fu=body*0.07;
+  const total=body+interest+fu;
+  return {interest,fu,total,monthly:total/months};
+}
+/* ═══ типы кредитов со слов: ставка и срок предзаполнены средними по РФ на середину 2026, менеджер может поправить.
+   Источники дефолтов (сверка ЦБ ПСК I кв. 2026 × рыночные обзоры, июль 2026): потреб 30,7% / 28 мес (ПСК ЦБ, ОКБ);
+   карта 52% / 36 мес (ПСК ЦБ; срок = горизонт погашения мин. платежами, у карт договорного срока нет);
+   МФО 292% = потолок 0,8%/день / 4 мес (сдвиг рынка в installment); залоговый 25% / 96 мес; ипотека рыночная 18% / 282 мес (23,5 года).
+   receipt (V2): расписка — займ у физлица, ставка 0% по умолчанию (редактируема в advanced), срок 12 мес.
+   Расписки — только со слов: в КИ не отражаются, суд включает требования физлиц в реестр. ═══ */
+const CREDIT_TYPES=[
+  {k:'loan',    name:'Кредит',                   rate:30.7,months:28,  demo:700000, demoN:2},
+  {k:'card',    name:'Кредитная карта',          rate:52,  months:36,  demo:250000, demoN:3},
+  {k:'mfo',     name:'МФО',                      rate:292, months:4,   demo:200000, demoN:6},
+  {k:'secured', name:'Залоговый кредит',         rate:25,  months:96,  demo:0,      demoN:0},
+  {k:'mortgage',name:'Ипотека',                  rate:18,  months:282, demo:0,      demoN:0},
+  {k:'receipt', name:'Расписка · займ у физлица',rate:0,   months:12,  demo:0,      demoN:0},
+];
+/* короткие подписи для чипов и строк */
+const CHIP_LABEL={loan:'Кредит',card:'Карта',mfo:'МФО',secured:'Залог',mortgage:'Ипотека',receipt:'Расписка'};
+/* математика — по docs/rdg-formula-spec.md */
+function annuityPayment(principal,monthlyRate,months){
+  if(principal<=0||months<=0)return 0;
+  if(monthlyRate<=0)return principal/months;
+  const f=Math.pow(1+monthlyRate,months);
+  return principal*monthlyRate*f/(f-1);
+}
+function projectRevolving(balance,monthlyRate,payment,maxMonths){
+  let total=0,cur=balance;
+  for(let i=0;i<maxMonths&&cur>1;i++){
+    const interest=cur*monthlyRate;
+    const p=Math.min(payment,cur+interest);
+    cur=cur+interest-p; total+=p;
+  }
+  return total;
+}
+/* по типу: текущий платёж и «сколько выплатит без РДГ» (суммы со слов = текущий остаток, balanceMode current, paid=0).
+   receipt идёт аннуитетной веткой: rate 0 → платёж = тело/срок, total = тело (проценты 0 — creditCalc даёт это сам). */
+function creditCalc(k,amount,rate,months){
+  const m=rate/100/12;
+  if(k==='card'){
+    const pay=Math.max(annuityPayment(amount,m,months), amount*0.07); /* мин. платёж карты 7% от долга */
+    return {pay, total:projectRevolving(amount,m,pay,months)};
+  }
+  if(k==='mfo'){
+    const cap=amount*2.3; /* дата договора со слов неизвестна → лимит ×2.3 */
+    const pay=cap/months;
+    return {pay, total:Math.min(projectRevolving(amount,m,pay,months),cap)};
+  }
+  /* loan / secured / mortgage / receipt — аннуитет */
+  const pay=annuityPayment(amount,m,months);
+  return {pay, total:Math.max(pay*months,amount)};
+}
+/* ── V2: чипы типов долгов ── */
+function renderCreditRows(){
+  document.getElementById('w_chips').innerHTML=CREDIT_TYPES.map(t=>
+    '<button type="button" class="chip" data-t="'+t.k+'" title="'+t.name+'" onclick="toggleChip(\''+t.k+'\')">'+CHIP_LABEL[t.k]+'</button>').join('');
+  document.getElementById('w_credits').innerHTML=CREDIT_TYPES.map(t=>
+    '<div class="crt" data-t="'+t.k+'">'+
+      '<div class="crmain">'+
+        '<div class="crlab"><b>'+CHIP_LABEL[t.k]+'</b><span id="crs_'+t.k+'">—</span></div>'+
+        '<input class="c-am" type="number" min="0" placeholder="Сумма, ₽">'+
+        '<input class="c-n" type="number" min="0" placeholder="шт">'+
+      '</div>'+
+      '<div class="cradv">'+
+        '<div><label>Ставка, %/год</label><input class="c-r" type="number" min="0" value="'+t.rate+'"></div>'+
+        '<div><label>Срок, мес</label><input class="c-m" type="number" min="1" value="'+t.months+'"></div>'+
+        (t.k==='receipt'?'<div class="cravnote">Расписка — со слов клиента: в КИ не видна, суд включает требования физлиц в реестр.</div>':'')+
+      '</div>'+
+    '</div>').join('');
+  /* правка полей: расписка НЕ сбрасывает КИ (в отчёте её и нет — живёт рядом с точными данными) */
+  document.querySelectorAll('#w_credits .crt').forEach(row=>{
+    row.querySelectorAll('input').forEach(i=>i.addEventListener('input',()=>{
+      if(kiLoaded&&row.dataset.t!=='receipt')dropKi();
+      calc();
+    }));
+  });
+}
+function toggleChip(k){
+  const row=document.querySelector('#w_credits .crt[data-t="'+k+'"]');
+  const chip=document.querySelector('#w_chips .chip[data-t="'+k+'"]');
+  const on=!row.classList.contains('en');
+  if(!on){row.querySelector('.c-am').value='';row.querySelector('.c-n').value='';}
+  row.classList.toggle('en',on);
+  chip.classList.toggle('on',on);
+  if(kiLoaded&&k!=='receipt')dropKi(); /* правка состава после КИ = снова «со слов»; расписка — исключение */
+  calc();
+  if(on)row.querySelector('.c-am').focus({preventScroll:true});
+}
+/* чипы по факту значений (после КИ / dropKi): включаем всё, где сумма > 0; выключенные вручную не трогаем */
+function syncChipsFromValues(){
+  document.querySelectorAll('#w_credits .crt').forEach(row=>{
+    const amt=parseFloat(row.querySelector('.c-am').value)||0;
+    if(amt>0){
+      row.classList.add('en');
+      document.querySelector('#w_chips .chip[data-t="'+row.dataset.t+'"]').classList.add('on');
+    }
+  });
+}
+/* свод по конструктору: долг, число договоров, текущий платёж, «без РДГ» */
+function creditsTotals(){
+  let debt=0,n=0,monthly=0,noRdg=0,mortAmount=0,mortPay=0,mortTotal=0;
+  document.querySelectorAll('#w_credits .crt').forEach(row=>{
+    const k=row.dataset.t;
+    const amount=parseFloat(row.querySelector('.c-am').value)||0;
+    const cnt=parseFloat(row.querySelector('.c-n').value)||0;
+    const rate=parseFloat(row.querySelector('.c-r').value)||0;
+    const months=Math.max(1,parseFloat(row.querySelector('.c-m').value)||1);
+    const s=row.querySelector('#crs_'+k);
+    if(amount>0){
+      const c=creditCalc(k,amount,rate,months);
+      debt+=amount; n+=cnt||1; monthly+=c.pay; noRdg+=c.total;
+      /* ипотека — вне плана РДГ (298-ФЗ, ст. 213.10-1: отдельное мировое, жильё сохраняется), платёж по ней продолжается */
+      if(k==='mortgage'){mortAmount+=amount;mortPay+=c.pay;mortTotal+=c.total;}
+      row.classList.add('on');
+      s.textContent='~'+fmt(c.pay)+' ₽/мес';
+    }else{
+      row.classList.remove('on');
+      s.textContent='—';
+    }
+  });
+  return {debt,n,monthly,noRdg,mortAmount,mortPay,mortTotal};
+}
+/* расписка отдельно: в ct уже входит (со слов / SB-путь); в ОКБ-пути добавляется ПОВЕРХ точного числа КИ,
+   а её шт. — к счётчику договоров при любой КИ (в отчётах бюро расписок нет) */
+function receiptTotals(){
+  const row=document.querySelector('#w_credits .crt[data-t="receipt"]');
+  const amount=parseFloat(row.querySelector('.c-am').value)||0;
+  if(amount<=0) return {amount:0,n:0,pay:0};
+  const cnt=parseFloat(row.querySelector('.c-n').value)||0;
+  const rate=parseFloat(row.querySelector('.c-r').value)||0;
+  const months=Math.max(1,parseFloat(row.querySelector('.c-m').value)||1);
+  const c=creditCalc('receipt',amount,rate,months);
+  return {amount,n:cnt||1,pay:c.pay};
+}
+/* ПМ по регионам 2026 — таблица в ./pm-regions.js (PM_REGIONS + PM_FEDERAL); поля редактируемые (advanced), регион только автоподставляет */
+const DEFAULT_REGION='Омская область';
+function fillRegionSelect(){
+  const sel=document.getElementById('w_region');
+  sel.innerHTML='<option value="">РФ · федеральное значение</option>'+Object.keys(PM_REGIONS).map(r=>'<option'+(r===DEFAULT_REGION?' selected':'')+'>'+r+'</option>').join('');
+  applyRegionPM();
+}
+function applyRegionPM(){
+  const r=document.getElementById('w_region').value;
+  const pm=PM_REGIONS[r]||PM_FEDERAL;
+  document.getElementById('w_pmSelf').value=pm.self;
+  document.getElementById('w_pmChild').value=pm.child;
+}
+let term=60, prior='no', prod='rdg', last={}, kiLoaded=false, kiTypes=false, kiCount=null, kiBusy=false, kiError=false, sentAt=null;
+/* склонение для бейджа: 1 договор / 2 договора / 22 договора / 11 договоров */
+const decl=n=>{const d=n%10,m=n%100;return m>=11&&m<=14?'договоров':d===1?'договор':d>=2&&d<=4?'договора':'договоров';};
+function calc(){
+  /* источник долга: КИ (точное поле) или конструктор типов со слов */
+  const ct=creditsTotals();
+  const rc=receiptTotals(); /* расписка живёт рядом с точными данными КИ — в обоих путях (SB и ОКБ) */
+  /* kiTypes: «Скоринг Бюро» разложен по типам — конструктор и есть точный источник; старый ОКБ-путь держит одно число в w_debt + расписку поверх */
+  const debt=(kiLoaded&&!kiTypes)?((parseFloat(document.getElementById('w_debt').value)||0)+rc.amount):ct.debt;
+  document.getElementById('w_debtTotal').textContent=debt>0?fmt(debt)+' ₽':'—';
+  /* число договоров при КИ: счётчик отчёта + шт. расписки (в отчётах бюро её нет); бейдж «по КИ» не трогаем */
+  document.getElementById('w_nTotal').textContent=kiLoaded?(kiCount||0)+rc.n:ct.n;
+  /* платёж сейчас: ручной ввод приоритетнее расчётного по кредитам (п.10.1 спеки) */
+  const payManual=parseFloat(document.getElementById('w_paynow').value)||0;
+  const payCalc=((!kiLoaded||kiTypes)&&ct.monthly>0)?Math.round(ct.monthly):0;
+  const paynow=payManual>0?payManual:payCalc;
+  document.getElementById('w_paynow').placeholder=payCalc>0?('авто: '+fmt(payCalc)):'авто';
+  const income=parseFloat(document.getElementById('w_income').value)||0;
+  const kids=parseFloat(document.getElementById('w_kids').value)||0;
+  /* свободный доход: минус ПМ клиента и полный ПМ ребёнка на КАЖДОГО ребёнка (правило заказчика) */
+  const pmSelf=parseFloat(document.getElementById('w_pmSelf').value)||PM_FEDERAL.self;
+  const pmChild=parseFloat(document.getElementById('w_pmChild').value)||PM_FEDERAL.child;
+  /* свободный доход: минус ПМ семьи и платёж по ипотеке (она вне плана, но платить её продолжаем — 298-ФЗ) */
+  const mortPay=(kiLoaded&&!kiTypes)?0:ct.mortPay, mortAmount=(kiLoaded&&!kiTypes)?0:ct.mortAmount;
+  const free=income-(pmSelf+kids*pmChild)-mortPay;
+  /* тело плана — без ипотеки (298-ФЗ: отдельное мировое с ипотечным банком, жильё сохраняется) */
+  const body=Math.max(0,debt-mortAmount);
+  const P60=planCalc(body,60), P36=planCalc(body,36), PE=planCalc(body,term);
+  const v=document.getElementById('w_verdict'), kvs=document.getElementById('w_kvs');
+  document.getElementById('w_rdgFields').style.display=prod==='rdg'?'':'none';
+  let route, eff=term, kv=[];
+  const mfcHint=(body>=25000&&body<=1000000)?'<br>⚠ Долг 25 тыс.–1 млн: возможно бесплатное внесудебное через МФЦ (нужно оконченное исполнительное производство, ст. 223.2) — проверит юрист.':'';
+  if(prod==='bfl'){
+    route='БФЛ';
+    v.className='verdict bfl';
+    v.innerHTML='<b>БФЛ · списание долга</b>Долг '+fmt(debt)+' ₽ списывается целиком, платёж только за процедуру.';
+    kv=[['Долг спишется',fmt(debt)+' ₽'],['Процедура','13 500 ₽/мес · ~14 мес'],['Услуги + госплатежи',fmt(BFL_COST)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
+    /* переплата банкам «в пустоту» (правка Виктории 14.07): проценты по конструктору без ипотеки */
+    const intYear=monthlyGrowth()*12;
+    if(intYear>0) kv.splice(1,0,['Проценты банкам за год, если тянуть','~'+fmt(intYear)+' ₽ — в пустоту'],['Экономия с процентами за год',fmt(Math.max(0,debt+intYear-BFL_COST))+' ₽']);
+  }else if(prior==='yes'){
+    route='self'; /* допуск по ст. 213.13 не пройден — без презентации, маршрут решает юрист */
+    v.className='verdict self';
+    v.innerHTML='<b>РДГ недоступна · ст. 213.13</b>Было банкротство (замок 5 лет) или план реструктуризации (замок 8 лет). Маршрут решает юрист — передайте с пометкой.';
+    kv=[['Замок закона','банкротство — 5 лет · план РДГ — 8 лет']];
+  }else if(debt<=0||free>=debt/3){
+    route='self';
+    v.className='verdict self';
+    v.innerHTML='<b>Мимо процедур</b>'+(debt<=0?'Введите кредиты клиента.':'Свободных '+fmt(free)+' ₽/мес: закроет долг сам за ~3 месяца — процедура не нужна.');
+    kv=[['Свободный доход',fmt(free)+' ₽/мес']];
+  }else if(free>=P60.monthly){
+    route='РДГ';
+    if(free<PE.monthly) eff=60;
+    const PLAN=planCalc(body,eff);
+    const margin=(free-PLAN.monthly)/free; /* запас: план должен оставлять больше ПМ — впритык суд может не утвердить (Пленум ВС № 45) */
+    v.className='verdict rdg';
+    if(margin<0.1){
+      v.innerHTML='<b>РДГ · пограничный — запас впритык</b>Платёж '+fmt(PLAN.monthly)+' ₽/мес при свободных '+fmt(free)+' ₽. Суд может не утвердить (Пленум ВС № 45) — усилить подтверждённый доход или добавить созаёмный.';
+    }else{
+      v.innerHTML='<b>РДГ · подходит — план '+eff+' мес</b>Платёж '+fmt(PLAN.monthly)+' ₽/мес вместо банковских '+(paynow>0?fmt(paynow)+' ₽':'платежей')+'. Банковские проценты стоп, дальше ключевая '+KEY_RATE_TXT+'% — не банкрот.'+(free<P36.monthly?' 36 мес не тянет — только с одобрения кредиторов (60).':'')+(mortAmount>0?' Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ).':'');
+    }
+    kv=[['Тело плана'+(mortAmount>0?' (без ипотеки)':''),fmt(body)+' ₽'],
+        ['Проценты · ключевая '+KEY_RATE_TXT+'%','~'+fmt(PLAN.interest)+' ₽'],
+        ['ФУ 7% от выплаченного',fmt(PLAN.fu)+' ₽'],
+        ['Итого по плану',fmt(PLAN.total)+' ₽'],
+        ['Платёж · 60 мес (с кредиторами)',fmt(P60.monthly)+' ₽/мес'],
+        ['Платёж · 36 мес (через суд, ≥50%)',free>=P36.monthly?fmt(P36.monthly)+' ₽/мес':'не тянет'],
+        ['Госплатежи (старт, отдельно)',fmt(GOS_START)+' ₽']];
+    if(mortAmount>0) kv.push(['Ипотека — вне плана (298-ФЗ)',fmt(mortAmount)+' ₽ · ~'+fmt(mortPay)+' ₽/мес']);
+    if(paynow>0) kv.push(['Платит сейчас',fmt(paynow)+' ₽/мес'],['Нагрузка снизится на',fmt(Math.max(0,paynow-PLAN.monthly-mortPay))+' ₽/мес']);
+    if((!kiLoaded||kiTypes)&&ct.noRdg>0){const noRdgPlan=ct.noRdg-ct.mortTotal; kv.push(['Без РДГ выплатит (без ипотеки)',fmt(noRdgPlan)+' ₽'],['— из них проценты банкам, в пустоту',fmt(Math.max(0,noRdgPlan-body))+' ₽'],['Выгода РДГ (с учётом переплаты)',fmt(Math.max(0,noRdgPlan-PLAN.total))+' ₽']);}
+    kv.push(['Свободный доход (после ПМ'+(mortPay>0?' и ипотеки':'')+')',fmt(free)+' ₽/мес'],['Услуги ДОНУЛЯ','13 500 ₽/мес']);
+  }else{
+    route='БФЛ'; /* РДГ не тянет → кандидат на списание; вердикт, запись и ссылка идут по БФЛ */
+    v.className='verdict bfl';
+    v.innerHTML='<b>Не тянет РДГ → кандидат на списание</b>Свободных '+fmt(free)+' ₽/мес меньше платежа плана даже на 60 мес ('+fmt(P60.monthly)+' ₽ с процентами по ключевой). Долг '+fmt(debt)+' ₽ спишется целиком.'+mfcHint;
+    kv=[['Свободный доход',fmt(free)+' ₽/мес'],['Мин. платёж плана (60 мес)',fmt(P60.monthly)+' ₽/мес'],['Долг спишется',fmt(debt)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
+    const intYearB=monthlyGrowth()*12;
+    if(intYearB>0) kv.splice(3,0,['Проценты банкам за год, если тянуть','~'+fmt(intYearB)+' ₽ — в пустоту'],['Экономия с процентами за год',fmt(Math.max(0,debt+intYearB-BFL_COST))+' ₽']);
+  }
+  kvs.innerHTML=kv.map(([k,x])=>'<div class="kv"><span>'+k+'</span><b>'+x+'</b></div>').join('');
+  const planOk=route==='РДГ';
+  last={debt,body,paynow,income,route,eff,contracts:kiLoaded?(kiCount||0)+rc.n:ct.n,pay:planOk?Math.round(planCalc(body,eff).monthly):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null,noPresent:prior==='yes'};
+  updateHeader();
+  updateSendUI();
+}
+/* ── V2: sticky-шапка — живой вердикт одной строкой или хинт «Не хватает…» ── */
+function updateHeader(){
+  const vl=document.getElementById('w_vline'), hint=document.getElementById('w_hint');
+  let needDebt=false, needInc=false;
+  if(prod==='bfl'){ needDebt=!(last.debt>0); }
+  else if(prior!=='yes'){ needDebt=!(last.debt>0); needInc=!(last.income>0); }
+  if(needDebt||needInc){
+    hint.style.display='';
+    document.getElementById('w_needDebt').style.display=needDebt?'':'none';
+    document.getElementById('w_needInc').style.display=needInc?'':'none';
+    vl.style.display='none'; setPanel(false);
+    return;
+  }
+  hint.style.display='none'; vl.style.display='';
+  const v=document.getElementById('w_verdict');
+  const cls=v.className.replace('verdict','').trim(); /* rdg | bfl | self */
+  document.getElementById('w_dot').className='dotc '+cls;
+  const b=v.querySelector('b');
+  let title=(b?b.textContent:'').split(' — ')[0];
+  let extra='';
+  /* строка короткая: жертвуем словом («подходит», «списание долга»), но не цифрой «вместо N» — цвет точки уже кодирует вердикт; «пограничный» оставляем, точка та же зелёная */
+  if(last.route==='РДГ'){ title=title.replace(' · подходит',''); extra=' · '+fmt(last.pay)+' ₽'+(last.paynow>0?' вместо '+fmt(last.paynow):'/мес'); }
+  else if(last.route==='БФЛ'){ title=title.indexOf('БФЛ')===0?'БФЛ':'Не тянет РДГ'; extra=' · спишется '+fmt(last.debt)+' ₽'; }
+  document.getElementById('w_vshort').textContent=title+extra;
+}
+let panelOpen=false;
+function setPanel(open){
+  panelOpen=open;
+  document.getElementById('w_panel').classList.toggle('open',open);
+  document.getElementById('w_vline').classList.toggle('open',open);
+}
+function togglePanel(){setPanel(!panelOpen);}
+document.addEventListener('click',e=>{ if(panelOpen&&!e.target.closest('.dws')) setPanel(false); });
+/* хинт-кнопки: плавный скролл к полю + фокус */
+function gotoDebts(){
+  showTab('calc'); collapseDebts(false);
+  document.getElementById('sec_debts').scrollIntoView({behavior:'smooth',block:'start'});
+  const f=document.querySelector('#w_credits .crt.en .c-am');
+  if(f) f.focus({preventScroll:true});
+  else{ const c=document.getElementById('w_chips'); c.classList.add('urge'); setTimeout(()=>c.classList.remove('urge'),900); }
+}
+function gotoIncome(){
+  showTab('calc');
+  document.getElementById('row_income').scrollIntoView({behavior:'smooth',block:'center'});
+  document.getElementById('w_income').focus({preventScroll:true});
+}
+/* ── V2: секция «Долги» схлопывается в summary, когда заполнена и фокус ушёл дальше ── */
+function collapseDebts(c){
+  document.getElementById('w_debtBody').style.display=c?'none':'';
+  document.getElementById('w_debtSum').classList.toggle('show',c);
+}
+document.getElementById('pane_calc').addEventListener('focusin',e=>{
+  if(!e.target.closest('#sec_debts')&&last.debt>0&&document.getElementById('w_debtBody').style.display!=='none') collapseDebts(true);
+});
+/* ── V2: advanced-экспандер (ставки/сроки типов + ПМ) ── */
+function toggleAdv(){
+  const b=document.getElementById('w_body'), on=!b.classList.contains('adv');
+  b.classList.toggle('adv',on);
+  document.getElementById('w_advTg').textContent=on?'⚙ Скрыть ставки, сроки и ПМ':'⚙ Уточнить ставки, сроки и ПМ';
+}
+/* ── V2: степпер детей ── */
+function kidStep(d){
+  const i=document.getElementById('w_kids');
+  i.value=Math.max(0,(parseFloat(i.value)||0)+d);
+  calc();
+}
+/* ── V2: вкладки Расчёт / Действия ── */
+function showTab(t){
+  document.getElementById('pane_calc').style.display=t==='calc'?'':'none';
+  document.getElementById('pane_act').style.display=t==='act'?'':'none';
+  document.getElementById('tab_calc').classList.toggle('on',t==='calc');
+  document.getElementById('tab_act').classList.toggle('on',t==='act');
+  if(t==='act'&&last.debt>0) collapseDebts(true);
+  setPanel(false);
+}
+/* бейдж-пульс «Действия»: вердикт готов, не отправлено — одна ненавязчивая opacity-анимация, без автопереключения */
+let pulsed=false;
+function updateTabDot(valid){
+  const d=document.getElementById('w_tdot');
+  const show=!!valid&&!sentAt;
+  d.classList.toggle('show',show);
+  if(show&&!pulsed){ pulsed=true; d.classList.add('pulse'); setTimeout(()=>d.classList.remove('pulse'),2200); }
+  if(!show) pulsed=false;
+}
+/* ссылка на презентацию с цифрами клиента (демо-связка; в проде merge-поля CRM + короткая ссылка движка) */
+function presentUrl(){
+  if(last.noPresent) return null; /* допуск по ст. 213.13 не пройден — маршрут решает юрист, презентацию не шлём */
+  const name=document.querySelector('.deal h1').textContent.trim();
+  const pay=last.paynow>0?{pay:last.paynow}:{}; /* платёж не спросили — параметр не шлём, страница скроет сравнение, а не выдумает цифру */
+  const ki=kiLoaded?{ki:1}:{}; /* КИ загружена → презентация показывает точные числа + блок кредиторов */
+  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,term:last.eff}); /* РДГ идёт по телу плана (без ипотеки) */
+  if(last.route==='БФЛ') return '../client-presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki});
+  return null;
+}
+/* строка данных + primary-кнопка + статус отправки — единый рендер состояния */
+function updateSendUI(){
+  const badge=document.getElementById('w_badge'), btn=document.getElementById('w_send'),
+        st=document.getElementById('w_sstat'), copy=document.getElementById('w_copy'),
+        up=document.getElementById('w_kiBtn'), pv=document.getElementById('w_present');
+  if(kiBusy){ /* парсинг PDF — отправка заблокирована */
+    badge.className='dbadge load'; badge.textContent='⏳ читаю отчёт…';
+    btn.className='sbtn dis'; btn.disabled=true; btn.textContent='✈ Отправить презентацию клиенту';
+    st.className='sstat none'; st.textContent='дождитесь расчёта…';
+    copy.disabled=true; up.classList.remove('hi');
+    updateTabDot(false);
+    return;
+  }
+  if(kiLoaded){ badge.className='dbadge ki'; badge.textContent='✓ точно · по КИ'; }
+  else if(kiError){ badge.className='dbadge err'; badge.textContent='⚠ не распознан — со слов'; }
+  else{ badge.className='dbadge words'; badge.textContent='🎤 со слов · предварительно'; }
+  const u=presentUrl();
+  if(!u){ /* «мимо процедур» или пустой долг — презентации нет, отправлять нечего */
+    btn.className='sbtn dis'; btn.disabled=true; btn.textContent='✈ Отправить презентацию клиенту';
+    st.className='sstat warn'; st.textContent=last.debt>0?'«мимо процедур» — презентации нет':'введите долг';
+    copy.disabled=true; up.classList.remove('hi');
+    if(pv) pv.style.display='none';
+    updateTabDot(false);
+    return;
+  }
+  btn.className='sbtn'; btn.disabled=false;
+  btn.textContent=sentAt?'✈ Отправить снова':(kiError?'✈ Отправить со слов':'✈ Отправить презентацию клиенту');
+  if(sentAt){ st.className='sstat sent'; st.textContent='✓ отправлено '+sentAt; }
+  else{ st.className='sstat none'; st.textContent='ещё не отправлено'; }
+  copy.disabled=false;
+  /* отправлено со слов → подсветить догрузку КИ: та же ссылка станет точной */
+  up.classList.toggle('hi', !!sentAt&&!kiLoaded&&!kiError);
+  if(pv&&pv.style.display!=='none') pv.href=u;
+  updateTabDot(true);
+}
+/* отправка = запись чисел в поля сделки + фиксация факта отправки (в проде: amo API + автопуш ссылки в чат) */
+function sendPresentation(){
+  const u=presentUrl(); if(!u) return;
+  document.getElementById('f_debt').textContent=fmt(last.debt)+' ₽ · '+(last.contracts||0)+' дог.'+(kiLoaded?' (по КИ)':'');
+  document.getElementById('f_income').textContent=fmt(last.income)+' ₽';
+  document.getElementById('f_route').textContent=last.route==='РДГ'?'РДГ · '+last.eff+' мес':'БФЛ · списание';
+  document.getElementById('f_pay').textContent=last.pay?fmt(last.pay)+' ₽/мес':'—';
+  sentAt=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  document.querySelector('.dw').classList.remove('hot'); /* «горячее» снято — презентация ушла */
+  const pv=document.getElementById('w_present'); pv.href=u; pv.style.display='';
+  document.getElementById('w_noteTxt').innerHTML='Поля сделки обновлены (см. слева). В проде ссылка уходит клиенту в чат автоматически и лежит в сделке.';
+  document.getElementById('w_note').style.display='';
+  updateSendUI();
+  const t=document.getElementById('w_toast');
+  t.style.display='block';
+  t.innerHTML='✈ Презентация ('+last.route+') отправлена клиенту'+(kiLoaded?' — точные числа по КИ.':' — числа со слов, уточним по КИ.');
+  setTimeout(()=>{t.style.display='none';},6000);
+}
+/* пометить данные как «по КИ» (старый ОКБ-путь: одно точное число долга вместо конструктора) */
+function markKi(count){
+  kiLoaded=true; kiTypes=false; kiError=false; kiCount=count; /* kiTypes сброшен: ОКБ-путь держит одно число в w_debt (иначе после SB→ОКБ calc() считал бы по старому конструктору) */
+  document.getElementById('w_chips').style.display='none';
+  /* конструктор скрыт, но строка расписки остаётся видимой: она живёт рядом с точными данными КИ и в ОКБ-пути (в отчёте её нет), calc() прибавляет её поверх w_debt */
+  document.getElementById('w_credits').style.display='';
+  document.querySelectorAll('#w_credits .crt').forEach(r=>{r.style.display=r.dataset.t==='receipt'?'':'none';});
+  document.getElementById('w_debtWrap').style.display='';
+  document.getElementById('w_debt').classList.add('ki');
+  document.getElementById('w_debtLabel').textContent='Долг по кредитной истории, ₽';
+  document.getElementById('dh_small').textContent='точный расчёт по КИ';
+  collapseDebts(false); /* показать точное поле — менеджер должен его увидеть */
+}
+/* ручная правка после КИ → честно возвращаемся на «со слов», ссылка перестаёт слать ki=1 */
+function dropKi(){
+  kiLoaded=false; kiTypes=false; kiCount=null;
+  document.getElementById('w_chips').style.display='';
+  document.getElementById('w_credits').style.display='';
+  document.querySelectorAll('#w_credits .crt').forEach(r=>{r.style.display='';}); /* снять построчное скрытие ОКБ-режима */
+  document.getElementById('w_debtWrap').style.display='none';
+  document.getElementById('w_debt').classList.remove('ki');
+  document.getElementById('dh_small').textContent='экспресс · первый звонок';
+  document.querySelector('.dw').classList.remove('hot');
+  syncChipsFromValues(); /* числа из КИ остались в конструкторе — чипы по факту значений */
+  const f=document.getElementById('f_debt');
+  f.textContent=f.textContent.replace(' (по КИ)','');
+}
+document.querySelectorAll('#w_prior button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#w_prior button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); prior=b.dataset.p; calc();
+}));
+document.querySelectorAll('#w_term button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#w_term button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); term=+b.dataset.t; calc();
+}));
+document.querySelectorAll('#w_prod button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#w_prod button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); prod=b.dataset.p; calc();
+}));
+/* просрочки: влияет только на сценарии п.5 юр. заключения (payload overdue), не на расчёт */
+const ovdFlag=()=>document.querySelector('#w_ovd button.on')?.dataset.o==='1'?1:0;
+document.querySelectorAll('#w_ovd button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('#w_ovd button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+}));
+document.getElementById('w_debt').addEventListener('input',()=>{ if(kiLoaded) dropKi(); }); /* до calc — чтобы бейдж обновился сразу */
+['w_debt','w_paynow','w_income','w_kids','w_pmSelf','w_pmChild'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+document.getElementById('w_region').addEventListener('change',()=>{applyRegionPM();calc();});
+renderCreditRows();
+fillRegionSelect();
+calc();
+
+/* демо состояния 4 «КИ пришла в дожиме»: ?ki=1 — канонный набор из реального обезличенного отчёта «Скоринг Бюро» 10.07.2026
+   (13 договоров · 3 029 036 ₽: потреб 947 387/2, карты 418 185/5, МФО 122 000/4, ипотека 1 541 464/2; среднемес. платёж 119 718) */
+if(new URLSearchParams(location.search).get('ki')==='1'){
+  applyKiTypes({
+    bureau:'Скоринг Бюро', date:'10 июля 2026', count:13, total:3029036, ok:true, avgMonthly:119718,
+    types:{loan:{amount:947387,n:2},card:{amount:418185,n:5},mfo:{amount:122000,n:4},secured:{amount:0,n:0},mortgage:{amount:1541464,n:2}},
+    rows:null /* файл выгод возьмёт зашитый демо-набор ki.html */
+  },true);
+  document.querySelector('.dw').classList.add('hot'); /* жёлтая кайма — «горячее», шлите сразу */
+  document.getElementById('w_noteTxt').innerHTML='<b>Клиент прислал КИ по запросу в дожиме.</b> Клиент увидит точные числа и список кредиторов.';
+  document.getElementById('w_note').style.display='';
+}
+
+/* ===== загрузка КИ (отчёт ОКБ) прямо в виджете ===== */
+function parseOkb(fullText){
+  let flat=fullText.replace(/Сформирован[\s\S]{0,140}?из \d+/g,' ').replace(/ /g,' ').replace(/\s+/g,' ');
+  const num=s=>parseFloat(s.replace(/ /g,'').replace(',','.'));
+  const sumM=flat.match(/([\d ]+(?:,\d+)?) р\. Задолженности по обязательствам/);
+  const cntM=flat.match(/(\d+) Действующие кредиты\/займы/);
+  const dateM=fullText.match(/Кредитный отчет\s*на (.+?) года/);
+  let secIdx=flat.indexOf('ДЕЙСТВУЮЩИЕ КРЕДИТНЫЕ ДОГОВОРЫ Информация о действующих');
+  if(secIdx<0) secIdx=flat.lastIndexOf('ДЕЙСТВУЮЩИЕ КРЕДИТНЫЕ ДОГОВОРЫ');
+  if(secIdx>0) flat=flat.slice(secIdx);
+  const cut=flat.search(/ 1\. [А-ЯЁA-Z]/);
+  if(cut>0) flat=flat.slice(0,cut);
+  const fwd=/^Договор займа \(кредита\) - (.+?) ((?:\d[\d ]*)(?:,\d+)?) р\. ((?:\d[\d ]*)(?:,\d+)?) р\. ((?:\d[\d ]*)(?:,\d+)?) р\. (Без просрочек|Была просрочка по \d{2}\.\d{2}\.\d{4}|Просрочка с \d{2}\.\d{2}\.\d{4})/;
+  const credits=[]; const seen=new Set();
+  let idx=flat.indexOf('Договор займа (кредита) - ');
+  while(idx!==-1){
+    const back=flat.slice(Math.max(0,idx-110),idx);
+    const ms=[...back.matchAll(/(\d{1,2}) (?=[А-ЯЁA-Z«"])/g)];
+    const fm=flat.slice(idx).match(fwd);
+    if(ms.length&&fm){
+      const l=ms[ms.length-1];
+      const n=+l[1], lender=back.slice(l.index+l[0].length).trim(), kind=fm[1].trim();
+      if(!seen.has(n)){
+        seen.add(n);
+        const product=/микрозаем/i.test(kind)?'mfo':(/карт|овердрафт/i.test(kind)?'card':'loan');
+        credits.push({n,lender,kind,product,amount:num(fm[2]),debt:num(fm[3]),overdue:num(fm[4]),status:fm[5]});
+      }
+    }
+    idx=flat.indexOf('Договор займа (кредита) - ', idx+1);
+  }
+  credits.sort((a,b)=>a.n-b.n);
+  return {credits, summary:{debt:sumM?num(sumM[1]):null,count:cntM?+cntM[1]:null}, date:dateM?dateM[1]+' года':''};
+}
+async function parseKiFile(file){
+  const t=document.getElementById('w_toast');
+  t.style.display='block'; t.innerHTML='Читаю '+file.name+'…';
+  kiBusy=true; updateSendUI(); /* на время парсинга отправка заблокирована */
+  try{
+    if(!window.pdfjsLib) throw new Error('pdf.js не загрузился');
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    let text='';
+    for(let i=1;i<=Math.min(pdf.numPages,40);i++){
+      const pg=await pdf.getPage(i); const tc=await pg.getTextContent();
+      text+=tc.items.map(it=>it.str).join(' ')+'\n';
+    }
+    /* сначала канонный формат заказчика — «Скоринг Бюро» (ki-parse.js), затем фоллбэк ОКБ */
+    const sb=(typeof parseSb==='function')?parseSb(text):null;
+    if(sb){ applyKiTypes(sb); return; }
+    const parsed=parseOkb(text);
+    if(!parsed.credits.length) throw new Error('таблица договоров не найдена (поддерживаются отчёты «Скоринг Бюро» и ОКБ)');
+    const total=parsed.credits.reduce((s,c)=>s+c.debt,0);
+    const ok=parsed.summary.debt!=null&&Math.abs(total-parsed.summary.debt)<1&&parsed.credits.length===parsed.summary.count;
+    /* точные данные в виджет и поля сделки; презентация теперь пойдёт с ?ki=1 */
+    document.getElementById('w_debt').value=Math.round(total);
+    markKi(parsed.credits.length);
+    kiBusy=false; calc();
+    document.getElementById('f_debt').textContent=fmt(total)+' ₽ (по КИ)';
+    const rcOkb=receiptTotals(); /* расписка со слов не выпадает: calc() уже прибавил её поверх отчёта — говорим об этом явно */
+    t.innerHTML=(ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+parsed.credits.length+' '+decl(parsed.credits.length)+', долг '+fmt(total)+' ₽'+(ok?' — сходится со сводкой отчёта.':'.')+(rcOkb.amount>0?' Расписка '+fmt(rcOkb.amount)+' ₽ со слов учтена сверх отчёта.':'')+' В проде PDF прикрепляется к сделке.';
+    const payload={
+      name:document.querySelector('.deal h1').textContent.trim(),
+      date:parsed.date, term, overdue:ovdFlag(), credits:parsed.credits
+    };
+    localStorage.setItem('kiCalc', JSON.stringify(payload));
+    /* файл выгод: данные зашиты в URL (base64url) — печать/PDF той же выгоды на дожим.
+       В проде вместо этого движок сохраняет расчёт и отдаёт короткую ссылку + прикладывает PDF к сделке. */
+    const kf=document.getElementById('w_kiFile');
+    kf.href='./ki.html#d='+b64url(JSON.stringify(payload))+'&print=1'; kf.style.display='';
+  }catch(e){ kiBusy=false; kiError=true; updateSendUI(); t.innerHTML='Не удалось разобрать файл: '+e.message; }
+}
+/* «Скоринг Бюро»: раскладываем точные тела по типам прямо в конструктор — ставки/сроки остаются средними, ипотека уйдёт «вне плана» сама.
+   Расписка (receipt) в КИ не отражается — поле не заполняется из отчёта, остаётся ручным со слов
+   (расписки — только со слов, суд включает требования физлиц в реестр). */
+function applyKiTypes(sb,demo){
+  document.querySelectorAll('#w_credits .crt').forEach(row=>{
+    if(row.dataset.t==='receipt') return; /* расписка живёт рядом с точными данными КИ */
+    const t=sb.types[row.dataset.t]||{amount:0,n:0};
+    row.querySelector('.c-am').value=t.amount?Math.round(t.amount):'';
+    row.querySelector('.c-n').value=t.n||'';
+    row.classList.toggle('en',!!t.amount);
+    document.querySelector('#w_chips .chip[data-t="'+row.dataset.t+'"]').classList.toggle('on',!!t.amount);
+  });
+  if(sb.avgMonthly) document.getElementById('w_paynow').value=Math.round(sb.avgMonthly); /* среднемесячный платёж из отчёта (вкл. ипотеку) */
+  kiLoaded=true; kiTypes=true; kiError=false; kiCount=sb.count;
+  document.getElementById('w_chips').style.display='';
+  document.getElementById('w_credits').style.display='';
+  document.querySelectorAll('#w_credits .crt').forEach(r=>{r.style.display='';}); /* снять построчное скрытие, если до этого был ОКБ-режим */
+  document.getElementById('w_debtWrap').style.display='none';
+  document.getElementById('dh_small').textContent='точный расчёт по КИ · '+(sb.bureau||'');
+  kiBusy=false; calc();
+  document.getElementById('f_debt').textContent=fmt(sb.total)+' ₽ · '+sb.count+' дог. (по КИ)';
+  const t=document.getElementById('w_toast');
+  t.style.display='block';
+  t.innerHTML=(sb.ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+sb.count+' '+decl(sb.count)+', долг '+fmt(sb.total)+' ₽'+(sb.ok?' — сходится с «Итого» отчёта.':'.')+(sb.types.mortgage.amount>0?' Ипотека '+fmt(sb.types.mortgage.amount)+' ₽ — вне плана (298-ФЗ).':'')+' В проде PDF прикрепляется к сделке.';
+  const kf=document.getElementById('w_kiFile');
+  if(sb.rows&&sb.rows.length){
+    /* заключение считает платёж и ПДН само — передаём доход/семью/ПМ и ссылку дожим-презентации */
+    const payload={name:document.querySelector('.deal h1').textContent.trim(),date:sb.date,term,overdue:ovdFlag(),
+      income:parseFloat(document.getElementById('w_income').value)||0,
+      kids:parseFloat(document.getElementById('w_kids').value)||0,
+      pmSelf:parseFloat(document.getElementById('w_pmSelf').value)||0,
+      pmChild:parseFloat(document.getElementById('w_pmChild').value)||0,
+      pres:presentUrl()?presentUrl().replace('../','../'):null,
+      credits:sb.rows.map(r=>({n:r.n,lender:r.lender,debt:r.debt,product:r.type,opened:r.opened}))};
+    kf.href='./ki.html#d='+b64url(JSON.stringify(payload))+'&print=1';
+  }else kf.href='./ki.html#print=1';
+  kf.style.display='';
+  if(!demo) setTimeout(()=>{t.style.display='none';},12000);
+}
+function b64url(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+/* ═══ дожим-сообщения: готовые тексты с цифрами клиента (канон: не купил → запрос КИ обязателен) ═══ */
+function monthlyGrowth(){
+  /* проценты в месяц по конструктору (без ипотеки): со слов — по средним ставкам, по КИ — точные тела; расписка 0% даёт 0 */
+  let g=0;
+  document.querySelectorAll('#w_credits .crt').forEach(row=>{
+    if(row.dataset.t==='mortgage') return;
+    const amount=parseFloat(row.querySelector('.c-am').value)||0;
+    const rate=parseFloat(row.querySelector('.c-r').value)||0;
+    g+=amount*rate/100/12;
+  });
+  return Math.round(g);
+}
+function dzText(kind){
+  const name=document.querySelector('.deal h1').textContent.trim();
+  const abs=u=>u?new URL(u,location.href).href:'';
+  const pres=abs(presentUrl());
+  const guide=abs('../ki-guide/');
+  const sample=abs('./ki.html');
+  const grow=monthlyGrowth();
+  const plan=last.pay?fmt(last.pay):null;
+  if(kind==='open'){
+    return name+', добрый день! Это ДОНУЛЯ. Посчитали по вашим цифрам: платёж можно снизить до ~'+(plan||'—')+' ₽/мес вместо нынешних ~'+fmt(last.paynow||0)+' ₽. Всё уже готово на вашей персональной странице: '+pres+'\nОткройте — это 2 минуты. Если удобнее голосом — наберу.';
+  }
+  if(kind==='think'){
+    return name+', пока решение откладывается — долг растёт: ~+'+fmt(grow)+' ₽ процентов в месяц (+'+fmt(grow*12)+' ₽ за год). Предлагаю проверить точно по официальным данным: скачайте свою кредитную историю, это бесплатно и займёт 5 минут — инструкция: '+guide+'\nПришлёте PDF сюда — юрист подготовит юридическое заключение по всем вашим договорам, вот пример: '+sample+'\nЭто бесплатно и ни к чему не обязывает. Ваш расчёт: '+pres;
+  }
+  /* ki: заключение по реальному отчёту готово; главная фраза — по маршруту */
+  const opinion=abs((document.getElementById('w_kiFile').getAttribute('href')||'./ki.html').replace(/[#&]print=1/,''));
+  const main=last.route==='БФЛ'
+    ?'Главное: долг списывается целиком, платёж только за процедуру — 13 500 ₽/мес'
+    :'Главное: единый платёж ~'+(plan||'—')+' ₽/мес по плану, утверждённому судом'+(last.debt>last.body?', ипотека сохраняется':'');
+  return name+', юрист разобрал вашу кредитную историю: '+(kiCount||'—')+' договоров на '+fmt(last.debt||0)+' ₽. Юридическое заключение готово: '+opinion+'\n'+main+'. Договор и оплата — на вашей странице: '+pres+'\nКаждый месяц ожидания — ещё ~+'+fmt(grow)+' ₽ процентов.';
+}
+function copyDz(kind,btn){
+  if(kind==='ki'&&!kiLoaded){
+    const t=document.getElementById('w_toast');
+    t.style.display='block'; t.innerHTML='Сначала загрузите КИ — сообщение «По КИ» собирается по реальному отчёту.';
+    setTimeout(()=>{t.style.display='none';},4000);
+    return;
+  }
+  const txt=dzText(kind);
+  const old=btn.textContent;
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject())
+    .then(()=>{btn.textContent='✓ Скопировано';})
+    .catch(()=>{btn.textContent='не вышло';});
+  setTimeout(()=>{btn.textContent=old;},2500);
+}
+/* фоллбэк отправки (состояние 7): чат недоступен → менеджер копирует ссылку ПРЕЗЕНТАЦИИ и шлёт сам */
+function copyClientLink(){
+  const u=presentUrl(); if(!u) return;
+  const b=document.getElementById('w_copy');
+  const abs=new URL(u,location.href).href;
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(abs):Promise.reject())
+    .then(()=>{b.textContent='✓ Скопировано';})
+    .catch(()=>{b.textContent='не вышло — откройте презентацию';});
+  setTimeout(()=>{b.textContent='⧉ Скопировать';},3000);
+}
+document.getElementById('w_ki').addEventListener('change',e=>{ if(e.target.files[0]) parseKiFile(e.target.files[0]); });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</body>
+</html>
