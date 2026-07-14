@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Дожим · 3 дня до договора · плейбук менеджера · ДОНУЛЯ</title>
+<meta name="description" content="Полная дожимная механика «не подписал договор»: 3 дня, касания по дням, готовые тексты, новые дожимы, финал потолка.">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ПЛЕЙБУК МЕНЕДЖЕРА: дожим «не подписал» за 3 дня. Канон — свод правил §0 (окна), §10 (пустой дожим),
+   потолок «контакт→договор» = 3 дня активного времени (абсолютный), попытка = телефонный набор, сообщение = дополнение. */
+:root{
+  --paper:#F4EFE6; --paper2:#ECE5D8; --card:#fff; --card2:#FBF8F2;
+  --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0B3B2E; --pine2:#0C4233; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
+  --gold:#C99A33; --gold-bright:#F4C775; --gold-soft:#FBF3DC; --gold-ink:#8A6212;
+  --brick:#A8442E; --brick-soft:#F8E3DC;
+  --line:#E4DCCD; --shadow:0 18px 44px -22px rgba(11,59,46,.42); --shadow-sm:0 8px 22px -14px rgba(11,59,46,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:960px;margin:0 auto;padding:24px 18px 80px}
+
+.topnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.topnav a{font-size:13px;font-weight:700;text-decoration:none;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+.topnav a:hover{color:var(--green-ink);border-color:var(--green)}
+.topnav a.cur{background:var(--pine);color:#fff;border-color:var(--pine)}
+
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:28px 26px;box-shadow:var(--shadow)}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+.hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
+.hdr .brand b{font-size:15px}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:26px;line-height:1.16;letter-spacing:-.02em;font-weight:800}
+.hdr p{margin-top:10px;font-size:14.5px;color:rgba(255,255,255,.8);max-width:66ch}
+
+.rules{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.rule{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 13px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.rule b{color:var(--ink)}
+
+.day{margin-top:28px}
+.day-h{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.day-h .dn{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--pine);border-radius:999px;padding:6px 14px}
+.day-h b{font-size:17px;letter-spacing:-.01em}
+.day-h span{font-size:13px;color:var(--faint)}
+.day-goal{font-size:13px;color:var(--green-ink);font-weight:600;margin-bottom:10px}
+
+.touch{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);padding:15px 18px;margin-top:10px;display:grid;grid-template-columns:92px 1fr;gap:14px}
+.touch .tw{text-align:center}
+.touch .tw .tt{font-size:12px;font-weight:800;color:var(--green-ink)}
+.touch .tw .tc{margin-top:4px;display:inline-block;font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 9px}
+.tc.call{background:var(--pine);color:#fff}
+.tc.chat{background:var(--green-soft);color:var(--green-ink)}
+.tc.sms{background:var(--gold-soft);color:var(--gold-ink)}
+.touch h3{font-size:14.5px;letter-spacing:-.01em}
+.touch .aim{margin-top:3px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.touch .aim b{color:var(--ink)}
+.touch .tool{display:inline-block;margin-top:7px;font-size:11px;font-weight:700;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:3px 10px}
+.touch .tool.w{background:var(--green-soft);color:var(--green-ink)}
+.msg{margin-top:9px;background:var(--card2);border:1px dashed var(--line);border-radius:10px;padding:10px 12px;font-size:12.5px;color:var(--ink);line-height:1.55;white-space:pre-line}
+.msg .ph{color:var(--gold-ink);font-weight:700}
+.copy{margin-top:7px;border:1px solid var(--green);background:#fff;color:var(--green-ink);border-radius:8px;padding:6px 12px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.copy:hover{background:var(--green-soft)}
+.branch{margin-top:9px;border-left:none;background:var(--green-soft);border-radius:10px;padding:9px 12px;font-size:12.5px;color:var(--green-ink);line-height:1.5}
+.branch b{display:block}
+
+.newtag{display:inline-block;margin-left:6px;font-size:9.5px;font-weight:800;letter-spacing:.05em;background:var(--brick);color:#fff;border-radius:999px;padding:2px 7px;vertical-align:2px}
+
+.final{margin-top:28px;background:var(--brick-soft);border:1px solid rgba(168,68,46,.3);border-radius:16px;padding:16px 18px}
+.final h2{font-size:15px;color:var(--brick);margin-bottom:8px}
+.final ul{list-style:none}
+.final li{font-size:13px;color:#6E2E1F;padding:4px 0 4px 18px;position:relative;line-height:1.5}
+.final li::before{content:"→";position:absolute;left:0;font-weight:800;color:var(--brick)}
+
+.foot{margin-top:28px;background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:18px 20px}
+.foot h3{font-size:15px;font-weight:800;margin-bottom:8px}
+.foot ul{list-style:none;display:grid;gap:8px}
+.foot li{font-size:13px;color:var(--muted);line-height:1.5;padding-left:16px;position:relative}
+.foot li::before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.foot li b{color:var(--ink);font-weight:600}
+
+@media(max-width:640px){
+  .wrap{padding:16px 13px 60px}
+  .hdr{padding:24px 20px;border-radius:20px}.hdr h1{font-size:22px}
+  .touch{grid-template-columns:1fr}
+  .touch .tw{display:flex;gap:8px;align-items:center;text-align:left}
+  .touch .tw .tc{margin-top:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topnav">
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/sales-flow-map/">Карта связки</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/manager-situations/">Ситуации менеджера</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/widget-states/">Состояния виджета</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/rdg-calc-method/">Как считает калькулятор</a>
+    <a class="cur" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/dozhim-3days/">Дожим · 3 дня</a>
+  </nav>
+
+  <header class="hdr">
+    <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · ПЛЕЙБУК ДОЖИМА</b><small>НЕ ПОДПИСАЛ ДОГОВОР → 3 ДНЯ</small></div></div>
+    <h1>Дожим за 3 дня: не подписал на первом звонке</h1>
+    <p>Потолок «контакт → договор» — <b>3 дня активного времени</b>, абсолютный (свод §0). Дальше лид уходит другому с мерджем. Значит, каждый день дожима обязан двигать сделку, а не «напоминать о себе». Ниже — план по дням: каждое касание с целью, готовым текстом и инструментом.</p>
+  </header>
+
+  <div class="rules">
+    <div class="rule"><b>Попытка = телефонный набор.</b> Сообщение — дополнение, окно 48 ч само по себе не закрывает.</div>
+    <div class="rule"><b>Каждое касание — новая ценность.</b> Рубрика звонка: попытался закрыть · отработал возражение · новый шаг с датой. 0 из 3 = «пустой дожим», работой не считается (§10).</div>
+    <div class="rule"><b>Ритм: максимум 1 звонок + 2 сообщения в день.</b> Больше — уже давление, растёт риск отказа.</div>
+    <div class="rule"><b>«Прекратите контакт» = стоп.</b> Отказ с цитатой → закрытие с причиной, DNC. Право закрыть есть.</div>
+    <div class="rule"><b>КИ пришла — план дня отменяется.</b> В любой день: КИ в виджет → заключение → немедленно звонок «разбор». Это самый сильный момент.</div>
+    <div class="rule"><b>Парковка по дате клиента</b> паузит потолок (лимит 1–2 на лид). Разговор потолок НЕ двигает.</div>
+  </div>
+
+  <!-- Д0 -->
+  <div class="day">
+    <div class="day-h"><span class="dn">День 0</span><b>День первого звонка — закрепить, пока горячо</b><span>2 сообщения, без повторного звонка</span></div>
+    <div class="day-goal">Цель дня: ссылка открыта + КИ запрошена.</div>
+
+    <div class="touch">
+      <div class="tw"><div class="tt">≤ 15 мин<br>после звонка</div><span class="tc chat">чат</span></div>
+      <div>
+        <h3>Резюме звонка + персональная ссылка</h3>
+        <div class="aim">Пока клиент горячий — зафиксировать 2 цифры и ссылку. Если презентацию на звонке не открыл — это его первый контакт с ней.</div>
+        <span class="tool w">✉ в виджете: «Не открыл» — цифры подставятся сами</span>
+        <div class="msg">{Имя}, спасибо за разговор! Коротко, о чём договорились: платёж можно снизить до ~<span class="ph">{платёж по плану}</span> ₽/мес вместо нынешних ~<span class="ph">{платит сейчас}</span> ₽. Ваш персональный расчёт, договор и подпись — по ссылке: <span class="ph">{ссылка}</span>
+Посмотрите сегодня — я на связи до вечера.</div>
+        <button class="copy" onclick="cp(this)">Скопировать шаблон</button>
+      </div>
+    </div>
+
+    <div class="touch">
+      <div class="tw"><div class="tt">+2–3 часа</div><span class="tc chat">чат</span></div>
+      <div>
+        <h3>Запрос КИ = обмен на бесплатное юр. заключение</h3>
+        <div class="aim">Обязательный шаг (канон). Не «пришлите документы», а <b>обмен</b>: КИ за 5 минут → юрист бесплатно готовит юридическое заключение по всем договорам. Приложить пример.</div>
+        <span class="tool w">✉ в виджете: «Не подписал» — рост долга, инструкция, пример заключения</span>
+      </div>
+    </div>
+
+    <div class="touch">
+      <div class="tw"><div class="tt">Вечер,<br>если не открыл</div><span class="tc sms">SMS</span></div>
+      <div>
+        <h3>SMS-дубль другим каналом</h3>
+        <div class="aim">Мессенджер мог не дойти. Коротко, одна цифра, одна ссылка.</div>
+        <div class="msg">{Имя}, ваш расчёт по снижению платежа готов: <span class="ph">{ссылка}</span> — ДОНУЛЯ</div>
+        <button class="copy" onclick="cp(this)">Скопировать шаблон</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Д1 -->
+  <div class="day">
+    <div class="day-h"><span class="dn">День 1</span><b>День точности — звонок №2</b><span>окно 48 ч закрывается набором</span></div>
+    <div class="day-goal">Цель дня: КИ в руках ИЛИ живое возражение названо вслух. Рубрика звонка — все 3 пункта.</div>
+
+    <div class="touch">
+      <div class="tw"><div class="tt">Утро</div><span class="tc call">звонок</span></div>
+      <div>
+        <h3>Три сценария по состоянию клиента</h3>
+        <div class="branch"><b>КИ прислал → «разбор заключения»</b>Загрузить PDF в виджет → юр. заключение готово → звонок: все его кредиторы с вердиктами, точный платёж, «ипотека сохраняется». Закрытие на подпись прямо на звонке: в просмотре договора есть кнопка «Подписать». Подписал → денежное окно ст. 4–5.</div>
+        <div class="branch" style="margin-top:6px"><b>Ссылку открыл, КИ нет → возражение + «вместе за 5 минут»<span class="newtag">НОВОЕ</span></b>Отработать возражение по библиотеке скрипта. Затем не отпускать на «сам сделаю»: «давайте прямо сейчас вместе — откройте scoring.ru, я подскажу по шагам, это 5 минут». Конверсия запроса КИ на звонке в разы выше, чем «сделает сам потом».</div>
+        <div class="branch" style="margin-top:6px"><b>Не открывал ничего → дозвон в другое время + смена захода</b>Звонить в другое окно дня (обед/после 18). Дозвонился — не пересказывать презентацию, а спросить: «что удобнее — я в двух словах голосом, или посмотрите ссылку, пока я на линии?»</div>
+      </div>
+    </div>
+
+    <div class="touch">
+      <div class="tw"><div class="tt">День</div><span class="tc chat">чат</span></div>
+      <div>
+        <h3>Семейный ход <span class="newtag">НОВОЕ</span></h3>
+        <div class="aim">Решение о долгах почти всегда семейное. Документ, который смотрят двое, закрывается вдвое чаще. Дать прямое разрешение переслать.</div>
+        <div class="msg">{Имя}, частый вопрос — «надо посоветоваться». Это правильно: перешлите расчёт супруге/супругу — <span class="ph">{ссылка}</span>. Если появятся вопросы у обоих, наберу в удобное время и отвечу сразу двоим. Когда удобно?</div>
+        <button class="copy" onclick="cp(this)">Скопировать шаблон</button>
+      </div>
+    </div>
+
+    <div class="touch">
+      <div class="tw"><div class="tt">Вечер</div><span class="tc chat">чат</span></div>
+      <div>
+        <h3>Кейс-соцдоказательство <span class="newtag">НОВОЕ</span></h3>
+        <div class="aim">Не давить цифрами второй раз подряд — показать, что «такие как я» уже прошли. Кейс обезличенный, похожий по сумме/составу семьи.</div>
+        <div class="msg">{Имя}, для примера: на прошлой неделе суд утвердил план клиенту с очень похожей ситуацией — долг ~1,5 млн, семья с двумя детьми, ипотека. Итог: один платёж вместо девяти, квартира осталась, коллекторы замолчали в первый же месяц. Ваш расчёт показывает такую же картину: <span class="ph">{ссылка}</span></div>
+        <button class="copy" onclick="cp(this)">Скопировать шаблон</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Д2 -->
+  <div class="day">
+    <div class="day-h"><span class="dn">День 2</span><b>День дефицита — звонок №3</b><span>дефицит честный: потолок реален</span></div>
+    <div class="day-goal">Цель дня: решение назначено на завтра, названа конкретика («завтра в 12 подписываем» / «нет — и вот почему»).</div>
+
+    <div class="touch">
+      <div class="tw"><div class="tt">Утро</div><span class="tc call">звонок</span></div>
+      <div>
+        <h3>«Бронь условий до завтра» <span class="newtag">НОВОЕ</span></h3>
+        <div class="aim">Честный дедлайн — не выдумка: послезавтра лид передаётся другому специалисту (потолок 3 дня), и разбор начнётся заново. Плюс два смягчителя решения: <b>частичка от 1 000 ₽</b> (подпись + символическая фиксация вместо полного платежа) и <b>60 месяцев</b>, если пугает платёж.</div>
+        <div class="msg">Скрипт-каркас: «{Имя}, я держу вашу бронь расчёта и условий до завтра — потом по нашим правилам передаю дело коллеге, и всё начнётся заново. Давайте честно: что останавливает? … [возражение по библиотеке] … Можно подписать сегодня и зафиксировать всё платежом от 1 000 ₽ — остальное когда скажете.»</div>
+      </div>
+    </div>
+
+    <div class="touch">
+      <div class="tw"><div class="tt">День</div><span class="tc chat">чат</span></div>
+      <div>
+        <h3>ФССП-ход: проверка приставов <span class="newtag">НОВОЕ</span></h3>
+        <div class="aim">Перевести срочность из абстрактной в личную: база исполнительных производств публичная. Если там что-то есть — тянуть по-настоящему опасно (арест счетов, до 50% дохода).</div>
+        <div class="msg">{Имя}, проверьте себя за минуту в официальной базе приставов: fssp.gov.ru → «Узнать о долгах» (ФИО + дата рождения). Если там есть производство — счета могут арестовать в любой день, и тогда действовать придётся уже в аварийном режиме. Если пусто — тем лучше, значит успеваем всё сделать спокойно. Ваш расчёт: <span class="ph">{ссылка}</span></div>
+        <button class="copy" onclick="cp(this)">Скопировать шаблон</button>
+      </div>
+    </div>
+
+    <div class="touch">
+      <div class="tw"><div class="tt">Вечер</div><span class="tc chat">чат</span></div>
+      <div>
+        <h3>Дедлайн-сообщение</h3>
+        <div class="aim">Письменно зафиксировать то, что сказано голосом утром. Последняя строка — забота, не угроза.</div>
+        <div class="msg">{Имя}, напоминаю: завтра — последний день, когда ваш расчёт и условия закреплены за мной. Дальше дело уходит коллеге и рассматривается заново. Что теряете, откладывая: ~+<span class="ph">{рост}</span> ₽ процентов каждый месяц. Что нужно, чтобы завтра закрыть вопрос: 10 минут и код из СМС. Ссылка та же: <span class="ph">{ссылка}</span></div>
+        <button class="copy" onclick="cp(this)">Скопировать шаблон</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Д3 -->
+  <div class="day">
+    <div class="day-h"><span class="dn">День 3</span><b>День финала — звонок №4, «да или нет»</b><span>день ноля: вечером лид уходит</span></div>
+    <div class="day-goal">Цель дня: решение в любую сторону. «Да» → подпись + частичка. «Нет» → причина зафиксирована, закрытие честное.</div>
+
+    <div class="touch">
+      <div class="tw"><div class="tt">Утро</div><span class="tc call">звонок</span></div>
+      <div>
+        <h3>Прямой вопрос + квал намерения</h3>
+        <div class="aim">Без новых презентаций. «Сегодня закрываю ваш вопрос в любую сторону — да или нет?» Возражение — последняя отработка + финальный оффер (частичка от 1 000 / 60 мес). Квал намерения из рубрики: «если посоветуетесь и будет „нет" — всё равно идёте?»</div>
+      </div>
+    </div>
+
+    <div class="touch">
+      <div class="tw"><div class="tt">День</div><span class="tc chat">чат</span></div>
+      <div>
+        <h3>«Дверь открыта» — финальное сообщение <span class="newtag">НОВОЕ</span></h3>
+        <div class="aim">Уйти без обиды и оставить дорогу назад: ссылка живёт, долг растёт, заключение устаревает. Часть «нет» возвращается сама через 1–2 недели — вернётся уже в тёплый пул.</div>
+        <div class="msg">{Имя}, закрываю вашу бронь — без обид, таковы правила: держим условия 3 дня. Ссылка останется рабочей: <span class="ph">{ссылка}</span>. Держите в голове одно: долг сейчас растёт на ~+<span class="ph">{рост}</span> ₽ в месяц, и с каждым месяцем план будет дороже. Надумаете — напишите сюда, начнём с актуального заключения. Хорошего дня!</div>
+        <button class="copy" onclick="cp(this)">Скопировать шаблон</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="final">
+    <h2>Конец дня 3 — потолок. Что происходит автоматически</h2>
+    <ul>
+      <li>Лид уходит другому менеджеру с мерджем всей истории (свод v2.11) — новые касания начнёт коллега, уже с заключением и перепиской.</li>
+      <li>Финальный вердикт AI-QA догоняет: живой клиент + недобитый гейт = −1 жизнь; недозвоны рейтинг не трогают.</li>
+      <li>КИ так и не запрошена за 3 дня = провал обязательного шага (канон «не купил → запрос КИ обязателен»).</li>
+      <li>Клиент вернулся сам после потолка → тёплый пул, приоритетная выдача.</li>
+    </ul>
+  </div>
+
+  <div class="foot">
+    <h3>Инструменты под рукой</h3>
+    <ul>
+      <li><b>Кнопки ✉ в amo-виджете</b> — «Не открыл» / «Не подписал» / «По КИ»: тексты с цифрами клиента подставляются сами. Остальные шаблоны — копируйте с этой страницы (плейсхолдеры {…} заменит виджет будущего релиза; пока — руками).</li>
+      <li><b>Инструкция клиенту по КИ</b> — <a href="../ki-guide/" style="color:var(--green-ink)">«Кредитная история за 5 минут»</a> (scoring.ru через Госуслуги, бесплатно, «ничего не покупать»).</li>
+      <li><b>Пример юр. заключения</b> — <a href="../calc-widget/ki.html" style="color:var(--green-ink)">обезличенный образец</a>: показывайте до получения КИ, после — шлите персональное.</li>
+      <li><b>Опция на будущее:</b> голосовое/кружок от юриста «посмотрел вашу историю» перед звонком №2 — персонализация сильнее любого текста (в прод-релизе).</li>
+      <li><b>Помнить:</b> подписал, но не оплатил — это уже другой режим (ст. 5: попытка каждый день, потолка нет, частичка-добор). Этот плейбук — только про «не подписал».</li>
+    </ul>
+  </div>
+
+</div>
+<script>
+'use strict';
+function cp(btn){
+  const t=btn.previousElementSibling.textContent.trim();
+  const ok=()=>{btn.textContent='✓ Скопировано';setTimeout(()=>{btn.textContent='Скопировать шаблон';},2000);};
+  /* фоллбэк без Clipboard API — execCommand работает по клику без разрешений */
+  const legacy=()=>{try{
+    const ta=document.createElement('textarea');ta.value=t;ta.style.cssText='position:fixed;opacity:0';
+    document.body.appendChild(ta);ta.select();
+    const r=document.execCommand('copy');document.body.removeChild(ta);
+    r?ok():(btn.textContent='выделите текст вручную');
+  }catch(e){btn.textContent='выделите текст вручную';}};
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok).catch(legacy);
+  else legacy();
+}
+</script>
+</body>
+</html>
