@@ -293,7 +293,9 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           </div>
 
           <!-- в) ПЛАТЁЖ СЕЙЧАС -->
-          <div class="rowf"><span class="rlab">Платёж сейчас, ₽/мес</span><input id="w_paynow" class="rin" type="number" placeholder="авто"></div>
+          <!-- платёж руками не вводится (правка заказчика 14.07): всегда считается по кредитам, при КИ — из отчёта -->
+          <div class="rowf freeline"><span class="rlab">Платёж сейчас — считаем по кредитам</span><b id="w_paynowLine" class="num">—</b></div>
+          <input id="w_paynow" type="hidden">
 
           <!-- г) ДОХОД · ДЕТИ · РЕГИОН -->
           <div class="rowf" id="row_income"><span class="rlab">Офиц. доход, ₽/мес</span><input id="w_income" class="rin" type="number"></div>
@@ -536,7 +538,7 @@ function calc(){
   const payManual=parseFloat(document.getElementById('w_paynow').value)||0;
   const payCalc=((!kiLoaded||kiTypes)&&ct.monthly>0)?Math.round(ct.monthly):0;
   const paynow=payManual>0?payManual:payCalc;
-  document.getElementById('w_paynow').placeholder=payCalc>0?('авто: '+fmt(payCalc)):'авто';
+  document.getElementById('w_paynowLine').textContent=(payManual>0?fmt(payManual)+' ₽/мес · по КИ':payCalc>0?'~'+fmt(payCalc)+' ₽/мес':'— введите долги');
   const income=parseFloat(document.getElementById('w_income').value)||0;
   const kids=parseFloat(document.getElementById('w_kids').value)||0;
   /* свободный доход: минус ПМ клиента и полный ПМ ребёнка на КАЖДОГО ребёнка (правило заказчика) */
@@ -773,6 +775,7 @@ function markKi(count){
 /* ручная правка после КИ → честно возвращаемся на «со слов», ссылка перестаёт слать ki=1 */
 function dropKi(){
   kiLoaded=false; kiTypes=false; kiCount=null;
+  document.getElementById('w_paynow').value=''; /* платёж из отчёта недействителен после правки данных — назад к расчёту по кредитам */
   document.getElementById('w_chips').style.display='';
   document.getElementById('w_credits').style.display='';
   document.querySelectorAll('#w_credits .crt').forEach(r=>{r.style.display='';}); /* снять построчное скрытие ОКБ-режима */
