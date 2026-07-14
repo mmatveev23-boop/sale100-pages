@@ -4,105 +4,57 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Виджет-калькулятор · состояния · ДОНУЛЯ</title>
-<meta name="description" content="Состояния виджета в карточке сделки amoCRM: со слов → по КИ, отправлено/нет, загрузка и ошибки. Одна презентация, КИ переключает данные.">
+<title>Калькулятор: как работать · инструкция менеджера · ДОНУЛЯ</title>
+<meta name="description" content="Инструкция по виджету-калькулятору: шаги первого звонка, что делает каждая кнопка, загрузка КИ трёх бюро, дожимы. Со скриншотами.">
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* ИНСТРУКЦИЯ ПО КАЛЬКУЛЯТОРУ (замена «Состояний виджета» 15.07.2026 — старая описывала V1).
+   Скриншоты guide-img/*.png сняты Playwright с боевого виджета; данные на скринах вымышленные. */
 :root{
-  --paper:#F4EFE6; --paper2:#ECE5D8; --card:#fff;
+  --paper:#F4EFE6; --paper2:#ECE5D8; --card:#fff; --card2:#FBF8F2;
   --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
   --pine:#0B3B2E; --pine2:#0C4233; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
   --gold:#C99A33; --gold-bright:#F4C775; --gold-soft:#FBF3DC; --gold-ink:#8A6212;
-  --blue:#4c8bf7; --alert:#A8442E; --alert-soft:#FAEDE8;
+  --brick:#A8442E; --brick-soft:#F8E3DC;
   --line:#E4DCCD; --shadow:0 18px 44px -22px rgba(11,59,46,.42); --shadow-sm:0 8px 22px -14px rgba(11,59,46,.4);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .num{font-variant-numeric:tabular-nums}
-.wrap{max-width:1180px;margin:0 auto;padding:24px 18px 80px}
+.wrap{max-width:960px;margin:0 auto;padding:24px 18px 80px}
 .topnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-.topnav a{font-size:13px;font-weight:700;text-decoration:none;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px;transition:color .15s,border-color .15s}
+.topnav a{font-size:13px;font-weight:700;text-decoration:none;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px}
 .topnav a:hover{color:var(--green-ink);border-color:var(--green)}
 .topnav a.cur{background:var(--pine);color:#fff;border-color:var(--pine)}
-
-/* ── ШАПКА ── */
 .hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:28px 26px;box-shadow:var(--shadow)}
 .hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:16px}
 .hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
-.hdr .brand b{font-size:15px;letter-spacing:.02em}
+.hdr .brand b{font-size:15px}
 .hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
 .hdr h1{font-size:26px;line-height:1.16;letter-spacing:-.02em;font-weight:800}
-.hdr p{margin-top:10px;font-size:14.5px;color:rgba(255,255,255,.8);max-width:66ch}
-/* принцип */
-.principle{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px}
-.pchip{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;color:var(--muted)}
-.pchip b{color:var(--ink);font-weight:700}
-.pchip .ic{width:9px;height:9px;border-radius:3px}
-
-/* ── СЕТКА СОСТОЯНИЙ ── */
-.grid{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;align-items:start}
-.state{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-sm);overflow:hidden}
-.state .lbl{display:flex;align-items:center;gap:9px;padding:14px 16px 0}
-.state .lbl .n{width:26px;height:26px;border-radius:8px;background:var(--pine);color:var(--gold-bright);display:grid;place-items:center;font-size:12.5px;font-weight:800;flex-shrink:0}
-.state .lbl b{font-size:15px;font-weight:800;letter-spacing:-.01em}
-.state .cap{padding:6px 16px 14px;font-size:12.5px;color:var(--muted);line-height:1.5}
-.state .cap b{color:var(--ink);font-weight:600}
-.wcanvas{background:#f7f8f9;border-top:1px solid var(--line);padding:14px}
-
-/* ── ВИДЖЕТ (как в amo, из in-amo.html) ── */
-.dw{background:#fff;border:1px solid #cfe0d8;border-radius:10px;overflow:hidden;box-shadow:0 4px 14px -8px rgba(11,59,46,.35)}
-.dw.hot{border:2px solid var(--gold);box-shadow:0 6px 18px -8px rgba(201,154,51,.5)}
-.dw .dh{display:flex;align-items:center;gap:8px;background:#0B3B2E;color:#fff;padding:10px 12px}
-.dw .dh .lg{width:22px;height:22px;border-radius:6px;background:#0F6B4F;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#F4C775}
-.dw .dh b{font-size:12.5px}
-.dw .dh small{display:block;font-size:10px;color:rgba(255,255,255,.6)}
-.dw .body{padding:10px 12px}
-.dw .seg{display:flex;gap:3px;background:#eef1f4;border-radius:8px;padding:3px;margin-bottom:2px}
-.dw .seg button{flex:1;border:none;background:none;border-radius:6px;padding:5px;font-family:inherit;font-weight:700;font-size:12px;color:#7c8894;cursor:default}
-.dw .seg button.on{background:#fff;color:#0B3B2E;box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.dw label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#94a0ab;margin:8px 0 3px}
-.dw .fld{width:100%;border:1px solid #d8dee3;border-radius:7px;padding:7px 9px;font-size:13px;color:#2e3640;background:#fff}
-.dw .fld.ki{border-color:#C99A33;background:#FBF3DC;color:#8A6212;font-weight:700}
-.dw .verdict{margin-top:10px;border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.4}
-.dw .verdict b{display:block;font-size:13px;margin-bottom:2px}
-.dw .verdict.rdg{background:#0B3B2E;color:#fff}
-.dw .verdict.bfl{background:#E9F3EE;color:#0B5540}
-.dw .kv{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:12.5px;border-bottom:1px dashed #eef1f4}
-.dw .kv span{color:#94a0ab}
-.dw .kv b{font-variant-numeric:tabular-nums}
-/* строка данных (источник) */
-.dbadge{margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px}
-.dbadge.words{background:#eef1f4;color:#7c8894}
-.dbadge.ki{background:#FBF3DC;color:#8A6212}
-.dbadge.load{background:#E4F0FA;color:#2f6fb0}
-.dbadge.err{background:#FAEDE8;color:#A8442E}
-/* кнопка отправки — главная (зелёная) */
-.sbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:10px;border:none;border-radius:8px;background:#0F6B4F;color:#fff;padding:11px;font-family:inherit;font-size:13.5px;font-weight:800;cursor:default}
-.sbtn.dis{background:#c3ccd4;color:#fff}
-.sbtn.err{background:#A8442E}
-/* статус под кнопкой */
-.sstat{margin-top:6px;text-align:center;font-size:11.5px;font-weight:600}
-.sstat.none{color:#94a0ab}
-.sstat.sent{color:#0F6B4F}
-.sstat.warn{color:#A8442E}
-/* вторичные */
-.lrow{display:flex;gap:6px;margin-top:8px}
-.lbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid #d8dee3;border-radius:8px;background:#fff;color:#0B5540;padding:8px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:default;text-align:center}
-.lbtn.hi{border-color:#0F6B4F;background:#E9F3EE}
-.lbtn.mut{color:#7c8894}
-.note{margin-top:9px;font-size:11px;color:#94a0ab;line-height:1.5}
-.note b{color:#5c6874;font-weight:700}
-.prog{margin-top:10px;height:8px;border-radius:5px;background:#e4eaef;overflow:hidden}
-.prog i{display:block;height:100%;width:62%;background:#4c8bf7;border-radius:5px}
-
-/* низ */
-.foot{margin-top:26px;background:var(--card);border:1px dashed var(--line);border-radius:16px;padding:18px 20px}
-.foot h3{font-size:15px;font-weight:800;margin-bottom:8px}
-.foot ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.foot li{font-size:13px;color:var(--muted);line-height:1.5;padding-left:16px;position:relative}
-.foot li::before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
-.foot li b{color:var(--ink);font-weight:600}
-@media (max-width:640px){ .foot ul{grid-template-columns:1fr} .principle{gap:8px} .hdr h1{font-size:22px} }
+.hdr p{margin-top:10px;font-size:14.5px;color:rgba(255,255,255,.8);max-width:72ch}
+.hdr p b{color:#fff}
+.hdr a.open{display:inline-block;margin-top:14px;background:var(--gold);color:#082A21;font-weight:800;font-size:13.5px;border-radius:11px;padding:11px 18px;text-decoration:none;transition:transform 160ms cubic-bezier(0.23,1,0.32,1)}
+.hdr a.open:active{transform:scale(0.97)}
+h2.sect{margin:26px 0 10px;font-size:17px;letter-spacing:-.01em}
+.step{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-sm);margin-top:12px;overflow:hidden;display:grid;grid-template-columns:300px 1fr}
+.step .shot{background:var(--paper2);padding:14px;display:flex;align-items:flex-start;justify-content:center}
+.step .shot img{max-width:100%;height:auto;max-height:520px;object-fit:contain;object-position:top;border-radius:10px;box-shadow:0 6px 20px -8px rgba(11,59,46,.35)}
+.step .tx{padding:16px 18px}
+.step .tx .sn{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:9px;background:var(--pine);color:var(--gold-bright);font-weight:800;font-size:13px;margin-bottom:7px}
+.step h3{font-size:15px;letter-spacing:-.01em;margin-bottom:5px}
+.step p{font-size:12.5px;color:var(--muted);line-height:1.55;margin-top:5px}
+.step p b{color:var(--ink)}
+.step .say{margin-top:8px;background:var(--card2);border:1px dashed var(--line);border-radius:10px;padding:9px 12px;font-size:12.5px;color:var(--ink);line-height:1.55}
+.step .say::before{content:"Голосом: ";font-weight:800;color:var(--green-ink)}
+@media(max-width:680px){.step{grid-template-columns:1fr}.step .shot img{max-height:420px}}
+.btns{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px}
+.btn-card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 14px;font-size:12.5px;color:var(--muted);line-height:1.55}
+.btn-card b{display:block;color:var(--ink);font-size:13px;margin-bottom:3px}
+.btn-card b .k{display:inline-block;background:var(--green-soft);color:var(--green-ink);border-radius:7px;padding:1px 8px;font-size:12px}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.rule{background:var(--gold-soft);border:1px solid rgba(201,154,51,.35);border-radius:12px;padding:10px 13px;font-size:12.5px;color:#7A6220;line-height:1.5}
+.rule b{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -112,172 +64,99 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
     <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/manager-system/">Система</a>
     <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/sales-flow-map/">Карта связки</a>
     <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/manager-situations/">Ситуации менеджера</a>
-    <a class="cur" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/widget-states/">Состояния виджета</a>
-      <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/lead-map/">Карта сценариев</a>
+    <a class="cur" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/widget-states/">Инструкция калькулятора</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/rdg-calc-method/">Как считает калькулятор</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/dozhim-3days/">Дожим · 3 дня</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/lead-map/">Карта сценариев</a>
   </nav>
 
   <header class="hdr">
-    <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор клиента</b><small>СОСТОЯНИЯ ВИДЖЕТА В amoCRM</small></div></div>
-    <h1>Как виджет выглядит на каждом шаге</h1>
-    <p>Одна презентация клиенту. Кредитная история (КИ) не создаёт второй документ — она переключает данные презентации со «со слов» на «точные». Ниже — все состояния виджета в карточке сделки.</p>
-    <div class="principle">
-      <span class="pchip"><span class="ic" style="background:#0F6B4F"></span><b>Одна кнопка</b> отправки презентации</span>
-      <span class="pchip"><span class="ic" style="background:#C99A33"></span>КИ переключает <b>данные</b>, не документ</span>
-      <span class="pchip"><span class="ic" style="background:#4c8bf7"></span>статус «отправлено» = <b>защита от «забыл»</b></span>
-    </div>
+    <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · ИНСТРУКЦИЯ ПО КАЛЬКУЛЯТОРУ</b><small>ОДИН ЗВОНОК — ОДИН ЭКРАН · СО СКРИНШОТАМИ</small></div></div>
+    <h1>Калькулятор за 5 минут: шаги звонка и каждая кнопка</h1>
+    <p>Виджет живёт в карточке сделки amoCRM справа. Ты вводишь цифры со слов клиента — он считает вердикт, готовит презентацию, дожимы и юр. заключение. Ниже — путь звонка по шагам и словарь кнопок. <b>Данные на скриншотах вымышленные.</b></p>
+    <a class="open" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/calc-widget/in-amo.html" target="_blank" rel="noopener">Открыть тренажёр и повторять по шагам ↗</a>
   </header>
 
-  <div class="grid">
+  <h2 class="sect">Путь звонка — 8 шагов</h2>
 
-    <!-- 1 · СО СЛОВ · НЕ ОТПРАВЛЕНО -->
-    <div class="state">
-      <div class="lbl"><span class="n">1</span><b>Со слов · не отправлено</b></div>
-      <div class="cap">Клоузер посчитал со слов прямо на звонке. КИ ещё нет. Клиент увидит числа с пометкой <b>«предварительно»</b>.</div>
-      <div class="wcanvas">
-        <div class="dw">
-          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>экспресс · первый звонок</small></div></div>
-          <div class="body">
-            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
-            <label>Долг со слов, ₽</label><div class="fld num">1 240 000</div>
-            <div class="verdict rdg"><b>РДГ · план 36 мес</b>Платёж ~36 856 ₽/мес, проценты останавливаются, не банкрот.</div>
-            <div class="dbadge words">🎤 Данные: со слов</div>
-            <button class="sbtn">✈ Отправить презентацию клиенту</button>
-            <div class="sstat none">ещё не отправлено</div>
-            <div class="lrow"><span class="lbtn">⭱ Загрузить КИ</span><span class="lbtn mut">⧉ Скопировать</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="step"><div class="shot"><img src="./guide-img/s1-start.png" alt="Старт виджета" loading="lazy"></div><div class="tx">
+    <span class="sn">1</span>
+    <h3>Старт: выбери продукт и тапай типы долгов</h3>
+    <p>Сверху тогл <b>РДГ / БФЛ</b> (обычно начинаем с РДГ — виджет сам скажет, если не тянет). Клиент рассказывает — ты <b>тапаешь чип типа долга</b> (Кредит · Карта · МФО · Залог · Ипотека · Расписка) и вводишь сумму. Поле «шт» можно не заполнять (по умолчанию 1). Ставки и сроки уже стоят средние по РФ — не трогай.</p>
+    <p>Нижняя часть (срок плана, просрочки, действия) спрятана — <b>раскроется сама после первой суммы</b>, или тапни «⌄ Развернуть».</p>
+  </div></div>
 
-    <!-- 2 · СО СЛОВ · ОТПРАВЛЕНО -->
-    <div class="state">
-      <div class="lbl"><span class="n">2</span><b>Со слов · отправлено</b></div>
-      <div class="cap">Ссылка ушла клиенту в чат. Не купил на звонке — <b>запрашиваем КИ, это обязательный шаг дожима</b>; пришла — <b>та же ссылка</b> станет точной, пересылать заново не нужно.</div>
-      <div class="wcanvas">
-        <div class="dw">
-          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>экспресс · первый звонок</small></div></div>
-          <div class="body">
-            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
-            <label>Долг со слов, ₽</label><div class="fld num">1 240 000</div>
-            <div class="verdict rdg"><b>РДГ · план 36 мес</b>Платёж ~36 856 ₽/мес, проценты останавливаются, не банкрот.</div>
-            <div class="dbadge words">🎤 Данные: со слов</div>
-            <button class="sbtn">✈ Отправить снова</button>
-            <div class="sstat sent">✓ отправлено 14:32</div>
-            <div class="lrow"><span class="lbtn hi">⭱ Загрузить КИ → станет точной</span></div>
-            <div class="note">Клиент открыл презентацию · виден в ленте сделки.</div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="step"><div class="shot"><img src="./guide-img/s2-filled.png" alt="Виджет с введёнными цифрами" loading="lazy"></div><div class="tx">
+    <span class="sn">2</span>
+    <h3>Цифры введены — виджет посчитал всё сам</h3>
+    <p>В шапке живой вердикт: <b>«РДГ · 21 400 ₽ вместо 165 456»</b> — он пересчитывается на каждый ввод. Ниже: «Итого долг», доход → «Останется на план» (допуск к РДГ), дети степпером, регион (подставляет прожиточный минимум).</p>
+    <p>Жёлтая карточка <b>«Клиенту голосом»</b> — четыре цифры, которые ты озвучиваешь по скрипту перед презентацией: вернёте банкам · переплата в пустоту · платёж было → станет · выгода в месяц.</p>
+    <div class="say">«Смотрите: по вашим цифрам вы вернёте банкам ~1,7 млн, из них полмиллиона — просто проценты. По закону платёж можно снизить со 165 до 21 тысячи — выгода ~144 тысячи каждый месяц».</div>
+  </div></div>
 
-    <!-- 3 · КИ ЗАГРУЖАЕТСЯ -->
-    <div class="state">
-      <div class="lbl"><span class="n">3</span><b>КИ загружается</b></div>
-      <div class="cap">Парсинг PDF-отчёта БКИ <b>прямо в виджете</b>, без выхода из amo. Сверяет сумму со сводкой отчёта.</div>
-      <div class="wcanvas">
-        <div class="dw">
-          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>точный расчёт по КИ</small></div></div>
-          <div class="body">
-            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
-            <div class="dbadge load">⏳ Читаю отчёт БКИ… нашёл 22 договора</div>
-            <div class="prog"><i></i></div>
-            <button class="sbtn dis">✈ Отправить презентацию клиенту</button>
-            <div class="sstat none">дождитесь расчёта…</div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="step"><div class="shot"><img src="./guide-img/s3-kv.png" alt="Раскладка вердикта" loading="lazy"></div><div class="tx">
+    <span class="sn">3</span>
+    <h3>Тап по вердикту — полная раскладка</h3>
+    <p>Если клиент спрашивает «откуда цифры» — тапни строку вердикта в шапке: раскроется вся математика: тело плана, ФУ 7%, итого по плану, платежи на 60 и 36 месяцев, госплатежи 50 000 отдельно, переплата банкам, выгода, свободный доход, услуги 13 500.</p>
+    <p><b>Помни канон цены:</b> голосом называешь «13 500 в месяц — потянете?», полную сумму (189 000 / VIP 169 000) — только на прямой вопрос.</p>
+  </div></div>
 
-    <!-- 4 · ПО КИ · НЕ ОТПРАВЛЕНО (КИ пришла в дожиме) -->
-    <div class="state">
-      <div class="lbl"><span class="n">4</span><b>По КИ · не отправлено</b></div>
-      <div class="cap"><b>КИ пришла в дожиме</b> (запросили обязательным шагом после первого звонка): данные точные, шлём сильную презентацию.</div>
-      <div class="wcanvas">
-        <div class="dw hot">
-          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>точный расчёт по КИ</small></div></div>
-          <div class="body">
-            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
-            <label>Долг по кредитной истории, ₽</label><div class="fld ki num">1 050 460</div>
-            <div class="verdict rdg"><b>РДГ · план 36 мес</b>22 договора · платёж по плану 31 222 ₽/мес.</div>
-            <div class="dbadge ki">✓ По кредитной истории · 22 договора</div>
-            <button class="sbtn">✈ Отправить презентацию клиенту</button>
-            <div class="sstat none">ещё не отправлено</div>
-            <div class="note"><b>Клиент прислал КИ по запросу в дожиме.</b> Клиент увидит точные числа и список кредиторов.</div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="step"><div class="shot"><img src="./guide-img/s4-chat-send.png" alt="Сообщение с презентацией в чате" loading="lazy"></div><div class="tx">
+    <span class="sn">4</span>
+    <h3>«✈ Отправить презентацию клиенту»</h3>
+    <p>Жми <b>после согласия по цене</b> (шаг 7 скрипта). Что происходит: 1) поля сделки слева заполняются (долг, тип услуги, платёж по плану); 2) клиенту в чат уходит сообщение с его цифрами и кнопкой <b>«Открыть персональную страницу»</b> — РДГ или Списание, по вердикту; 3) статус меняется на «✓ отправлено». Поменял цифры — «Отправить снова» обновит всё.</p>
+    <p>Ведёшь клиента по странице голосом до последнего экрана: договор → подпись СМС → оплата или частичка от 1 000 ₽.</p>
+  </div></div>
 
-    <!-- 5 · ПО КИ · ОТПРАВЛЕНО -->
-    <div class="state">
-      <div class="lbl"><span class="n">5</span><b>По КИ · отправлено</b></div>
-      <div class="cap">Точная презентация ушла. Отдельно можно скачать <b>файл выгод (PDF)</b> в сделку — на дожим.</div>
-      <div class="wcanvas">
-        <div class="dw">
-          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>точный расчёт по КИ</small></div></div>
-          <div class="body">
-            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
-            <label>Долг по кредитной истории, ₽</label><div class="fld ki num">1 050 460</div>
-            <div class="verdict rdg"><b>РДГ · план 36 мес</b>22 договора · платёж по плану 31 222 ₽/мес.</div>
-            <div class="dbadge ki">✓ По кредитной истории · 22 договора</div>
-            <button class="sbtn">✈ Отправить снова</button>
-            <div class="sstat sent">✓ отправлено 15:07</div>
-            <div class="lrow"><span class="lbtn mut">⧉ Скопировать</span><span class="lbtn mut">⤓ Файл выгод (PDF)</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="step"><div class="shot"><img src="./guide-img/s5-chat-dozhim.png" alt="Дожим-сообщение в чате" loading="lazy"></div><div class="tx">
+    <span class="sn">5</span>
+    <h3>Дожим-кнопки: «Не открыл» · «Не подписал» · «По КИ»</h3>
+    <p>Каждая кнопка собирает готовое сообщение <b>с цифрами этого клиента</b>, кладёт его в чат и копирует в буфер:</p>
+    <p><b>✉ Не открыл</b> — резюме звонка + персональная ссылка (касание Д0).<br>
+    <b>✉ Не подписал</b> — рост долга в месяц + обмен «КИ за 5 минут ↔ бесплатное юр. заключение» + пример.<br>
+    <b>✉ По КИ</b> — работает после загрузки КИ: разбор заключения, договор и оплата.</p>
+  </div></div>
 
-    <!-- 6 · ОШИБКА КИ -->
-    <div class="state">
-      <div class="lbl"><span class="n">6</span><b>КИ не распозналась</b></div>
-      <div class="cap">Не тот формат отчёта или скан. Виджет <b>остаётся на «со слов»</b> — расчёт не ломается, отправка доступна.</div>
-      <div class="wcanvas">
-        <div class="dw">
-          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>точный расчёт по КИ</small></div></div>
-          <div class="body">
-            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
-            <div class="dbadge err">⚠ Отчёт не распознан</div>
-            <div class="note">Поддерживается отчёт <b>ОКБ (текстовый PDF)</b>. Скан или другой формат не читается — проверьте файл или оставьте расчёт со слов.</div>
-            <div class="lrow"><span class="lbtn hi">⭱ Загрузить другой файл</span></div>
-            <button class="sbtn">✈ Отправить со слов</button>
-            <div class="sstat none">данные: со слов</div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="step"><div class="shot"><img src="./guide-img/s6-ki.png" alt="Загрузка двух КИ" loading="lazy"></div><div class="tx">
+    <span class="sn">6</span>
+    <h3>«⭱ Загрузить КИ · до 3 отчётов»</h3>
+    <p>Клиент прислал PDF кредитной истории — грузи. Виджет читает <b>три бюро: Скоринг Бюро, НБКИ, Кредистория (ОКБ)</b>, можно 1–3 файла сразу или по одному. Отчёты <b>склеиваются</b>: договоры-дубли объединяются по УИД сделки, тост показывает состав («2 отчёта → 6 уникальных, дублей 2»).</p>
+    <p>После загрузки: точные тела ложатся в типы, бейдж «точно · по КИ», платёж сейчас — из отчёта, просрочки ставятся сами. Правишь цифры руками — честный откат на «со слов».</p>
+  </div></div>
 
-    <!-- 7 · АВТОПУШ НЕДОСТУПЕН -->
-    <div class="state">
-      <div class="lbl"><span class="n">7</span><b>Чат недоступен → фоллбэк</b></div>
-      <div class="cap">Нет интеграции с чатом или клиент в другом канале. Отправка не прошла — виджет предлагает <b>скопировать ссылку</b>.</div>
-      <div class="wcanvas">
-        <div class="dw">
-          <div class="dh"><span class="lg">ДН</span><div><b>ДОНУЛЯ · Калькулятор</b><small>экспресс · первый звонок</small></div></div>
-          <div class="body">
-            <div class="seg"><button class="on">РДГ</button><button>БФЛ</button></div>
-            <div class="dbadge words">🎤 Данные: со слов</div>
-            <button class="sbtn err">✈ Не ушло в чат</button>
-            <div class="sstat warn">чат недоступен — отправьте ссылку сами</div>
-            <div class="lrow"><span class="lbtn hi">⧉ Скопировать ссылку</span></div>
-            <div class="note">Ссылка сформирована и лежит в сделке — вставьте её в любой канал клиента.</div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="step"><div class="shot"><img src="./guide-img/s7-chat-ki.png" alt="Заключение в чате" loading="lazy"></div><div class="tx">
+    <span class="sn">7</span>
+    <h3>Юр. заключение — само падает в чат</h3>
+    <p>Как только КИ разобрана, в чат уходит сообщение <b>«юрист разобрал вашу кредитную историю»</b> с кнопкой «Открыть юридическое заключение». Внутри — все кредиторы клиента с вердиктами, крупно «платёж: было → станет», сценарии и цена.</p>
+    <p><b>Канон: КИ пришла = всё бросаем</b> — открывай заключение и звони на разбор. Это самый сильный звонок воронки.</p>
+  </div></div>
 
+  <div class="step"><div class="shot"><img src="./guide-img/s8-bfl.png" alt="БФЛ с предупреждением о доходе" loading="lazy"></div><div class="tx">
+    <span class="sn">8</span>
+    <h3>Вкладка БФЛ — списание. Следи за белым доходом</h3>
+    <p>БФЛ считает списание целиком: «долг спишется», проценты за год «если тянуть», платёж → 13 500 за процедуру. <b>Важно:</b> если у клиента белый доход, виджет покажет предупреждение — всё сверх прожиточного минимума семьи ~6 месяцев процедуры уходит кредиторам (ст. 213.25) и «Выгоду с учётом удержаний». Большой белый доход → чаще выгоднее РДГ.</p>
+  </div></div>
+
+  <h2 class="sect">Словарь кнопок — что делает каждая</h2>
+  <div class="btns">
+    <div class="btn-card"><b><span class="k">РДГ / БФЛ</span> — продукт</b>Переключает расчёт: план реструктуризации или списание. Вердикт, «Клиенту голосом» и презентация меняются автоматически.</div>
+    <div class="btn-card"><b><span class="k">Чипы долгов</span> — ввод со слов</b>Тап включает тип, появляются поля «сумма + шт». Повторный тап с нулём — выключает. Расписка (займ у физлица) — только со слов, в КИ её нет.</div>
+    <div class="btn-card"><b><span class="k">Строка вердикта</span> — раскладка</b>Тап раскрывает/сворачивает полную математику плана. Точка: зелёная — РДГ, золотая — списание, серая — мимо процедур.</div>
+    <div class="btn-card"><b><span class="k">⌄ Развернуть</span></b>Открывает нижнюю часть (срок · просрочки · действия) до ввода цифр — например, чтобы сразу загрузить КИ.</div>
+    <div class="btn-card"><b><span class="k">⚙ Уточнить ставки, сроки и ПМ</span></b>Редкие поля: ставка/срок каждого типа и прожиточные минимумы. По умолчанию — средние по РФ и ПМ региона, обычно не трогаем.</div>
+    <div class="btn-card"><b><span class="k">Просрочки · для заключения</span></b>На расчёт не влияет. Управляет сценарием п.5 юр. заключения: «взыскание» для просроченных или «переплата в пустоту» для платящих. При загрузке КИ ставится сам.</div>
+    <div class="btn-card"><b><span class="k">Срок плана 60 / 36</span></b>60 мес — план одобряет собрание кредиторов; 36 мес — суд утверждает без одобрения (нужно ≥50%). Оба варианта — через суд.</div>
+    <div class="btn-card"><b><span class="k">✈ Отправить презентацию</span></b>Заполняет поля сделки + кладёт клиенту в чат сообщение с персональной ссылкой. Жать после согласия по цене. «Отправить снова» — обновить после правок.</div>
+    <div class="btn-card"><b><span class="k">⭱ Загрузить КИ · до 3 отчётов</span></b>PDF из Скоринг Бюро / НБКИ / Кредистории. Склейка с дедупом по УИД. Заключение генерится автоматически и падает в чат.</div>
+    <div class="btn-card"><b><span class="k">⧉ Скопировать</span></b>Копирует ссылку на персональную страницу — если чат недоступен и надо отправить руками.</div>
+    <div class="btn-card"><b><span class="k">✉ Не открыл / Не подписал / По КИ</span></b>Готовые дожим-тексты с цифрами клиента: в чат + в буфер. Канон: не купил → запрос КИ обязателен в каждом касании.</div>
   </div>
 
-  <div class="foot">
-    <h3>Что важно в этой логике</h3>
-    <ul>
-      <li><b>Одна презентация, два источника.</b> «Со слов» и «по КИ» — это одна и та же ссылка, меняются только числа и точность.</li>
-      <li><b>КИ — обязательный шаг дожима.</b> Первый звонок целиком со слов (охотники КИ не берут). Не купил — запрашиваем КИ у клиента, подписал он или нет; пришла → та же ссылка обновляется, клиенту не пересылаем.</li>
-      <li><b>Отправка гибридная.</b> Основное — автопуш в чат клиента; фоллбэк — «скопировать ссылку» (состояние 7).</li>
-      <li><b>Защита от «забыл».</b> Одна главная кнопка + статус «отправлено 14:32». Плюс на стороне CRM: статус «Договор на подписи» без презентации не наступает.</li>
-      <li><b>Маршрут (РДГ / БФЛ / мимо) — отдельная ось.</b> Он задаётся расчётом; на состояния отправки и КИ не влияет (здесь показан РДГ).</li>
-      <li><b>Страница выгод по КИ (дожим) — по желанию.</b> Файл выгод (PDF) в сделку остаётся для дожима на след. день, но это выгрузка, а не второй сайт.</li>
-    </ul>
+  <h2 class="sect">Три правила, которые нельзя нарушать</h2>
+  <div class="rules">
+    <div class="rule"><b>Платёж руками не вводится.</b> «Платёж сейчас» всегда считается по кредитам, при КИ — точный из отчёта. Единственный ввод денег — долги клиента.</div>
+    <div class="rule"><b>До КИ расчёт предварительный.</b> Бейдж «со слов · предварительно» — так и говорим клиенту. Точные цифры даёт заключение по КИ — поэтому запрос КИ обязателен для всех.</div>
+    <div class="rule"><b>Цену называем лестницей.</b> Голосом «13 500 — потянете?», полная сумма только на прямой вопрос. Ссылку на страницу шлём после согласия по цене, не раньше.</div>
   </div>
 
 </div>
