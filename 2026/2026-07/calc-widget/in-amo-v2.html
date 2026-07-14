@@ -111,6 +111,9 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw input.ki{border-color:#C99A33;background:#FBF3DC;color:#8A6212;font-weight:700}
 /* компактные строки: label слева, поле справа */
 .rowf{display:flex;align-items:center;gap:8px;margin-top:8px;min-height:30px;scroll-margin-top:110px}
+.rowf.freeline{min-height:0;margin-top:5px}
+.rowf.freeline .rlab{color:#98a1ab;font-weight:600}
+.rowf.freeline b{font-size:12px;color:#0B5540;white-space:nowrap}
 .dw .rowf .rlab{flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#5c6874;text-transform:none;letter-spacing:0;margin:0;line-height:1.3}
 .dw .rowf input.rin{width:126px;flex:none}
 .dw .rowf select.rin{width:170px;flex:none}
@@ -296,17 +299,14 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <div class="stpr"><button type="button" onclick="kidStep(-1)">−</button><input id="w_kids" type="number" value="1" min="0"><button type="button" onclick="kidStep(1)">+</button></div>
           </div>
           <div class="rowf"><span class="rlab">Регион (ПМ)</span><select id="w_region" class="rin"></select></div>
+          <!-- живой отклик на доход/детей/регион: видно, что дети считаются (ПМ ребёнка минусуется за каждого) -->
+          <div class="rowf freeline"><span class="rlab">Свободный доход после ПМ семьи</span><b id="w_freeLine" class="num">—</b></div>
 
           <!-- advanced: ставки/сроки типов + ПМ-поля (регион автозаполняет) -->
           <button type="button" class="advtg" id="w_advTg" onclick="toggleAdv()">⚙ Уточнить ставки, сроки и ПМ</button>
           <div class="advpm">
             <div><label>ПМ клиента, ₽/мес</label><input id="w_pmSelf" type="number"></div>
             <div><label>ПМ ребёнка, ₽/мес</label><input id="w_pmChild" type="number"></div>
-          </div>
-
-          <!-- д) ДОПУСК ст. 213.13 -->
-          <div class="rowf"><span class="rlab">Банкротство или реструктуризация раньше?</span>
-            <div class="seg sm" id="w_prior" style="width:110px"><button class="on" data-p="no">Нет</button><button data-p="yes">Было</button></div>
           </div>
 
           <!-- е) СРОК ПЛАНА РДГ (только при prod=rdg) -->
@@ -543,6 +543,8 @@ function calc(){
   /* свободный доход: минус ПМ семьи и платёж по ипотеке (она вне плана, но платить её продолжаем — 298-ФЗ) */
   const mortPay=(kiLoaded&&!kiTypes)?0:ct.mortPay, mortAmount=(kiLoaded&&!kiTypes)?0:ct.mortAmount;
   const free=income-(pmSelf+kids*pmChild)-mortPay;
+  /* живая строка у степпера детей: эффект семьи виден сразу (убрана только при пустом доходе) */
+  document.getElementById('w_freeLine').textContent=income>0?fmt(free)+' ₽/мес':'— введите доход';
   /* тело плана — без ипотеки (298-ФЗ: отдельное мировое с ипотечным банком, жильё сохраняется) */
   const body=Math.max(0,debt-mortAmount);
   const P60=planCalc(body,60), P36=planCalc(body,36), PE=planCalc(body,term);
@@ -778,10 +780,8 @@ function dropKi(){
   const f=document.getElementById('f_debt');
   f.textContent=f.textContent.replace(' (по КИ)','');
 }
-document.querySelectorAll('#w_prior button').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('#w_prior button').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on'); prior=b.dataset.p; calc();
-}));
+/* тогл «банкротство раньше» убран из UI (правка заказчика 14.07):
+   допуск по ст. 213.13 проверяет юрист при подписании; prior остаётся 'no' */
 document.querySelectorAll('#w_term button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('#w_term button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on'); term=+b.dataset.t; calc();
