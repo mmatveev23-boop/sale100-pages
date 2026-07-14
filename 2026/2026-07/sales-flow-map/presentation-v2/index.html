@@ -405,7 +405,7 @@ h1 .hl{color:var(--green)}
       <section class="scr" data-name="Шаг 1 из 7 · Условия">
         <h1>Спишем ваш долг <span class="hl nowrap" id="h1debt">1&nbsp;240&nbsp;000&nbsp;₽</span> законно</h1>
         <p class="sub">Процедура по 127-ФЗ: списание долга. Здесь всё, о чём говорили с экспертом, — проверьте глазами.</p>
-        <div class="kibadge stg" id="kiBadge" style="display:none">✓ Рассчитано по вашей кредитной истории · <b id="kiCount">22</b>&nbsp;договора</div>
+        <div class="kibadge stg" id="kiBadge" style="display:none">✓ Рассчитано по вашей кредитной истории · <b id="kiCount">22</b>&nbsp;<span id="kiCountW">договора</span></div>
         <div class="kibadge words stg" id="wordsBadge">🎤 Предварительный расчёт со слов — уточним по кредитной истории</div>
 
         <div class="save-hero stg">
@@ -421,7 +421,7 @@ h1 .hl{color:var(--green)}
         </div>
 
         <div class="creditors stg" id="crBlock" style="display:none">
-          <div class="crh">Ваши кредиторы · <span id="crCount">22</span> договора</div>
+          <div class="crh">Ваши кредиторы · <span id="crCount">22</span> <span id="crCountW">договора</span></div>
           <div id="crList"></div>
           <div class="crnote" id="crNote"><!-- текст собирается из объекта KI при ?ki=1 --></div>
         </div>
@@ -738,8 +738,10 @@ h1 .hl{color:var(--green)}
 const Q=new URLSearchParams(location.search);
 /* два состояния: ДАННЫЕ (со слов → по КИ, ?ki=1) и ПРОГРЕСС (?signed=1 — подписал, не оплатил). В проде — из движка. */
 const KION=Q.get('ki')==='1', SIGNED=Q.get('signed')==='1', PART=Math.max(0,+Q.get('part')||0);
-const KI={debt:1050460, count:22, interest:46140, payNow:55000, overdue:11, mfo:11, maxRate:292,
-  top:[['СФО Сервис Финанс',237354,1],['Сбербанк',164479,1],['Ренессанс Кредит',97844,1]]};
+/* канонный демо-набор КИ — реальный обезличенный отчёт «Скоринг Бюро» 10.07.2026: 13 действующих договоров на 3 029 036 ₽ (для списания — полный долг).
+   Просрочек сейчас нет, но по 15 договорам были; рейтинг 508, 52 отказа. payNow = среднемес. платёж из отчёта */
+const KI={debt:3029036, count:13, interest:72000, payNow:119718, overdueHist:15, rating:508, refused:52, mfo:4, maxRate:292,
+  top:[['Газпромбанк · кредит',947387,0],['Газпромбанк · овердрафт',147534,0],['Альфа-Банк · карта',120712,0]]};
 const payParam=Math.max(0,+Q.get('pay')||0);
 const debtParam=Math.max(0,+Q.get('debt'));
 const CLIENT={
@@ -890,7 +892,10 @@ if(Q.get('name')){
 if(KION){
   document.getElementById('wordsBadge').style.display='none';
   document.getElementById('kiBadge').style.display='';
+  const dclDog=n=>{const a=n%100,b=n%10;return (a>=11&&a<=14)?'договоров':b===1?'договор':(b>=2&&b<=4)?'договора':'договоров';};
   document.getElementById('kiCount').textContent=KI.count;
+  document.getElementById('kiCountW').textContent=dclDog(KI.count);
+  document.getElementById('crCountW').textContent=dclDog(KI.count);
   document.getElementById('crCount').textContent=KI.count;
   document.getElementById('crBlock').style.display='';
   const topSum=KI.top.reduce((s,[,v])=>s+v,0);
@@ -898,7 +903,7 @@ if(KION){
     KI.top.map(([n,v,od])=>`<div class="crrow"><span>${n}${od?' <em class="od">была просрочка</em>':''}</span><b class="num">${fmt(v)} ₽</b></div>`).join('')
     +`<div class="crrow more"><span>…и ещё ${KI.count-KI.top.length} договоров</span><b class="num">${fmt(KI.debt-topSum)} ₽</b></div>`;
   document.getElementById('crNote').innerHTML=
-    `${KI.mfo} МФО под ставки до ${KI.maxRate}% · проценты съедают <b class="num">~${fmt(KI.interest)} ₽/мес</b> — долг не уменьшается. По ${KI.overdue} договорам уже была просрочка — дальше пени и коллекторы.`;
+    `${KI.mfo} МФО под ставки до ${KI.maxRate}% · проценты съедают <b class="num">~${fmt(KI.interest)} ₽/мес</b> — долг не уменьшается. Сейчас просрочек нет, но по ${KI.overdueHist} договорам они уже были: рейтинг ${KI.rating}, ${KI.refused} отказа по заявкам — новых кредитов не дадут.`;
 }
 renderHero();
 recalc();

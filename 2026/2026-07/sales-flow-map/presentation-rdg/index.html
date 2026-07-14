@@ -435,7 +435,7 @@ h1 .hl{color:var(--green)}
       <section class="scr" data-name="Шаг 1 из 6 · Условия">
         <h1>Реструктуризация вашего долга <span class="hl nowrap" id="h1debt">1&nbsp;240&nbsp;000&nbsp;₽</span></h1>
         <p class="sub">Уберём переплату по процентам и снизим ежемесячный платёж.</p>
-        <div class="kibadge stg" id="kiBadge" style="display:none">✓ Рассчитано по вашей кредитной истории · <b id="kiCount">22</b>&nbsp;договора</div>
+        <div class="kibadge stg" id="kiBadge" style="display:none">✓ Рассчитано по вашей кредитной истории · <b id="kiCount">22</b>&nbsp;<span id="kiCountW">договора</span></div>
         <div class="kibadge words stg" id="wordsBadge">🎤 Предварительный расчёт со слов — уточним по кредитной истории</div>
 
         <div class="save-hero stg">
@@ -451,9 +451,9 @@ h1 .hl{color:var(--green)}
         </div>
 
         <div class="creditors stg" id="crBlock" style="display:none">
-          <div class="crh">Ваши кредиторы · <span id="crCount">22</span> договора</div>
+          <div class="crh">Ваши кредиторы · <span id="crCount">22</span> <span id="crCountW">договора</span></div>
           <div id="crList"></div>
-          <div class="crnote"><span id="crMfo">11</span> МФО под ставки до 292% · проценты съедают <b class="num">~<span id="crInterest">46 140</span> ₽/мес</b> — долг не уменьшается. По <span id="crOverdue">11</span> договорам уже была просрочка — дальше пени и коллекторы.</div>
+          <div class="crnote"><span id="crMfo">4</span> МФО под ставки до 292% · проценты съедают <b class="num">~<span id="crInterest">72 000</span> ₽/мес</b> — долг не уменьшается. Сейчас просрочек нет, но по <span id="crOverdue">15</span> договорам они уже были: рейтинг <span id="crRating">508</span>, <span id="crRefused">52</span> отказа по заявкам — новых кредитов не дадут.</div>
         </div>
 
         <button class="linkbtn stg" id="calcBtn" onclick="toggleCalc()">Как посчитана экономия</button>
@@ -740,8 +740,12 @@ const Q=new URLSearchParams(location.search);
    В проде статус сделки и данные КИ отдаёт движок; здесь — демо-параметры. */
 const KION=Q.get('ki')==='1', SIGNED=Q.get('signed')==='1', PART=Math.max(0,+Q.get('part')||0);
 /* демо-набор КИ = реальный обезличенный отчёт ОКБ (см. calc-widget/ki.html) */
-const KI={debt:1050460, count:22, mfo:11, interest:46140, payNow:55000, overdue:11,
-  top:[['СФО Сервис Финанс',237354,1],['Сбербанк',164479,1],['Ренессанс Кредит',97844,1]]};
+/* канонный демо-набор КИ — реальный обезличенный отчёт «Скоринг Бюро» 10.07.2026: 13 действующих договоров на 3 029 036 ₽,
+   из них 2 ипотеки на 1 541 464 ₽ — вне плана (298-ФЗ); в плане РДГ 11 договоров на 1 487 572 ₽.
+   Просрочек сейчас нет, но по 15 договорам были; рейтинг 508, 52 отказа. payNow = среднемес. платёж 119 718 минус ипотечные ~23 500 */
+const KI={debt:1487572, count:13, planCount:11, mfo:4, interest:72000, payNow:96200, overdueHist:15, rating:508, refused:52,
+  mortgage:1541464, mortgageN:2,
+  top:[['Газпромбанк · кредит',947387,0],['Газпромбанк · овердрафт',147534,0],['Альфа-Банк · карта',120712,0]]};
 const debtParam=Math.max(0,+Q.get('debt'));
 const CLIENT={name:(Q.get('name')||'Виктория Юрьевна').slice(0,60), debt:debtParam||(KION?KI.debt:1240000)};
 const payParam=Math.max(0,+Q.get('pay')||0);
@@ -879,16 +883,22 @@ if(Q.get('name')){
 if(KION){
   document.getElementById('kiBadge').style.display='';
   document.getElementById('wordsBadge').style.display='none'; /* точные данные заменяют «со слов» */
+  const dclDog=n=>{const a=n%100,b=n%10;return (a>=11&&a<=14)?'договоров':b===1?'договор':(b>=2&&b<=4)?'договора':'договоров';};
   document.getElementById('kiCount').textContent=KI.count;
+  document.getElementById('kiCountW').textContent=dclDog(KI.count);
+  document.getElementById('crCountW').textContent=dclDog(KI.count);
   document.getElementById('crCount').textContent=KI.count;
   document.getElementById('crMfo').textContent=KI.mfo;
   document.getElementById('crInterest').textContent=fmt(KI.interest);
-  document.getElementById('crOverdue').textContent=KI.overdue;
+  document.getElementById('crOverdue').textContent=KI.overdueHist;
+  document.getElementById('crRating').textContent=KI.rating;
+  document.getElementById('crRefused').textContent=KI.refused;
   document.getElementById('crBlock').style.display='';
   const topSum=KI.top.reduce((s,[,v])=>s+v,0);
   document.getElementById('crList').innerHTML=
     KI.top.map(([n,v,od])=>`<div class="crrow"><span>${n}${od?' <em class="od">была просрочка</em>':''}</span><b class="num">${fmt(v)} ₽</b></div>`).join('')
-    +`<div class="crrow more"><span>…и ещё ${KI.count-KI.top.length} договоров</span><b class="num">${fmt(KI.debt-topSum)} ₽</b></div>`;
+    +`<div class="crrow more"><span>…и ещё ${KI.planCount-KI.top.length} договоров в плане</span><b class="num">${fmt(KI.debt-topSum)} ₽</b></div>`
+    +(KI.mortgage>0?`<div class="crrow more"><span>Ипотека · ${KI.mortgageN} договора — вне плана, жильё сохраняется (298-ФЗ)</span><b class="num">${fmt(KI.mortgage)} ₽</b></div>`:'');
 }
 recalc();
 /* ?part=N → оплатил часть N, дробит остаток: экран оплаты показывает остаток и «внесено».

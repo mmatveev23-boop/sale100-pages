@@ -226,6 +226,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 </div>
 
 <script src="./pm-regions.js"></script>
+<script src="./ki-parse.js"></script>
 <script>
 'use strict';
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
@@ -301,7 +302,7 @@ function renderCreditRows(){
     '<div><label>Ставка %</label><input class="c-r" type="number" min="0" value="'+t.rate+'"></div>'+
     '<div><label>Срок, мес</label><input class="c-m" type="number" min="1" value="'+t.months+'"></div>'+
     '</div></div>').join('');
-  document.querySelectorAll('#w_credits input').forEach(i=>i.addEventListener('input',calc));
+  document.querySelectorAll('#w_credits input').forEach(i=>i.addEventListener('input',()=>{if(kiLoaded)dropKi();calc();}));
 }
 /* свод по конструктору: долг, число договоров, текущий платёж, «без РДГ» */
 function creditsTotals(){
@@ -340,18 +341,19 @@ function applyRegionPM(){
   document.getElementById('w_pmSelf').value=pm.self;
   document.getElementById('w_pmChild').value=pm.child;
 }
-let term=60, prior='no', prod='rdg', last={}, kiLoaded=false, kiCount=null, kiBusy=false, kiError=false, sentAt=null;
+let term=60, prior='no', prod='rdg', last={}, kiLoaded=false, kiTypes=false, kiCount=null, kiBusy=false, kiError=false, sentAt=null;
 /* склонение для бейджа: 1 договор / 2 договора / 22 договора / 11 договоров */
 const decl=n=>{const d=n%10,m=n%100;return m>=11&&m<=14?'договоров':d===1?'договор':d>=2&&d<=4?'договора':'договоров';};
 function calc(){
   /* источник долга: КИ (точное поле) или конструктор типов со слов */
   const ct=creditsTotals();
-  const debt=kiLoaded?(parseFloat(document.getElementById('w_debt').value)||0):ct.debt;
+  /* kiTypes: «Скоринг Бюро» разложен по типам — конструктор и есть точный источник; старый ОКБ-путь держит одно число в w_debt */
+  const debt=(kiLoaded&&!kiTypes)?(parseFloat(document.getElementById('w_debt').value)||0):ct.debt;
   document.getElementById('w_debtTotal').textContent=ct.debt>0?fmt(ct.debt)+' ₽':'—';
   document.getElementById('w_nTotal').textContent=ct.n;
   /* платёж сейчас: ручной ввод приоритетнее расчётного по кредитам (п.10.1 спеки) */
   const payManual=parseFloat(document.getElementById('w_paynow').value)||0;
-  const payCalc=(!kiLoaded&&ct.monthly>0)?Math.round(ct.monthly):0;
+  const payCalc=((!kiLoaded||kiTypes)&&ct.monthly>0)?Math.round(ct.monthly):0;
   const paynow=payManual>0?payManual:payCalc;
   document.getElementById('w_paynow').placeholder=payCalc>0?('авто: '+fmt(payCalc)):'авто';
   const income=parseFloat(document.getElementById('w_income').value)||0;
@@ -360,7 +362,7 @@ function calc(){
   const pmSelf=parseFloat(document.getElementById('w_pmSelf').value)||PM_FEDERAL.self;
   const pmChild=parseFloat(document.getElementById('w_pmChild').value)||PM_FEDERAL.child;
   /* свободный доход: минус ПМ семьи и платёж по ипотеке (она вне плана, но платить её продолжаем — 298-ФЗ) */
-  const mortPay=kiLoaded?0:ct.mortPay, mortAmount=kiLoaded?0:ct.mortAmount;
+  const mortPay=(kiLoaded&&!kiTypes)?0:ct.mortPay, mortAmount=(kiLoaded&&!kiTypes)?0:ct.mortAmount;
   const free=income-(pmSelf+kids*pmChild)-mortPay;
   /* тело плана — без ипотеки (298-ФЗ: отдельное мировое с ипотечным банком, жильё сохраняется) */
   const body=Math.max(0,debt-mortAmount);
@@ -404,7 +406,7 @@ function calc(){
         ['Госплатежи (старт, отдельно)',fmt(GOS_START)+' ₽']];
     if(mortAmount>0) kv.push(['Ипотека — вне плана (298-ФЗ)',fmt(mortAmount)+' ₽ · ~'+fmt(mortPay)+' ₽/мес']);
     if(paynow>0) kv.push(['Платит сейчас',fmt(paynow)+' ₽/мес'],['Нагрузка снизится на',fmt(Math.max(0,paynow-PLAN.monthly-mortPay))+' ₽/мес']);
-    if(!kiLoaded&&ct.noRdg>0){const noRdgPlan=ct.noRdg-ct.mortTotal; kv.push(['Без РДГ выплатит (без ипотеки)',fmt(noRdgPlan)+' ₽'],['Выгода РДГ',fmt(Math.max(0,noRdgPlan-PLAN.total))+' ₽']);}
+    if((!kiLoaded||kiTypes)&&ct.noRdg>0){const noRdgPlan=ct.noRdg-ct.mortTotal; kv.push(['Без РДГ выплатит (без ипотеки)',fmt(noRdgPlan)+' ₽'],['Выгода РДГ',fmt(Math.max(0,noRdgPlan-PLAN.total))+' ₽']);}
     kv.push(['Свободный доход (после ПМ'+(mortPay>0?' и ипотеки':'')+')',fmt(free)+' ₽/мес'],['Услуги ДОНУЛЯ','13 500 ₽/мес']);
   }else{
     route='БФЛ'; /* РДГ не тянет → кандидат на списание; вердикт, запись и ссылка идут по БФЛ */
@@ -414,7 +416,7 @@ function calc(){
   }
   kvs.innerHTML=kv.map(([k,x])=>'<div class="kv"><span>'+k+'</span><b>'+x+'</b></div>').join('');
   const planOk=route==='РДГ';
-  last={debt,paynow,income,route,eff,contracts:kiLoaded?kiCount:ct.n,pay:planOk?Math.round(planCalc(body,eff).monthly):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null,noPresent:prior==='yes'};
+  last={debt,body,paynow,income,route,eff,contracts:kiLoaded?kiCount:ct.n,pay:planOk?Math.round(planCalc(body,eff).monthly):(route==='БФЛ'?13500:null),benefit:route==='БФЛ'?Math.round(Math.max(0,debt-BFL_COST)):null,noPresent:prior==='yes'};
   updateSendUI();
 }
 /* ссылка на презентацию с цифрами клиента (демо-связка; в проде merge-поля CRM + короткая ссылка движка) */
@@ -423,7 +425,7 @@ function presentUrl(){
   const name=document.querySelector('.deal h1').textContent.trim();
   const pay=last.paynow>0?{pay:last.paynow}:{}; /* платёж не спросили — параметр не шлём, страница скроет сравнение, а не выдумает цифру */
   const ki=kiLoaded?{ki:1}:{}; /* КИ загружена → презентация показывает точные числа + блок кредиторов */
-  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,term:last.eff});
+  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,term:last.eff}); /* РДГ идёт по телу плана (без ипотеки) */
   if(last.route==='БФЛ') return '../client-presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki});
   return null;
 }
@@ -490,7 +492,7 @@ function markKi(count){
 }
 /* ручная правка долга после КИ → честно возвращаемся на «со слов», ссылка перестаёт слать ki=1 */
 function dropKi(){
-  kiLoaded=false; kiCount=null;
+  kiLoaded=false; kiTypes=false; kiCount=null;
   document.getElementById('w_crToggle').style.display='';
   document.getElementById('w_crToggle').classList.remove('open');
   document.getElementById('w_credits').style.display='none'; /* возвращаемся свёрнутыми */
@@ -520,18 +522,17 @@ renderCreditRows();
 fillRegionSelect();
 calc();
 
-/* демо состояния 4 «КИ пришла в дожиме»: ?ki=1 у самого виджета — клиент прислал отчёт по обязательному запросу после первого звонка */
+/* демо состояния 4 «КИ пришла в дожиме»: ?ki=1 — канонный набор из реального обезличенного отчёта «Скоринг Бюро» 10.07.2026
+   (13 договоров · 3 029 036 ₽: потреб 947 387/2, карты 418 185/5, МФО 122 000/4, ипотека 1 541 464/2; среднемес. платёж 119 718) */
 if(new URLSearchParams(location.search).get('ki')==='1'){
-  document.getElementById('w_debt').value=1050460; /* демо-набор КИ: 1 050 460 ₽ · 22 договора */
-  document.getElementById('w_paynow').value=61500; /* платёж со слов клиента — в демо задан */
-  markKi(22);
+  applyKiTypes({
+    bureau:'Скоринг Бюро', date:'10 июля 2026', count:13, total:3029036, ok:true, avgMonthly:119718,
+    types:{loan:{amount:947387,n:2},card:{amount:418185,n:5},mfo:{amount:122000,n:4},secured:{amount:0,n:0},mortgage:{amount:1541464,n:2}},
+    rows:null /* файл выгод возьмёт зашитый демо-набор ki.html */
+  },true);
   document.querySelector('.dw').classList.add('hot'); /* жёлтая кайма — «горячее», шлите сразу */
-  const kf=document.getElementById('w_kiFile');
-  kf.href='./ki.html#print=1'; kf.style.display=''; /* без #d= страница берёт тот же демо-набор */
-  document.getElementById('f_debt').textContent=fmt(1050460)+' ₽ (по КИ)';
   document.getElementById('w_noteTxt').innerHTML='<b>Клиент прислал КИ по запросу в дожиме.</b> Клиент увидит точные числа и список кредиторов.';
   document.getElementById('w_note').style.display='';
-  calc();
 }
 
 /* ===== загрузка КИ (отчёт ОКБ) прямо в виджете ===== */
@@ -581,8 +582,11 @@ async function parseKiFile(file){
       const pg=await pdf.getPage(i); const tc=await pg.getTextContent();
       text+=tc.items.map(it=>it.str).join(' ')+'\n';
     }
+    /* сначала канонный формат заказчика — «Скоринг Бюро» (ki-parse.js), затем фоллбэк ОКБ */
+    const sb=(typeof parseSb==='function')?parseSb(text):null;
+    if(sb){ applyKiTypes(sb); return; }
     const parsed=parseOkb(text);
-    if(!parsed.credits.length) throw new Error('таблица договоров не найдена (поддерживается отчёт ОКБ)');
+    if(!parsed.credits.length) throw new Error('таблица договоров не найдена (поддерживаются отчёты «Скоринг Бюро» и ОКБ)');
     const total=parsed.credits.reduce((s,c)=>s+c.debt,0);
     const ok=parsed.summary.debt!=null&&Math.abs(total-parsed.summary.debt)<1&&parsed.credits.length===parsed.summary.count;
     /* точные данные в виджет и поля сделки; презентация теперь пойдёт с ?ki=1 */
@@ -601,6 +605,32 @@ async function parseKiFile(file){
     const kf=document.getElementById('w_kiFile');
     kf.href='./ki.html#d='+b64url(JSON.stringify(payload))+'&print=1'; kf.style.display='';
   }catch(e){ kiBusy=false; kiError=true; updateSendUI(); t.innerHTML='Не удалось разобрать файл: '+e.message; }
+}
+/* «Скоринг Бюро»: раскладываем точные тела по типам прямо в конструктор — ставки/сроки остаются средними, ипотека уйдёт «вне плана» сама */
+function applyKiTypes(sb,demo){
+  document.querySelectorAll('#w_credits .crt').forEach(row=>{
+    const t=sb.types[row.dataset.t]||{amount:0,n:0};
+    row.querySelector('.c-am').value=t.amount?Math.round(t.amount):'';
+    row.querySelector('.c-n').value=t.n||'';
+  });
+  if(sb.avgMonthly) document.getElementById('w_paynow').value=Math.round(sb.avgMonthly); /* среднемесячный платёж из отчёта (вкл. ипотеку) */
+  kiLoaded=true; kiTypes=true; kiError=false; kiCount=sb.count;
+  document.getElementById('w_credits').style.display='';
+  const tg=document.getElementById('w_crToggle'); tg.style.display=''; tg.classList.add('open');
+  document.getElementById('w_debtWrap').style.display='none';
+  document.getElementById('dh_small').textContent='точный расчёт по КИ · '+(sb.bureau||'');
+  kiBusy=false; calc();
+  document.getElementById('f_debt').textContent=fmt(sb.total)+' ₽ · '+sb.count+' дог. (по КИ)';
+  const t=document.getElementById('w_toast');
+  t.style.display='block';
+  t.innerHTML=(sb.ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+sb.count+' '+decl(sb.count)+', долг '+fmt(sb.total)+' ₽'+(sb.ok?' — сходится с «Итого» отчёта.':'.')+(sb.types.mortgage.amount>0?' Ипотека '+fmt(sb.types.mortgage.amount)+' ₽ — вне плана (298-ФЗ).':'')+' В проде PDF прикрепляется к сделке.';
+  const kf=document.getElementById('w_kiFile');
+  if(sb.rows&&sb.rows.length){
+    const payload={name:document.querySelector('.deal h1').textContent.trim(),date:sb.date,term,credits:sb.rows.map(r=>({n:r.n,lender:r.lender,debt:r.debt,product:r.type}))};
+    kf.href='./ki.html#d='+b64url(JSON.stringify(payload))+'&print=1';
+  }else kf.href='./ki.html#print=1';
+  kf.style.display='';
+  if(!demo) setTimeout(()=>{t.style.display='none';},12000);
 }
 function b64url(s){return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 /* фоллбэк отправки (состояние 7): чат недоступен → менеджер копирует ссылку ПРЕЗЕНТАЦИИ и шлёт сам */

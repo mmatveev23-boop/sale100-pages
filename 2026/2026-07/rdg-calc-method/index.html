@@ -135,6 +135,13 @@ tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
 .tr-verdict.y{background:var(--gold-soft);color:var(--gold-ink);border:1px solid rgba(201,154,51,.45)}
 .tr-verdict.b{background:var(--green-soft);color:var(--green-ink);border:1px solid rgba(15,107,79,.3)}
 .tr-verdict.r{background:var(--brick-soft);color:var(--brick);border:1px solid rgba(168,68,46,.3)}
+.tr-ki{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:6px;border:1.5px dashed var(--green);border-radius:10px;background:var(--green-soft);color:var(--green-ink);padding:10px;font-size:13px;font-weight:700;cursor:pointer}
+.tr-ki:hover{background:#DEEDE5}
+.tr-kilinks{display:grid;gap:6px;margin-top:8px}
+.tr-kilinks a{display:flex;justify-content:space-between;align-items:center;gap:8px;text-decoration:none;border-radius:9px;padding:9px 12px;font-size:13px;font-weight:700}
+.tr-kilinks a.rdg{background:var(--pine);color:#fff}
+.tr-kilinks a.bfl{background:#fff;color:var(--green-ink);border:1.5px solid var(--green)}
+.tr-kilinks a.pdf{background:var(--gold-soft);color:var(--gold-ink);border:1px solid rgba(201,154,51,.45)}
 @media (max-width:760px){.trainer{grid-template-columns:1fr}}
 @media (max-width:640px){
   .wrap{padding:16px 13px 60px}
@@ -280,6 +287,10 @@ tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
       </div>
       <label>Банкротство или реструктуризация раньше?</label>
       <div class="tr-seg" id="t_prior"><button class="on" data-p="no">Нет</button><button data-p="yes">Было</button></div>
+      <label>Кредитная история клиента</label>
+      <label class="tr-ki" for="t_kiInput">⭱ Загрузить отчёт «Скоринг Бюро» (PDF)<input id="t_kiInput" type="file" accept="application/pdf" style="display:none"></label>
+      <div id="t_kiStatus" style="display:none;margin-top:8px;font-size:12.5px;line-height:1.5;color:var(--green-ink);font-weight:600"></div>
+      <div class="tr-kilinks" id="t_kiLinks" style="display:none"></div>
     </div>
     <div class="tr-col">
       <h3>Расчёт виджета</h3>
@@ -395,6 +406,45 @@ function tcalc(){
   kvs.innerHTML=kv.map(([k,x])=>'<div class="cf"><span>'+k+'</span><b class="num">'+x+'</b></div>').join('');
 }
 renderT();tcalc();
+/* ── загрузка реального отчёта «Скоринг Бюро»: раскладка по типам + презентация и файл выгод (парсер общий — ../calc-widget/ki-parse.js) ── */
+const b64url=s=>btoa(unescape(encodeURIComponent(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+document.getElementById('t_kiInput').addEventListener('change',async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  const st=document.getElementById('t_kiStatus');
+  st.style.display='block'; st.style.color='var(--muted)'; st.textContent='Читаю '+file.name+'…';
+  try{
+    if(!window.pdfjsLib) throw new Error('pdf.js не загрузился');
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const buf=await file.arrayBuffer();
+    const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+    let text='';
+    for(let i=1;i<=Math.min(pdf.numPages,40);i++){
+      const pg=await pdf.getPage(i); const tc=await pg.getTextContent();
+      text+=tc.items.map(it=>it.str).join(' ')+'\n';
+    }
+    const sb=parseSb(text);
+    if(!sb) throw new Error('это не отчёт «Скоринг Бюро» — таблица действующих договоров не найдена');
+    document.querySelectorAll('#t_credits .tct').forEach(row=>{
+      const t=sb.types[row.dataset.t]||{amount:0};
+      row.querySelector('.c-am').value=t.amount?Math.round(t.amount):'';
+    });
+    tcalc();
+    const mort=sb.types.mortgage.amount, body=Math.max(0,sb.total-mort);
+    st.style.color='var(--green-ink)';
+    st.innerHTML='✓ КИ разобрана: <b>'+sb.count+' договоров · '+fmt(sb.total)+' ₽</b>'+(sb.ok?' (сходится с «Итого» отчёта)':'')+(mort>0?' · ипотека '+fmt(mort)+' ₽ — вне плана':'')+(sb.avgMonthly?' · платёж по отчёту ~'+fmt(sb.avgMonthly)+' ₽/мес':'');
+    const payload={date:sb.date,term:60,credits:sb.rows.map(r=>({n:r.n,lender:r.lender,debt:r.debt,product:r.type}))};
+    const q=o=>new URLSearchParams(o).toString();
+    const L=document.getElementById('t_kiLinks');
+    L.style.display='grid';
+    L.innerHTML=
+      '<a class="rdg" target="_blank" rel="noopener" href="../client-presentation-rdg/index.html?'+q({debt:Math.round(body),pay:Math.round(sb.avgMonthly||0),ki:1,term:60})+'">Презентация · РДГ по КИ <span>↗</span></a>'+
+      '<a class="bfl" target="_blank" rel="noopener" href="../client-presentation-v2/index.html?'+q({debt:Math.round(sb.total),pay:Math.round(sb.avgMonthly||0),ki:1})+'">Презентация · Списание по КИ <span>↗</span></a>'+
+      '<a class="pdf" target="_blank" rel="noopener" href="../calc-widget/ki.html#d='+b64url(JSON.stringify(payload))+'&print=1">Файл выгод — печать / PDF <span>⤓</span></a>';
+  }catch(err){ st.style.color='var(--brick)'; st.textContent='Не удалось разобрать: '+err.message; }
+  e.target.value='';
+});
 </script>
+<script src="../calc-widget/ki-parse.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </body>
 </html>
