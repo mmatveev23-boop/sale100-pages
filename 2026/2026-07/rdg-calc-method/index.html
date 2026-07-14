@@ -432,14 +432,21 @@ document.getElementById('t_kiInput').addEventListener('change',async e=>{
     const mort=sb.types.mortgage.amount, body=Math.max(0,sb.total-mort);
     st.style.color='var(--green-ink)';
     st.innerHTML='✓ КИ разобрана: <b>'+sb.count+' договоров · '+fmt(sb.total)+' ₽</b>'+(sb.ok?' (сходится с «Итого» отчёта)':'')+(mort>0?' · ипотека '+fmt(mort)+' ₽ — вне плана':'')+(sb.avgMonthly?' · платёж по отчёту ~'+fmt(sb.avgMonthly)+' ₽/мес':'');
-    const payload={date:sb.date,term:60,credits:sb.rows.map(r=>({n:r.n,lender:r.lender,debt:r.debt,product:r.type}))};
     const q=o=>new URLSearchParams(o).toString();
+    const payload={date:sb.date,term:60,
+      income:parseFloat(document.getElementById('t_income').value)||0,
+      kids:parseFloat(document.getElementById('t_kids').value)||0,
+      pmSelf:parseFloat(document.getElementById('t_pmSelf').value)||0,
+      pmChild:parseFloat(document.getElementById('t_pmChild').value)||0,
+      pres:'../client-presentation-rdg/index.html?'+q({debt:Math.round(body),pay:Math.round(sb.avgMonthly||0),ki:1,term:60}),
+      credits:sb.rows.map(r=>({n:r.n,lender:r.lender,debt:r.debt,product:r.type,opened:r.opened}))};
+
     const L=document.getElementById('t_kiLinks');
     L.style.display='grid';
     L.innerHTML=
       '<a class="rdg" target="_blank" rel="noopener" href="../client-presentation-rdg/index.html?'+q({debt:Math.round(body),pay:Math.round(sb.avgMonthly||0),ki:1,term:60})+'">Презентация · РДГ по КИ <span>↗</span></a>'+
       '<a class="bfl" target="_blank" rel="noopener" href="../client-presentation-v2/index.html?'+q({debt:Math.round(sb.total),pay:Math.round(sb.avgMonthly||0),ki:1})+'">Презентация · Списание по КИ <span>↗</span></a>'+
-      '<a class="pdf" target="_blank" rel="noopener" href="../calc-widget/ki.html#d='+b64url(JSON.stringify(payload))+'&print=1">Файл выгод — печать / PDF <span>⤓</span></a>';
+      '<a class="pdf" target="_blank" rel="noopener" href="../calc-widget/ki.html#d='+b64url(JSON.stringify(payload))+'&print=1">Юридическое заключение — печать / PDF <span>⚖</span></a>';
   }catch(err){ st.style.color='var(--brick)'; st.textContent='Не удалось разобрать: '+err.message; }
   e.target.value='';
 });

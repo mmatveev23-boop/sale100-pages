@@ -4,138 +4,389 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Ваш расчёт по кредитной истории · ДОНУЛЯ</title>
-<meta name="description" content="Персональный расчёт по официальной кредитной истории: два законных пути решения.">
-<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Юридическое заключение по кредитной истории · ДОНУЛЯ</title>
+<meta name="description" content="Юридическое заключение по результатам правового анализа кредитной истории: все обязательства, правовые основания, сценарии и рекомендация.">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* КЛИЕНТСКАЯ страница выгод по кредитной истории. Открывается из amo-виджета (данные через localStorage)
-   или демо. Мобайл-фёрст: клиент смотрит с телефона. Печать → PDF для отправки в чат. */
+/* ЮРИДИЧЕСКОЕ ЗАКЛЮЧЕНИЕ по кредитной истории (данные — из распарсенного отчёта «Скоринг Бюро», #d= base64url или демо).
+   Структура — по ресёрчу правовых заключений и закрывающих документов (выгода → доказательство → цена → шаг):
+   реквизитная шапка · главный вывод · допущения · полная опись кредиторов с вердиктами · 3 нормы права ·
+   сценарии «бездействие vs процедура» · честные риски · вехи · гарантии · цена · выводы с подписью · оговорки · CTA (screen-only).
+   Печать → PDF (A4), CTA в печати скрыт. Математика плана — docs/rdg-law-calc-2026-07.md (KEY_RATE обновлять). */
 :root{
   --paper:#FAF7F2; --card:#fff; --ink:#1C1A16; --muted:#68625A; --faint:#9B948A;
   --pine:#0B3B2E; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
   --gold:#C99A33; --gold-soft:#FBF3DC; --gold-ink:#8A6212; --alert:#A8442E; --alert-soft:#FAEDE8;
-  --line:rgba(28,26,22,.11);
+  --line:rgba(28,26,22,.12);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
 .num{font-variant-numeric:tabular-nums}
-.wrap{max-width:680px;margin:0 auto;padding:16px 16px 60px}
+.wrap{max-width:760px;margin:0 auto;padding:16px 16px 110px}
 
-.c-hero{background:radial-gradient(120% 90% at 85% -10%, #135741 0%, transparent 55%),linear-gradient(165deg,#0C4233 0%,#0B3B2E 60%,#082A21 100%);color:#fff;border-radius:18px;padding:24px 20px}
-.c-hero .brand{display:flex;align-items:center;gap:8px;margin-bottom:14px}
-.c-hero .brand .lg{width:26px;height:26px;border-radius:7px;background:#0F6B4F;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#F4C775}
-.c-hero .brand b{font-size:13px;letter-spacing:.02em}
-.c-hero .brand small{display:block;font-size:9.5px;color:rgba(255,255,255,.55);letter-spacing:.08em}
-.c-hero .cd{font-size:11.5px;color:rgba(255,255,255,.6)}
-.c-hero h1{margin-top:6px;font-size:22px;line-height:1.22}
-.c-hero h1 i{font-style:normal;color:#F4C775}
-.c-hero p{margin-top:8px;font-size:13.5px;color:rgba(255,255,255,.78)}
+/* реквизитная шапка */
+.doc-hd{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--pine);border-radius:8px;padding:18px 20px}
+.doc-hd .brand{display:flex;align-items:center;gap:8px}
+.doc-hd .brand .lg{width:26px;height:26px;border-radius:7px;background:var(--pine);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#F4C775}
+.doc-hd .brand b{font-size:13px}
+.doc-hd .brand small{display:block;font-size:9.5px;color:var(--faint);letter-spacing:.08em}
+.doc-hd .req{margin-left:auto;text-align:right;font-size:11px;color:var(--faint);line-height:1.45}
+.doc-hd h1{margin-top:14px;font-size:19px;line-height:1.25;letter-spacing:-.01em;text-transform:uppercase}
+.doc-hd .for{margin-top:6px;font-size:14.5px}
+.doc-hd .base{margin-top:8px;font-size:12px;color:var(--muted)}
 
-.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.fact{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px}
-.fact .l{font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
-.fact .v{margin-top:4px;font-size:20px;font-weight:800;letter-spacing:-.01em}
-.fact .s{margin-top:2px;font-size:11.5px;color:var(--muted)}
-.fact.bad .v{color:var(--alert)}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:12px}
+.sec h2{font-size:15px;font-weight:800;letter-spacing:-.01em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec h2 .sn{flex:none;width:22px;height:22px;border-radius:7px;background:var(--pine);color:#fff;display:grid;place-items:center;font-size:11.5px}
 
-.split{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
-.way{border-radius:16px;padding:16px 18px}
-.way.rdg{background:var(--pine);color:#fff}
-.way.bfl{background:var(--card);border:1.5px solid var(--green)}
-.way .wl{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;opacity:.65}
-.way .wt{margin-top:4px;font-size:16.5px;font-weight:800}
-.way .wv{margin-top:8px;font-size:27px;font-weight:800;letter-spacing:-.01em}
-.way.rdg .wv{color:#F4C775}
-.way.bfl .wv{color:var(--green-ink)}
-.way .ws{font-size:12px;margin-top:2px;opacity:.75}
-.way ul{margin-top:10px;list-style:none;font-size:12.5px}
-.way li{padding:4px 0 4px 20px;position:relative}
-.way li::before{content:"✓";position:absolute;left:0;font-weight:800}
-.way.rdg li::before{color:#9FE8C6}
-.way.bfl li::before{color:var(--green)}
+/* главный вывод */
+.mainv{background:radial-gradient(120% 90% at 85% -10%, #135741 0%, transparent 55%),linear-gradient(165deg,#0C4233 0%,#0B3B2E 60%,#082A21 100%);color:#fff;border:none}
+.mainv h2{color:#F4C775}
+.mainv h2 .sn{background:rgba(255,255,255,.14)}
+.mainv .big{font-size:15px;line-height:1.55}
+.mainv .big b{color:#F4C775}
+.mainv .pay{margin:12px 0 4px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.mainv .payv{font-size:30px;font-weight:800;letter-spacing:-.01em;color:#F4C775}
+.mainv .payv small{font-size:15px;color:rgba(255,255,255,.75);font-weight:600}
+.gains{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
+.gain{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:11px;padding:10px 13px;font-size:12.5px;line-height:1.5}
+.gain b{display:block;font-size:13px}
+.gain small{color:rgba(255,255,255,.65)}
+@media(min-width:640px){.gains{grid-template-columns:repeat(3,1fr)}}
 
-.c-cta{margin-top:12px;background:var(--gold-soft);border:1px solid rgba(201,154,51,.4);border-radius:14px;padding:14px 16px;font-size:13.5px;color:var(--gold-ink)}
-.c-cta b{color:var(--ink)}
-.c-disc{margin-top:10px;font-size:10.5px;color:var(--faint);line-height:1.5}
-.c-actions{margin-top:14px}
-.c-actions button{width:100%;border:none;border-radius:12px;padding:13px;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;background:var(--green);color:#fff}
+.src{font-size:12.5px;color:var(--muted);line-height:1.6}
+.src b{color:var(--ink)}
+.hook{margin-top:9px;background:var(--gold-soft);border-radius:9px;padding:9px 12px;font-size:12px;color:var(--gold-ink)}
 
-@media (min-width:680px){ .facts{grid-template-columns:repeat(4,1fr)} .split{grid-template-columns:1fr 1fr} }
+/* опись обязательств */
+.sumline{background:var(--green-soft);border-radius:10px;padding:10px 13px;font-size:12.5px;color:var(--green-ink);font-weight:600;margin-bottom:10px}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -4px;padding:0 4px}
+table{width:100%;min-width:540px;border-collapse:collapse}
+th{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);text-align:left;padding:6px 7px;border-bottom:1.5px solid var(--line)}
+td{font-size:12px;padding:7px;border-bottom:1px solid rgba(28,26,22,.07);vertical-align:top;line-height:1.4}
+td.r,th.r{text-align:right;white-space:nowrap}
+tr.mort td{background:var(--green-soft)}
+td .vd{display:inline-block;font-size:10px;font-weight:700;border-radius:999px;padding:1px 8px;background:#EEF1F4;color:#5c6874;white-space:nowrap}
+td .vd.plan{background:var(--gold-soft);color:var(--gold-ink)}
+td .vd.home{background:var(--green);color:#fff}
+tr.tot td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2px solid var(--green);font-size:12.5px}
+.check{margin-top:9px;font-size:12px;color:var(--muted)}
+
+/* нормы */
+.laws{display:grid;grid-template-columns:1fr;gap:8px}
+.law{background:var(--gold-soft);border:1px solid rgba(201,154,51,.35);border-radius:10px;padding:10px 13px;font-size:12.5px;line-height:1.5}
+.law b{display:block;font-size:12.5px}
+.law .tr{margin-top:4px;color:var(--green-ink);font-weight:600}
+@media(min-width:640px){.laws{grid-template-columns:repeat(3,1fr)}}
+.qual{font-size:13px;margin-bottom:10px;line-height:1.55}
+
+/* сценарии */
+.scen{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sc{border-radius:12px;padding:13px 15px;font-size:12.5px}
+.sc.bad{background:var(--alert-soft);color:#6E2E1F}
+.sc.good{background:var(--pine);color:#fff}
+.sc .st{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px}
+.sc.bad .st{color:var(--alert)}
+.sc.good .st{color:#F4C775}
+.sc ul{list-style:none}
+.sc li{padding:4px 0 4px 18px;position:relative;line-height:1.45}
+.sc.bad li::before{content:"✕";position:absolute;left:0;font-weight:800;color:var(--alert)}
+.sc.good li::before{content:"✓";position:absolute;left:0;font-weight:800;color:#9FE8C6}
+.sc-note{margin-top:9px;font-size:12px;color:var(--muted)}
+@media(max-width:560px){.scen{grid-template-columns:1fr}}
+
+/* риски / вехи */
+.risk{display:grid;grid-template-columns:1fr;gap:7px;font-size:12.5px}
+.rk{border:1px solid var(--line);border-radius:10px;padding:9px 12px;line-height:1.5}
+.rk b{color:var(--ink)}
+.rk .cl{display:block;margin-top:3px;color:var(--green-ink);font-weight:600}
+.steps{list-style:none;counter-reset:st}
+.steps li{counter-increment:st;padding:9px 0 9px 40px;position:relative;border-bottom:1px dashed var(--line);font-size:13px;line-height:1.5}
+.steps li:last-child{border-bottom:none}
+.steps li::before{content:counter(st);position:absolute;left:0;top:8px;width:26px;height:26px;border-radius:9px;background:var(--green-soft);color:var(--green-ink);display:grid;place-items:center;font-weight:800;font-size:12.5px}
+.steps li.hero::before{background:var(--gold);color:#fff}
+.steps li b{display:block}
+.steps li small{color:var(--muted)}
+
+/* гарантии / цена */
+.gr{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px}
+.g1{border:1px solid var(--line);border-radius:10px;padding:10px 12px;line-height:1.5}
+.g1 b{display:block}
+@media(max-width:560px){.gr{grid-template-columns:1fr}}
+.price{background:var(--card);border:1.5px solid var(--green);border-radius:12px;padding:14px 16px;margin-bottom:9px}
+.price .pv{font-size:24px;font-weight:800;letter-spacing:-.01em;color:var(--green-ink)}
+.price .pv small{font-size:13px;font-weight:600;color:var(--muted)}
+.price .ps{margin-top:3px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.pval{background:var(--gold-soft);border-radius:10px;padding:10px 13px;font-size:12.5px;color:var(--gold-ink);line-height:1.5}
+
+/* выводы / подпись / оговорки */
+.concl{list-style:none;counter-reset:cn}
+.concl li{counter-increment:cn;padding:6px 0 6px 26px;position:relative;font-size:13px;line-height:1.55}
+.concl li::before{content:counter(cn) ".";position:absolute;left:2px;font-weight:800;color:var(--green-ink)}
+.sign{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:12.5px}
+.sign b{display:block;font-size:13.5px}
+.sign .who{color:var(--muted)}
+.sign .dt{color:var(--faint);white-space:nowrap}
+.disc{font-size:10px;color:var(--faint);line-height:1.55}
+.disc li{margin-left:16px;padding:1px 0}
+
+/* CTA — только экран */
+.ctabar{position:fixed;left:0;right:0;bottom:0;background:rgba(250,247,242,.96);backdrop-filter:blur(6px);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+.ctabar .in{max-width:760px;margin:0 auto;display:flex;gap:10px;align-items:center}
+.ctabar .txt{font-size:11.5px;color:var(--muted);line-height:1.35;flex:1;min-width:0}
+.ctabar .txt b{color:var(--ink);font-size:12.5px}
+.ctabar a{flex:none;display:inline-flex;align-items:center;gap:7px;background:var(--green);color:#fff;text-decoration:none;font-size:13.5px;font-weight:800;border-radius:11px;padding:12px 18px}
+.ctabar a:hover{background:var(--green-ink)}
+.printbtn{width:100%;border:none;border-radius:11px;padding:12px;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;background:#fff;color:var(--green-ink);border:1.5px solid var(--green);margin-top:12px}
+
 @media print{
-  body{background:#fff}
-  .c-actions{display:none!important}
+  body{background:#fff;font-size:12px}
   .wrap{padding:0;max-width:none}
-  .c-hero,.way.rdg{-webkit-print-color-adjust:exact;print-color-adjust:exact;border-radius:0}
+  .ctabar,.printbtn{display:none!important}
+  .sec,.doc-hd{border-radius:0;border-left:none;border-right:none;break-inside:avoid}
+  table{break-inside:auto} tr{break-inside:avoid}
+  .mainv,.sc.good,.steps li.hero::before{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .print-foot{display:block!important;margin-top:14px;font-size:11px;color:#68625A}
 }
+.print-foot{display:none}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="c-hero">
-    <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ</b><small>СПИСАНИЕ ДОЛГОВ</small></div></div>
-    <div class="cd num" id="c_date"></div>
-    <h1 id="c_title"></h1>
-    <p>Это официальные данные бюро кредитных историй — те же, что видят банки. Мы посчитали по ним оба законных пути решения. Цифры ниже — ваши, не примерные.</p>
+
+  <div class="doc-hd">
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ</b><small>УРЕГУЛИРОВАНИЕ ДОЛГОВ · 127-ФЗ</small></div></div>
+      <div class="req">Исх. № <span id="d_num" class="num">ДН-КИ-000000</span><br>Дата составления: <span id="d_today" class="num">—</span></div>
+    </div>
+    <h1>Юридическое заключение<br>по результатам правового анализа кредитной истории</h1>
+    <div class="for">Подготовлено для: <b id="d_name">—</b></div>
+    <div class="base">Основание: кредитный отчёт АО «Скоринг Бюро» от <span id="d_repdate" class="num">—</span>, сформированный по запросу субъекта кредитной истории. Реквизиты исполнителя — в договоре об оказании юридических услуг.</div>
   </div>
-  <div class="facts" id="c_facts"></div>
-  <div class="split">
-    <div class="way rdg" id="c_rdg"></div>
-    <div class="way bfl" id="c_bfl"></div>
+
+  <div class="sec mainv">
+    <h2><span class="sn">1</span>Основной вывод</h2>
+    <div class="big" id="d_main">—</div>
+    <div class="pay">Единый платёж по плану вместо <span id="d_paynow_top" class="num">—</span></div>
+    <div class="payv num"><span id="d_plan_pay">—</span> ₽/мес <small>· план до <span id="d_term">60</span> месяцев</small></div>
+    <div class="gains">
+      <div class="gain"><b>Тишина с первого дня</b>Стоп звонки, приставы, пени и штрафы <small>— ст. 213.11 127-ФЗ</small></div>
+      <div class="gain"><b>Ключевая ставка вместо банковских</b>14,25% на остаток <small>— ст. 213.19 127-ФЗ</small></div>
+      <div class="gain" id="d_gain3"><b>Жильё сохраняется</b>Ипотека — вне плана, отдельное соглашение <small>— 298-ФЗ</small></div>
+    </div>
   </div>
-  <div class="c-cta"><b>Что дальше?</b> Этот расчёт — материал к вашему разговору с экспертом ДОНУЛЯ. На консультации он сверит цифры с вашей ситуацией и поможет выбрать путь. Если появились вопросы до звонка — напишите нам в чат.</div>
-  <p class="c-disc" id="c_disc"></p>
-  <div class="c-actions"><button onclick="window.print()">Скачать PDF / распечатать</button></div>
+
+  <div class="sec">
+    <h2><span class="sn">2</span>Исходные данные и допущения</h2>
+    <div class="src" id="d_sources">—</div>
+    <div class="hook">Если у вас есть обязательства, не отражённые в отчёте (займы у физических лиц, поручительства, налоговые задолженности), — сообщите юристу: выводы будут уточнены.</div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">3</span>Перечень обязательств по данным кредитного отчёта</h2>
+    <div class="sumline" id="d_sumline">—</div>
+    <div class="tblwrap"><table>
+      <thead><tr><th>№</th><th>Кредитор · вид</th><th>Дата</th><th class="r">Остаток</th><th>Правовой вердикт</th></tr></thead>
+      <tbody id="d_rows"></tbody>
+    </table></div>
+    <div class="check">Проверьте список. Если какой-то договор указан неточно или отсутствует — отметьте, поправим до подачи документов.</div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">4</span>Правовое основание</h2>
+    <div class="qual" id="d_qual">—</div>
+    <div class="laws">
+      <div class="law"><b>Ст. 213.11 127-ФЗ · мораторий</b>С введением реструктуризации приостанавливаются исполнительные производства, прекращается начисление неустоек, штрафов и пеней.<span class="tr">Простыми словами: банки и приставы останавливаются, долг перестаёт расти.</span></div>
+      <div class="law"><b>Ст. 213.19 127-ФЗ · проценты плана</b>На требования кредиторов начисляются проценты в размере ключевой ставки Банка России вместо договорных.<span class="tr">Вместо 30–292% годовых по договорам — 14,25%.</span></div>
+      <div class="law"><b>Ст. 213.10-1 127-ФЗ (298-ФЗ) · ипотека</b>По ипотеке единственного жилья заключается отдельное соглашение с банком — без согласия остальных кредиторов.<span class="tr">Квартира не попадает в процедуру и сохраняется.</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">5</span>Финансовые последствия: сценарии</h2>
+    <div class="scen">
+      <div class="sc bad">
+        <div class="st">Если не предпринимать действий · 12 мес</div>
+        <ul id="d_bad"></ul>
+      </div>
+      <div class="sc good">
+        <div class="st">Судебная реструктуризация</div>
+        <ul id="d_good"></ul>
+      </div>
+    </div>
+    <div class="sc-note">Каждый пункт левой колонки закрывается введением процедуры. Прогноз роста — по ставкам ваших договоров; расчёт консервативный, без учёта штрафов за просрочку.</div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">6</span>Оценка судебной перспективы</h2>
+    <div class="src">Исходя из состава обязательств и подтверждаемого дохода, перспектива утверждения плана оценивается как <b>высокая</b>. Суд проверит: достоверность сведений, указанных при получении кредитов; сделки с имуществом за последние 3 года; добросовестность заёмщика.</div>
+    <div class="risk" style="margin-top:9px">
+      <div class="rk"><b>Сделки за 3 года.</b> Продажа/дарение имущества до подачи может быть оспорена.<span class="cl">Закрываем: юрист анализирует сделки до подачи заявления и выстраивает корректную позицию.</span></div>
+      <div class="rk"><b>Свежие кредиты перед обращением.</b> Несколько займов незадолго до процедуры суд может расценить как недобросовестность.<span class="cl">Закрываем: обосновываем целевое использование в заявлении — это стандартная работа сопровождения.</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">7</span>Порядок действий и сроки</h2>
+    <ol class="steps">
+      <li><b>Подписание договора и старт работы — на этой неделе</b><small>фиксация условий, приём документов по фото в чат</small></li>
+      <li><b>Сбор документов и запросы — ~2 недели</b><small>кредиторы, ФССП, справки — берём на себя</small></li>
+      <li><b>Подача заявления в арбитражный суд — 2–3 месяца</b><small>госплатежи вносятся заранее (~2-й месяц)</small></li>
+      <li class="hero"><b>Введение процедуры → мораторий</b><small>стоп пени, звонки и взыскания — первый ощутимый результат</small></li>
+      <li><b>Утверждение плана судом</b><small>единый посильный платёж, ипотека — отдельным соглашением</small></li>
+    </ol>
+    <div class="check">С момента подписания взаимодействие с кредиторами и коллекторами берёт на себя ДОНУЛЯ.</div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">8</span>Исполнитель и гарантии</h2>
+    <div class="gr">
+      <div class="g1"><b>Гарантия в договоре (п. 6)</b>Нет утверждённого плана по нашей вине — возвращаем оплаченное. Возврат за 7 рабочих дней по письменному требованию.</div>
+      <div class="g1"><b>Юрист сопровождения</b>Персональный юрист ведёт дело от заявления до утверждения плана, ответ в течение 24 часов.</div>
+      <div class="g1"><b>Все условия — письменно</b>Договор подписывается кодом из СМС (63-ФЗ), копия сразу в чат. Ничего «со слов».</div>
+      <div class="g1"><b>Оплата напрямую компании</b>Платежи уходят на официальный счёт в Сбербанке — без посредников и наличных.</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">9</span>Стоимость сопровождения</h2>
+    <div class="price">
+      <div class="pv num">13 500 <small>₽/мес · 14 платежей (услуги целиком 189 000 ₽ · VIP при оплате сразу 169 000 ₽)</small></div>
+      <div class="ps">Включено: анализ сделок, подготовка и подача заявления, представительство, взаимодействие с кредиторами, сопровождение до утверждения плана. Госплатежи 50 000 ₽ (депозит суда, публикации, почта) — отдельно, напрямую государству. Первый шаг — <b>фиксация условий от 1 000 ₽</b>.</div>
+    </div>
+    <div class="pval" id="d_anchor">—</div>
+  </div>
+
+  <div class="sec">
+    <h2><span class="sn">10</span>Выводы</h2>
+    <ol class="concl" id="d_concl"></ol>
+    <div class="check" style="margin-top:8px">Окончательное решение о выборе процедуры принимает клиент.</div>
+    <div class="sign">
+      <div class="who"><b>Светлана Марченко</b>руководитель практики по реструктуризации долгов, ДОНУЛЯ</div>
+      <div class="dt num" id="d_signdate">—</div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2 style="font-size:12px"><span class="sn" style="width:18px;height:18px;font-size:9px">i</span>Оговорки и ограничения</h2>
+    <ul class="disc">
+      <li>Заключение носит предварительный характер, основано на кредитном отчёте от <span id="d_repdate2">—</span> и сведениях клиента; при выявлении новых обстоятельств выводы подлежат уточнению.</li>
+      <li>Настоящий документ не является публичной офертой; условия оказания услуг определяются договором.</li>
+      <li>Введение процедуры и утверждение плана реструктуризации относятся к исключительной компетенции арбитражного суда.</li>
+      <li>Заключение отражает законодательство Российской Федерации на дату составления.</li>
+      <li>Адресовано исключительно лицу, указанному в шапке документа.</li>
+    </ul>
+    <button class="printbtn" onclick="window.print()">Скачать PDF / распечатать</button>
+    <div class="print-foot">Вопросы по заключению — юрист ДОНУЛЯ, ответ в чате в течение 24 часов. Ваша персональная страница с договором и оплатой — по ссылке из чата.</div>
+  </div>
+
+</div>
+
+<div class="ctabar" id="d_cta" style="display:none">
+  <div class="in">
+    <div class="txt"><b>Готовы зафиксировать условия?</b><br>Подпись по СМС и оплата — на вашей персональной странице · первый платёж от 1 000 ₽</div>
+    <a id="d_ctalink" href="#">Перейти к подписанию и оплате →</a>
+  </div>
 </div>
 
 <script>
 'use strict';
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
-/* демо-данные (обезличенный пример реального отчёта) — если страница открыта без данных из виджета */
-const DEMO={name:'Светлана Викторовна',date:'10 июля 2026 года',term:60,credits:[{"n": 1, "lender": "МФО МКК «Стратосфера» · микрозаём", "product": "mfo", "debt": 24000}, {"n": 2, "lender": "МФО МКК «А Деньги» · заём", "product": "mfo", "debt": 47500}, {"n": 3, "lender": "МФО МКК «Займер» · заём", "product": "mfo", "debt": 25000}, {"n": 4, "lender": "МФО МКК «ДЗП-Единый» · заём", "product": "mfo", "debt": 25500}, {"n": 5, "lender": "МТС-Банк · кредитная карта", "product": "card", "debt": 50000}, {"n": 6, "lender": "Газпромбанк · овердрафт", "product": "card", "debt": 147534}, {"n": 7, "lender": "ВТБ · кредитная карта", "product": "card", "debt": 99939}, {"n": 8, "lender": "Газпромбанк · кредит", "product": "loan", "debt": 947387}, {"n": 9, "lender": "Альфа-Банк · кредитная карта", "product": "card", "debt": 120712}, {"n": 10, "lender": "ДОМ.РФ · ипотека", "product": "mortgage", "debt": 959891}, {"n": 11, "lender": "Сбербанк · ипотека", "product": "mortgage", "debt": 581574}, {"n": 12, "lender": "Сбербанк · кредитная карта", "product": "card", "debt": 0}, {"n": 13, "lender": "Совкомбанк · кредит", "product": "loan", "debt": 0}]};
-/* проценты в месяц по средним ставкам типов (ПСК ЦБ 2026); ипотека — здоровый кредит, в «долговую яму» не считаем */
-function estMonthlyInterest(c){ const b=+c.debt||0;
-  if(c.product==='mortgage') return 0;
-  if(c.product==='mfo') return b*(2.92/12);
-  if(c.product==='card') return b*(0.52/12);
-  return b*(0.307/12);
-}
+const KEY_RATE=14.25;
+const dcl=(n,a,b,c)=>{const m=n%100,d=n%10;return (m>=11&&m<=14)?c:d===1?a:(d>=2&&d<=4)?b:c;};
+/* демо-данные: обезличенный реальный отчёт «Скоринг Бюро» 10.07.2026 (канон КИ заказчика) */
+const DEMO={name:'Светлана Викторовна',date:'10 июля 2026',term:60,income:150000,kids:2,pmSelf:17960,pmChild:15983,
+  pres:'../client-presentation-rdg/index.html?debt=1487572&pay=119718&ki=1&term=60',
+  credits:[
+  {"n":1,"lender":"МФО МКК «Стратосфера» · микрозаём","product":"mfo","debt":24000,"opened":"29.06.2026"},
+  {"n":2,"lender":"МФО МКК «А Деньги» · заём","product":"mfo","debt":47500,"opened":"23.03.2026"},
+  {"n":3,"lender":"МФО МКК «Займер» · заём","product":"mfo","debt":25000,"opened":"16.03.2026"},
+  {"n":4,"lender":"МФО МКК «ДЗП-Единый» · заём","product":"mfo","debt":25500,"opened":"26.01.2026"},
+  {"n":5,"lender":"МТС-Банк · кредитная карта","product":"card","debt":50000,"opened":"21.08.2025"},
+  {"n":6,"lender":"Газпромбанк · овердрафт","product":"card","debt":147534,"opened":"10.01.2025"},
+  {"n":7,"lender":"ВТБ · кредитная карта","product":"card","debt":99939,"opened":"25.12.2024"},
+  {"n":8,"lender":"Газпромбанк · кредит","product":"loan","debt":947387,"opened":"27.11.2024"},
+  {"n":9,"lender":"Альфа-Банк · кредитная карта","product":"card","debt":120712,"opened":"25.12.2023"},
+  {"n":10,"lender":"ДОМ.РФ · ипотека","product":"mortgage","debt":959891,"opened":"15.07.2023"},
+  {"n":11,"lender":"Сбербанк · ипотека","product":"mortgage","debt":581574,"opened":"01.09.2022"},
+  {"n":12,"lender":"Сбербанк · кредитная карта","product":"card","debt":0,"opened":"25.06.2015"},
+  {"n":13,"lender":"Совкомбанк · кредит","product":"loan","debt":0,"opened":"18.12.2012"}]};
+const RATE={mfo:2.92,card:0.52,loan:0.307,secured:0.25,mortgage:0.18};
+const PNAME={mfo:'МФО',card:'карта',loan:'кредит',secured:'залоговый',mortgage:'ипотека'};
+function monthlyInterest(c){const b=+c.debt||0;const r=RATE[c.product]??0.307;return c.product==='mortgage'?0:b*r/12;}
 function render(d){
-  /* данные могут прийти из URL-ссылки — числа принудительно приводим, имя вставляем только как текст (не innerHTML) */
-  const total=d.credits.reduce((s,c)=>s+(+c.debt||0),0);
-  const over=d.credits.reduce((s,c)=>s+(+c.overdue||0),0);
-  const mfo=d.credits.filter(c=>c.product==='mfo');
-  const interest=d.credits.reduce((s,c)=>s+estMonthlyInterest(c),0);
-  const term=+d.term||36;
-  /* план по закону (docs/rdg-law-calc-2026-07.md): тело без ипотеки + проценты по ключевой ЦБ 14,25% + ФУ 7% */
-  const mort=d.credits.filter(c=>c.product==='mortgage').reduce((s,c)=>s+(+c.debt||0),0);
+  /* числа приводим принудительно, имя — только текстом */
+  const cr=d.credits;
+  const total=cr.reduce((s,c)=>s+(+c.debt||0),0);
+  const mortRows=cr.filter(c=>c.product==='mortgage');
+  const mort=mortRows.reduce((s,c)=>s+(+c.debt||0),0);
   const body=Math.max(0,total-mort);
-  const rdgPay=body*(1+(14.25/100)*(term/12)/2+0.07)/term;
-  document.getElementById('c_date').textContent='Расчёт по вашей кредитной истории'+(d.date?' · отчёт БКИ на '+String(d.date).slice(0,40):'');
-  const ttl=document.getElementById('c_title');
-  ttl.textContent='';
-  if(d.name) ttl.append(String(d.name).slice(0,60)+', ');
-  const tRest=document.createElement('span'); tRest.innerHTML='вот что показала <i>ваша кредитная история</i>'; ttl.append(tRest);
-  document.getElementById('c_facts').innerHTML=`
-    <div class="fact"><div class="l">Ваш долг</div><div class="v num">${fmt(total)} ₽</div><div class="s num">${d.credits.length} действующих договоров</div></div>
-    <div class="fact bad"><div class="l">Из них МФО</div><div class="v num">${mfo.length}</div><div class="s num">${fmt(mfo.reduce((s,c)=>s+(+c.debt||0),0))} ₽ — ставки до 292% годовых</div></div>
-    <div class="fact bad"><div class="l">Проценты съедают</div><div class="v num">~${fmt(interest)} ₽</div><div class="s">каждый месяц — долг при этом не уменьшается</div></div>
-    <div class="fact ${over>0?'bad':''}"><div class="l">Просрочка</div><div class="v num">${over>0?fmt(over)+' ₽':'ещё нет'}</div><div class="s">${over>0?'уже в отчёте — дальше пени и коллекторы':'но запас прочности кончается'}</div></div>`;
-  document.getElementById('c_rdg').innerHTML=`
-    <div class="wl">Путь 1 · Реструктуризация (РДГ)</div>
-    <div class="wt">Долг замораживается, платёж один</div>
-    <div class="wv num">${fmt(rdgPay)} ₽/мес</div>
-    <div class="ws num">план на ${term} мес вместо ~${fmt(interest)} ₽ одних только процентов${mort>0?' · ипотека '+fmt(mort)+' ₽ — вне плана, жильё сохраняется (298-ФЗ)':''}</div>
-    <ul><li>Проценты и пени останавливаются по закону</li><li>Вместо ${d.credits.length} кредиторов — один платёж</li><li>Вы не признаётесь банкротом, имущество не трогают</li></ul>`;
-  document.getElementById('c_bfl').innerHTML=`
-    <div class="wl">Путь 2 · Списание долга (БФЛ)</div>
-    <div class="wt">Долг ${fmt(total)} ₽ списывается целиком</div>
-    <div class="wv">13 500 ₽/мес</div>
-    <div class="ws">процедура ~14 месяцев, дальше — жизнь с чистого листа</div>
-    <ul><li>Списываются все ${d.credits.length} договоров, включая МФО</li><li>Коллекторам и банкам звонить вам запрещено</li><li>Гарантия в договоре: не спишем — вернём деньги</li></ul>`;
-  document.getElementById('c_disc').textContent='Расчёт предварительный, по данным отчёта бюро кредитных историй'+(d.date?' от '+d.date:'')+'. Проценты по действующим договорам оценены по типам обязательств. Итоговые условия фиксируются в договоре; выбор процедуры — после консультации. ИП Плешаков Р. Т., ИНН 470516340503 · донуля.рф';
+  const planRows=cr.length-mortRows.length;
+  const mfoRows=cr.filter(c=>c.product==='mfo');
+  const interest=cr.reduce((s,c)=>s+monthlyInterest(c),0); /* без ипотеки */
+  const term=+d.term||60;
+  const planTotal=body*(1+(KEY_RATE/100)*(term/12)/2+0.07);
+  const planPay=planTotal/term;
+  const today=new Date();
+  const dstr=today.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+  const set=(id,v)=>document.getElementById(id).textContent=v;
+
+  /* шапка */
+  set('d_num','ДН-КИ-'+String(today.getDate()).padStart(2,'0')+String(today.getMonth()+1).padStart(2,'0')+String(today.getFullYear()).slice(2));
+  set('d_today',dstr); set('d_signdate',dstr);
+  document.getElementById('d_name').textContent=d.name?String(d.name).slice(0,60):'клиента';
+  set('d_repdate',d.date?String(d.date).slice(0,40):'—');
+  set('d_repdate2',d.date?String(d.date).slice(0,40):'—');
+
+  /* 1. главный вывод */
+  document.getElementById('d_main').innerHTML='По <b>'+planRows+' из '+cr.length+'</b> ваших кредитных обязательств применима судебная реструктуризация долгов (гл. X 127-ФЗ). Совокупный долг <b>'+fmt(total)+' ₽</b>'+(mort>0?', из них ипотека '+fmt(mort)+' ₽ выводится за скобки с сохранением жилья':'')+'. Проценты и пени останавливаются с введения процедуры.';
+  const payNowShown=(+d.income>0&&interest>0)?'~'+fmt(interest+body*0.02)+' ₽/мес по '+planRows+' договорам':'нынешних платежей';
+  set('d_paynow_top',payNowShown);
+  set('d_plan_pay',fmt(planPay)); set('d_term',term);
+  if(mort<=0) document.getElementById('d_gain3').innerHTML='<b>Не банкротство</b>План исполнен — вы рассчитались и не получили статус банкрота <small>— ст. 213.14 127-ФЗ</small>';
+
+  /* 2. источники */
+  document.getElementById('d_sources').innerHTML='<b>Исследовано:</b> 1) кредитный отчёт АО «Скоринг Бюро» от '+(d.date||'—')+' — все действующие обязательства ('+cr.length+' '+dcl(cr.length,'договор','договора','договоров')+'); 2) сведения, сообщённые клиентом (доход'+(+d.income>0?' '+fmt(+d.income)+' ₽/мес':'')+(+d.kids>0?', детей: '+d.kids:'')+', регион проживания). Допущения: сведения отчёта приняты как полные и актуальные на дату формирования; сведения клиента приняты как достоверные.';
+
+  /* 3. опись */
+  const banks=new Set(cr.filter(c=>c.product!=='mfo').map(c=>String(c.lender).split('·')[0].trim())).size;
+  document.getElementById('d_sumline').textContent=cr.length+' '+dcl(cr.length,'договор','договора','договоров')+' · '+banks+' '+dcl(banks,'банк','банка','банков')+' + '+mfoRows.length+' МФО · совокупный долг '+fmt(total)+' ₽'+(+d.income>0?' · долговая нагрузка ~'+Math.round((interest+body*0.02+ (mort>0? mort*0.015:0))/(+d.income)*100)+'% дохода':'');
+  document.getElementById('d_rows').innerHTML=cr.map(c=>{
+    const isM=c.product==='mortgage';
+    const zero=(+c.debt||0)<=0;
+    return '<tr'+(isM?' class="mort"':'')+'><td class="num">'+c.n+'</td><td>'+String(c.lender).slice(0,70)+'</td><td class="num">'+(c.opened||'—')+'</td><td class="r num">'+(zero?'0 ₽':fmt(+c.debt)+' ₽')+'</td><td>'+(isM?'<span class="vd home">вне плана · жильё сохраняется</span>':zero?'<span class="vd">закрывается справкой</span>':'<span class="vd plan">включается в план</span>')+'</td></tr>';
+  }).join('')+'<tr class="tot"><td></td><td>В план реструктуризации</td><td></td><td class="r num">'+fmt(body)+' ₽</td><td>'+planRows+' '+dcl(planRows,'договор','договора','договоров')+'</td></tr>';
+
+  /* 4. квалификация */
+  document.getElementById('d_qual').innerHTML='Совокупность обязательств и текущая платёжная нагрузка дают право на обращение в арбитражный суд с заявлением о реструктуризации долгов в порядке <b>ст. 213.4 127-ФЗ «О несостоятельности (банкротстве)»</b>. Условия допуска по ст. 213.13 (источник дохода; отсутствие банкротства за 5 лет и утверждённого плана за 8 лет) — проверяются юристом при подписании.';
+
+  /* 5. сценарии */
+  const growth=interest*12;
+  document.getElementById('d_bad').innerHTML=
+    '<li>Долг растёт: +~'+fmt(growth)+' ₽ процентов за год по ставкам ваших договоров</li>'+
+    '<li>Судебный приказ / исполнительная надпись — обычно через ~6 месяцев просрочки</li>'+
+    '<li>+7% исполнительский сбор ('+fmt(total*0.07)+' ₽, ст. 112 229-ФЗ)</li>'+
+    '<li>Удержание до 50% дохода'+(+d.income>0?' — до '+fmt((+d.income)/2)+' ₽/мес':'')+' (ст. 99 229-ФЗ), арест счетов, запрет выезда</li>';
+  document.getElementById('d_good').innerHTML=
+    '<li>Рост долга остановлен с даты введения процедуры (ст. 213.11)</li>'+
+    '<li>Единый платёж ~'+fmt(planPay)+' ₽/мес по плану, утверждённому судом</li>'+
+    '<li>Исполнительные производства приостановлены, коллекторам звонить запрещено</li>'+
+    (mort>0?'<li>Ипотечное жильё — сохраняется (отдельное соглашение, 298-ФЗ)</li>':'<li>Статус банкрота не присваивается — план исполнен, долг закрыт</li>');
+
+  /* 9. якорь цены */
+  document.getElementById('d_anchor').innerHTML='<b>Для сравнения:</b> без процедуры долг прирастает на ~'+fmt(growth)+' ₽ в год — стоимость всего сопровождения меньше '+(growth>189000?'годового':'двухлетнего')+' роста долга. Гарантия возврата — в договоре (п. 6).';
+
+  /* 10. выводы */
+  document.getElementById('d_concl').innerHTML=
+    '<li>По состоянию на '+(d.date||dstr)+' совокупный объём обязательств составляет '+fmt(total)+' ₽ по '+cr.length+' '+dcl(cr.length,'договору','договорам','договорам')+'.</li>'+
+    '<li>Имеются правовые основания для обращения в арбитражный суд в порядке ст. 213.4 127-ФЗ.</li>'+
+    '<li>К включению в план реструктуризации подлежат '+planRows+' '+dcl(planRows,'обязательство','обязательства','обязательств')+' на '+fmt(body)+' ₽'+(mort>0?'; '+mortRows.length+' ипотечных обязательства на '+fmt(mort)+' ₽ сохраняются вне плана с сохранением жилья (ст. 213.10-1)':'')+'.</li>'+
+    '<li>Рекомендуется: фиксация условий и подача заявления до накопления просрочек — каждый месяц ожидания прибавляет ~'+fmt(interest)+' ₽ процентов.</li>';
+
+  /* CTA */
+  if(d.pres){const cta=document.getElementById('d_cta');cta.style.display='';document.getElementById('d_ctalink').href=String(d.pres);}
 }
-/* данные: 1) из ссылки #d=… (base64url — виджет открывает так «Файл выгод (PDF)» с &print=1: печать/PDF-выгрузка для дожима, не второй клиентский сайт);
-   2) localStorage (открытие из виджета в том же браузере); 3) демо. В проде — короткая ссылка движка. */
+/* данные: 1) #d=… base64url (виджет/тренажёр открывают «Юр. заключение (PDF)» с &print=1); 2) localStorage; 3) демо */
 function fromHash(){
   const m=location.hash.match(/[#&]d=([^&]+)/);
   if(!m) return null;
@@ -148,12 +399,11 @@ const hashHasData=/[#&]d=/.test(location.hash);
 let d=fromHash();
 if(!d&&!hashHasData){ try{ d=JSON.parse(localStorage.getItem('kiCalc')||'null'); }catch(e){} }
 if(hashHasData&&!d){
-  /* ссылка обрезана мессенджером или повреждена — НЕ показываем чужие демо-данные и не печатаем */
-  document.querySelector('.wrap').innerHTML='<div class="c-hero"><div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ</b><small>СПИСАНИЕ ДОЛГОВ</small></div></div><h1>Ссылка открылась не целиком</h1><p>Похоже, мессенджер обрезал длинную ссылку. Откройте её из сообщения полностью (нажмите на саму ссылку, не копируйте руками) — или напишите нам в чат, пришлём новую.</p></div>';
+  /* ссылка обрезана мессенджером — не показываем чужие данные и не печатаем */
+  document.querySelector('.wrap').innerHTML='<div class="doc-hd"><div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ</b><small>УРЕГУЛИРОВАНИЕ ДОЛГОВ</small></div></div><h1>Ссылка открылась не целиком</h1><div class="base">Похоже, мессенджер обрезал ссылку. Попросите менеджера прислать её ещё раз или откройте с другого устройства.</div></div>';
 }else{
   render(d&&d.credits&&d.credits.length?d:DEMO);
-  /* #…&print=1 — сразу открыть печать (кнопка «Файл выгод (PDF)» в виджете) */
-  if(/[#&]print=1/.test(location.hash)) setTimeout(()=>window.print(),500);
+  if(/[#&]print=1/.test(location.hash)) setTimeout(()=>window.print(),600);
 }
 </script>
 </body>

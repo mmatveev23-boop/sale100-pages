@@ -208,7 +208,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <div class="lrow">
           <label class="lbtn" id="w_kiBtn" style="cursor:pointer">⭱ Загрузить КИ<input type="file" id="w_ki" accept="application/pdf" style="display:none"></label>
           <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
-          <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">⤓ Файл выгод (PDF)</a>
+          <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">⚖ Юр. заключение (PDF)</a>
         </div>
         <div class="wnote" id="w_note" style="display:none"><span id="w_noteTxt"></span> <a id="w_present" target="_blank" style="display:none">Открыть презентацию ↗</a></div>
         <div class="toast" id="w_toast"></div>
@@ -626,7 +626,14 @@ function applyKiTypes(sb,demo){
   t.innerHTML=(sb.ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+sb.count+' '+decl(sb.count)+', долг '+fmt(sb.total)+' ₽'+(sb.ok?' — сходится с «Итого» отчёта.':'.')+(sb.types.mortgage.amount>0?' Ипотека '+fmt(sb.types.mortgage.amount)+' ₽ — вне плана (298-ФЗ).':'')+' В проде PDF прикрепляется к сделке.';
   const kf=document.getElementById('w_kiFile');
   if(sb.rows&&sb.rows.length){
-    const payload={name:document.querySelector('.deal h1').textContent.trim(),date:sb.date,term,credits:sb.rows.map(r=>({n:r.n,lender:r.lender,debt:r.debt,product:r.type}))};
+    /* заключение считает платёж и ПДН само — передаём доход/семью/ПМ и ссылку дожим-презентации */
+    const payload={name:document.querySelector('.deal h1').textContent.trim(),date:sb.date,term,
+      income:parseFloat(document.getElementById('w_income').value)||0,
+      kids:parseFloat(document.getElementById('w_kids').value)||0,
+      pmSelf:parseFloat(document.getElementById('w_pmSelf').value)||0,
+      pmChild:parseFloat(document.getElementById('w_pmChild').value)||0,
+      pres:presentUrl()?presentUrl().replace('../','../'):null,
+      credits:sb.rows.map(r=>({n:r.n,lender:r.lender,debt:r.debt,product:r.type,opened:r.opened}))};
     kf.href='./ki.html#d='+b64url(JSON.stringify(payload))+'&print=1';
   }else kf.href='./ki.html#print=1';
   kf.style.display='';
