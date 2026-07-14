@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Как считает калькулятор РДГ · пример семьи · ДОНУЛЯ</title>
-<meta name="description" content="Методика расчёта РДГ по 127-ФЗ в виджете: тело без ипотеки, проценты по ключевой ставке, ФУ 7%, рекомендация менеджеру. Пример: семья в Москве с 2 детьми, долг 1,5 млн и ипотека.">
+<meta name="description" content="Методика расчёта РДГ в виджете: тело без ипотеки + 7% ФУ, проценты заморожены, рекомендация менеджеру. Пример: семья в Москве с 2 детьми, долг 1,5 млн и ипотека.">
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -163,10 +163,10 @@ tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
 
   <header class="hdr">
     <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · КАЛЬКУЛЯТОР РДГ</b><small>КАК СЧИТАЕТ И ПОЧЕМУ ЕМУ МОЖНО ВЕРИТЬ</small></div></div>
-    <h1>Как виджет считает РДГ — по закону, а не «на глаз»</h1>
-    <p>Менеджер вводит кредиты со слов клиента — виджет считает план реструктуризации так, как его будет считать суд, и сразу отвечает: подходит клиенту РДГ или нет. Ниже — методика по шагам и живой пример: семья в Москве с двумя детьми, долгом 1,5 млн и ипотекой.</p>
+    <h1>Как виджет считает РДГ — прозрачно, шаг за шагом</h1>
+    <p>Менеджер вводит кредиты со слов клиента — виджет считает план по единой формуле компании и сразу отвечает: подходит клиенту РДГ или нет. Точный график утвердит суд — расчёт предварительный. Ниже — методика по шагам и живой пример: семья в Москве с двумя детьми, долгом 1,5 млн и ипотекой.</p>
     <div class="lawchips">
-      <span class="lc">Проценты плана: <b>ключевая ЦБ 14,25%</b> · ст. 213.19</span>
+      <span class="lc">Проценты: <b>заморожены</b> · ст. 213.11</span>
       <span class="lc">Срок: <b>60 / 36 мес</b> · ст. 213.14, 213.17</span>
       <span class="lc">Допуск: <b>ст. 213.13</b></span>
       <span class="lc">Ипотека вне плана: <b>298-ФЗ</b></span>
@@ -191,9 +191,9 @@ tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
       <span class="law">298-ФЗ · ст. 213.10-1</span>
     </div></div>
     <div class="step"><div class="sn">2</div><div>
-      <b>Плюс проценты плана — по ключевой ставке ЦБ, не по банковским</b>
-      <p>С момента процедуры банковские проценты и пени останавливаются. Вместо них на долг капает ключевая ставка ЦБ — сейчас <b>14,25%</b> — на убывающий остаток: <code>тело × 14,25% × (срок в годах ÷ 2)</code>. Это главный смысл РДГ: заменить 30–52% банковских на 14,25% государственных.</p>
-      <span class="law">ст. 213.11, 213.19 п. 2</span>
+      <b>Проценты замораживаются — рост долга останавливается</b>
+      <p>С введения процедуры банковские проценты, пени и штрафы останавливаются, новые не начисляются. План — это просто <code>тело долга + 7% управляющего, поделить на срок</code>. Это главный смысл РДГ: долг зафиксирован, вместо 30–292% банковских — ноль новых процентов.</p>
+      <span class="law">ст. 213.11 · формула компании (rdg-formula-spec)</span>
     </div></div>
     <div class="step"><div class="sn">3</div><div>
       <b>Плюс вознаграждение финансового управляющего — 7%</b>
@@ -249,26 +249,25 @@ tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
     <div class="calcflow">
       <div class="cf"><span>Свободный доход <span class="sub">160 000 − ПМ 28 940 − 2 × 21 903 − ипотека 38 072</span></span><b class="num">49 182 ₽/мес</b></div>
       <div class="cf"><span>Тело плана <span class="sub">кредиты и карты, без ипотеки</span></span><b class="num">1 500 000 ₽</b></div>
-      <div class="cf"><span>Проценты плана <span class="sub">14,25% (ключевая ЦБ) на убывающий остаток, 5 лет</span></span><b class="num">~534 375 ₽</b></div>
-      <div class="cf"><span>Вознаграждение ФУ <span class="sub">7% от выплаченного</span></span><b class="num">105 000 ₽</b></div>
-      <div class="cf"><span>Итого по плану</span><b class="num">2 139 375 ₽</b></div>
-      <div class="cf"><span>Платёж · 60 мес <span class="sub">с одобрения кредиторов</span></span><b class="num">35 656 ₽/мес ✓ тянет</b></div>
-      <div class="cf"><span>Платёж · 36 мес <span class="sub">через суд, без одобрения</span></span><b class="num">53 490 ₽/мес — не тянет</b></div>
+      <div class="cf"><span>Вознаграждение ФУ <span class="sub">7% от тела — единственная надбавка, новых процентов нет</span></span><b class="num">105 000 ₽</b></div>
+      <div class="cf"><span>Итого по плану <span class="sub">тело + 7%</span></span><b class="num">1 605 000 ₽</b></div>
+      <div class="cf"><span>Платёж · 60 мес <span class="sub">одобряет собрание кредиторов</span></span><b class="num">26 750 ₽/мес ✓ тянет</b></div>
+      <div class="cf"><span>Платёж · 36 мес <span class="sub">суд без одобрения</span></span><b class="num">44 583 ₽/мес ✓ тоже тянет</b></div>
       <div class="cf total"><span>Вердикт виджета</span><b>🟢 РДГ · подходит — план 60 мес</b></div>
     </div>
   </div>
 
   <div class="benefits">
-    <div class="bf"><div class="bl">Нагрузка в месяц</div><div class="bv num">−49 800 ₽</div><div class="bs">Должны были платить ~123 528 ₽/мес. Станет: план 35 656 + ипотека 38 072 = <b>73 728 ₽/мес</b>. Минус 40%.</div></div>
+    <div class="bf"><div class="bl">Нагрузка в месяц</div><div class="bv num">−58 706 ₽</div><div class="bs">Должны были платить ~123 528 ₽/мес. Станет: план 26 750 + ипотека 38 072 = <b>64 822 ₽/мес</b>. Минус 48%.</div></div>
     <div class="bf gold"><div class="bl">Квартира</div><div class="bv">Сохраняется</div><div class="bs">Ипотека — отдельным соглашением с банком (298-ФЗ), в процедуру не попадает. При списании долга с торгами так бы не вышло.</div></div>
-    <div class="bf"><div class="bl">Ставка на долг</div><div class="bv num">14,25%</div><div class="bs">Вместо 30,7% по кредитам и 52% по картам. Пени и коллекторы — стоп с первого дня процедуры (ст. 213.11).</div></div>
-    <div class="bf"><div class="bl">Статус</div><div class="bv">Не банкрот</div><div class="bs">План исполнен — семья рассчиталась и не получила статус банкрота и его последствий. Плюс переплата по кредитам меньше на ~70 000 ₽ даже против «дотянуть самим».</div></div>
+    <div class="bf"><div class="bl">Новые проценты</div><div class="bv num">0%</div><div class="bs">Долг заморожен: вместо 30,7% по кредитам и 52% по картам не капает ничего. Пени и коллекторы — стоп с введения процедуры (ст. 213.11).</div></div>
+    <div class="bf"><div class="bl">Статус</div><div class="bv">Не банкрот</div><div class="bs">План исполнен — семья рассчиталась и не получила статус банкрота и его последствий. Вся надбавка к долгу — 105 000 ₽ (7% управляющего) против сотен тысяч процентов банкам.</div></div>
   </div>
 
   <div class="wverdict">
     <span class="tag">ТАК ЭТО ВИДИТ МЕНЕДЖЕР В ВИДЖЕТЕ</span>
     <b>🟢 РДГ · подходит — план 60 мес</b>
-    Платёж 35 656 ₽/мес вместо банковских 123 528 ₽. Банковские проценты стоп, дальше ключевая 14,25% — не банкрот. 36 мес не тянет — только с одобрения кредиторов (60). Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ). Госплатежи 50 000 ₽ на старте, услуги ДОНУЛЯ 13 500 ₽/мес.
+    Платёж 26 750 ₽/мес вместо банковских 123 528 ₽. Проценты заморожены: только тело + 7% управляющего — не банкрот. Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ). Госплатежи 50 000 ₽ на старте, услуги ДОНУЛЯ 13 500 ₽/мес.
   </div>
 
   <h2><span class="n">5</span>Тренажёр — подставьте свои цифры</h2>
@@ -305,7 +304,7 @@ tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
     <h3>Служебное</h3>
     <ul>
       <li><b>Методология и источники</b> — <code>docs/rdg-law-calc-2026-07.md</code> в репо (127-ФЗ ст. 20.6, 213.11–213.19, 213.10-1, 223.2; Пленум ВС № 45; 474-ФЗ, 298-ФЗ, 259-ФЗ). Живой расчёт — <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/calc-widget/in-amo.html" style="color:var(--green-ink)">виджет в amo</a>: пример выше можно повторить руками.</li>
-      <li><b>Обновляемые константы:</b> ключевая ставка <code>KEY_RATE = 14,25%</code> — после каждого заседания ЦБ (~раз в 6 недель, следующее 24.07.2026); средние ставки типов кредитов — раз в квартал (ПСК ЦБ); прожиточные минимумы — раз в год.</li>
+      <li><b>Обновляемые константы:</b> средние ставки типов кредитов — раз в квартал (ПСК ЦБ); прожиточные минимумы — раз в год. Ключевая ставка в расчёте больше не участвует (формула: тело + 7%).</li>
       <li><b>Осознанные упрощения прототипа:</b> лаг «введение процедуры → утверждение плана» (~4–7 мес) не считаем; залоговые не-ипотечные кредиторы в плане не моделируются; судимость (ст. 213.13) — вопрос анкеты передачи, не первого звонка.</li>
     </ul>
   </div>
@@ -314,10 +313,9 @@ tr.sum td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
 <script src="../calc-widget/pm-regions.js"></script>
 <script>
 'use strict';
-/* тренажёр = математика боевого виджета (docs/rdg-law-calc-2026-07.md): держать в синхроне с calc-widget/in-amo.html */
+/* тренажёр = математика боевого виджета (rdg-formula-spec.md заказчика): держать в синхроне с calc-widget/in-amo.html */
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
-const KEY_RATE=14.25, GOS_START=50000, BFL_COST=239000;
-const KEY_RATE_TXT=KEY_RATE.toLocaleString('ru-RU');
+const GOS_START=50000, BFL_COST=239000;
 const CREDIT_TYPES=[
   {k:'loan',    name:'Кредит',          rate:30.7,months:28,  demo:1000000, demoN:2},
   {k:'card',    name:'Кредитная карта', rate:52,  months:36,  demo:500000,  demoN:3},
@@ -333,7 +331,7 @@ function creditCalc(k,amount,rate,months){
   if(k==='mfo'){const cap=amount*2.3;const pay=cap/months;return {pay,total:Math.min(projectRevolving(amount,m,pay,months),cap)};}
   const pay=annuityPayment(amount,m,months);return {pay,total:Math.max(pay*months,amount)};
 }
-function planCalc(body,months){const interest=body*(KEY_RATE/100)*(months/12)/2;const fu=body*0.07;const total=body+interest+fu;return {interest,fu,total,monthly:total/months};}
+function planCalc(body,months){const fu=body*0.07;const total=body+fu;return {interest:0,fu,total,monthly:total/months};} /* формула заказчика: рост заморожен */
 let prior='no';
 function renderT(){
   document.getElementById('t_credits').innerHTML=CREDIT_TYPES.map(t=>
@@ -385,10 +383,9 @@ function tcalc(){
   }else if(free>=P60.monthly){
     const margin=(free-P60.monthly)/free;
     if(margin<0.1){v.className='tr-verdict y';v.innerHTML='<b>🟡 РДГ · пограничный — запас впритык</b>Платёж '+fmt(P60.monthly)+' ₽/мес при свободных '+fmt(free)+' ₽. Суд может не утвердить (Пленум ВС № 45).';}
-    else{v.className='tr-verdict g';v.innerHTML='<b>🟢 РДГ · подходит — план 60 мес</b>Платёж '+fmt(P60.monthly)+' ₽/мес вместо банковских '+fmt(monthly)+' ₽. Проценты банков стоп, дальше ключевая '+KEY_RATE_TXT+'%.'+(free<P36.monthly?' 36 мес не тянет — только с одобрения кредиторов.':'')+(mortAmount>0?' Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ).':'');}
+    else{v.className='tr-verdict g';v.innerHTML='<b>🟢 РДГ · подходит — план 60 мес</b>Платёж '+fmt(P60.monthly)+' ₽/мес вместо банковских '+fmt(monthly)+' ₽. Проценты заморожены: тело + 7% управляющего.'+(free<P36.monthly?' 36 мес не тянет — только с одобрения кредиторов.':'')+(mortAmount>0?' Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ).':'');}
     kv=[['Тело плана'+(mortAmount>0?' (без ипотеки)':''),fmt(body)+' ₽'],
-        ['Проценты · ключевая '+KEY_RATE_TXT+'%','~'+fmt(P60.interest)+' ₽'],
-        ['ФУ 7% от выплаченного',fmt(P60.fu)+' ₽'],
+        ['ФУ 7% (вознаграждение управляющего)',fmt(P60.fu)+' ₽'],
         ['Итого по плану',fmt(P60.total)+' ₽'],
         ['Платёж · 60 мес (с кредиторами)',fmt(P60.monthly)+' ₽/мес'],
         ['Платёж · 36 мес (через суд, ≥50%)',free>=P36.monthly?fmt(P36.monthly)+' ₽/мес':'не тянет'],
