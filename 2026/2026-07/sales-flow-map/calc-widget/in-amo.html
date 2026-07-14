@@ -292,11 +292,6 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             </div>
           </div>
 
-          <!-- б) ПРОСРОЧКИ (сценарии юр. заключения — payload overdue) -->
-          <div class="rowf"><span class="rlab">Просрочки — влияют на сценарии юр. заключения, не на расчёт</span>
-            <div class="seg sm" id="w_ovd" style="width:158px"><button class="on" data-o="1">есть</button><button data-o="0">платит исправно</button></div>
-          </div>
-
           <!-- в) ПЛАТЁЖ СЕЙЧАС -->
           <!-- платёж руками не вводится (правка заказчика 14.07): всегда считается по кредитам, при КИ — из отчёта -->
           <div class="rowf freeline"><span class="rlab">Платёж сейчас — считаем по кредитам</span><b id="w_paynowLine" class="num">—</b></div>
@@ -318,6 +313,11 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <div class="advpm">
             <div><label>ПМ клиента, ₽/мес</label><input id="w_pmSelf" type="number"></div>
             <div><label>ПМ ребёнка, ₽/мес</label><input id="w_pmChild" type="number"></div>
+          </div>
+
+          <!-- ПРОСРОЧКИ (только сценарии юр. заключения — payload overdue; опущены вниз и ужаты, правка заказчика 15.07) -->
+          <div class="rowf"><span class="rlab">Просрочки <span style="color:#98a1ab;font-weight:600">· для заключения</span></span>
+            <div class="seg sm" id="w_ovd" style="width:158px"><button class="on" data-o="1">есть</button><button data-o="0">платит исправно</button></div>
           </div>
 
           <!-- е) СРОК ПЛАНА РДГ (только при prod=rdg) -->
