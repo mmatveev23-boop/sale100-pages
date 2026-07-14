@@ -455,7 +455,7 @@ h1 .hl{color:var(--green)}
         <div class="bars stg">
           <div class="bar now"><div class="bl"><span>Платите сейчас</span><b class="num" id="cmpPayNow">—</b></div><i style="width:100%"></i></div>
           <div class="bar us"><div class="bl"><span>Будете платить с нами</span><b class="num" id="cmpUsMonthly">—</b></div><i id="cmpUsBar" style="width:68%"></i></div>
-          <div class="bnote">Всё включено: платёж по плану, который утвердит суд, и наши услуги. Проценты и пени остановлены — долг больше не растёт.</div>
+          <div class="bnote">Платёж по плану, который утвердит суд. Услуги ДОНУЛЯ — отдельно: 13 500 ₽/мес, 14 платежей (ниже). Проценты и пени остановлены — долг больше не растёт.</div>
         </div>
 
         <div class="noact stg" id="noAct">
@@ -865,9 +865,11 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   const noUs=Math.max(CLIENT_PAY*RDG_TERM, CLIENT.debt);
   const interest=Math.max(0,noUs-CLIENT.debt);
   const withUs=planTotal(CLIENT.debt,RDG_TERM)+RASS_TOTAL;
-  const usMonthly=Math.round(withUs/RDG_TERM);
-  const save=noUs-withUs, saveM=CLIENT_PAY-usMonthly;
   const plan=Math.round(planTotal(CLIENT.debt,RDG_TERM)/RDG_TERM);
+  /* бар «с нами» = платёж по плану (канон скрипта: услуги 13 500 называются отдельно; виджет и заключение считают так же).
+     Общая экономия (hero) по-прежнему честно учитывает услуги целиком. Было: план+услуги/срок — цифра расходилась с виджетом. */
+  const usMonthly=plan;
+  const save=noUs-withUs, saveM=CLIENT_PAY-usMonthly;
   const set=(id,v)=>document.getElementById(id).textContent=v;
   /* платёж клиента неизвестен или экономии нет (платит меньше плана) — хиро и бары не показываем, честный расчёт остаётся в спойлере */
   if(CLIENT_PAY<=0||save<=0){
