@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Карта сценариев лида · тренажёр менеджера · ДОНУЛЯ</title>
+<meta name="description" content="Интерактивная карта сценариев лида: от первого набора до оплаты. Тренажёр — кликайте события и смотрите, что делает менеджер на каждом шаге.">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* КАРТА СЦЕНАРИЕВ ЛИДА — тренажёр. Канон: плейбук дожима (site/dozhim-3days), свод правил §0/§10.
+   Потолок «контакт→договор» = 3 дня активного времени; попытка = телефонный набор; КИ — главный дожимный ход. */
+:root{
+  --paper:#F4EFE6; --paper2:#ECE5D8; --card:#fff; --card2:#FBF8F2;
+  --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0B3B2E; --pine2:#0C4233; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
+  --gold:#C99A33; --gold-bright:#F4C775; --gold-soft:#FBF3DC; --gold-ink:#8A6212;
+  --brick:#A8442E; --brick-soft:#F8E3DC;
+  --line:#E4DCCD; --shadow:0 18px 44px -22px rgba(11,59,46,.42); --shadow-sm:0 8px 22px -14px rgba(11,59,46,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 18px 250px}
+
+.topnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.topnav a{font-size:13px;font-weight:700;text-decoration:none;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 14px}
+.topnav a:hover{color:var(--green-ink);border-color:var(--green)}
+.topnav a.cur{background:var(--pine);color:#fff;border-color:var(--pine)}
+
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:26px 26px;box-shadow:var(--shadow)}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
+.hdr .brand b{font-size:15px}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:26px;line-height:1.16;letter-spacing:-.02em;font-weight:800}
+.hdr p{margin-top:10px;font-size:14.5px;color:rgba(255,255,255,.8);max-width:76ch}
+.hdr p b{color:#fff}
+.formula{margin-top:14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12px;font-weight:800;letter-spacing:.02em}
+.formula span{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:5px 11px;color:#fff;white-space:nowrap}
+.formula span.money{background:var(--gold);border-color:var(--gold);color:#082A21}
+.formula i{font-style:normal;color:rgba(255,255,255,.45)}
+
+/* ── карта ── */
+.mapscroll{margin-top:18px;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,#FDFBF6 0%,var(--card2) 100%)}
+.mapinner{position:relative;min-width:1720px;display:flex;gap:54px;align-items:stretch;padding:30px 70px 30px 28px}
+.mapinner svg{position:absolute;inset:0;pointer-events:none}
+.col{display:flex;flex-direction:column;justify-content:center;gap:20px;position:relative}
+
+.node{width:236px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow-sm);position:relative;transition:opacity 180ms ease-out,border-color 180ms ease-out,box-shadow 180ms ease-out;scroll-margin-top:20px;scroll-margin-bottom:250px}
+.node .chip{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:3px 9px;background:var(--green-soft);color:var(--green-ink);margin-bottom:7px}
+.node h3{font-size:14px;letter-spacing:-.01em;line-height:1.25}
+.node .nd{margin-top:5px;font-size:11.5px;color:var(--muted);line-height:1.45}
+.node.f-good{background:var(--green-soft);border-color:rgba(15,107,79,.35)}
+.node.f-good .chip{background:var(--pine);color:#fff}
+.node.f-mid{background:var(--card2)}
+.node.f-mid .chip{background:var(--paper2);color:var(--muted)}
+.node.f-bad{background:var(--brick-soft);border-color:rgba(168,68,46,.3)}
+.node.f-bad .chip{background:var(--brick);color:#fff}
+.node.gold .chip{background:var(--gold-soft);color:var(--gold-ink)}
+
+.mode-train .node{opacity:.35}
+.mode-train .node.done{opacity:.78}
+.mode-train .node.on{opacity:1;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft),var(--shadow)}
+.mode-over .node{opacity:1}
+
+.ev{display:none;margin-top:10px;flex-wrap:wrap;gap:6px}
+.mode-train .node.on .ev{display:flex}
+.ev button{border:1px solid var(--green);background:#fff;color:var(--green-ink);border-radius:999px;padding:6px 11px;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;text-align:left;transition:background 150ms ease-out,transform 160ms ease-out}
+.ev button:hover{background:var(--green-soft)}
+.ev button:active{transform:scale(0.97)}
+.ev button.bad{border-color:var(--brick);color:var(--brick)}
+.ev button.bad:hover{background:var(--brick-soft)}
+.ev button.mid{border-color:var(--line);color:var(--muted)}
+.ev button.mid:hover{background:var(--paper2)}
+
+path.edge{fill:none;stroke:var(--line);stroke-width:1.8}
+path.edge.act{stroke:var(--green);stroke-width:2.6}
+.mode-over path.edge.act{stroke:var(--line);stroke-width:1.8}
+
+/* ── панель менеджера ── */
+.panel{position:fixed;left:0;right:0;bottom:0;z-index:20;pointer-events:none}
+.p-in{max-width:1120px;margin:0 auto;padding:0 18px 14px;pointer-events:auto}
+.p-card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 -6px 34px -12px rgba(11,59,46,.35),var(--shadow-sm);padding:12px 16px 14px}
+.p-top{display:flex;align-items:center;gap:12px}
+.crumbs{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;font-size:11.5px;color:var(--faint);padding-bottom:2px}
+.crumbs b{color:var(--green-ink)}
+.crumbs .sep{margin:0 5px;color:var(--line)}
+.p-ctl{display:flex;gap:7px;flex-shrink:0}
+.p-ctl button{border:1px solid var(--line);background:var(--card2);color:var(--muted);border-radius:999px;padding:6px 13px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background 150ms ease-out,color 150ms ease-out,transform 160ms ease-out}
+.p-ctl button:hover{color:var(--green-ink);border-color:var(--green)}
+.p-ctl button:active{transform:scale(0.97)}
+.p-main{margin-top:8px}
+.p-hd{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.p-hd b{font-size:15px;letter-spacing:-.01em}
+.day-badge{font-size:11px;font-weight:800;background:var(--gold-soft);color:var(--gold-ink);border:1px solid var(--gold);border-radius:999px;padding:3px 11px}
+.p-acts{list-style:none;margin-top:7px;display:grid;gap:4px}
+.p-acts li{font-size:12.5px;color:var(--muted);line-height:1.45;padding-left:15px;position:relative}
+.p-acts li::before{content:"";position:absolute;left:2px;top:7px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.p-acts li b{color:var(--ink);font-weight:600}
+.p-tools{margin-top:9px;display:flex;gap:6px;flex-wrap:wrap}
+.p-tools a{font-size:11px;font-weight:700;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:4px 11px;text-decoration:none;transition:transform 160ms ease-out}
+.p-tools a:hover{color:var(--green-ink);background:var(--green-soft)}
+.p-tools a:active{transform:scale(0.97)}
+.p-main.res{border-radius:12px;padding:11px 14px;margin-top:8px}
+.p-main.res-good{background:var(--green-soft)}
+.p-main.res-good .p-hd b{color:var(--green-ink)}
+.p-main.res-mid{background:var(--card2);border:1px dashed var(--line)}
+.p-main.res-bad{background:var(--brick-soft)}
+.p-main.res-bad .p-hd b{color:var(--brick)}
+.p-main.res .p-acts li::before{background:currentColor;opacity:.5}
+.again{margin-top:9px;border:0;background:var(--pine);color:#fff;border-radius:999px;padding:8px 16px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:transform 160ms ease-out,opacity 150ms ease-out}
+.again:hover{opacity:.92}
+.again:active{transform:scale(0.97)}
+.p-hint{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:6px}
+
+@media(max-width:640px){
+  .wrap{padding:16px 13px 280px}
+  .node{scroll-margin-bottom:300px}
+  .hdr{padding:22px 18px;border-radius:20px}.hdr h1{font-size:21px}
+  .p-in{padding:0 10px 10px}
+  .p-card{padding:10px 12px 12px}
+  .p-top{flex-wrap:wrap}
+  .p-main{max-height:44vh;overflow-y:auto}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="topnav">
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/sales-flow-map/">Карта связки</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/manager-situations/">Ситуации менеджера</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/widget-states/">Состояния виджета</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/rdg-calc-method/">Как считает калькулятор</a>
+    <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/dozhim-3days/">Дожим · 3 дня</a>
+    <a class="cur" href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/lead-map/">Карта сценариев</a>
+  </nav>
+
+  <header class="hdr">
+    <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · КАРТА СЦЕНАРИЕВ ЛИДА</b><small>ТРЕНАЖЁР: ОТ ПЕРВОГО НАБОРА ДО ОПЛАТЫ</small></div></div>
+    <h1>Что бы ни ответил клиент — у менеджера есть следующий ход</h1>
+    <p>Это тренажёр: активен один узел, на нём — кнопки событий. Нажимайте, что ответил клиент, — карта подсветит путь, а панель внизу покажет, <b>что делает менеджер</b> на этом шаге и какие инструменты под рукой. Три опоры канона: потолок <b>«контакт → договор» = 3 дня</b> активного времени, <b>попытка = телефонный набор</b> (сообщение — дополнение), <b>запрос КИ — главный дожимный ход, для всех</b>.</p>
+    <div class="formula" aria-label="Формула работы менеджера"><span>Со слов</span><i>→</i><span>Расчёт в виджете</span><i>→</i><span>Презентация голосом</span><i>→</i><span>Попытка закрыть</span><i>→</i><span>Запрос КИ</span><i>→</i><span>Заключение</span><i>→</i><span>Звонок-разбор</span><i>→</i><span class="money">Деньги</span></div>
+  </header>
+
+  <div class="mapscroll" id="mapscroll">
+    <div class="mapinner mode-train" id="mapinner">
+      <svg id="edges" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#C9BFA9"></path></marker>
+          <marker id="arrg" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0F6B4F"></path></marker>
+        </defs>
+        <g id="eg"></g>
+      </svg>
+      <!-- колонки собирает JS -->
+    </div>
+  </div>
+
+</div>
+
+<div class="panel">
+  <div class="p-in">
+    <div class="p-card">
+      <div class="p-top">
+        <div class="crumbs" id="crumbs"></div>
+        <div class="p-ctl">
+          <button type="button" id="btnOver">Показать всю карту</button>
+          <button type="button" id="btnReset">⟲ Сначала</button>
+        </div>
+      </div>
+      <div class="p-main" id="pmain"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ══ данные ══ */
+var PAGES='https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/';
+var TOOLS={
+  pb:['Плейбук дожима',PAGES+'dozhim-3days/'],
+  ki:['Пример юр. заключения',PAGES+'calc-widget/ki.html'],
+  kg:['Инструкция «КИ за 5 минут»',PAGES+'ki-guide/'],
+  pres:['Демо-презентация РДГ',PAGES+'client-presentation-rdg/'],
+  w:['Виджет-калькулятор',PAGES+'calc-widget/in-amo.html'],
+  ms:['Ситуации менеджера',PAGES+'manager-situations/']
+};
+
+var N={
+  lead:{name:'Лид',chip:'Старт',title:'Лид взят в работу',
+    desc:'Владение менеджера. Потолок «контакт → договор» — 3 дня активного времени.',
+    acts:['<b>Владение менеджера:</b> лид закреплён, вести его — ваша работа.','Потолок <b>«контакт → договор» = 3 дня</b> активного времени — стартует с первого контакта.','Попытка = телефонный набор; сообщение — дополнение.'],
+    tools:['pb'],
+    ev:[{l:'Звонок 1 — набираем',to:'call1'}]},
+  call1:{name:'Звонок 1',chip:'Звонок',title:'Звонок 1',
+    desc:'Попытка = телефонный набор. Дозвон → консультация со слов прямо на звонке.',
+    acts:['<b>Попытка = телефонный набор.</b> Сообщение — дополнение, не замена.','Дозвонились → консультация со слов прямо на этом звонке.'],
+    tools:['ms'],
+    ev:[{l:'Дозвонился',to:'consult'},{l:'Недозвон',to:'nocall',cls:'mid'}]},
+  nocall:{name:'Недозвон',chip:'48 ч',title:'Недозвон',gold:true,
+    desc:'Окно касаний 48 ч. Молчание — не отказ.',
+    acts:['<b>Попытка = телефонный набор</b>, сообщение — дополнение.','Окно касаний — <b>48 ч</b>.','Молчание — не отказ и не закрытие: дальше лид уходит в пул касаний.'],
+    tools:['ms','pb'],
+    ev:[{l:'Дозвонился',to:'consult'},{l:'Молчание',to:'pool',cls:'mid'}]},
+  consult:{name:'Консультация',chip:'Звонок',title:'Консультация со слов',
+    desc:'Кредиты со слов → виджет, расчёт виден сразу. Презентация выгод голосом. Резюме + ссылка каждому в Д0.',
+    acts:['Кредиты <b>со слов</b> — в конструктор виджета: расчёт виден сразу (вердикт + выжимка).','Презентация выгод — <b>голосом</b> по персональной странице клиента.','<b>Резюме + ссылка уходит каждому в Д0 (≤15 мин)</b>: дата и готовность подписать — не условие.'],
+    tools:['w','pres'],
+    ev:[{l:'Готов — подписывает',to:'sign'},{l:'Думает',to:'dozhim1'},{l:'Не открыл ссылку',to:'notopen',cls:'mid'},{l:'«Прекратите контакт»',to:'dnc',cls:'bad'}]},
+  sign:{name:'Подписание',chip:'На линии',title:'Подписание на звонке',
+    desc:'Договор в просмотре, кнопка «Подписать», код из СМС, копия в чат.',
+    acts:['Договор — в просмотре на персональной странице, кнопка <b>«Подписать»</b>.','Подпись — <b>код из СМС</b>, копия договора уходит в чат.'],
+    tools:['pres'],
+    ev:[{l:'Оплатил полностью',to:'paid'},{l:'Частичка от 1 000 ₽',to:'partial'},{l:'Не оплатил',to:'part2',cls:'mid'}]},
+  dozhim1:{name:'Дожим',chip:'Д0–Д3',title:'Дожим: не подписал · Д0–Д3',gold:true,
+    desc:'Д0 резюме + ссылка + КИ · Д1 звонок №2 · Д2 бронь условий · Д3 «да или нет». Ритм: 1 звонок + 2 сообщения в день.',
+    tools:['pb','ki','kg'],
+    ev:[]},
+  notopen:{name:'Не открыл',chip:'Вечер Д0',title:'Не открыл ссылку',
+    desc:'Вечером SMS-дубль другим каналом, наутро звонок №2 — дальше как дожим.',
+    acts:['Вечером — <b>SMS-дубль другим каналом</b>: коротко, одна цифра, одна ссылка.','Наутро — <b>звонок №2</b>, дальше по механике дожима Д1–Д3.'],
+    tools:['pb'],
+    ev:[{l:'Наутро — звонок №2',to:'dozhim1'}]},
+  ki:{name:'КИ пришла',chip:'Приоритет',title:'КИ пришла = всё бросаем',gold:true,
+    desc:'PDF в виджет → юр. заключение готово → немедленно звонок-разбор. Самый сильный звонок воронки.',
+    acts:['<b>PDF в виджет → юр. заключение готово.</b>','<b>Немедленно звонок-разбор</b> — самый сильный звонок воронки, не откладывать ни на час.','Закрытие на подпись — прямо на звонке.'],
+    tools:['w','ki'],
+    ev:[{l:'Подписал',to:'sign'},{l:'Всё ещё думает',to:'dozhim1',cls:'mid'}]},
+  part2:{name:'Не оплатил',chip:'Ежедневно',title:'Подписал, не оплатил',
+    desc:'Час 0 — не отпускать с линии. Попытка каждый день первые 3 дня, дальше ритм 48 ч. Потолка нет.',
+    acts:['<b>Час 0 — не отпускать с линии:</b> оплата СБП 15 секунд / частичка от 1 000 ₽ / точная дата платежа вслух + в сделку (дата = артефакт) + запрос КИ, не вешая трубку.','<b>Д1:</b> гарантия возврата (п. 6 договора, 7 рабочих дней), оплата на счёт компании в Сбербанке.','<b>Д2:</b> «бронирование юриста» — для старта нужны <b>ДВА условия: первый платёж и кредитный отчёт</b>.','<b>Д3 и дальше:</b> «что мешает» + перенос на 25-е (день графика). Потолка нет, но попытка каждый день первые 3 дня, дальше ритм 48 ч; больше 14 дней без движения — разбор с РОПом.'],
+    tools:['pb','kg'],
+    ev:[{l:'Оплатил',to:'paid'},{l:'Частичка',to:'partial'},{l:'КИ прислал',to:'ki'}]},
+  partial:{name:'Частичка',chip:'Добор',title:'Частичка от 1 000 ₽',
+    desc:'Условия зафиксированы, лид закреплён. Статус «Частичка — добор».',
+    acts:['<b>Условия зафиксированы, лид закреплён.</b>','Добор полной суммы — статус <b>«Частичка — добор»</b>.'],
+    tools:['pb'],
+    ev:[{l:'Добор полной',to:'paid'},{l:'Завис',to:'part2',cls:'mid'}]},
+  paid:{name:'Оплата ✓',chip:'Финал ✓',title:'Оплата прошла',fin:'good',
+    desc:'Анкета передачи → юрист сопровождения (ответ в течение 24 ч).',
+    acts:['<b>Анкета передачи</b> — обязательные поля amo.','Передача <b>юристу сопровождения</b>: ответ в течение 24 ч.','Если КИ ещё нет — запрос продолжается в каждом касании.']},
+  ceiling:{name:'Потолок',chip:'Финал',title:'Потолок 3 дня',fin:'mid',
+    desc:'Лид уходит другому менеджеру с мерджем всей истории.',
+    acts:['Лид уходит другому менеджеру <b>с мерджем всей истории</b>.','<b>КИ не запрошена за 3 дня = провал гейта.</b> Вывод: запрос КИ — в Д0, не в Д3.']},
+  pool:{name:'Пул',chip:'Финал',title:'Пул / касания',fin:'mid',
+    desc:'Бот греет. Часть возвращается сама через 1–2 недели.',
+    acts:['<b>Молчание — не отказ и не закрытие.</b>','Бот греет; часть клиентов возвращается сама через 1–2 недели.']},
+  dnc:{name:'Отказ',chip:'Финал',title:'Отказ с цитатой',fin:'bad',
+    desc:'Только «прекратите контакт» с цитатой. DNC, без возврата. Право закрыть есть.',
+    acts:['Отказ — только <b>«прекратите контакт» с цитатой</b> = закрытие с причиной.','<b>DNC, без возврата.</b> Право закрыть есть.']}
+};
+
+/* колонки слева направо */
+var COLS=[['lead'],['call1','nocall'],['consult','pool'],['sign','dozhim1','notopen','dnc'],['ki','part2','ceiling'],['paid','partial']];
+
+/* рёбра (26 + петля дожима) */
+var EDGES=[
+  ['lead','call1'],
+  ['call1','consult'],['call1','nocall'],
+  ['nocall','consult'],['nocall','pool'],
+  ['consult','sign'],['consult','dozhim1'],['consult','notopen'],['consult','dnc'],
+  ['sign','paid'],['sign','partial'],['sign','part2'],
+  ['dozhim1','ki'],['dozhim1','sign'],['dozhim1','ceiling'],['dozhim1','dozhim1'],
+  ['notopen','dozhim1'],
+  ['ki','sign'],['ki','dozhim1'],['ki','paid'],['ki','partial'],['ki','part2'],
+  ['part2','paid'],['part2','partial'],['part2','ki'],
+  ['partial','paid'],['partial','part2']
+];
+
+/* канон дожима по дням */
+var DZ=[
+  'Д0 — <b>резюме + персональная ссылка + запрос КИ</b>: обмен на бесплатное юр. заключение (обязательный канон).',
+  'Д1 — <b>звонок №2</b>: разбор заключения / возражение / смена захода.',
+  'Д2 — <b>«бронь условий до завтра»</b>, частичка 1 000 ₽ на линии.',
+  'Д3 — <b>«да или нет»</b>, дверь открыта.'
+];
+
+/* ══ сборка DOM ══ */
+var inner=document.getElementById('mapinner');
+COLS.forEach(function(ids){
+  var col=document.createElement('div');col.className='col';
+  ids.forEach(function(id){
+    var n=N[id];
+    var d=document.createElement('div');
+    d.className='node'+(n.fin?' f-'+n.fin:'')+(n.gold?' gold':'');
+    d.id='n_'+id;
+    d.innerHTML='<span class="chip">'+n.chip+'</span><h3>'+n.title+'</h3><div class="nd">'+n.desc+'</div><div class="ev"></div>';
+    col.appendChild(d);
+  });
+  inner.appendChild(col);
+});
+
+/* ══ состояние ══ */
+var S={cur:'lead',taken:{},crumbs:[],day:null,signed:false,over:false};
+
+/* ══ рёбра SVG ══ */
+var eg=document.getElementById('eg');
+var svg=document.getElementById('edges');
+function rectOf(id){
+  var r=document.getElementById('n_'+id).getBoundingClientRect();
+  var c=inner.getBoundingClientRect();
+  return {l:r.left-c.left,r:r.right-c.left,cy:r.top-c.top+r.height/2};
+}
+function pathFor(a,b){
+  var s=rectOf(a),t=rectOf(b);
+  if(a===b) return 'M '+s.r+' '+(s.cy-14)+' C '+(s.r+46)+' '+(s.cy-36)+', '+(s.r+46)+' '+(s.cy+36)+', '+s.r+' '+(s.cy+14);
+  if(t.l>=s.r-6){var mx=(s.r+t.l)/2;return 'M '+s.r+' '+s.cy+' C '+mx+' '+s.cy+', '+mx+' '+t.cy+', '+t.l+' '+t.cy;}
+  if(t.r<=s.l+6) return 'M '+s.l+' '+s.cy+' C '+(s.l-56)+' '+s.cy+', '+(t.r+56)+' '+t.cy+', '+t.r+' '+t.cy;
+  var dir=t.cy>s.cy?1:-1;
+  return 'M '+s.r+' '+(s.cy+dir*10)+' C '+(s.r+44)+' '+(s.cy+dir*36)+', '+(t.r+44)+' '+(t.cy-dir*36)+', '+t.r+' '+(t.cy-dir*10);
+}
+function draw(){
+  /* сброс перед замером: атрибут height = CSS-высота SVG, иначе прошлый (больший) размер попадает в scrollHeight и высота никогда не уменьшается */
+  svg.setAttribute('width',0);
+  svg.setAttribute('height',0);
+  svg.setAttribute('width',inner.scrollWidth);
+  svg.setAttribute('height',inner.scrollHeight);
+  while(eg.firstChild)eg.removeChild(eg.firstChild);
+  EDGES.forEach(function(e){
+    var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    var act=!S.over&&S.taken[e[0]+'>'+e[1]];
+    p.setAttribute('d',pathFor(e[0],e[1]));
+    p.setAttribute('class','edge'+(act?' act':''));
+    p.setAttribute('marker-end','url(#'+(act?'arrg':'arr')+')');
+    eg.appendChild(p);
+  });
+}
+
+/* ══ панель ══ */
+var pmain=document.getElementById('pmain');
+var crumbsEl=document.getElementById('crumbs');
+function toolLinks(ids){
+  if(!ids||!ids.length)return '';
+  return '<div class="p-tools">'+ids.map(function(k){
+    return '<a href="'+TOOLS[k][1]+'" target="_blank" rel="noopener">'+TOOLS[k][0]+'</a>';
+  }).join('')+'</div>';
+}
+function actsOf(id){
+  if(id==='ki'&&S.signed)return [
+    '<b>PDF в виджет → юр. заключение готово.</b>',
+    '<b>Немедленно звонок-разбор</b> — самый сильный звонок воронки, не откладывать ни на час.',
+    'Договор уже подписан — закрытие на <b>оплату</b> прямо на звонке.'
+  ];
+  if(id==='dozhim1'){
+    var a=[DZ[S.day]||DZ[3]];
+    a.push('Ритм: <b>максимум 1 звонок + 2 сообщения в день</b>. Больше — уже давление.');
+    a.push('КИ пришла — план дня отменяется: PDF в виджет → заключение → немедленно звонок-разбор.');
+    return a;
+  }
+  return N[id].acts||[];
+}
+function renderCrumbs(){
+  crumbsEl.innerHTML=S.crumbs.map(function(c,i){
+    var last=i===S.crumbs.length-1;
+    return (last?'<b>'+c+'</b>':c);
+  }).join('<span class="sep">→</span>');
+  crumbsEl.scrollLeft=crumbsEl.scrollWidth;
+}
+function renderPanel(){
+  var n=N[S.cur];
+  if(S.over){
+    pmain.className='p-main';
+    pmain.innerHTML='<div class="p-hd"><b>Вся карта</b></div><div class="p-hint">Режим обзора: все узлы и связи видны — «вид сверху» для обучения. Нажмите «Режим тренажёра», чтобы вернуться к сценарию (он сохранён).</div>';
+    return;
+  }
+  var day=S.cur==='dozhim1'?'<span class="day-badge num">День '+S.day+' из 3</span>':'';
+  var acts='<ul class="p-acts">'+actsOf(S.cur).map(function(a){return '<li>'+a+'</li>';}).join('')+'</ul>';
+  if(n.fin){
+    pmain.className='p-main res res-'+n.fin;
+    pmain.innerHTML='<div class="p-hd"><b>Итог: '+n.title+'</b></div>'+acts+'<button type="button" class="again" id="btnAgain">Пройти другой сценарий</button>';
+    document.getElementById('btnAgain').addEventListener('click',reset);
+  }else{
+    pmain.className='p-main';
+    pmain.innerHTML='<div class="p-hd"><b>'+n.title+'</b>'+day+'</div>'+acts+toolLinks(n.tools);
+  }
+}
+
+/* ══ события узлов ══ */
+function eventsOf(id){
+  /* КИ после подписания: договор уже есть — закрываем на оплату, потолка нет (ежедневный ритм части 2) */
+  if(id==='ki'&&S.signed)return [{l:'Оплатил',to:'paid'},{l:'Частичка',to:'partial'},{l:'Всё ещё думает',to:'part2',cls:'mid'}];
+  if(id!=='dozhim1')return N[id].ev||[];
+  var ev=[{l:'КИ прислал',to:'ki'},{l:'Подписал',to:'sign'}];
+  if(S.day>=3)ev.push({l:'3 дня вышли',to:'ceiling',cls:'bad'});
+  else ev.push({l:'Всё ещё думает (+1 день)',to:'dozhim1',cls:'mid'});
+  return ev;
+}
+function renderEvents(){
+  document.querySelectorAll('.node .ev').forEach(function(el){el.innerHTML='';});
+  var box=document.querySelector('#n_'+S.cur+' .ev');
+  eventsOf(S.cur).forEach(function(e){
+    var b=document.createElement('button');
+    b.type='button';
+    b.textContent=e.l;
+    if(e.cls)b.className=e.cls;
+    b.addEventListener('click',function(){step(S.cur,e.to);});
+    box.appendChild(b);
+  });
+}
+function crumbName(id){return id==='dozhim1'?'Дожим Д'+S.day:N[id].name;}
+function setClasses(){
+  Object.keys(N).forEach(function(id){
+    var el=document.getElementById('n_'+id);
+    el.classList.toggle('on',id===S.cur);
+  });
+  document.getElementById('n_'+S.cur).classList.add('done');
+}
+function step(from,to){
+  S.taken[from+'>'+to]=true;
+  if(to==='sign'||to==='part2')S.signed=true;         /* договор подписан — потолка 3 дней больше нет */
+  /* счётчик дней дожима (только до подписания; из КИ дни НЕ сбрасываются) */
+  if(to==='dozhim1'){
+    if(from==='consult')S.day=0;
+    else if(from==='notopen')S.day=1;                 /* SMS-дубль вечером Д0, звонок №2 наутро = Д1 */
+    else if(from==='dozhim1')S.day=Math.min(S.day+1,3);
+  }
+  S.cur=to;
+  S.crumbs.push(crumbName(to));
+  setClasses();renderEvents();renderCrumbs();renderPanel();draw();
+  var el=document.getElementById('n_'+to);
+  el.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+function reset(){
+  S.cur='lead';S.taken={};S.day=null;S.signed=false;S.over=false;
+  S.crumbs=[N.lead.name];
+  inner.classList.add('mode-train');inner.classList.remove('mode-over');
+  document.getElementById('btnOver').textContent='Показать всю карту';
+  Object.keys(N).forEach(function(id){document.getElementById('n_'+id).classList.remove('on','done');});
+  setClasses();renderEvents();renderCrumbs();renderPanel();draw();
+  document.getElementById('n_lead').scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+document.getElementById('btnReset').addEventListener('click',reset);
+document.getElementById('btnOver').addEventListener('click',function(){
+  S.over=!S.over;
+  inner.classList.toggle('mode-over',S.over);
+  inner.classList.toggle('mode-train',!S.over);
+  this.textContent=S.over?'Режим тренажёра':'Показать всю карту';
+  renderPanel();draw();
+});
+
+/* ══ старт ══ */
+S.crumbs=[N.lead.name];
+setClasses();renderEvents();renderCrumbs();renderPanel();draw();
+window.addEventListener('resize',draw);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(draw);
+window.addEventListener('load',draw);
+</script>
+</body>
+</html>
