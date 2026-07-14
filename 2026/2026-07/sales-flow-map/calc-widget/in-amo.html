@@ -343,7 +343,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
             <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">⚖ Юр. заключение (PDF)</a>
           </div>
-          <div class="kinote">Читаем отчёты трёх бюро: <b>Скоринг Бюро · НБКИ · Кредистория (ОКБ)</b> — можно 1–3 файла, договоры-дубли объединяются по УИД сделки. Потренироваться (демо-клиент): <a href="./demo-ki/demo-sb.pdf" download>СБ</a> · <a href="./demo-ki/demo-nbki.pdf" download>НБКИ</a> · <a href="./demo-ki/demo-credistory.pdf" download>Кредистория</a></div>
+          <div class="kinote">Читаем отчёты трёх бюро: <b>Скоринг Бюро · НБКИ · Кредистория (ОКБ)</b> — можно 1–3 файла, договоры-дубли объединяются по УИД сделки.</div>
           <label style="margin-top:10px">Дожим-сообщения — копируются с цифрами клиента</label>
           <div class="lrow" style="margin-top:4px">
             <button class="lbtn" onclick="copyDz('open',this)">✉ Не открыл</button>
@@ -791,6 +791,17 @@ function trainerChatMsg(url){
   m.innerHTML='<div class="who">Salebot → клиенту · тренажёр</div><div class="bubble"><small>'+time+' ✓ Отправлено · '+last.route+'</small>'+body+'<br><a class="trlink" href="'+url+'" target="_blank" rel="noopener">Открыть персональную страницу ↗</a></div>';
   m.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
+/* тренажёр: юр. заключение падает в чат сразу после разбора КИ — менеджер видит дожимной инструмент (заказчик 15.07) */
+function trainerKiMsg(href){
+  const feed=document.querySelector('.feed'); if(!feed||!href) return;
+  let m=document.getElementById('tr_ki');
+  if(!m){m=document.createElement('div');m.className='msgcard';m.id='tr_ki';feed.insertBefore(m,feed.querySelector('.note'));}
+  const name=(document.querySelector('.deal h1').textContent.trim().split(' ')[0])||'Клиент';
+  const time=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  const abs=new URL(href.replace(/[#&]print=1/,''),location.href).href;
+  m.innerHTML='<div class="who">Salebot → клиенту · юр. заключение · тренажёр</div><div class="bubble"><small>'+time+' ✓ Отправлено</small>'+name+', юрист разобрал вашу кредитную историю: юридическое заключение готово — все договоры с вердиктами, точный платёж по плану, что с ипотекой.<br><a class="trlink" href="'+abs+'" target="_blank" rel="noopener">Открыть юридическое заключение ↗</a></div>';
+  m.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function sendPresentation(){
   const u=presentUrl(); if(!u) return;
   document.getElementById('f_debt').textContent=fmt(last.debt)+' ₽ · '+(last.contracts||0)+' дог.'+(kiLoaded?' (по КИ)':'');
@@ -964,6 +975,7 @@ function parseOkbLegacy(text){
        В проде вместо этого движок сохраняет расчёт и отдаёт короткую ссылку + прикладывает PDF к сделке. */
     const kf=document.getElementById('w_kiFile');
     kf.href='./ki.html#d='+b64url(JSON.stringify(payload))+'&print=1'; kf.style.display='';
+    trainerKiMsg(kf.getAttribute('href'));
   }catch(e){ kiBusy=false; kiError=true; updateSendUI(); t.innerHTML='Не удалось разобрать файл: '+e.message; }
 }
 /* «Скоринг Бюро» / НБКИ / Кредистория (и склейка): раскладываем точные тела по типам прямо в конструктор — ставки/сроки остаются средними, ипотека уйдёт «вне плана» сама.
@@ -1005,6 +1017,7 @@ function applyKiTypes(sb,demo){
       pres:presentUrl()?presentUrl().replace('../','../'):null,
       credits:sb.rows.map(r=>({n:r.n,lender:r.lender,debt:r.debt,product:r.type,opened:r.opened}))};
     kf.href='./ki.html#d='+b64url(JSON.stringify(payload))+'&print=1';
+    trainerKiMsg(kf.getAttribute('href'));
   }else kf.href='./ki.html#print=1';
   kf.style.display='';
   if(!demo) setTimeout(()=>{t.style.display='none';},12000);
