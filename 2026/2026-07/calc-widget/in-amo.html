@@ -277,8 +277,6 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 
       <div class="body" id="w_body">
         <div id="pane_calc">
-          <!-- «Клиенту голосом» — строки Камрана: появляются вместе с вердиктом -->
-          <div class="voice" id="w_voice" style="display:none"></div>
 
           <!-- а) ДОЛГИ: чипы типов, поля только включённых; заполнил и ушёл дальше → схлопывается в summary -->
           <div class="sec" id="sec_debts">
@@ -332,6 +330,9 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         </div>
 
         <!-- вкладка «Действия» -->
+          <!-- «Клиенту голосом» — строки Камрана: внизу формы, где менеджер оказывается после ввода (правка заказчика 15.07) -->
+          <div class="voice" id="w_voice" style="display:none"></div>
+
         <div class="actsep">Действия ⚡</div>
         <div id="pane_act">
           <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
