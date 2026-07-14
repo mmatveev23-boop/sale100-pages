@@ -351,7 +351,7 @@ function render(d){
   const mfoRows=cr.filter(c=>c.product==='mfo');
   const interest=cr.reduce((s,c)=>s+monthlyInterest(c),0); /* без ипотеки */
   const term=+d.term||60;
-  const planTotal=body*(1+(KEY_RATE/100)*(term/12)/2+0.07);
+  const planTotal=body*1.07; /* формула заказчика (rdg-formula-spec.md): рост заморожен — тело + 7% ФУ */
   const planPay=planTotal/term;
   const today=new Date();
   const dstr=today.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});

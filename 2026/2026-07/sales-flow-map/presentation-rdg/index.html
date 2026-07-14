@@ -480,7 +480,7 @@ h1 .hl{color:var(--green)}
         <div class="cmp">
           <div class="ch">По вашим цифрам: долг <b class="num" id="cmpDebt">—</b>, платите <b class="num" id="cmpPay2">—</b> в месяц</div>
           <div class="cr bad"><span>Вернёте банкам, если платить по своим договорам<small>долг + проценты по вашим ставкам и срокам · из них переплата ~<span class="num" id="cmpInterest">—</span></small></span><b class="num" id="cmpNoUs">—</b></div>
-          <div class="cr"><span>С нами<small>план на <span class="num" id="planTerm">36</span> мес: тело долга + проценты по ключевой ЦБ 14,25% (вместо 30–292% по договорам) + вознаграждение управляющего 7% — утверждает суд. Услуги ДОНУЛЯ — отдельно: 13 500 ₽ × 14 платежей</small></span><b class="num" id="cmpUsPay2">—</b></div>
+          <div class="cr"><span>С нами<small>план на <span class="num" id="planTerm">36</span> мес: рост процентов заморожен — тело долга + вознаграждение управляющего 7%, утверждает суд. Услуги ДОНУЛЯ — отдельно: 13 500 ₽ × 14 платежей</small></span><b class="num" id="cmpUsPay2">—</b></div>
         </div>
         </div>
 
@@ -771,9 +771,9 @@ const payParam=Math.max(0,+Q.get('pay')||0);
 /* платёж сейчас со слов клиента и срок плана — в проде из CRM; без платежа хиро экономии не считаем (не выдумываем цифру), но при КИ берём демо-платёж */
 const CLIENT_PAY=payParam>0?payParam:(KION?KI.payNow:(Q.has('debt')?0:61500)), RDG_TERM=Q.get('term')==='60'?60:36;
 const RASS_TOTAL=189000, RASS_M=14, VIP=169000, PAY_DAY=25;
-/* план РДГ по закону (docs/rdg-law-calc-2026-07.md): тело + проценты по ключевой ЦБ на убывающий остаток (ст. 213.19 п.2, 14,25% с 22.06.2026) + 7% ФУ (ст. 20.6 п.17) */
+/* план РДГ — формула заказчика (rdg-formula-spec.md): рост процентов заморожен, план = тело + 7% ФУ / срок */
 const KEY_RATE=14.25;
-const planTotal=(body,months)=>body*(1+(KEY_RATE/100)*(months/12)/2+0.07);
+const planTotal=(body,months)=>body*1.07; /* формула заказчика: рост заморожен — тело + 7% ФУ, без новых процентов */
 const fmt=n=>n.toLocaleString('ru-RU');
 
 let step=0, tariff='rassrochka', sim=true;
