@@ -130,6 +130,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .chips{display:flex;flex-wrap:wrap;gap:5px;transition:background .3s ease-out;border-radius:8px}
 .chips.urge{background:#FBF3DC}
 .chips-hint{margin-top:6px;font-size:11px;color:#8A6212;background:#FBF3DC;border-radius:7px;padding:5px 9px;line-height:1.4}
+.trlink{display:inline-block;margin-top:9px;background:#fff;color:#0B5540;font-weight:700;border-radius:8px;padding:7px 12px;text-decoration:none;font-size:13px;transition:transform 160ms ease-out}
+.trlink:active{transform:scale(0.97)}
 .voice{margin:10px 0 2px;background:linear-gradient(165deg,#FBF3DC,#F7EAC8);border:1px solid rgba(201,154,51,.45);border-radius:12px;padding:9px 12px}
 .voice .vh{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#8A6212;margin-bottom:2px}
 .voice .vr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:12px;padding:4px 0;border-top:1px dashed rgba(201,154,51,.3)}
@@ -767,6 +769,23 @@ function updateSendUI(){
   updateTabDot(true);
 }
 /* отправка = запись чисел в поля сделки + фиксация факта отправки (в проде: amo API + автопуш ссылки в чат) */
+/* тренажёр: сообщение клиенту с персональной ссылкой падает в ленту чата мокапа —
+   ровно так в проде его отправит Salebot; при повторной отправке обновляется на месте */
+function trainerChatMsg(url){
+  const feed=document.querySelector('.feed');
+  let m=document.getElementById('tr_msg');
+  if(!m){
+    m=document.createElement('div'); m.className='msgcard'; m.id='tr_msg';
+    feed.insertBefore(m, feed.querySelector('.note'));
+  }
+  const name=(document.querySelector('.deal h1').textContent.trim().split(' ')[0])||'Клиент';
+  const time=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  const body=last.route==='РДГ'
+    ? name+', спасибо за разговор! Коротко, о чём договорились: платёж можно снизить до ~'+fmt(last.pay)+' ₽/мес вместо нынешних ~'+fmt(last.paynow)+' ₽. Ваш персональный расчёт, договор и подпись — по ссылке:'
+    : name+', спасибо за разговор! По вашим цифрам: долг '+fmt(last.debt)+' ₽ по закону списывается целиком. Ваш персональный расчёт, договор и подпись — по ссылке:';
+  m.innerHTML='<div class="who">Salebot → клиенту · тренажёр</div><div class="bubble"><small>'+time+' ✓ Отправлено · '+last.route+'</small>'+body+'<br><a class="trlink" href="'+url+'" target="_blank" rel="noopener">Открыть персональную страницу ↗</a></div>';
+  m.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
 function sendPresentation(){
   const u=presentUrl(); if(!u) return;
   document.getElementById('f_debt').textContent=fmt(last.debt)+' ₽ · '+(last.contracts||0)+' дог.'+(kiLoaded?' (по КИ)':'');
@@ -776,7 +795,8 @@ function sendPresentation(){
   sentAt=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
   document.querySelector('.dw').classList.remove('hot'); /* «горячее» снято — презентация ушла */
   const pv=document.getElementById('w_present'); pv.href=u; pv.style.display='';
-  document.getElementById('w_noteTxt').innerHTML='Поля сделки обновлены (см. слева). В проде ссылка уходит клиенту в чат автоматически и лежит в сделке.';
+  trainerChatMsg(u);
+  document.getElementById('w_noteTxt').innerHTML='Поля сделки обновлены (см. слева), сообщение со ссылкой упало в чат (тренажёр) — в проде его отправит Salebot автоматически.';
   document.getElementById('w_note').style.display='';
   updateSendUI();
   const t=document.getElementById('w_toast');
