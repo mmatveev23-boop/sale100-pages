@@ -52,6 +52,14 @@ h2.sect{margin:26px 0 10px;font-size:17px;letter-spacing:-.01em}
 .btn-card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:11px 14px;font-size:12.5px;color:var(--muted);line-height:1.55}
 .btn-card b{display:block;color:var(--ink);font-size:13px;margin-bottom:3px}
 .btn-card b .k{display:inline-block;background:var(--green-soft);color:var(--green-ink);border-radius:7px;padding:1px 8px;font-size:12px}
+.step .shot img{cursor:zoom-in}
+/* лайтбокс: клик по скрину — во весь экран; клик/Esc — закрыть; ссылка — открыть отдельной вкладкой */
+.lb{position:fixed;inset:0;z-index:60;background:rgba(8,42,33,.88);display:none;align-items:center;justify-content:center;padding:26px;cursor:zoom-out}
+.lb.on{display:flex}
+.lb img{max-width:94vw;max-height:88vh;border-radius:12px;box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
+.lb .lbbar{position:fixed;top:14px;right:16px;display:flex;gap:8px}
+.lb .lbbar a,.lb .lbbar button{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;font:inherit;font-size:12.5px;font-weight:700;border-radius:999px;padding:8px 14px;text-decoration:none;cursor:pointer;transition:transform 160ms cubic-bezier(0.23,1,0.32,1)}
+.lb .lbbar a:active,.lb .lbbar button:active{transform:scale(0.97)}
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
 .rule{background:var(--gold-soft);border:1px solid rgba(201,154,51,.35);border-radius:12px;padding:10px 13px;font-size:12.5px;color:#7A6220;line-height:1.5}
 .rule b{color:var(--ink)}
@@ -161,5 +169,19 @@ h2.sect{margin:26px 0 10px;font-size:17px;letter-spacing:-.01em}
   </div>
 
 </div>
+
+<div class="lb" id="lb" onclick="lbClose(event)">
+  <div class="lbbar"><a id="lbOpen" href="#" target="_blank" rel="noopener" onclick="event.stopPropagation()">Открыть отдельной вкладкой ↗</a><button type="button" onclick="lbClose()">✕ Закрыть</button></div>
+  <img id="lbImg" src="" alt="Скриншот крупно">
+</div>
+<script>
+'use strict';
+const lb=document.getElementById('lb'), lbImg=document.getElementById('lbImg'), lbOpen=document.getElementById('lbOpen');
+document.querySelectorAll('.step .shot img').forEach(im=>{
+  im.addEventListener('click',()=>{lbImg.src=im.src;lbOpen.href=im.src;lb.classList.add('on');});
+});
+function lbClose(e){ if(e&&e.target===lbImg) return; lb.classList.remove('on'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') lb.classList.remove('on'); });
+</script>
 </body>
 </html>
