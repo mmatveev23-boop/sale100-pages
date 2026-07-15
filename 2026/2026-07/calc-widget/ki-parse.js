@@ -101,7 +101,10 @@ function parseNbki(text){
 }
 
 /* «Кредистория» (АО «ОКБ»): суммы из сводной таблицы раздела «ДЕЙСТВУЮЩИЕ КРЕДИТНЫЕ ДОГОВОРЫ»,
-   УИД и дата сделки — из детальных блоков того же раздела (идут в том же порядке) */
+   УИД и дата сделки — из детальных блоков того же раздела, привязка ПО НОМЕРУ блока
+   (не по порядку: у поручительства свой блок, он сдвинул бы индексы).
+   Проверено на двух реальных отчётах: 09.07.2026 «Дмитрий» (7 долгов из 8 строк: виды с «ёлочками»
+   «Кредит «овердрафт» (…)», статусы «Была просрочка по …», поручительство ВТБ) и 09.07.2026 (5/265 112,52). */
 function parseCredistory(text){
   const num=s=>parseFloat(String(s).replace(/\s/g,'').replace(',','.'));
   if(!/АО «ОКБ»|кредистория/i.test(text)) return null;
@@ -111,20 +114,51 @@ function parseCredistory(text){
   const sec=text.slice(idx,end);
   const tblEnd=sec.indexOf('Внимательно проверьте');
   const tbl=tblEnd>0?sec.slice(0,tblEnd):sec.slice(0,6000);
-  const rowRe=/(\d{1,2})\s+(.+?)\s+Договор [^-]{0,40}- ([А-Яа-яё() ,]{3,45})\s+([\d\s]+(?:,\d+)?) р\.\s+([\d\s]+(?:,\d+)?) р\.\s+([\d\s]+(?:,\d+)?) р\.\s+(Просрочка с\s+\d{2}\.\d{2}\.\d{4}|Без просрочек)/g;
-  const rows=[]; let m;
+  /* строка таблицы: № · «кредитор + вид» · 3 суммы «N р.» · статус. Запрет « р.» внутри имени
+     держит границу строки — имя не может перепрыгнуть суммы соседней записи (иначе при незнакомом
+     статусе regex склеивал кредитора одной строки с долгом другой) */
+  const rowRe=/(?:^|\s)(\d{1,2})\s+((?:(?!\s?р\.)[^])+?)\s+([\d\s]+(?:,\d+)?)\s*р\.\s+([\d\s]+(?:,\d+)?)\s*р\.\s+([\d\s]+(?:,\d+)?)\s*р\.\s+(Без просрочек|(?:Была\s+п|П)росрочка(?:\s+(?:с|по))?\s+\d{2}\.\d{2}\.\d{4})/g;
+  const all=[]; let m;
   while((m=rowRe.exec(tbl))){
-    rows.push({n:+m[1],lender:m[2].replace(/\s+/g,' ').trim().slice(0,90),kind:m[3].trim(),
-      limit:num(m[4]),debt:num(m[5]),overdueAmt:num(m[6]),uid:'',opened:'',
-      status:m[7]});
+    const src=m[2].replace(/\s+/g,' ').trim();
+    let lender=src, kind='', guarantee=false;
+    const dv=src.match(/^(.*?)\s+Договор\s[^-]{0,40}?-\s+(.+)$/);
+    if(dv){ lender=dv[1]; kind=dv[2]; }
+    else{ const pv=src.match(/^(.*?)\s+Поручительство\s/); if(pv){ lender=pv[1]; guarantee=true; } }
+    all.push({n:+m[1],lender:lender.slice(0,90),kind:kind.trim(),guarantee,
+      limit:num(m[3]),debt:num(m[4]),overdueAmt:num(m[5]),uid:'',opened:'',
+      status:m[6]});
   }
+  const rows=all.filter(r=>!r.guarantee); /* поручительство — не долг клиента: «Итого» отчёта его не считает */
   if(!rows.length) return null;
-  /* УИД и дата — из детальных блоков раздела, по порядку номеров */
-  const uids=[]; const idRe=/Идентификатор сделки\s+([0-9a-fа-яё-]{10,})/g;
-  let u; while((u=idRe.exec(sec))) uids.push(u[1].toLowerCase());
-  const dates=[]; const dRe=/Дата совершения сделки\s+(\d{1,2}) ([а-яё]+) (\d{4})/g;
-  let d; while((d=dRe.exec(sec))) dates.push(('0'+d[1]).slice(-2)+'.'+(KI_MONTHS[d[2]]||'01')+'.'+d[3]);
-  rows.forEach((r,i)=>{r.uid=uids[i]||'';r.opened=dates[i]||'';r.type=kiTypeOf(r.lender,r.kind);});
+  /* якоря детальных блоков: «N. <первое слово кредитора>» (включая поручительства — их блоки
+     не должны отдавать свой УИД соседям) → раскладка УИД/дат по номеру записи */
+  const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const hd=[];
+  for(const r of all){
+    const w=r.lender.split(' ')[0]||''; if(!w) continue;
+    const hm=new RegExp('(?:^|\\s)'+r.n+'\\.\\s+'+esc(w)).exec(sec);
+    if(hm) hd.push({n:r.n,pos:hm.index});
+  }
+  hd.sort((a,b)=>a.pos-b.pos);
+  const uidRe=/Идентификатор сделки\s+([0-9a-fа-яё-]{10,})/g;
+  const dateRe=/Дата совершения сделки\s+(\d{1,2}) ([а-яё]+) (\d{4})/g;
+  const fmtDate=x=>('0'+x[1]).slice(-2)+'.'+(KI_MONTHS[x[2]]||'01')+'.'+x[3];
+  if(hd.length){
+    const byN=(re,fmt)=>{ const out={}; let x;
+      while((x=re.exec(sec))){ let best=null; for(const b of hd){ if(b.pos<x.index) best=b; else break; }
+        if(best&&out[best.n]===undefined) out[best.n]=fmt(x); }
+      return out; };
+    const uidByN=byN(uidRe,x=>x[1].toLowerCase());
+    const dateByN=byN(dateRe,fmtDate);
+    rows.forEach(r=>{r.uid=uidByN[r.n]||'';r.opened=dateByN[r.n]||'';});
+  }else{
+    /* якорей нет (нестандартная вёрстка) — деградация до привязки по порядку */
+    const uids=[]; let u; while((u=uidRe.exec(sec))) uids.push(u[1].toLowerCase());
+    const dates=[]; let d; while((d=dateRe.exec(sec))) dates.push(fmtDate(d));
+    rows.forEach((r,i)=>{r.uid=uids[i]||'';r.opened=dates[i]||'';});
+  }
+  rows.forEach((r,i)=>{r.n=i+1;r.type=kiTypeOf(r.lender,r.kind);}); /* сквозная нумерация: без дырок после выброса поручительств */
   const itog=text.match(/([\d\s]+,\d{2})\s*р\.\s+Задолженности по обязательствам/);
   const dm=text.match(/на (\d{1,2}) ([а-яё]+) (\d{4}) года/);
   const total=rows.reduce((s,r)=>s+r.debt,0);
@@ -132,7 +166,8 @@ function parseCredistory(text){
     rows,types:kiBuildTypes(rows),total,count:rows.length,
     itogo:itog?num(itog[1]):null,avgMonthly:null,
     ok:itog?Math.abs(total-num(itog[1]))<1:false,
-    hasOverdue:rows.some(r=>r.overdueAmt>0||/Просрочка/.test(r.status||''))};
+    /* просрочка = только текущая («Просрочка с …» или сумма>0); «Была просрочка по …» — прошлая, закрытая */
+    hasOverdue:rows.some(r=>r.overdueAmt>0||/^Просрочка/.test(r.status||''))};
 }
 
 /* распознать любой поддерживаемый отчёт */
