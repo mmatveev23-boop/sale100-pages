@@ -159,6 +159,15 @@ tr.tot td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
   .print-foot{display:block!important;margin-top:14px;font-size:11px;color:#68625A}
 }
 .print-foot{display:none}
+/* ── режим «предварительное · со слов» (draft=1 в payload): плашка + замазанный перечень ── */
+.draftbar{background:linear-gradient(135deg,#FBF3DC,#F7E9C4);border:1px solid rgba(201,154,51,.5);border-radius:12px;padding:12px 16px;margin:14px auto 0;max-width:820px;font-size:13px;line-height:1.55}
+.draftbar b{color:#8A6212}
+.draftbar a{color:#0F6B4F;font-weight:700}
+.blurtxt{filter:blur(4px);user-select:none;pointer-events:none;color:#5E675F}
+tr.lockcta td{background:#FBF8F2;border-bottom:none;padding:14px 10px}
+.lockbox{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.lockbox .t{font-size:13px;line-height:1.5}
+.lockbox a{display:inline-block;background:#0B3B2E;color:#fff;text-decoration:none;font-weight:700;font-size:13px;border-radius:10px;padding:9px 14px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -319,8 +328,9 @@ const DEMO={name:'Светлана Викторовна',date:'10 июля 2026'
   {"n":11,"lender":"Сбербанк · ипотека","product":"mortgage","debt":581574,"opened":"01.09.2022"},
   {"n":12,"lender":"Сбербанк · кредитная карта","product":"card","debt":0,"opened":"25.06.2015"},
   {"n":13,"lender":"Совкомбанк · кредит","product":"loan","debt":0,"opened":"18.12.2012"}]};
-const RATE={mfo:2.92,card:0.52,loan:0.307,secured:0.25,mortgage:0.18};
-const PNAME={mfo:'МФО',card:'карта',loan:'кредит',secured:'залоговый',mortgage:'ипотека'};
+const RATE={mfo:2.92,card:0.52,loan:0.307,secured:0.25,mortgage:0.18,receipt:0};
+const PNAME={mfo:'МФО',card:'карта',loan:'кредит',secured:'залоговый',mortgage:'ипотека',receipt:'расписка'};
+const GUIDE='../ki-guide/'; /* инструкция «КИ за 5 минут» — соседний слаг и в репо, и на Pages */
 function monthlyInterest(c){const b=+c.debt||0;const r=RATE[c.product]??0.307;return c.product==='mortgage'?0:b*r/12;}
 /* п.5: два сценария левой колонки — данные кладёт render(), перерисовка по переключателю (скрыт на печати) */
 let SCEN=null;
@@ -349,6 +359,7 @@ function drawScen(over){
 }
 function render(d){
   /* числа приводим принудительно, имя — только текстом */
+  const isDraft=String(d.draft||'')==='1'; /* предварительное заключение со слов (спека дожим-v2 16.07.2026) */
   const cr=d.credits;
   const total=cr.reduce((s,c)=>s+(+c.debt||0),0);
   const mortRows=cr.filter(c=>c.product==='mortgage');
@@ -368,16 +379,28 @@ function render(d){
   const set=(id,v)=>document.getElementById(id).textContent=v;
 
   /* шапка */
-  set('d_num','ДН-КИ-'+String(today.getDate()).padStart(2,'0')+String(today.getMonth()+1).padStart(2,'0')+String(today.getFullYear()).slice(2));
+  set('d_num',(isDraft?'ДН-ПРЕД-':'ДН-КИ-')+String(today.getDate()).padStart(2,'0')+String(today.getMonth()+1).padStart(2,'0')+String(today.getFullYear()).slice(2));
   set('d_today',dstr); set('d_signdate',dstr);
   document.getElementById('d_name').textContent=d.name?String(d.name).slice(0,60):'клиента';
   set('d_repdate',d.date?String(d.date).slice(0,40):'—');
   set('d_repdate2',d.date?String(d.date).slice(0,40):'—');
+  if(isDraft){
+    document.querySelector('.doc-hd h1').innerHTML='Предварительное юридическое заключение<br>по сведениям, сообщённым клиентом';
+    document.getElementById('d_base').textContent='Основание: сведения, сообщённые клиентом в ходе консультации. Кредитный отчёт не исследован — выводы предварительные и будут бесплатно уточнены после получения отчёта.';
+    const bar=document.createElement('div'); bar.className='draftbar';
+    bar.innerHTML='⚠ <b>Это предварительное заключение — по вашим словам.</b> Точные суммы, полный список кредиторов и скрытые риски юрист заполнит <b>бесплатно</b> по вашему кредитному отчёту. Скачать отчёт — 5 минут через Госуслуги: <a href="'+GUIDE+'" target="_blank" rel="noopener">инструкция →</a>';
+    document.querySelector('.doc-hd').after(bar);
+    /* первая оговорка — про отсутствие отчёта */
+    document.getElementById('d_repdate2').closest('li').textContent='Заключение предварительное, основано на сведениях клиента; кредитный отчёт не исследован — при его получении выводы будут уточнены.';
+  }
 
   /* 1. главный вывод */
-  document.getElementById('d_main').innerHTML='По <b>'+planRows+' из '+cr.length+'</b> ваших кредитных обязательств применима судебная реструктуризация долгов (гл. X 127-ФЗ). Совокупный долг <b>'+fmt(total)+' ₽</b>'+(mort>0?(inPlanM?', ипотека '+fmt(mort)+' ₽ включена в план по вашему решению':', из них ипотека '+fmt(mort)+' ₽ выводится за скобки с сохранением жилья'):'')+'. Проценты и пени останавливаются с введения процедуры.';
-  /* крупное «было → станет» + экономия в месяц (правка заказчика 15.07: «6 888 непонятно — покажи большие суммы») */
-  const payNowVal=interest>0?Math.round(interest+body*0.02):0;
+  document.getElementById('d_main').innerHTML=isDraft
+    ?'Предварительная оценка по сведениям, сообщённым вами: применима <b>судебная реструктуризация долгов (гл. X 127-ФЗ)</b>. Совокупный долг ~<b>'+fmt(total)+' ₽</b>'+(mort>0?(inPlanM?', ипотека ~'+fmt(mort)+' ₽ включена в план по вашему решению':', ипотека ~'+fmt(mort)+' ₽ — вне плана, жильё сохраняется'):'')+'. Проценты и пени остановятся с введения процедуры. Точные суммы и перечень кредиторов юрист сверит по кредитному отчёту.'
+    :'По <b>'+planRows+' из '+cr.length+'</b> ваших кредитных обязательств применима судебная реструктуризация долгов (гл. X 127-ФЗ). Совокупный долг <b>'+fmt(total)+' ₽</b>'+(mort>0?(inPlanM?', ипотека '+fmt(mort)+' ₽ включена в план по вашему решению':', из них ипотека '+fmt(mort)+' ₽ выводится за скобки с сохранением жилья'):'')+'. Проценты и пени останавливаются с введения процедуры.';
+  /* крупное «было → станет» + экономия в месяц (правка заказчика 15.07: «6 888 непонятно — покажи большие суммы»);
+     в черновике платёж «сейчас» приходит из виджета (тот же, что видел клиент в презентации) */
+  const payNowVal=(isDraft&&+d.paynow>0)?Math.round(+d.paynow):(interest>0?Math.round(interest+body*0.02):0);
   if(payNowVal>0){
     set('d_paynow_big','~'+fmt(payNowVal));
     set('d_freeMon','~'+fmt(Math.max(0,payNowVal-planPay))+' ₽');
@@ -388,20 +411,32 @@ function render(d){
     document.getElementById('d_payArr').style.display='none';
     document.getElementById('d_freeRow').textContent='план до '+term+' месяцев';
   }
-  set('d_plan_pay',fmt(planPay));
+  set('d_plan_pay',(isDraft?'~':'')+fmt(planPay));
   if(mortOut<=0) document.getElementById('d_gain3').innerHTML='<b>Не банкротство</b>План исполнен — вы рассчитались и не получили статус банкрота <small>— ст. 213.14 127-ФЗ</small>'; /* при ипотеке в плане карточка «жильё сохраняется» не обещается */
 
   /* 2. источники */
-  document.getElementById('d_sources').innerHTML='<b>Исследовано:</b> 1) '+(d.src?'кредитные отчёты '+String(d.src).slice(0,180):'кредитный отчёт АО «Скоринг Бюро» от '+(d.date||'—'))+' — все действующие обязательства ('+cr.length+' '+dcl(cr.length,'договор','договора','договоров')+'); 2) сведения, сообщённые клиентом (доход'+(+d.income>0?' '+fmt(+d.income)+' ₽/мес':'')+(+d.kids>0?', детей: '+d.kids:'')+', регион проживания). Допущения: сведения отчёта приняты как полные и актуальные на дату формирования; сведения клиента приняты как достоверные.';
+  document.getElementById('d_sources').innerHTML=isDraft
+    ?'<b>Исследовано:</b> сведения, сообщённые клиентом в ходе консультации — состав долгов по типам, суммы, доход'+(+d.income>0?' '+fmt(+d.income)+' ₽/мес':'')+(+d.kids>0?', детей: '+d.kids:'')+', регион проживания. <b>Кредитный отчёт не исследован</b> — точный перечень кредиторов, просрочки и скрытые обязательства будут сверены по отчёту, после чего заключение станет окончательным.'
+    :'<b>Исследовано:</b> 1) '+(d.src?'кредитные отчёты '+String(d.src).slice(0,180):'кредитный отчёт АО «Скоринг Бюро» от '+(d.date||'—'))+' — все действующие обязательства ('+cr.length+' '+dcl(cr.length,'договор','договора','договоров')+'); 2) сведения, сообщённые клиентом (доход'+(+d.income>0?' '+fmt(+d.income)+' ₽/мес':'')+(+d.kids>0?', детей: '+d.kids:'')+', регион проживания). Допущения: сведения отчёта приняты как полные и актуальные на дату формирования; сведения клиента приняты как достоверные.';
 
-  /* 3. опись */
+  /* 3. опись; в черновике вместо перечня — замазанные строки-замок (curiosity gap: раздел «уже существует», откроется по отчёту) */
   const banks=new Set(cr.filter(c=>c.product!=='mfo').map(c=>String(c.lender).split('·')[0].trim())).size;
+  if(isDraft){
+    const nDog=+d.contracts>0?+d.contracts:cr.length;
+    document.getElementById('d_sumline').textContent='~'+nDog+' '+dcl(nDog,'договор','договора','договоров')+' (со слов) · совокупный долг ~'+fmt(total)+' ₽ · точный перечень — по кредитному отчёту';
+    document.getElementById('d_rows').innerHTML=
+      [1,2,3,4,5].map(i=>'<tr><td class="num">'+i+'</td><td><span class="blurtxt">ПАО «Банк-кредитор» · кредитный договор</span></td><td class="num"><span class="blurtxt">··.··.202·</span></td><td class="r num"><span class="blurtxt">··· ··· ₽</span></td><td><span class="blurtxt">вердикт юриста</span></td></tr>').join('')
+      +'<tr class="lockcta"><td colspan="5"><div class="lockbox"><div class="t">🔒 <b>Раздел заполняется по вашему кредитному отчёту:</b> точный список кредиторов, суммы и просрочки, продажи долга коллекторам, судебные производства и правовой вердикт по каждому договору.</div><a href="'+GUIDE+'" target="_blank" rel="noopener">Пришлите отчёт — юрист заполнит бесплатно →</a></div></td></tr>'
+      +'<tr class="tot"><td></td><td>В план реструктуризации (предварительно)</td><td></td><td class="r num">~'+fmt(body)+' ₽</td><td>уточним по отчёту</td></tr>';
+    document.querySelector('.check').textContent='Список выше откроется после сверки с вашим кредитным отчётом — в нём часто находятся забытые договоры и долги, проданные коллекторам.';
+  }else{
   document.getElementById('d_sumline').textContent=cr.length+' '+dcl(cr.length,'договор','договора','договоров')+' · '+banks+' '+dcl(banks,'банк','банка','банков')+' + '+mfoRows.length+' МФО · совокупный долг '+fmt(total)+' ₽'+(+d.income>0?' · долговая нагрузка ~'+Math.round((interest+body*0.02+ (mortOut>0? mortOut*0.015:0))/(+d.income)*100)+'% дохода':'');
   document.getElementById('d_rows').innerHTML=cr.map(c=>{
     const isM=c.product==='mortgage';
     const zero=(+c.debt||0)<=0;
     return '<tr'+(isM?' class="mort"':'')+'><td class="num">'+c.n+'</td><td>'+String(c.lender).slice(0,70)+'</td><td class="num">'+(c.opened||'—')+'</td><td class="r num">'+(zero?'0 ₽':fmt(+c.debt)+' ₽')+'</td><td>'+(isM?(inPlanM?'<span class="vd plan">в плане · решение клиента</span>':'<span class="vd home">вне плана · жильё сохраняется</span>'):zero?'<span class="vd">закрывается справкой</span>':'<span class="vd plan">включается в план</span>')+'</td></tr>';
   }).join('')+'<tr class="tot"><td></td><td>В план реструктуризации</td><td></td><td class="r num">'+fmt(body)+' ₽</td><td>'+planRows+' '+dcl(planRows,'договор','договора','договоров')+'</td></tr>';
+  }
 
   /* 4. квалификация */
   document.getElementById('d_qual').innerHTML='Совокупность обязательств и текущая платёжная нагрузка дают право на обращение в арбитражный суд с заявлением о реструктуризации долгов в порядке <b>ст. 213.4 127-ФЗ «О несостоятельности (банкротстве)»</b>. Условия допуска по ст. 213.13 (источник дохода; отсутствие банкротства за 5 лет и утверждённого плана за 8 лет) — проверяются юристом при подписании.';
@@ -416,16 +451,24 @@ function render(d){
   document.getElementById('d_anchor').innerHTML='<b>Для сравнения:</b> без процедуры долг прирастает на ~'+fmt(growth)+' ₽ в год — стоимость всего сопровождения меньше '+(growth>189000?'годового':'двухлетнего')+' роста долга. Гарантия возврата — в договоре (п. 6).';
 
   /* 10. выводы */
+  const nDogC=isDraft&&+d.contracts>0?+d.contracts:cr.length;
   document.getElementById('d_concl').innerHTML=
-    '<li>По состоянию на '+(d.date||dstr)+' совокупный объём обязательств составляет '+fmt(total)+' ₽ по '+cr.length+' '+dcl(cr.length,'договору','договорам','договорам')+'.</li>'+
+    '<li>По состоянию на '+(isDraft?dstr:(d.date||dstr))+' совокупный объём обязательств составляет '+(isDraft?'~':'')+fmt(total)+' ₽ по '+(isDraft?'~':'')+nDogC+' '+dcl(nDogC,'договору','договорам','договорам')+(isDraft?' (со слов клиента)':'')+'.</li>'+
     '<li>Имеются правовые основания для обращения в арбитражный суд в порядке ст. 213.4 127-ФЗ.</li>'+
-    '<li>К включению в план реструктуризации подлежат '+planRows+' '+dcl(planRows,'обязательство','обязательства','обязательств')+' на '+fmt(body)+' ₽'+(mort>0?(inPlanM?'; ипотечные обязательства на '+fmt(mort)+' ₽ включены в план по решению клиента (залог сохраняется, банк-залогодержатель голосует в плане)':'; '+mortRows.length+' ипотечных обязательства на '+fmt(mort)+' ₽ сохраняются вне плана с сохранением жилья (ст. 213.10-1)'):'')+'.</li>'+
-    '<li>Рекомендуется: фиксация условий и подача заявления до накопления просрочек — каждый месяц ожидания прибавляет ~'+fmt(interest)+' ₽ процентов.</li>';
+    (isDraft
+      ?'<li>К включению в план реструктуризации предварительно подлежат обязательства на ~'+fmt(body)+' ₽ (~'+nDogC+' '+dcl(nDogC,'договор','договора','договоров')+' со слов)'+(mort>0?(inPlanM?'; ипотека ~'+fmt(mort)+' ₽ включена в план по решению клиента':'; ипотека ~'+fmt(mort)+' ₽ — вне плана с сохранением жилья (ст. 213.10-1)'):'')+'; точный состав — по кредитному отчёту.</li>'
+      :'<li>К включению в план реструктуризации подлежат '+planRows+' '+dcl(planRows,'обязательство','обязательства','обязательств')+' на '+fmt(body)+' ₽'+(mort>0?(inPlanM?'; ипотечные обязательства на '+fmt(mort)+' ₽ включены в план по решению клиента (залог сохраняется, банк-залогодержатель голосует в плане)':'; '+mortRows.length+' ипотечных обязательства на '+fmt(mort)+' ₽ сохраняются вне плана с сохранением жилья (ст. 213.10-1)'):'')+'.</li>')+
+    '<li>Рекомендуется: фиксация условий и подача заявления до накопления просрочек — каждый месяц ожидания прибавляет ~'+fmt(interest)+' ₽ процентов.</li>'+
+    (isDraft?'<li><b>Для окончательного заключения необходим кредитный отчёт</b>: скрытые риски (переуступки долга коллекторам, судебные производства, точные просрочки) видны только в нём. Отчёт бесплатен, заказывается за 5 минут через Госуслуги — юрист уточнит выводы в день получения.</li>':'');
 
   /* два отчёта: «Основание» перечисляет оба бюро (после всех set — заменяет d_repdate внутри) */
   if(d.src) document.getElementById('d_base').textContent='Основание: кредитные отчёты '+String(d.src).slice(0,180)+', сформированные по запросу субъекта кредитной истории. Реквизиты исполнителя — в договоре об оказании юридических услуг.';
-  /* CTA */
-  if(d.pres){const cta=document.getElementById('d_cta');cta.style.display='';document.getElementById('d_ctalink').href=String(d.pres);}
+  /* CTA: в черновике главный шаг — прислать отчёт (дефицит продаёт КИ), в полном — подписание/оплата */
+  if(isDraft){
+    const cta=document.getElementById('d_cta'); cta.style.display='';
+    cta.querySelector('.txt').innerHTML='<b>Один шаг до точного заключения</b><br>Скачайте кредитный отчёт — 5 минут, бесплатно — и пришлите в чат: юрист закроет все пропуски';
+    const l=document.getElementById('d_ctalink'); l.textContent='Как скачать отчёт →'; l.href=GUIDE;
+  }else if(d.pres){const cta=document.getElementById('d_cta');cta.style.display='';document.getElementById('d_ctalink').href=String(d.pres);}
 }
 /* данные: 1) #d=… base64url (виджет/тренажёр открывают «Юр. заключение (PDF)» с &print=1); 2) localStorage; 3) демо */
 function fromHash(){

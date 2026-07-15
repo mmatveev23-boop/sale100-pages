@@ -346,6 +346,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <label class="lbtn" id="w_kiBtn" style="cursor:pointer">⭱ Загрузить КИ · до 3 отчётов<input type="file" id="w_ki" accept="application/pdf" multiple style="display:none"></label>
             <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
             <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">⚖ Юр. заключение (PDF)</a>
+            <!-- черновик со слов (спека дожим-v2): виден до КИ, для звонка дня 2 «юрист посмотрел ваш случай»; после КИ уступает полному -->
+            <a class="lbtn" id="w_draftFile" target="_blank" style="display:none">⚖ Предварительное закл. · со слов</a>
           </div>
           <div class="kinote">Читаем отчёты трёх бюро: <b>Скоринг Бюро · НБКИ · Кредистория (ОКБ)</b> — можно 1–3 файла, договоры-дубли объединяются по УИД сделки.</div>
           <label style="margin-top:10px">Дожим-сообщения — копируются с цифрами клиента</label>
@@ -685,6 +687,7 @@ function calc(){
   updateHeader();
   updateSendUI();
   rebuildKiHref(); /* срок/доход/ипотека-галочка меняются после загрузки КИ — юрзаключение не должно протухать */
+  rebuildDraftHref(); /* черновик со слов живёт до КИ и обновляется с каждым вводом */
 }
 /* ── V2: sticky-шапка — живой вердикт одной строкой; до готовности данных пусто (хинт убран заказчиком) ── */
 function updateHeader(){
@@ -1038,6 +1041,32 @@ function applyKiTypes(sb,demo){
   }else kf.href='./ki.html#print=1';
   kf.style.display='';
   if(!demo) setTimeout(()=>{t.style.display='none';},12000);
+}
+/* ── черновик юрзаключения СО СЛОВ (спека дожим-v2 16.07): агрегаты конструктора вместо кредиторов,
+   ki.html в режиме draft=1 замазывает перечень и продаёт запрос КИ. Кнопка живёт до загрузки КИ. ── */
+const DRAFT_LBL={loan:'Кредиты',card:'Кредитные карты',mfo:'Займы МФО',secured:'Залоговые кредиты',mortgage:'Ипотека',receipt:'Расписки (займы у физлиц)'};
+function draftCredits(){
+  const out=[]; let i=1;
+  document.querySelectorAll('#w_credits .crt').forEach(row=>{
+    const amount=parseFloat(row.querySelector('.c-am').value)||0; if(amount<=0) return;
+    const cnt=parseFloat(row.querySelector('.c-n').value)||1; const t=row.dataset.t;
+    out.push({n:i++,lender:(DRAFT_LBL[t]||t)+' — '+cnt+' шт · со слов',product:t,debt:Math.round(amount),opened:''});
+  });
+  return out;
+}
+function rebuildDraftHref(){
+  const a=document.getElementById('w_draftFile');
+  const show=!kiLoaded&&!kiBusy&&last.debt>0&&!last.noPresent&&(last.route==='РДГ'||last.route==='БФЛ');
+  a.style.display=show?'':'none';
+  if(!show) return;
+  const payload={draft:1,name:document.querySelector('.deal h1').textContent.trim(),term,overdue:ovdFlag(),
+    mortInPlan:last.mortInPlan||0,paynow:last.paynow||0,contracts:last.contracts||0,
+    income:parseFloat(document.getElementById('w_income').value)||0,
+    kids:parseFloat(document.getElementById('w_kids').value)||0,
+    pmSelf:parseFloat(document.getElementById('w_pmSelf').value)||0,
+    pmChild:parseFloat(document.getElementById('w_pmChild').value)||0,
+    pres:presentUrl()||null,credits:draftCredits()};
+  a.href='./ki.html#d='+b64url(JSON.stringify(payload))+'&print=1';
 }
 /* href юрзаключения из живых полей виджета — вызывается из calc(), пока загружена КИ */
 function rebuildKiHref(){
