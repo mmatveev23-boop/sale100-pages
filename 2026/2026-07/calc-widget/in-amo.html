@@ -347,6 +347,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <div class="lrow">
             <label class="lbtn" id="w_kiBtn" style="cursor:pointer">⭱ Загрузить КИ · до 3 отчётов<input type="file" id="w_ki" accept="application/pdf" multiple style="display:none"></label>
             <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
+            <button class="lbtn" id="w_payLink" onclick="copyPayLink()">💳 Ссылка на оплату</button>
             <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">⚖ Юр. заключение (PDF)</a>
             <!-- черновик со слов (спека дожим-v2): виден до КИ, для звонка дня 2 «юрист посмотрел ваш случай»; после КИ уступает полному -->
             <a class="lbtn" id="w_draftFile" target="_blank" style="display:none">⚖ Предварительное закл. · со слов</a>
@@ -768,7 +769,7 @@ function updateSendUI(){
     badge.className='dbadge load'; badge.textContent='⏳ читаю отчёт…';
     btn.className='sbtn dis'; btn.disabled=true; btn.textContent='✈ Отправить презентацию клиенту';
     st.className='sstat none'; st.textContent='дождитесь расчёта…';
-    copy.disabled=true; up.classList.remove('hi');
+    copy.disabled=true; document.getElementById('w_payLink').disabled=true; up.classList.remove('hi');
     updateTabDot(false);
     return;
   }
@@ -779,7 +780,7 @@ function updateSendUI(){
   if(!u){ /* «мимо процедур» или пустой долг — презентации нет, отправлять нечего */
     btn.className='sbtn dis'; btn.disabled=true; btn.textContent='✈ Отправить презентацию клиенту';
     st.className='sstat warn'; st.textContent=last.debt>0?'«мимо процедур» — презентации нет':'введите долг';
-    copy.disabled=true; up.classList.remove('hi');
+    copy.disabled=true; document.getElementById('w_payLink').disabled=true; up.classList.remove('hi');
     if(pv) pv.style.display='none';
     updateTabDot(false);
     return;
@@ -788,7 +789,7 @@ function updateSendUI(){
   btn.textContent=sentAt?'✈ Отправить снова':(kiError?'✈ Отправить со слов':'✈ Отправить презентацию клиенту');
   if(sentAt){ st.className='sstat sent'; st.textContent='✓ отправлено '+sentAt; }
   else{ st.className='sstat none'; st.textContent='ещё не отправлено'; }
-  copy.disabled=false;
+  copy.disabled=false; document.getElementById('w_payLink').disabled=false;
   /* отправлено со слов → подсветить догрузку КИ: та же ссылка станет точной */
   up.classList.toggle('hi', !!sentAt&&!kiLoaded&&!kiError);
   if(pv&&pv.style.display!=='none') pv.href=u;
@@ -1150,6 +1151,17 @@ function copyDz(kind,btn){
   setTimeout(()=>{btn.textContent=old;},2500);
 }
 /* фоллбэк отправки (состояние 7): чат недоступен → менеджер копирует ссылку ПРЕЗЕНТАЦИИ и шлёт сам */
+/* прямая «ссылка на оплату» (правка заказчика 16.07): та же персональная страница, открытая на подписи/оплате,
+   сумма — из «К оплате сегодня». Не отдельный URL-сущность: одна ссылка = одно состояние, договор всегда рядом. */
+function copyPayLink(){
+  const u=presentUrl(); if(!u) return;
+  const b=document.getElementById('w_payLink');
+  const abs=new URL(u,location.href).href+'&go=pay';
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(abs):Promise.reject())
+    .then(()=>{b.textContent='✓ Скопировано';})
+    .catch(()=>{b.textContent='не вышло — откройте презентацию';});
+  setTimeout(()=>{b.textContent='💳 Ссылка на оплату';},3000);
+}
 function copyClientLink(){
   const u=presentUrl(); if(!u) return;
   const b=document.getElementById('w_copy');
