@@ -758,6 +758,9 @@ const Q=new URLSearchParams(location.search);
 /* два состояния презентации: ДАННЫЕ (со слов → по КИ, ?ki=1) и ПРОГРЕСС (?signed=1 — подписал, не оплатил).
    В проде статус сделки и данные КИ отдаёт движок; здесь — демо-параметры. */
 const KION=Q.get('ki')==='1', SIGNED=Q.get('signed')==='1', PART=Math.max(0,+Q.get('part')||0);
+/* ?due=N — «одна сумма к оплате» от менеджера (частичка, выторгована голосом): экран оплаты показывает её как факт.
+   Действует до внесения денег: если есть ?part (уже внёс) — сумму ведёт part-логика, due игнорируется. */
+const DUE=Math.max(0,+Q.get('due')||0);
 /* демо-набор КИ = реальный обезличенный отчёт ОКБ (см. calc-widget/ki.html) */
 /* канонный демо-набор КИ — реальный обезличенный отчёт «Скоринг Бюро» 10.07.2026: 13 действующих договоров на 3 029 036 ₽,
    из них 2 ипотеки на 1 541 464 ₽ — вне плана (298-ФЗ); в плане РДГ 11 договоров на 1 487 572 ₽.
@@ -827,6 +830,12 @@ function recalc(){
   document.getElementById('payNext').style.display=vip?'none':'';
   document.getElementById('payNext').textContent='Следующий платёж — '+months(2)[1].replace(' г.','')+'. Напомним заранее в чате.';
   document.getElementById('payNote').textContent=(vip?'оплата по договору':'первый платёж по графику')+' · договор № ДН-2607-1418';
+  if(DUE>=1000&&!vip&&DUE<first&&PART<=0){ /* частичка от менеджера: зачёт в первый платёж */
+    document.getElementById('docFirst').textContent=fmt(DUE)+' ₽ · частичка';
+    document.getElementById('payAmount').innerHTML=fmt(DUE)+' <small>₽</small>';
+    document.getElementById('payExact').textContent=fmt(DUE);
+    document.getElementById('payNote').textContent='частичка — зачёт в первый платёж · остаток '+fmt(first-DUE)+' ₽ по графику · договор № ДН-2607-1418';
+  }
 }
 function setTariff(t){tariff=t;document.getElementById('trfR').classList.toggle('sel',t==='rassrochka');document.getElementById('trfV').classList.toggle('sel',t==='vip');recalc();}
 function toggleSched(){const f=document.getElementById('schedFull'),b=document.getElementById('schedBtn');const open=f.style.display==='none';f.style.display=open?'':'none';b.textContent=open?'Скрыть график':'Показать график по месяцам';}

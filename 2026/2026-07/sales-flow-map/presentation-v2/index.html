@@ -757,6 +757,9 @@ h1 .hl{color:var(--green)}
 const Q=new URLSearchParams(location.search);
 /* два состояния: ДАННЫЕ (со слов → по КИ, ?ki=1) и ПРОГРЕСС (?signed=1 — подписал, не оплатил). В проде — из движка. */
 const KION=Q.get('ki')==='1', SIGNED=Q.get('signed')==='1', PART=Math.max(0,+Q.get('part')||0);
+/* ?due=N — «одна сумма к оплате» от менеджера (частичка, выторгована голосом): экран оплаты показывает её как факт.
+   Действует до внесения денег: если есть ?part (уже внёс) — сумму ведёт part-логика, due игнорируется. */
+const DUE=Math.max(0,+Q.get('due')||0);
 /* канонный демо-набор КИ — реальный обезличенный отчёт «Скоринг Бюро» 10.07.2026: 13 действующих договоров на 3 029 036 ₽ (для списания — полный долг).
    Просрочек сейчас нет, но по 15 договорам были; рейтинг 508, 52 отказа. payNow = среднемес. платёж из отчёта */
 const KI={debt:3029036, count:13, interest:72000, payNow:119718, overdueHist:15, rating:508, refused:52, mfo:4, maxRate:292,
@@ -830,6 +833,12 @@ function recalc(){
   document.getElementById('payNext').style.display=vip?'none':'';
   document.getElementById('payNext').textContent='Следующий платёж — '+months(2)[1].replace(' г.','')+'. Напомним заранее в чате.';
   document.getElementById('payNote').textContent=(vip?'оплата по договору':'первый платёж по графику')+' · договор № ДН-2607-1418';
+  if(DUE>=1000&&!vip&&DUE<first&&PART<=0){ /* частичка от менеджера: зачёт в первый платёж */
+    document.getElementById('docFirst').textContent=fmt(DUE)+' ₽ · частичка';
+    document.getElementById('payAmount').innerHTML=fmt(DUE)+' <small>₽</small>';
+    document.getElementById('payExact').textContent=fmt(DUE);
+    document.getElementById('payNote').textContent='частичка — зачёт в первый платёж · остаток '+fmt(first-DUE)+' ₽ по графику · договор № ДН-2607-1418';
+  }
   /* бары хиро: «с нами» = рассрочка услуг 13 500/мес; скрыты при VIP (разовая оплата) и без известного платежа клиента */
   const barsEl=document.getElementById('barsWrap');
   if(barsEl) barsEl.style.display=(CLIENT.payNow>0 && !vip)?'':'none';

@@ -340,6 +340,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 
         <div class="actsep">Действия ⚡</div>
         <div id="pane_act">
+          <!-- «одна сумма к оплате» (правка заказчика 16.07): частичку выторговывает менеджер голосом, страница показывает её как факт -->
+          <div class="rowf"><span class="rlab">К оплате сегодня, ₽ <span style="color:#98a1ab;font-weight:600">· пусто = первый платёж</span></span><input id="w_due" class="rin" type="number" placeholder="13 500"></div>
           <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
           <div class="sstat none" id="w_sstat">ещё не отправлено</div>
           <div class="lrow">
@@ -751,8 +753,10 @@ function presentUrl(){
   const name=document.querySelector('.deal h1').textContent.trim();
   const pay=last.paynow>0?{pay:last.paynow}:{}; /* платёж не спросили — параметр не шлём, страница скроет сравнение, а не выдумает цифру */
   const ki=kiLoaded?{ki:1}:{}; /* КИ загружена → презентация показывает точные числа + блок кредиторов */
-  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,term:last.eff,...(last.nous>0?{nous:last.nous}:{})}); /* РДГ идёт по телу плана (без ипотеки) */
-  if(last.route==='БФЛ') return '../client-presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki});
+  const dueV=parseFloat(document.getElementById('w_due').value)||0;
+  const due=dueV>0?{due:Math.max(1000,Math.round(dueV))}:{}; /* частичка от менеджера: минимум 1 000 (канон) */
+  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,...due,term:last.eff,...(last.nous>0?{nous:last.nous}:{})}); /* РДГ идёт по телу плана (без ипотеки) */
+  if(last.route==='БФЛ') return '../client-presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,...due});
   return null;
 }
 /* строка данных + primary-кнопка + статус отправки — единый рендер состояния */
@@ -888,7 +892,7 @@ document.querySelectorAll('#w_ovd button').forEach(b=>b.addEventListener('click'
   b.classList.add('on');
 }));
 document.getElementById('w_debt').addEventListener('input',()=>{ if(kiLoaded) dropKi(); }); /* до calc — чтобы бейдж обновился сразу */
-['w_debt','w_paynow','w_income','w_kids','w_pmSelf','w_pmChild','w_ovrInt'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
+['w_debt','w_paynow','w_income','w_kids','w_pmSelf','w_pmChild','w_ovrInt','w_due'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 document.getElementById('w_region').addEventListener('change',()=>{applyRegionPM();calc();});
 renderCreditRows();
 fillRegionSelect();
