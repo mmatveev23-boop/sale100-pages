@@ -307,9 +307,9 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <div class="rowf freeline"><span class="rlab" id="w_freeLab">Останется на план: доход − прожиточный минимум семьи</span><b id="w_freeLine" class="num">—</b></div>
           </div>
 
-          <!-- нижняя часть свёрнута до первых цифр со слов (правка заказчика 15.07); раскрывается сама при вводе долга или кнопкой -->
-          <button type="button" class="advtg" id="w_moreTg" onclick="openMore()">⌄ Развернуть: срок плана · просрочки · действия</button>
-          <div id="w_more" style="display:none">
+          <!-- нижняя часть ОТКРЫТА сразу (правка заказчика 16.07, отмена сворачивания 15.07); кнопка-тогл оставлена скрытой на откат -->
+          <button type="button" class="advtg" id="w_moreTg" onclick="openMore()" style="display:none">⌄ Развернуть: срок плана · просрочки · действия</button>
+          <div id="w_more">
           <!-- advanced: ставки/сроки типов + ПМ-поля (регион автозаполняет) -->
           <button type="button" class="advtg" id="w_advTg" onclick="toggleAdv()">⚙ Уточнить ставки, сроки и ПМ</button>
           <div class="advpm">
@@ -560,9 +560,9 @@ let term=60, prior='no', prod='rdg', last={}, kiLoaded=false, kiTypes=false, kiC
 let payFromKi=false;   /* платёж в w_paynow пришёл из отчёта (а не от менеджера) — для подписи поля */
 let mortInPlan=false;  /* ипотека в плане РДГ (правка Виктории 15.07); дефолт — вне плана по 298-ФЗ */
 let kiPayloadBase=null; /* база payload юрзаключения — href пересобирается в calc() (срок/доход/ипотека меняются после загрузки КИ) */
-/* нижняя часть виджета: свёрнута, пока нет цифр со слов; открывается сама или кнопкой, обратно не сворачивается.
+/* нижняя часть виджета: открыта всегда (правка заказчика 16.07). openMore оставлен — на случай отката к сворачиванию.
    ВАЖНО: объявление до первого calc() — иначе TDZ валит инициализацию */
-let moreOpen=false;
+let moreOpen=true;
 function openMore(){moreOpen=true;document.getElementById('w_more').style.display='';document.getElementById('w_moreTg').style.display='none';}
 /* склонение для бейджа: 1 договор / 2 договора / 22 договора / 11 договоров */
 const decl=n=>{const d=n%10,m=n%100;return m>=11&&m<=14?'договоров':d===1?'договор':d>=2&&d<=4?'договора':'договоров';};
