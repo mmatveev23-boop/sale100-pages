@@ -14,10 +14,17 @@ function parseSb(text){
   const kindRe=new RegExp('('+KINDS.map(k=>k.replace(/[/]/g,'\\/')).join('|')+')','g');
   const kinds=[]; let km;
   while((km=kindRe.exec(sec))) kinds.push(km[1]);
-  const rowRe=/(?:^|\s)(\d{1,2})\s+((?:МФО|Банк|Ипотечный агент|МКК|КПК|Лизинг)[:\s][^]*?)\s(\d{2}\.\d{2}\.\d{4})\s+([\d\s]+\.\d{2})\s*₽\s+(?:([\d\s]+\.\d{2})\s*₽|отсутствует)/g;
+  /* колонки СБ: сумма/лимит · срочный основной долг · текущая просрочка — два последних НЕЗАВИСИМЫ
+     (в отличие от НБКИ/ОКБ, где просрочка входит в задолженность): полный долг = срочный + просрочка.
+     У глубоких МФО-просрочек срочный часто «отсутствует», весь долг сидит в третьей колонке
+     (фидбек команды 15.07.2026: виджет видел 119 282,60 из 309 392,34). Третья колонка опциональна —
+     старые/демо-отчёты без неё продолжают читаться */
+  const rowRe=/(?:^|\s)(\d{1,2})\s+((?:МФО|Банк|Ипотечный агент|МКК|КПК|Лизинг)[:\s][^]*?)\s(\d{2}\.\d{2}\.\d{4})\s+([\d\s]+\.\d{2})\s*₽\s+(?:([\d\s]+\.\d{2})\s*₽|отсутствует)(?:\s+(?:([\d\s]+\.\d{2})\s*₽|отсутствует))?/g;
   const rows=[]; let m;
   while((m=rowRe.exec(sec))){
-    rows.push({n:+m[1], lender:m[2].replace(/\s+/g,' ').trim().slice(0,90), opened:m[3], limit:num(m[4]), debt:m[5]?num(m[5]):0});
+    const ovd=m[6]?num(m[6]):0;
+    rows.push({n:+m[1], lender:m[2].replace(/\s+/g,' ').trim().slice(0,90), opened:m[3], limit:num(m[4]),
+      debt:(m[5]?num(m[5]):0)+ovd, overdueAmt:ovd});
   }
   if(!rows.length) return null;
   rows.forEach((r,i)=>{r.kind=kinds[i]||'';});
@@ -30,7 +37,8 @@ function parseSb(text){
   };
   const types={loan:{amount:0,n:0},card:{amount:0,n:0},mfo:{amount:0,n:0},secured:{amount:0,n:0},mortgage:{amount:0,n:0}};
   rows.forEach(r=>{const k=typeOf(r);r.type=k;types[k].amount+=r.debt;types[k].n++;});
-  const itog=sec.match(/Итого\s+([\d\s]+\.\d{2})/);
+  const itog=sec.match(/Итого\s+([\d\s]+\.\d{2})(?:\s*₽)?(?:\s+(?:([\d\s]+\.\d{2})\s*₽|отсутствует))?/);
+  const itogo=itog?num(itog[1])+(itog[2]?num(itog[2]):0):null; /* «Итого» двухколоночное: срочный + просрочка */
   const pm=text.match(/([\d\s]+\.\d{2})\s*₽\s+среднемесячный платёж/);
   const total=rows.reduce((s,r)=>s+r.debt,0);
   return {
@@ -38,9 +46,10 @@ function parseSb(text){
     date:dm?dm[1]:null,
     rows, types, total,
     count:rows.length,
-    itogo:itog?num(itog[1]):null,          /* «Итого» из отчёта — сверка с total */
+    itogo,
     avgMonthly:pm?num(pm[1]):null,          /* среднемесячный платёж из сводки (включая ипотеку) */
-    ok:itog?Math.abs(total-num(itog[1]))<1:false,
+    ok:itogo!=null?Math.abs(total-itogo)<1:false,
+    hasOverdue:rows.some(r=>r.overdueAmt>0),
   };
 }
 
