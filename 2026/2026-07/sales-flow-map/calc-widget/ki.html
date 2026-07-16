@@ -165,6 +165,9 @@ tr.tot td{font-weight:800;color:var(--green-ink);border-bottom:none;border-top:2
 .draftbar a{color:#0F6B4F;font-weight:700}
 .blurtxt{filter:blur(4px);user-select:none;pointer-events:none;color:#5E675F}
 tr.lockcta td{background:#FBF8F2;border-bottom:none;padding:14px 10px}
+/* образец (демо): диагональный водяной знак — «очевидно чужой кейс» */
+.demo-wm{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:50}
+.demo-wm span{font-size:110px;font-weight:800;color:rgba(11,59,46,.05);transform:rotate(-28deg);letter-spacing:.12em;white-space:nowrap}
 .lockbox{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
 .lockbox .t{font-size:13px;line-height:1.5}
 .lockbox a{display:inline-block;background:#0B3B2E;color:#fff;text-decoration:none;font-weight:700;font-size:13px;border-radius:10px;padding:9px 14px;white-space:nowrap}
@@ -360,6 +363,7 @@ function drawScen(over){
 function render(d){
   /* числа приводим принудительно, имя — только текстом */
   const isDraft=String(d.draft||'')==='1'; /* предварительное заключение со слов (спека дожим-v2 16.07.2026) */
+  const isDemo=String(d.demo||'')==='1';   /* образец-витрина: продаёт запрос КИ, а не читается «вместо» (ресёрч 16.07) */
   const cr=d.credits;
   const total=cr.reduce((s,c)=>s+(+c.debt||0),0);
   const mortRows=cr.filter(c=>c.product==='mortgage');
@@ -392,6 +396,13 @@ function render(d){
     document.querySelector('.doc-hd').after(bar);
     /* первая оговорка — про отсутствие отчёта */
     document.getElementById('d_repdate2').closest('li').textContent='Заключение предварительное, основано на сведениях клиента; кредитный отчёт не исследован — при его получении выводы будут уточнены.';
+  }
+  if(isDemo){
+    const bar=document.createElement('div'); bar.className='draftbar';
+    bar.innerHTML='📄 <b>Это образец.</b> Пример юридического заключения на обезличенных данных вымышленного клиента — чтобы вы видели, что получите. <b>Такое же заключение юрист подготовит по вашему кредитному отчёту — бесплатно.</b> Скачать отчёт — 5 минут через Госуслуги: <a href="'+GUIDE+'" target="_blank" rel="noopener">инструкция →</a>';
+    document.querySelector('.doc-hd').after(bar);
+    const wm=document.createElement('div'); wm.className='demo-wm'; wm.innerHTML='<span>ОБРАЗЕЦ</span>';
+    document.body.appendChild(wm);
   }
 
   /* 1. главный вывод */
@@ -468,6 +479,11 @@ function render(d){
     const cta=document.getElementById('d_cta'); cta.style.display='';
     cta.querySelector('.txt').innerHTML='<b>Один шаг до точного заключения</b><br>Скачайте кредитный отчёт — 5 минут, бесплатно — и пришлите в чат: юрист закроет все пропуски';
     const l=document.getElementById('d_ctalink'); l.textContent='Как скачать отчёт →'; l.href=GUIDE;
+  }else if(isDemo){
+    /* образец: мостик-CTA «такое же по вашему отчёту» вместо подписания (это чужой кейс) */
+    const cta=document.getElementById('d_cta'); cta.style.display='';
+    cta.querySelector('.txt').innerHTML='<b>Такое же — по вашему отчёту</b><br>Скачайте кредитную историю (5 минут, бесплатно) и пришлите менеджеру — юрист подготовит ваше заключение';
+    const l=document.getElementById('d_ctalink'); l.textContent='Как скачать отчёт →'; l.href=GUIDE;
   }else if(d.pres){const cta=document.getElementById('d_cta');cta.style.display='';document.getElementById('d_ctalink').href=String(d.pres);}
 }
 /* данные: 1) #d=… base64url (виджет/тренажёр открывают «Юр. заключение (PDF)» с &print=1); 2) localStorage; 3) демо */
@@ -486,7 +502,8 @@ if(hashHasData&&!d){
   /* ссылка обрезана мессенджером — не показываем чужие данные и не печатаем */
   document.querySelector('.wrap').innerHTML='<div class="doc-hd"><div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ</b><small>УРЕГУЛИРОВАНИЕ ДОЛГОВ</small></div></div><h1>Ссылка открылась не целиком</h1><div class="base">Похоже, мессенджер обрезал ссылку. Попросите менеджера прислать её ещё раз или откройте с другого устройства.</div></div>';
 }else{
-  render(d&&d.credits&&d.credits.length?d:DEMO);
+  const real=d&&d.credits&&d.credits.length;
+  render(real?d:{...DEMO,demo:1}); /* без данных → образец-витрина с плашкой и водяным знаком */
   if(/[#&]print=1/.test(location.hash)) setTimeout(()=>window.print(),600);
 }
 </script>
