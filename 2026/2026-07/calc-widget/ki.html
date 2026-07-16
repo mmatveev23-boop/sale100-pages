@@ -187,6 +187,7 @@ tr.lockcta td{background:#FBF8F2;border-bottom:none;padding:14px 10px}
 .dh-path{margin-top:12px;font-size:13px;color:#5E675F;line-height:1.6}
 .dh-path b{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:#E9F3EE;color:#0B5540;font-size:11px;vertical-align:-3px;margin-right:2px}
 .ctamicro{flex-basis:100%;font-size:12px;color:#5E675F;font-weight:600;margin-top:2px}
+.dh-proof{margin-top:10px;font-size:13.5px;font-weight:700;color:#0B3B2E}
 .dh-trust{margin-top:8px;font-size:13px;color:#8A938A;line-height:1.5}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* образец: продающие элементы (ресёрч 17.07 — выгода на первый экран, один оффер, CTA-примерки) */
@@ -438,6 +439,7 @@ function render(d){
       +'<a class="dh-cta" href="'+GUIDE+'?src=top" target="_blank" rel="noopener">Узнать мой платёж по закону<small>отчёт с Госуслуг — 5 минут</small></a>'
       +'<div class="dh-risk">Бесплатно · ничего не подписываете · запрос своего отчёта не влияет на кредитную историю</div>'
       +'<div class="dh-path"><b>1</b> Скачиваете отчёт — 5 минут &nbsp;<b>2</b> Присылаете в этот чат &nbsp;<b>3</b> Заключение с вашим платежом — в день получения</div>'
+      +'<div class="dh-proof">✓ Списали долги более чем у 10 000 человек</div>'
       +'<div class="dh-trust">Ниже — полный текст заключения. Данные — вымышленного клиента: ваши цифры будут другими.</div>';
     document.querySelector('.doc-hd').before(hero);
     const wm=document.createElement('div'); wm.className='demo-wm'; wm.innerHTML='<span>ОБРАЗЕЦ</span>';
@@ -476,6 +478,7 @@ function render(d){
       +'<li><b>Юрист подготовит ваше заключение — бесплатно</b><small>Светлана Марченко, руководитель практики — как этот образец. Бесплатно, потому что заключение строится по данным отчёта — юристу нужен час, а не неделя. Если процедура не подходит — скажем прямо</small></li></ol>'
       +'<a class="go" href="'+GUIDE+'?src=final" target="_blank" rel="noopener">Хочу такое же — скачать отчёт →</a>'
       +'<div class="ctamicro" style="margin-top:8px">Бесплатно · ничего не подписываете · запрос своего отчёта не влияет на кредитную историю</div>'
+      +'<div class="dh-proof">✓ Списали долги более чем у 10 000 человек</div>'
       +'<div class="who2">В этом примере каждый месяц ожидания прибавляет ~'+fmt(interest)+' ₽ процентов. Вашу цифру покажет ваш отчёт.</div>';
     disc.before(fin);
   }
