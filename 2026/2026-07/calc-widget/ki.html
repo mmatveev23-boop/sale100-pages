@@ -182,7 +182,11 @@ tr.lockcta td{background:#FBF8F2;border-bottom:none;padding:14px 10px}
 .dh-sub{font-size:clamp(17px,2vw,19px);line-height:1.5;color:#16231D;margin:0 0 16px;max-width:52ch}
 .dh-cta{display:block;text-align:center;background:#0B3B2E;color:#fff!important;font-weight:700;font-size:17px;border-radius:12px;padding:17px 22px;text-decoration:none}
 @media(min-width:640px){.dh-cta{display:inline-block;min-width:300px}}
-.dh-risk{margin-top:10px;font-size:13.5px;color:#0B5540;font-weight:600}
+.dh-risk{margin-top:10px;font-size:13px;color:#0B5540;font-weight:600}
+.dh-cta small{display:block;font-weight:600;font-size:13px;opacity:.85;margin-top:3px}
+.dh-path{margin-top:12px;font-size:13px;color:#5E675F;line-height:1.6}
+.dh-path b{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:#E9F3EE;color:#0B5540;font-size:11px;vertical-align:-3px;margin-right:2px}
+.ctamicro{flex-basis:100%;font-size:12px;color:#5E675F;font-weight:600;margin-top:2px}
 .dh-trust{margin-top:8px;font-size:13px;color:#8A938A;line-height:1.5}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* образец: продающие элементы (ресёрч 17.07 — выгода на первый экран, один оффер, CTA-примерки) */
@@ -431,9 +435,10 @@ function render(d){
     hero.innerHTML='<div class="dh-kicker">Образец юридического заключения</div>'
       +'<h1 class="dh-h1">'+(wasDemo>0?'<span class="dh-was">Платёж был <s>'+money(wasDemo)+'<span class="vh"> — старый платёж</span></s></span><span class="dh-now">стал '+money(planPay)+' в месяц</span>':'<span class="dh-now">Узнайте свой платёж по закону</span>')+'</h1>'
       +'<p class="dh-sub">Пришлите свой кредитный отчёт — юрист бесплатно посчитает ваш платёж по закону.</p>'
-      +'<a class="dh-cta" href="'+GUIDE+'?src=top" target="_blank" rel="noopener">Скачать мой кредитный отчёт</a>'
-      +'<div class="dh-risk">Бесплатно и ни к чему не обязывает</div>'
-      +'<div class="dh-trust">Ниже — полный текст заключения с расчётом по 127-ФЗ. Данные в образце — вымышленного клиента: ваши цифры будут другими.</div>';
+      +'<a class="dh-cta" href="'+GUIDE+'?src=top" target="_blank" rel="noopener">Узнать мой платёж по закону<small>отчёт с Госуслуг — 5 минут</small></a>'
+      +'<div class="dh-risk">Бесплатно · ничего не подписываете · запрос своего отчёта не влияет на кредитную историю</div>'
+      +'<div class="dh-path"><b>1</b> Скачиваете отчёт — 5 минут &nbsp;<b>2</b> Присылаете в этот чат &nbsp;<b>3</b> Заключение с вашим платежом — в день получения</div>'
+      +'<div class="dh-trust">Ниже — полный текст заключения. Данные — вымышленного клиента: ваши цифры будут другими.</div>';
     document.querySelector('.doc-hd').before(hero);
     const wm=document.createElement('div'); wm.className='demo-wm'; wm.innerHTML='<span>ОБРАЗЕЦ</span>';
     document.body.appendChild(wm);
@@ -469,7 +474,9 @@ function render(d){
       +'<li><b>Скачайте свой кредитный отчёт — 5 минут</b><small>через Госуслуги; бесплатно по закону — дважды в год (ст. 8 218-ФЗ)</small></li>'
       +'<li><b>Пришлите файл менеджеру в этот же чат</b><small>вы ничего не подписываете; запрос отчёта не влияет на кредитную историю, банки о нём не узнают</small></li>'
       +'<li><b>Юрист подготовит ваше заключение — бесплатно</b><small>Светлана Марченко, руководитель практики — как этот образец. Бесплатно, потому что заключение строится по данным отчёта — юристу нужен час, а не неделя. Если процедура не подходит — скажем прямо</small></li></ol>'
-      +'<a class="go" href="'+GUIDE+'?src=final" target="_blank" rel="noopener">Хочу такое же — скачать отчёт →</a>';
+      +'<a class="go" href="'+GUIDE+'?src=final" target="_blank" rel="noopener">Хочу такое же — скачать отчёт →</a>'
+      +'<div class="ctamicro" style="margin-top:8px">Бесплатно · ничего не подписываете · запрос своего отчёта не влияет на кредитную историю</div>'
+      +'<div class="who2">В этом примере каждый месяц ожидания прибавляет ~'+fmt(interest)+' ₽ процентов. Вашу цифру покажет ваш отчёт.</div>';
     disc.before(fin);
   }
 
@@ -546,7 +553,7 @@ function render(d){
      вставляется здесь, ПОСЛЕ построения d_rows */
   if(isDemo){
     document.getElementById('d_rows').insertAdjacentHTML('beforeend',
-      '<tr class="lockcta"><td colspan="5"><div class="lockbox"><div class="t">⏳ <b>Ваши кредиторы появятся здесь.</b> У клиента из примера — '+cr.length+' '+dcl(cr.length,'договор','договора','договоров')+', '+planRows+' вошли в план. Сколько их в вашем отчёте и что получит вердикт «включается в план» — юрист заполнит по вашему отчёту; там же видны переуступки долга коллекторам и суды.</div><a href="'+GUIDE+'?src=mid" target="_blank" rel="noopener">Скачать свой отчёт — 5 минут →</a></div></td></tr>');
+      '<tr class="lockcta"><td colspan="5"><div class="lockbox"><div class="t">⏳ <b>Ваши кредиторы появятся здесь.</b> У клиента из примера — '+cr.length+' '+dcl(cr.length,'договор','договора','договоров')+', '+planRows+' вошли в план. Сколько их в вашем отчёте и что получит вердикт «включается в план» — юрист заполнит по вашему отчёту; там же видны переуступки долга коллекторам и суды.</div><a href="'+GUIDE+'?src=mid" target="_blank" rel="noopener">Увидеть свой список — скачать отчёт · 5 минут →</a><div class="ctamicro">Бесплатно · ничего не подписываете · запрос своего отчёта не влияет на кредитную историю</div></div></td></tr>');
   }
   /* CTA: в черновике главный шаг — прислать отчёт (дефицит продаёт КИ), в полном — подписание/оплата */
   if(isDraft){
@@ -557,8 +564,8 @@ function render(d){
     /* липкий мостик: от первого лица, появляется только после ухода первого экрана
        (sticky на этапе «ориентирования» не выигрывает — показываем, когда читатель уже в документе) */
     const cta=document.getElementById('d_cta');
-    cta.querySelector('.txt').innerHTML='<b>Такое же — по вашему отчёту</b><br>Скачайте кредитную историю (5 минут, бесплатно) и пришлите менеджеру — юрист подготовит ваше заключение';
-    const l=document.getElementById('d_ctalink'); l.textContent='Хочу такое же — скачать отчёт →'; l.href=GUIDE+'?src=sticky';
+    cta.querySelector('.txt').innerHTML='<b>Такое же — по вашему отчёту</b><br>Бесплатно · ничего не подписываете · не влияет на кредитную историю';
+    const l=document.getElementById('d_ctalink'); l.textContent='Узнать мой платёж →'; l.href=GUIDE+'?src=sticky';
     cta.style.display='none';
     const mv=document.querySelector('.mainv');
     if(mv&&'IntersectionObserver' in window){
