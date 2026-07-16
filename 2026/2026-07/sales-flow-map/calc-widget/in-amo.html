@@ -221,7 +221,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
     <div class="stagebar"><i></i></div>
     <div class="tabs"><b>Основное</b><span>МПП</span><span>Анкета</span><span>Сбор доков</span><span>Суд</span><span>Сохран</span></div>
     <div class="frow"><span>Отв-ный</span><b>Гасанова Шафаг</b></div>
-    <div class="frow"><span>Бюджет</span><b>0 ₽</b></div>
+    <div class="frow"><span>Бюджет</span><b>0 ₽</b></div>
     <div class="frow"><span>Статус активности</span><b class="blue">Выбрать</b></div>
     <div class="frow"><span>Договор</span><b>…</b></div>
     <div class="frow"><span>Сумма долга (со слов)</span><b id="f_debt">—</b></div>
@@ -286,16 +286,16 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
               <label style="margin-top:0">Долги клиента — что есть?</label>
               <div class="chips" id="w_chips"></div>
               <div id="w_credits"></div>
-              <div id="w_debtWrap" style="display:none"><label id="w_debtLabel">Долг по кредитной истории, ₽</label><input id="w_debt" type="number"></div>
+              <div id="w_debtWrap" style="display:none"><label id="w_debtLabel">Долг по кредитной истории, ₽</label><input id="w_debt" type="number"></div>
               <!-- живое «итого» при открытой секции (фидбек заказчика: «почему не считаем общую сумму?») -->
               <div class="rowf freeline" id="w_debtLiveRow" style="display:none"><span class="rlab">Итого долг</span><b id="w_debtLive" class="num">—</b></div>
             </div>
           </div>
 
           <!-- в) ДОХОД (РДГ-only) → ПЛАТЁЖ (всегда): порядок по правке заказчика 15.07 -->
-          <div class="rowf" id="row_income"><span class="rlab">Офиц. доход, ₽/мес</span><input id="w_income" class="rin" type="number"></div>
+          <div class="rowf" id="row_income"><span class="rlab">Офиц. доход, ₽/мес</span><input id="w_income" class="rin" type="number"></div>
           <!-- платёж снова редактируем (правка Виктории 15.07): авто по кредитам / из отчёта КИ, менеджер может вписать факт клиента -->
-          <div class="rowf"><span class="rlab" id="w_paynowLab">Платёж сейчас, ₽/мес — авто, можно поправить</span><input id="w_paynow" class="rin" type="number"></div>
+          <div class="rowf"><span class="rlab" id="w_paynowLab">Платёж сейчас, ₽/мес — авто, можно поправить</span><input id="w_paynow" class="rin" type="number"></div>
 
           <!-- г) ДЕТИ · РЕГИОН — только для РДГ (допуск к плану); в БФЛ на расчёт не влияют и скрыты -->
           <div id="w_rdgIncome">
@@ -313,8 +313,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <!-- advanced: ставки/сроки типов + ПМ-поля (регион автозаполняет) -->
           <button type="button" class="advtg" id="w_advTg" onclick="toggleAdv()">⚙ Уточнить ставки, сроки и ПМ</button>
           <div class="advpm">
-            <div><label>ПМ клиента, ₽/мес</label><input id="w_pmSelf" type="number"></div>
-            <div><label>ПМ ребёнка, ₽/мес</label><input id="w_pmChild" type="number"></div>
+            <div><label>ПМ клиента, ₽/мес</label><input id="w_pmSelf" type="number"></div>
+            <div><label>ПМ ребёнка, ₽/мес</label><input id="w_pmChild" type="number"></div>
           </div>
 
           <!-- переплата редактируема (правка Виктории 15.07): авто по ставкам конструктора, менеджер может вписать факт клиента -->
@@ -341,7 +341,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <div class="actsep">Действия ⚡</div>
         <div id="pane_act">
           <!-- «одна сумма к оплате» (правка заказчика 16.07): частичку выторговывает менеджер голосом, страница показывает её как факт -->
-          <div class="rowf"><span class="rlab">К оплате сегодня, ₽ <span style="color:#98a1ab;font-weight:600">· пусто = первый платёж</span></span><input id="w_due" class="rin" type="number" placeholder="13 500"></div>
+          <div class="rowf"><span class="rlab">К оплате сегодня, ₽ <span style="color:#98a1ab;font-weight:600">· пусто = первый платёж</span></span><input id="w_due" class="rin" type="number" placeholder="13 500"></div>
           <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
           <div class="sstat none" id="w_sstat">ещё не отправлено</div>
           <div class="lrow">
@@ -388,9 +388,9 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 const fmt=n=>Math.round(n).toLocaleString('ru-RU');
 const BFL_COST=239000;
 /* ═══ закон (докс: docs/rdg-law-calc-2026-07.md) ═══
-   KEY_RATE — ключевая ставка ЦБ (проценты плана, ст. 213.19 п.2 127-ФЗ; фиксируется на дату утверждения плана).
+   KEY_RATE — ключевая ставка ЦБ (проценты плана, ст. 213.19 п.2 127-ФЗ; фиксируется на дату утверждения плана).
    14,25% с 22.06.2026 (решение ЦБ 19.06.2026) — обновлять после заседаний ЦБ (~раз в 6 недель).
-   GOS_START — стартовые госплатежи (канон заказчика): депозит ФУ 25 000 (ст. 20.6 п.3) + публикации 15 000 + почта 10 000. Госпошлина должника 0 ₽ (259-ФЗ). */
+   GOS_START — стартовые госплатежи (канон заказчика): депозит ФУ 25 000 (ст. 20.6 п.3) + публикации 15 000 + почта 10 000. Госпошлина должника 0 ₽ (259-ФЗ). */
 const KEY_RATE=14.25, GOS_START=50000;
 const KEY_RATE_TXT=KEY_RATE.toLocaleString('ru-RU'); /* «14,25» — русская запятая в интерфейсе */
 /* план РДГ — формула заказчика (rdg-formula-spec.md, раздел 6): рост процентов ЗАМОРОЖЕН,
@@ -458,7 +458,7 @@ function renderCreditRows(){
     '<div class="crt" data-t="'+t.k+'">'+
       '<div class="crmain">'+
         '<div class="crlab"><b>'+CHIP_LABEL[t.k]+'</b><span id="crs_'+t.k+'">—</span></div>'+
-        '<input class="c-am" type="number" min="0" placeholder="Сумма, ₽">'+
+        '<input class="c-am" type="number" min="0" placeholder="Сумма, ₽">'+
         '<input class="c-n" type="number" min="0" placeholder="шт">'+
       '</div>'+
       '<div class="cradv">'+
@@ -512,7 +512,7 @@ function creditsTotals(){
       /* ипотека — вне плана РДГ (298-ФЗ, ст. 213.10-1: отдельное мировое, жильё сохраняется), платёж по ней продолжается */
       if(k==='mortgage'){mortAmount+=amount;mortPay+=c.pay;mortTotal+=c.total;}
       row.classList.add('on');
-      s.textContent='~'+fmt(c.pay)+' ₽/мес';
+      s.textContent='~'+fmt(c.pay)+' ₽/мес';
     }else{
       row.classList.remove('on');
       s.textContent='—';
@@ -573,10 +573,10 @@ function calc(){
   const rc=receiptTotals(); /* расписка живёт рядом с точными данными КИ — в обоих путях (SB и ОКБ) */
   /* kiTypes: «Скоринг Бюро» разложен по типам — конструктор и есть точный источник; старый ОКБ-путь держит одно число в w_debt + расписку поверх */
   const debt=(kiLoaded&&!kiTypes)?((parseFloat(document.getElementById('w_debt').value)||0)+rc.amount):ct.debt;
-  document.getElementById('w_debtTotal').textContent=debt>0?fmt(debt)+' ₽':'—';
+  document.getElementById('w_debtTotal').textContent=debt>0?fmt(debt)+' ₽':'—';
   document.getElementById('w_debtLiveRow').style.display=debt>0?'':'none';
   if(!moreOpen&&debt>0) openMore();
-  document.getElementById('w_debtLive').textContent=debt>0?fmt(debt)+' ₽ · '+(kiLoaded?(kiCount||0)+rc.n:ct.n)+' дог':'—';
+  document.getElementById('w_debtLive').textContent=debt>0?fmt(debt)+' ₽ · '+(kiLoaded?(kiCount||0)+rc.n:ct.n)+' дог':'—';
   /* число договоров при КИ: счётчик отчёта + шт. расписки (в отчётах бюро её нет); бейдж «по КИ» не трогаем */
   document.getElementById('w_nTotal').textContent=kiLoaded?(kiCount||0)+rc.n:ct.n;
   /* платёж сейчас: ручной ввод приоритетнее расчётного по кредитам (п.10.1 спеки); поле видимое (правка Виктории 15.07) */
@@ -584,7 +584,7 @@ function calc(){
   const payCalc=((!kiLoaded||kiTypes)&&ct.monthly>0)?Math.round(ct.monthly):0;
   const paynow=payManual>0?payManual:payCalc;
   document.getElementById('w_paynow').placeholder=payCalc>0?'~'+fmt(payCalc):'—';
-  document.getElementById('w_paynowLab').textContent='Платёж сейчас, ₽/мес'+(payManual>0?(payFromKi?' · из отчёта КИ':' · введён вручную'):' — авто, можно поправить');
+  document.getElementById('w_paynowLab').textContent='Платёж сейчас, ₽/мес'+(payManual>0?(payFromKi?' · из отчёта КИ':' · введён вручную'):' — авто, можно поправить');
   const income=parseFloat(document.getElementById('w_income').value)||0;
   const kids=parseFloat(document.getElementById('w_kids').value)||0;
   /* свободный доход: минус ПМ клиента и полный ПМ ребёнка на КАЖДОГО ребёнка (правило заказчика) */
@@ -599,7 +599,7 @@ function calc(){
   const free=income-(pmSelf+kids*pmChild)-mortPay;
   /* живая строка у степпера детей: эффект семьи виден сразу (убрана только при пустом доходе) */
   document.getElementById('w_freeLab').textContent=prod==='rdg'?'Останется на план: доход − прожиточный минимум семьи':'Сверх ПМ семьи — удержат в процедуре (ст. 213.25)';
-  document.getElementById('w_freeLine').textContent=income>0?fmt(prod==='rdg'?free:Math.max(0,income-(pmSelf+kids*pmChild)))+' ₽/мес':'— введите доход';
+  document.getElementById('w_freeLine').textContent=income>0?fmt(prod==='rdg'?free:Math.max(0,income-(pmSelf+kids*pmChild)))+' ₽/мес':'— введите доход';
   /* тело плана — без ипотеки (298-ФЗ: отдельное мировое с ипотечным банком, жильё сохраняется); с галочкой — вместе с ипотекой */
   const body=Math.max(0,debt-(mortInPlanActive?0:mortAmount));
   /* переплата: авто по ставкам, менеджер может вписать факт (правка Виктории 15.07) */
@@ -615,22 +615,22 @@ function calc(){
   if(prod==='bfl'){
     route='БФЛ';
     v.className='verdict bfl';
-    v.innerHTML='<b>БФЛ · списание долга</b>Долг '+fmt(debt)+' ₽ списывается целиком, платёж только за процедуру.';
-    kv=[['Долг спишется',fmt(debt)+' ₽'],['Процедура','13 500 ₽/мес · ~14 мес'],['Услуги + госплатежи',fmt(BFL_COST)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
+    v.innerHTML='<b>БФЛ · списание долга</b>Долг '+fmt(debt)+' ₽ списывается целиком, платёж только за процедуру.';
+    kv=[['Долг спишется',fmt(debt)+' ₽'],['Процедура','13 500 ₽/мес · ~14 мес'],['Услуги + госплатежи',fmt(BFL_COST)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
     /* белый доход в списании: сверх ПМ семьи ~6 мес процедуры уходит кредиторам (ст. 213.25) — итог уточняет юрист */
     const massM=income>0?Math.max(0,income-(pmSelf+kids*pmChild)):0;
     if(massM>0){
-      kv.push(['Из дохода в процедуре (сверх ПМ семьи)','~'+fmt(massM)+' ₽/мес · ~6 мес ≈ '+fmt(massM*6)+' ₽'],['Выгода с учётом удержаний',fmt(Math.max(0,debt-BFL_COST-massM*6))+' ₽']);
-      v.innerHTML+='<br>⚠ Белый доход: ~'+fmt(massM)+' ₽/мес сверх ПМ семьи в процедуре уйдёт кредиторам — сравните с РДГ.';
+      kv.push(['Из дохода в процедуре (сверх ПМ семьи)','~'+fmt(massM)+' ₽/мес · ~6 мес ≈ '+fmt(massM*6)+' ₽'],['Выгода с учётом удержаний',fmt(Math.max(0,debt-BFL_COST-massM*6))+' ₽']);
+      v.innerHTML+='<br>⚠ Белый доход: ~'+fmt(massM)+' ₽/мес сверх ПМ семьи в процедуре уйдёт кредиторам — сравните с РДГ.';
     }
     /* переплата банкам «в пустоту» (правка Виктории 14.07): проценты по конструктору без ипотеки; ручной факт приоритетнее (15.07) */
     const intYear=intYearEff();
-    if(intYear>0) kv.splice(1,0,['Проценты банкам за год, если тянуть','~'+fmt(intYear)+' ₽ — в пустоту'],['Экономия с процентами за год',fmt(Math.max(0,debt+intYear-BFL_COST))+' ₽']);
+    if(intYear>0) kv.splice(1,0,['Проценты банкам за год, если тянуть','~'+fmt(intYear)+' ₽ — в пустоту'],['Экономия с процентами за год',fmt(Math.max(0,debt+intYear-BFL_COST))+' ₽']);
     /* снижение платежа — п.3 Камрана: платил банкам N → платит только процедуру */
-    if(paynow>0) kv.splice(1,0,['Платит сейчас',fmt(paynow)+' ₽/мес'],['Станет — только процедура','13 500 ₽/мес · ~14 мес']);
-    voice.push(['Долг спишется целиком',fmt(debt)+' ₽']);
-    if(intYear>0) voice.push(['Проценты банкам за год, если тянуть','~'+fmt(intYear)+' ₽']);
-    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → 13 500 ₽/мес'],['Выгода с нами — в месяц','~'+fmt(Math.max(0,paynow-13500))+' ₽']);
+    if(paynow>0) kv.splice(1,0,['Платит сейчас',fmt(paynow)+' ₽/мес'],['Станет — только процедура','13 500 ₽/мес · ~14 мес']);
+    voice.push(['Долг спишется целиком',fmt(debt)+' ₽']);
+    if(intYear>0) voice.push(['Проценты банкам за год, если тянуть','~'+fmt(intYear)+' ₽']);
+    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → 13 500 ₽/мес'],['Выгода с нами — в месяц','~'+fmt(Math.max(0,paynow-13500))+' ₽']);
   }else if(prior==='yes'){
     route='self'; /* допуск по ст. 213.13 не пройден — без презентации, маршрут решает юрист */
     v.className='verdict self';
@@ -639,8 +639,8 @@ function calc(){
   }else if(debt<=0||free>=debt/3){
     route='self';
     v.className='verdict self';
-    v.innerHTML='<b>Мимо процедур</b>'+(debt<=0?'Введите кредиты клиента.':'Свободных '+fmt(free)+' ₽/мес: закроет долг сам за ~3 месяца — процедура не нужна.');
-    kv=[['Свободный доход',fmt(free)+' ₽/мес']];
+    v.innerHTML='<b>Мимо процедур</b>'+(debt<=0?'Введите кредиты клиента.':'Свободных '+fmt(free)+' ₽/мес: закроет долг сам за ~3 месяца — процедура не нужна.');
+    kv=[['Свободный доход',fmt(free)+' ₽/мес']];
   }else if(free>=P60.monthly){
     route='РДГ';
     if(free<PE.monthly) eff=60;
@@ -648,36 +648,36 @@ function calc(){
     const margin=(free-PLAN.monthly)/free; /* запас: план должен оставлять больше ПМ — впритык суд может не утвердить (Пленум ВС № 45) */
     v.className='verdict rdg';
     if(margin<0.1){
-      v.innerHTML='<b>РДГ · пограничный — запас впритык</b>Платёж '+fmt(PLAN.monthly)+' ₽/мес при свободных '+fmt(free)+' ₽. Суд может не утвердить (Пленум ВС № 45) — усилить подтверждённый доход или добавить созаёмный.';
+      v.innerHTML='<b>РДГ · пограничный — запас впритык</b>Платёж '+fmt(PLAN.monthly)+' ₽/мес при свободных '+fmt(free)+' ₽. Суд может не утвердить (Пленум ВС № 45) — усилить подтверждённый доход или добавить созаёмный.';
     }else{
-      v.innerHTML='<b>РДГ · подходит — план '+eff+' мес</b>Платёж '+fmt(PLAN.monthly)+' ₽/мес вместо банковских '+(paynow>0?fmt(paynow)+' ₽':'платежей')+'. Проценты заморожены: только тело + 7% управляющего — не банкрот.'+(free<P36.monthly?' 36 мес не тянет — только с одобрения кредиторов (60).':'')+(mortAmount>0?(mortInPlanActive?' Ипотека включена в план по решению клиента — банк-залогодержатель голосует в плане.':' Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ).'):'');
+      v.innerHTML='<b>РДГ · подходит — план '+eff+' мес</b>Платёж '+fmt(PLAN.monthly)+' ₽/мес вместо банковских '+(paynow>0?fmt(paynow)+' ₽':'платежей')+'. Проценты заморожены: только тело + 7% управляющего — не банкрот.'+(free<P36.monthly?' 36 мес не тянет — только с одобрения кредиторов (60).':'')+(mortAmount>0?(mortInPlanActive?' Ипотека включена в план по решению клиента — банк-залогодержатель голосует в плане.':' Ипотека — отдельным соглашением, жильё сохраняется (298-ФЗ).'):'');
     }
-    kv=[['Тело плана'+(mortAmount>0?(mortInPlanActive?' (с ипотекой)':' (без ипотеки)'):''),fmt(body)+' ₽'],
-        ['ФУ 7% (вознаграждение управляющего)',fmt(PLAN.fu)+' ₽'],
-        ['Итого по плану',fmt(PLAN.total)+' ₽'],
-        ['Платёж · 60 мес (одобряет собрание кредиторов)',fmt(P60.monthly)+' ₽/мес'],
-        ['Платёж · 36 мес (суд без одобрения, ≥50%)',free>=P36.monthly?fmt(P36.monthly)+' ₽/мес':'не тянет'],
-        ['Госплатежи (старт, отдельно)',fmt(GOS_START)+' ₽']];
-    if(mortAmount>0) kv.push(mortInPlanActive?['Ипотека — включена в план (решение клиента)',fmt(mortAmount)+' ₽']:['Ипотека — вне плана (298-ФЗ)',fmt(mortAmount)+' ₽ · ~'+fmt(ct.mortPay)+' ₽/мес']);
-    if(paynow>0) kv.push(['Платит сейчас',fmt(paynow)+' ₽/мес'],['Нагрузка снизится на',fmt(Math.max(0,paynow-PLAN.monthly-mortPay))+' ₽/мес']);
-    if((!kiLoaded||kiTypes)&&ct.noRdg>0){const noRdgPlan=ct.noRdg-(mortInPlanActive?0:ct.mortTotal); kv.push(['Без РДГ выплатит'+(mortAmount>0&&!mortInPlanActive?' (без ипотеки)':''),fmt(noRdgPlan)+' ₽'],['— из них проценты банкам, в пустоту',fmt(Math.max(0,noRdgPlan-body))+' ₽'],['Выгода РДГ (с учётом переплаты)',fmt(Math.max(0,noRdgPlan-PLAN.total))+' ₽']);}
-    kv.push(['Свободный доход (после ПМ'+(mortPay>0?' и ипотеки':'')+')',fmt(free)+' ₽/мес'],['Услуги ДОНУЛЯ','13 500 ₽/мес']);
+    kv=[['Тело плана'+(mortAmount>0?(mortInPlanActive?' (с ипотекой)':' (без ипотеки)'):''),fmt(body)+' ₽'],
+        ['ФУ 7% (вознаграждение управляющего)',fmt(PLAN.fu)+' ₽'],
+        ['Итого по плану',fmt(PLAN.total)+' ₽'],
+        ['Платёж · 60 мес (одобряет собрание кредиторов)',fmt(P60.monthly)+' ₽/мес'],
+        ['Платёж · 36 мес (суд без одобрения, ≥50%)',free>=P36.monthly?fmt(P36.monthly)+' ₽/мес':'не тянет'],
+        ['Госплатежи (старт, отдельно)',fmt(GOS_START)+' ₽']];
+    if(mortAmount>0) kv.push(mortInPlanActive?['Ипотека — включена в план (решение клиента)',fmt(mortAmount)+' ₽']:['Ипотека — вне плана (298-ФЗ)',fmt(mortAmount)+' ₽ · ~'+fmt(ct.mortPay)+' ₽/мес']);
+    if(paynow>0) kv.push(['Платит сейчас',fmt(paynow)+' ₽/мес'],['Нагрузка снизится на',fmt(Math.max(0,paynow-PLAN.monthly-mortPay))+' ₽/мес']);
+    if((!kiLoaded||kiTypes)&&ct.noRdg>0){const noRdgPlan=ct.noRdg-(mortInPlanActive?0:ct.mortTotal); kv.push(['Без РДГ выплатит'+(mortAmount>0&&!mortInPlanActive?' (без ипотеки)':''),fmt(noRdgPlan)+' ₽'],['— из них проценты банкам, в пустоту',fmt(Math.max(0,noRdgPlan-body))+' ₽'],['Выгода РДГ (с учётом переплаты)',fmt(Math.max(0,noRdgPlan-PLAN.total))+' ₽']);}
+    kv.push(['Свободный доход (после ПМ'+(mortPay>0?' и ипотеки':'')+')',fmt(free)+' ₽/мес'],['Услуги ДОНУЛЯ','13 500 ₽/мес']);
     if((!kiLoaded||kiTypes)&&ct.noRdg>0){const nrp=ct.noRdg-(mortInPlanActive?0:ct.mortTotal);
-      voice.push(['Вернёте банкам без нас — долг + проценты',fmt(nrp)+' ₽'],['— из них переплата, в пустоту',fmt(Math.max(0,nrp-body))+' ₽']);}
-    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → '+fmt(PLAN.monthly+mortPay)+' ₽/мес'],['Выгода с нами — в месяц','~'+fmt(Math.max(0,paynow-PLAN.monthly-mortPay))+' ₽']);
+      voice.push(['Вернёте банкам без нас — долг + проценты',fmt(nrp)+' ₽'],['— из них переплата, в пустоту',fmt(Math.max(0,nrp-body))+' ₽']);}
+    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → '+fmt(PLAN.monthly+mortPay)+' ₽/мес'],['Выгода с нами — в месяц','~'+fmt(Math.max(0,paynow-PLAN.monthly-mortPay))+' ₽']);
   }else{
     route='БФЛ'; /* РДГ не тянет → кандидат на списание; вердикт, запись и ссылка идут по БФЛ */
     v.className='verdict bfl';
-    v.innerHTML='<b>Не тянет РДГ → кандидат на списание</b>Свободных '+fmt(free)+' ₽/мес меньше платежа плана даже на 60 мес ('+fmt(P60.monthly)+' ₽). Долг '+fmt(debt)+' ₽ спишется целиком.'+mfcHint;
-    kv=[['Свободный доход',fmt(free)+' ₽/мес'],['Мин. платёж плана (60 мес)',fmt(P60.monthly)+' ₽/мес'],['Долг спишется',fmt(debt)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
+    v.innerHTML='<b>Не тянет РДГ → кандидат на списание</b>Свободных '+fmt(free)+' ₽/мес меньше платежа плана даже на 60 мес ('+fmt(P60.monthly)+' ₽). Долг '+fmt(debt)+' ₽ спишется целиком.'+mfcHint;
+    kv=[['Свободный доход',fmt(free)+' ₽/мес'],['Мин. платёж плана (60 мес)',fmt(P60.monthly)+' ₽/мес'],['Долг спишется',fmt(debt)+' ₽'],['Выгода (минимум)',fmt(Math.max(0,debt-BFL_COST))+' ₽']];
     const massB=income>0?Math.max(0,income-(pmSelf+kids*pmChild)):0;
-    if(massB>0) kv.push(['Из дохода в процедуре (сверх ПМ семьи)','~'+fmt(massB)+' ₽/мес · ~6 мес ≈ '+fmt(massB*6)+' ₽']);
+    if(massB>0) kv.push(['Из дохода в процедуре (сверх ПМ семьи)','~'+fmt(massB)+' ₽/мес · ~6 мес ≈ '+fmt(massB*6)+' ₽']);
     const intYearB=intYearEff();
-    if(intYearB>0) kv.splice(3,0,['Проценты банкам за год, если тянуть','~'+fmt(intYearB)+' ₽ — в пустоту'],['Экономия с процентами за год',fmt(Math.max(0,debt+intYearB-BFL_COST))+' ₽']);
-    if(paynow>0) kv.splice(3,0,['Платит сейчас',fmt(paynow)+' ₽/мес'],['Станет — только процедура','13 500 ₽/мес · ~14 мес']);
-    voice.push(['Долг спишется целиком',fmt(debt)+' ₽']);
-    if(intYearB>0) voice.push(['Проценты банкам за год, если тянуть','~'+fmt(intYearB)+' ₽']);
-    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → 13 500 ₽/мес'],['Выгода с нами — в месяц','~'+fmt(Math.max(0,paynow-13500))+' ₽']);
+    if(intYearB>0) kv.splice(3,0,['Проценты банкам за год, если тянуть','~'+fmt(intYearB)+' ₽ — в пустоту'],['Экономия с процентами за год',fmt(Math.max(0,debt+intYearB-BFL_COST))+' ₽']);
+    if(paynow>0) kv.splice(3,0,['Платит сейчас',fmt(paynow)+' ₽/мес'],['Станет — только процедура','13 500 ₽/мес · ~14 мес']);
+    voice.push(['Долг спишется целиком',fmt(debt)+' ₽']);
+    if(intYearB>0) voice.push(['Проценты банкам за год, если тянуть','~'+fmt(intYearB)+' ₽']);
+    if(paynow>0) voice.push(['Платёж: было → станет','~'+fmt(paynow)+' → 13 500 ₽/мес'],['Выгода с нами — в месяц','~'+fmt(Math.max(0,paynow-13500))+' ₽']);
   }
   kvs.innerHTML=kv.map(([k,x])=>'<div class="kv"><span>'+k+'</span><b>'+x+'</b></div>').join('');
   /* блок «Клиенту голосом» (правка заказчика по фидбеку Камрана): три опорные цифры отдельно, без раскрытия раскладки */
@@ -710,8 +710,8 @@ function updateHeader(){
   let title=(b?b.textContent:'').split(' — ')[0];
   let extra='';
   /* строка короткая: жертвуем словом («подходит», «списание долга»), но не цифрой «вместо N» — цвет точки уже кодирует вердикт; «пограничный» оставляем, точка та же зелёная */
-  if(last.route==='РДГ'){ title=title.replace(' · подходит',''); extra=' · '+fmt(last.pay)+' ₽'+(last.paynow>0?' вместо '+fmt(last.paynow):'/мес'); }
-  else if(last.route==='БФЛ'){ title=title.indexOf('БФЛ')===0?'БФЛ':'Не тянет РДГ'; extra=' · спишется '+fmt(last.debt)+' ₽'; }
+  if(last.route==='РДГ'){ title=title.replace(' · подходит',''); extra=' · '+fmt(last.pay)+' ₽'+(last.paynow>0?' вместо '+fmt(last.paynow):'/мес'); }
+  else if(last.route==='БФЛ'){ title=title.indexOf('БФЛ')===0?'БФЛ':'Не тянет РДГ'; extra=' · спишется '+fmt(last.debt)+' ₽'; }
   document.getElementById('w_vshort').textContent=title+extra;
 }
 let panelOpen=false;
@@ -755,7 +755,7 @@ function presentUrl(){
   const pay=last.paynow>0?{pay:last.paynow}:{}; /* платёж не спросили — параметр не шлём, страница скроет сравнение, а не выдумает цифру */
   const ki=kiLoaded?{ki:1}:{}; /* КИ загружена → презентация показывает точные числа + блок кредиторов */
   const dueV=parseFloat(document.getElementById('w_due').value)||0;
-  const due=dueV>0?{due:Math.max(1000,Math.round(dueV))}:{}; /* частичка от менеджера: минимум 1 000 (канон) */
+  const due=dueV>0?{due:Math.max(1000,Math.round(dueV))}:{}; /* частичка от менеджера: минимум 1 000 (канон) */
   if(last.route==='РДГ') return '../presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,...due,term:last.eff,...(last.nous>0?{nous:last.nous}:{})}); /* РДГ идёт по телу плана (без ипотеки) */
   if(last.route==='БФЛ') return '../presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,...due});
   return null;
@@ -808,8 +808,8 @@ function trainerChatMsg(url){
   const name=(document.querySelector('.deal h1').textContent.trim().split(' ')[0])||'Клиент';
   const time=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
   const body=last.route==='РДГ'
-    ? name+', спасибо за разговор! Коротко, о чём договорились: платёж можно снизить до ~'+fmt(last.pay)+' ₽/мес вместо нынешних ~'+fmt(last.paynow)+' ₽. Ваш персональный расчёт, договор и подпись — по ссылке:'
-    : name+', спасибо за разговор! По вашим цифрам: долг '+fmt(last.debt)+' ₽ по закону списывается целиком. Ваш персональный расчёт, договор и подпись — по ссылке:';
+    ? name+', спасибо за разговор! Коротко, о чём договорились: платёж можно снизить до ~'+fmt(last.pay)+' ₽/мес вместо нынешних ~'+fmt(last.paynow)+' ₽. Ваш персональный расчёт, договор и подпись — по ссылке:'
+    : name+', спасибо за разговор! По вашим цифрам: долг '+fmt(last.debt)+' ₽ по закону списывается целиком. Ваш персональный расчёт, договор и подпись — по ссылке:';
   m.innerHTML='<div class="who">Salebot → клиенту · тренажёр</div><div class="bubble"><small>'+time+' ✓ Отправлено · '+last.route+'</small>'+body+'<br><a class="trlink" href="'+url+'" target="_blank" rel="noopener">Открыть персональную страницу ↗</a></div>';
   m.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -826,10 +826,10 @@ function trainerKiMsg(href){
 }
 function sendPresentation(){
   const u=presentUrl(); if(!u) return;
-  document.getElementById('f_debt').textContent=fmt(last.debt)+' ₽ · '+(last.contracts||0)+' дог.'+(kiLoaded?' (по КИ)':'');
-  document.getElementById('f_income').textContent=fmt(last.income)+' ₽';
+  document.getElementById('f_debt').textContent=fmt(last.debt)+' ₽ · '+(last.contracts||0)+' дог.'+(kiLoaded?' (по КИ)':'');
+  document.getElementById('f_income').textContent=fmt(last.income)+' ₽';
   document.getElementById('f_route').textContent=last.route==='РДГ'?'РДГ · '+last.eff+' мес':'БФЛ · списание';
-  document.getElementById('f_pay').textContent=last.pay?fmt(last.pay)+' ₽/мес':'—';
+  document.getElementById('f_pay').textContent=last.pay?fmt(last.pay)+' ₽/мес':'—';
   sentAt=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
   document.querySelector('.dw').classList.remove('hot'); /* «горячее» снято — презентация ушла */
   const pv=document.getElementById('w_present'); pv.href=u; pv.style.display='';
@@ -851,7 +851,7 @@ function markKi(count){
   document.querySelectorAll('#w_credits .crt').forEach(r=>{r.style.display=r.dataset.t==='receipt'?'':'none';});
   document.getElementById('w_debtWrap').style.display='';
   document.getElementById('w_debt').classList.add('ki');
-  document.getElementById('w_debtLabel').textContent='Долг по кредитной истории, ₽';
+  document.getElementById('w_debtLabel').textContent='Долг по кредитной истории, ₽';
   document.getElementById('dh_small').textContent='точный расчёт по КИ';
   collapseDebts(false); /* показать точное поле — менеджер должен его увидеть */
 }
@@ -900,7 +900,7 @@ fillRegionSelect();
 calc();
 
 /* демо состояния 4 «КИ пришла в дожиме»: ?ki=1 — канонный набор из реального обезличенного отчёта «Скоринг Бюро» 10.07.2026
-   (13 договоров · 3 029 036 ₽: потреб 947 387/2, карты 418 185/5, МФО 122 000/4, ипотека 1 541 464/2; среднемес. платёж 119 718) */
+   (13 договоров · 3 029 036 ₽: потреб 947 387/2, карты 418 185/5, МФО 122 000/4, ипотека 1 541 464/2; среднемес. платёж 119 718) */
 if(new URLSearchParams(location.search).get('ki')==='1'){
   applyKiTypes({
     bureau:'Скоринг Бюро', date:'10 июля 2026', count:13, total:3029036, ok:true, avgMonthly:119718,
@@ -992,9 +992,9 @@ function parseOkbLegacy(text){
     document.getElementById('w_debt').value=Math.round(total);
     markKi(parsed.credits.length);
     kiBusy=false; calc();
-    document.getElementById('f_debt').textContent=fmt(total)+' ₽ (по КИ)';
+    document.getElementById('f_debt').textContent=fmt(total)+' ₽ (по КИ)';
     const rcOkb=receiptTotals(); /* расписка со слов не выпадает: calc() уже прибавил её поверх отчёта — говорим об этом явно */
-    t.innerHTML=(ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+parsed.credits.length+' '+decl(parsed.credits.length)+', долг '+fmt(total)+' ₽'+(ok?' — сходится со сводкой отчёта.':'.')+(rcOkb.amount>0?' Расписка '+fmt(rcOkb.amount)+' ₽ со слов учтена сверх отчёта.':'')+' В проде PDF прикрепляется к сделке.';
+    t.innerHTML=(ok?'✓ КИ разобрана: ':'КИ разобрана (сверьте глазами): ')+parsed.credits.length+' '+decl(parsed.credits.length)+', долг '+fmt(total)+' ₽'+(ok?' — сходится со сводкой отчёта.':'.')+(rcOkb.amount>0?' Расписка '+fmt(rcOkb.amount)+' ₽ со слов учтена сверх отчёта.':'')+' В проде PDF прикрепляется к сделке.';
     const payload={
       name:document.querySelector('.deal h1').textContent.trim(),
       date:parsed.date, term, overdue:ovdFlag(), credits:parsed.credits
@@ -1027,14 +1027,14 @@ function applyKiTypes(sb,demo){
   document.getElementById('w_debtWrap').style.display='none';
   document.getElementById('dh_small').textContent='точный расчёт по КИ · '+(sb.bureau||'');
   kiBusy=false; calc();
-  document.getElementById('f_debt').textContent=fmt(sb.total)+' ₽ · '+sb.count+' дог. (по КИ)';
+  document.getElementById('f_debt').textContent=fmt(sb.total)+' ₽ · '+sb.count+' дог. (по КИ)';
   const t=document.getElementById('w_toast');
   t.style.display='block';
   t.innerHTML=(sb.sources&&sb.sources.length>1
-    ?'✓ Объединены отчёты: '+sb.sources.map(s=>s.bureau+' ('+(s.date||'—')+') — '+s.count+' дог').join(' + ')+' → '+sb.count+' уникальных, дублей объединено '+(sb.dupes||0)+'. Долг '+fmt(sb.total)+' ₽.'
-    :(sb.ok?'✓ КИ разобрана: ':'⚠ КИ разобрана не полностью: ')+sb.count+' '+decl(sb.count)+', долг '+fmt(sb.total)+' ₽'+(sb.ok?' — сходится с «Итого» отчёта.'
-      :(sb.itogo?', а «Итого» в отчёте '+fmt(sb.itogo)+' ₽ — не сходится, сверьте с PDF и добейте долг вручную.':' — «Итого» в отчёте не найдено, сверьте с PDF глазами.')))
-    +(sb.types.mortgage.amount>0?' Ипотека '+fmt(sb.types.mortgage.amount)+' ₽ — вне плана (298-ФЗ).':'')+' В проде PDF прикрепляется к сделке.';
+    ?'✓ Объединены отчёты: '+sb.sources.map(s=>s.bureau+' ('+(s.date||'—')+') — '+s.count+' дог').join(' + ')+' → '+sb.count+' уникальных, дублей объединено '+(sb.dupes||0)+'. Долг '+fmt(sb.total)+' ₽.'
+    :(sb.ok?'✓ КИ разобрана: ':'⚠ КИ разобрана не полностью: ')+sb.count+' '+decl(sb.count)+', долг '+fmt(sb.total)+' ₽'+(sb.ok?' — сходится с «Итого» отчёта.'
+      :(sb.itogo?', а «Итого» в отчёте '+fmt(sb.itogo)+' ₽ — не сходится, сверьте с PDF и добейте долг вручную.':' — «Итого» в отчёте не найдено, сверьте с PDF глазами.')))
+    +(sb.types.mortgage.amount>0?' Ипотека '+fmt(sb.types.mortgage.amount)+' ₽ — вне плана (298-ФЗ).':'')+' В проде PDF прикрепляется к сделке.';
   const kf=document.getElementById('w_kiFile');
   if(sb.rows&&sb.rows.length){
     /* заключение считает платёж и ПДН само — база хранится, href пересобирает calc() (срок/доход/ипотека живые) */
@@ -1111,20 +1111,20 @@ function dzText(kind){
   const grow=Math.round(intYearEff()/12); /* ручной факт переплаты (если введён) доходит и до дожим-сообщений */
   const plan=last.pay?fmt(last.pay):null;
   if(kind==='open'){
-    return name+', добрый день! Это ДОНУЛЯ. Посчитали по вашим цифрам: платёж можно снизить до ~'+(plan||'—')+' ₽/мес вместо нынешних ~'+fmt(last.paynow||0)+' ₽. Всё уже готово на вашей персональной странице: '+pres+'\nОткройте — это 2 минуты. Если удобнее голосом — наберу.';
+    return name+', добрый день! Это ДОНУЛЯ. Посчитали по вашим цифрам: платёж можно снизить до ~'+(plan||'—')+' ₽/мес вместо нынешних ~'+fmt(last.paynow||0)+' ₽. Всё уже готово на вашей персональной странице: '+pres+'\nОткройте — это 2 минуты. Если удобнее голосом — наберу.';
   }
   if(kind==='think'){
     /* порядок по ресёрчу 16.07: рост → пример-витрина → инструкция (один призыв) → анонс звонка Д1.
-       grow=0 (долг не введён / расписка 0%) — фраза без чисел, «+0 ₽» выглядит сломанным */
-    const growTxt=grow>0?'долг растёт: ~+'+fmt(grow)+' ₽ процентов в месяц (+'+fmt(grow*12)+' ₽ за год)':'долг продолжает расти по ставкам ваших договоров';
+       grow=0 (долг не введён / расписка 0%) — фраза без чисел, «+0 ₽» выглядит сломанным */
+    const growTxt=grow>0?'долг растёт: ~+'+fmt(grow)+' ₽ процентов в месяц (+'+fmt(grow*12)+' ₽ за год)':'долг продолжает расти по ставкам ваших договоров';
     return name+', пока решение откладывается — '+growTxt+'.\nПосмотрите, что вы получите: вот пример юридического заключения, которое юрист готовит по кредитному отчёту — все договоры с вердиктами, точный платёж, что с имуществом: '+sample+'\nСделаем такое же по вам — бесплатно и ни к чему не обязывает. Нужен только ваш отчёт: скачивается за 5 минут, инструкция: '+guide+' Пришлёте PDF сюда — юрист возьмёт в работу.\nЗавтра он как раз посмотрит ваш случай — наберу вам на пару минут. Ваш расчёт: '+pres;
   }
   /* ki: заключение по реальному отчёту готово; главная фраза — по маршруту */
   const opinion=abs((document.getElementById('w_kiFile').getAttribute('href')||'./ki.html').replace(/[#&]print=1/,''));
   const main=last.route==='БФЛ'
-    ?'Главное: долг списывается целиком, платёж только за процедуру — 13 500 ₽/мес'
-    :'Главное: единый платёж ~'+(plan||'—')+' ₽/мес по плану, утверждённому судом'+(last.debt>last.body?', ипотека сохраняется':'');
-  return name+', юрист разобрал вашу кредитную историю: '+(kiCount||'—')+' договоров на '+fmt(last.debt||0)+' ₽. Юридическое заключение готово: '+opinion+'\n'+main+'. Договор и оплата — на вашей странице: '+pres+'\nКаждый месяц ожидания — ещё ~+'+fmt(grow)+' ₽ процентов.';
+    ?'Главное: долг списывается целиком, платёж только за процедуру — 13 500 ₽/мес'
+    :'Главное: единый платёж ~'+(plan||'—')+' ₽/мес по плану, утверждённому судом'+(last.debt>last.body?', ипотека сохраняется':'');
+  return name+', юрист разобрал вашу кредитную историю: '+(kiCount||'—')+' договоров на '+fmt(last.debt||0)+' ₽. Юридическое заключение готово: '+opinion+'\n'+main+'. Договор и оплата — на вашей странице: '+pres+'\nКаждый месяц ожидания — ещё ~+'+fmt(grow)+' ₽ процентов.';
 }
 /* тренажёр: дожим-сообщение падает в ленту чата (как презентация) — по одному пузырю на тип касания */
 function dzChatMsg(kind,txt){
