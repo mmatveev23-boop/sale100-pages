@@ -168,6 +168,11 @@ tr.lockcta td{background:#FBF8F2;border-bottom:none;padding:14px 10px}
 /* образец (демо): диагональный водяной знак — «очевидно чужой кейс» */
 .demo-wm{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:50}
 .demo-wm span{font-size:110px;font-weight:800;color:rgba(11,59,46,.05);transform:rotate(-28deg);letter-spacing:.12em;white-space:nowrap}
+/* образец: продающие элементы (ресёрч 17.07 — выгода на первый экран, один оффер, CTA-примерки) */
+.go{display:inline-block;margin-top:10px;background:#0B3B2E;color:#fff!important;text-decoration:none;font-weight:800;font-size:14px;border-radius:11px;padding:12px 18px}
+.midcta{background:linear-gradient(135deg,#FBF3DC,#F7E9C4);border:1px solid rgba(201,154,51,.5);border-radius:12px;padding:13px 16px;margin-top:12px;font-size:13.5px;line-height:1.55}
+.who2{margin-top:8px;font-size:12px;color:#5E675F}
+.fitnote{margin-top:8px;font-size:12px;color:rgba(255,255,255,.72)}
 .lockbox{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
 .lockbox .t{font-size:13px;line-height:1.5}
 .lockbox a{display:inline-block;background:#0B3B2E;color:#fff;text-decoration:none;font-weight:700;font-size:13px;border-radius:10px;padding:9px 14px;white-space:nowrap}
@@ -398,11 +403,33 @@ function render(d){
     document.getElementById('d_repdate2').closest('li').textContent='Заключение предварительное, основано на сведениях клиента; кредитный отчёт не исследован — при его получении выводы будут уточнены.';
   }
   if(isDemo){
+    /* плашка-переворот НАД шапкой: выгода + кнопка на первом экране (57% внимания выше фолда — NN/g);
+       реквизитная шапка остаётся вторым экраном как знак официальности */
+    const wasDemo=interest>0?Math.round(interest+body*0.02):0;
     const bar=document.createElement('div'); bar.className='draftbar';
-    bar.innerHTML='📄 <b>Это образец.</b> Пример юридического заключения на обезличенных данных вымышленного клиента — чтобы вы видели, что получите. <b>Такое же заключение юрист подготовит по вашему кредитному отчёту — бесплатно.</b> Скачать отчёт — 5 минут через Госуслуги: <a href="'+GUIDE+'" target="_blank" rel="noopener">инструкция →</a>';
-    document.querySelector('.doc-hd').after(bar);
+    bar.innerHTML=(wasDemo>0?'<b>Здесь платёж ~'+fmt(wasDemo)+' ₽ превратился в ~'+fmt(planPay)+' ₽/мес.</b> ':'')
+      +'Это образец: данные вымышленного клиента — <b>ваши цифры будут другими</b>. Такое же заключение по вашему отчёту юрист подготовит <b>бесплатно</b>: вы ничего не подписываете, запрос отчёта не влияет на кредитную историю. Сам отчёт бесплатен по закону — дважды в год (ст. 8 218-ФЗ).'
+      +'<br><a class="go" href="'+GUIDE+'?src=top" target="_blank" rel="noopener">Хочу такое же — скачать отчёт · 5 минут →</a>';
+    document.querySelector('.doc-hd').before(bar);
     const wm=document.createElement('div'); wm.className='demo-wm'; wm.innerHTML='<span>ОБРАЗЕЦ</span>';
     document.body.appendChild(wm);
+    /* один оффер на документ: печать чужого образца конкурирует с запросом КИ */
+    const pb=document.querySelector('.printbtn'); if(pb) pb.style.display='none';
+    /* мид-CTA «примерка» вместо «проверьте список» (чужой список не проверяют); ~50% глубины — зона главных потерь */
+    const chk=document.querySelector('.sec .check');
+    if(chk) chk.outerHTML='<div class="midcta"><b>У клиента из примера — '+cr.length+' '+dcl(cr.length,'договор','договора','договоров')+', '+planRows+' вошли в план.</b> Сколько их в <b>вашем</b> отчёте — покажет только сам отчёт: там же видны переуступки долга коллекторам и судебные производства. <a class="go" href="'+GUIDE+'?src=mid" target="_blank" rel="noopener">Скачать свой отчёт — 5 минут →</a><div class="who2">Ваше заключение подготовит Светлана Марченко, руководитель практики — как этот образец.</div></div>';
+    /* слоты-примерки у ключевых цифр */
+    document.getElementById('d_freeRow').insertAdjacentHTML('afterend','<div class="fitnote">Ваш платёж будет другим — он считается по вашему кредитному отчёту.</div>');
+    const scn=document.querySelector('.sc-note'); if(scn) scn.insertAdjacentHTML('beforeend',' <b>Прогноз — для долга из образца; ваш считается по ставкам вашего отчёта.</b>');
+    /* финальный развёрнутый CTA перед оговорками: до конца доходят самые горячие, а конец без действия — «ложное дно» */
+    const disc=document.querySelector('.disc').closest('.sec');
+    const fin=document.createElement('div'); fin.className='sec';
+    fin.innerHTML='<h2><span class="sn">✓</span>Что дальше — три шага</h2><ol class="steps">'
+      +'<li><b>Скачайте свой кредитный отчёт — 5 минут</b><small>через Госуслуги; бесплатно по закону — дважды в год (ст. 8 218-ФЗ)</small></li>'
+      +'<li><b>Пришлите файл менеджеру в этот же чат</b><small>вы ничего не подписываете; запрос отчёта не влияет на кредитную историю, банки о нём не узнают</small></li>'
+      +'<li><b>Юрист подготовит ваше заключение — бесплатно</b><small>Светлана Марченко, руководитель практики — как этот образец. Бесплатно, потому что заключение строится по данным отчёта — юристу нужен час, а не неделя. Если процедура не подходит — скажем прямо</small></li></ol>'
+      +'<a class="go" href="'+GUIDE+'?src=final" target="_blank" rel="noopener">Хочу такое же — скачать отчёт →</a>';
+    disc.before(fin);
   }
 
   /* 1. главный вывод */
@@ -480,10 +507,16 @@ function render(d){
     cta.querySelector('.txt').innerHTML='<b>Один шаг до точного заключения</b><br>Скачайте кредитный отчёт — 5 минут, бесплатно — и пришлите в чат: юрист закроет все пропуски';
     const l=document.getElementById('d_ctalink'); l.textContent='Как скачать отчёт →'; l.href=GUIDE;
   }else if(isDemo){
-    /* образец: мостик-CTA «такое же по вашему отчёту» вместо подписания (это чужой кейс) */
-    const cta=document.getElementById('d_cta'); cta.style.display='';
+    /* липкий мостик: от первого лица, появляется только после ухода первого экрана
+       (sticky на этапе «ориентирования» не выигрывает — показываем, когда читатель уже в документе) */
+    const cta=document.getElementById('d_cta');
     cta.querySelector('.txt').innerHTML='<b>Такое же — по вашему отчёту</b><br>Скачайте кредитную историю (5 минут, бесплатно) и пришлите менеджеру — юрист подготовит ваше заключение';
-    const l=document.getElementById('d_ctalink'); l.textContent='Как скачать отчёт →'; l.href=GUIDE;
+    const l=document.getElementById('d_ctalink'); l.textContent='Хочу такое же — скачать отчёт →'; l.href=GUIDE+'?src=sticky';
+    cta.style.display='none';
+    const mv=document.querySelector('.mainv');
+    if(mv&&'IntersectionObserver' in window){
+      new IntersectionObserver(es=>{es.forEach(e=>{cta.style.display=e.boundingClientRect.bottom<=0?'':'none';});}).observe(mv);
+    }else cta.style.display='';
   }else if(d.pres){const cta=document.getElementById('d_cta');cta.style.display='';document.getElementById('d_ctalink').href=String(d.pres);}
 }
 /* данные: 1) #d=… base64url (виджет/тренажёр открывают «Юр. заключение (PDF)» с &print=1); 2) localStorage; 3) демо */
