@@ -168,6 +168,20 @@ tr.lockcta td{background:#FBF8F2;border-bottom:none;padding:14px 10px}
 /* образец (демо): диагональный водяной знак — «очевидно чужой кейс» */
 .demo-wm{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:50}
 .demo-wm span{font-size:110px;font-weight:800;color:rgba(11,59,46,.05);transform:rotate(-28deg);letter-spacing:.12em;white-space:nowrap}
+/* хиро образца = титульный лист документа, не баннер (ресёрч 17.07: жёлтая плашка читается рекламой →
+   баннерная слепота; отделяем масштабом и воздухом, один акцентный цвет — сумма и кнопка) */
+.demo-hero{background:#fff;border:1px solid #E4DCCD;border-radius:16px;padding:24px 22px;margin:0 0 14px;box-shadow:0 8px 22px -14px rgba(11,59,46,.4)}
+.dh-kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;color:#8A6212;border-bottom:1px solid #E4DCCD;padding-bottom:9px;margin-bottom:14px}
+.dh-h1{margin:0 0 10px;line-height:1.15;font-weight:800}
+.dh-was{display:block;font-size:clamp(18px,2.6vw,26px);color:#5E675F;font-weight:600;margin-bottom:2px}
+.dh-was s{text-decoration-thickness:2px;text-decoration-color:#A8442E}
+.dh-now{display:block;font-size:clamp(32px,5vw,48px);color:#0F6B4F}
+.dh-sub{font-size:clamp(17px,2vw,19px);line-height:1.5;color:#16231D;margin:0 0 16px;max-width:52ch}
+.dh-cta{display:block;text-align:center;background:#0B3B2E;color:#fff!important;font-weight:700;font-size:17px;border-radius:12px;padding:17px 22px;text-decoration:none}
+@media(min-width:640px){.dh-cta{display:inline-block;min-width:300px}}
+.dh-risk{margin-top:10px;font-size:13.5px;color:#0B5540;font-weight:600}
+.dh-trust{margin-top:8px;font-size:13px;color:#8A938A;line-height:1.5}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* образец: продающие элементы (ресёрч 17.07 — выгода на первый экран, один оффер, CTA-примерки) */
 .go{display:inline-block;margin-top:10px;background:#0B3B2E;color:#fff!important;text-decoration:none;font-weight:800;font-size:14px;border-radius:11px;padding:12px 18px}
 .midcta{background:linear-gradient(135deg,#FBF3DC,#F7E9C4);border:1px solid rgba(201,154,51,.5);border-radius:12px;padding:13px 16px;margin-top:12px;font-size:13.5px;line-height:1.55}
@@ -403,14 +417,18 @@ function render(d){
     document.getElementById('d_repdate2').closest('li').textContent='Заключение предварительное, основано на сведениях клиента; кредитный отчёт не исследован — при его получении выводы будут уточнены.';
   }
   if(isDemo){
-    /* плашка-переворот НАД шапкой: выгода + кнопка на первом экране (57% внимания выше фолда — NN/g);
-       реквизитная шапка остаётся вторым экраном как знак официальности */
+    /* хиро НАД шапкой: kicker → H1 «было→стало» → суб → CTA 56px → риск-строка → trust
+       (число-результат в H1 — самый большой доказанный рычаг; зачёркнутое «было» + крупное «стало» — GoodUI #21) */
     const wasDemo=interest>0?Math.round(interest+body*0.02):0;
-    const bar=document.createElement('div'); bar.className='draftbar';
-    bar.innerHTML=(wasDemo>0?'<b>Здесь платёж ~'+fmt(wasDemo)+' ₽ превратился в ~'+fmt(planPay)+' ₽/мес.</b> ':'')
-      +'Это образец: данные вымышленного клиента — <b>ваши цифры будут другими</b>. Такое же заключение по вашему отчёту юрист подготовит <b>бесплатно</b>: вы ничего не подписываете, запрос отчёта не влияет на кредитную историю. Сам отчёт бесплатен по закону — дважды в год (ст. 8 218-ФЗ).'
-      +'<br><a class="go" href="'+GUIDE+'?src=top" target="_blank" rel="noopener">Хочу такое же — скачать отчёт · 5 минут →</a>';
-    document.querySelector('.doc-hd').before(bar);
+    const money=n=>'<span style="white-space:nowrap">'+fmt(n).replace(/\s/g,' ')+' ₽</span>';
+    const hero=document.createElement('div'); hero.className='demo-hero';
+    hero.innerHTML='<div class="dh-kicker">Образец юридического заключения</div>'
+      +'<h1 class="dh-h1">'+(wasDemo>0?'<span class="dh-was">Платёж был <s>'+money(wasDemo)+'<span class="vh"> — старый платёж</span></s></span><span class="dh-now">стал '+money(planPay)+' в месяц</span>':'<span class="dh-now">Узнайте свой платёж по закону</span>')+'</h1>'
+      +'<p class="dh-sub">Пришлите свой кредитный отчёт — юрист бесплатно посчитает ваш платёж по закону.</p>'
+      +'<a class="dh-cta" href="'+GUIDE+'?src=top" target="_blank" rel="noopener">Скачать мой кредитный отчёт</a>'
+      +'<div class="dh-risk">Бесплатно и ни к чему не обязывает</div>'
+      +'<div class="dh-trust">Ниже — полный текст заключения с расчётом по 127-ФЗ. Данные в образце — вымышленного клиента: ваши цифры будут другими.</div>';
+    document.querySelector('.doc-hd').before(hero);
     const wm=document.createElement('div'); wm.className='demo-wm'; wm.innerHTML='<span>ОБРАЗЕЦ</span>';
     document.body.appendChild(wm);
     /* один оффер на документ: печать чужого образца конкурирует с запросом КИ */
