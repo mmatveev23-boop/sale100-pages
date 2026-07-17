@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Обнулятор · Пульт сделки — что закрывает и как работает · ДОНУЛЯ</title>
+<meta name="description" content="Продуктовая страница пульта «Обнулятор»: какие вопросы менеджера он закрывает и как работает по шагам звонка. Все ссылки живые.">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ПРЕЗЕНТАЦИЯ ИНСТРУМЕНТА «ОБНУЛЯТОР» — стиль семьи страниц проекта (токены dozhim-3days). Все ссылки живые, относительные. */
+:root{
+  --paper:#F4EFE6; --paper2:#ECE5D8; --card:#fff; --card2:#FBF8F2;
+  --ink:#16231D; --muted:#5E675F; --faint:#8A938A;
+  --pine:#0B3B2E; --pine2:#0C4233; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
+  --gold:#C99A33; --gold-bright:#F4C775; --gold-soft:#FBF3DC; --gold-ink:#8A6212;
+  --line:#E4DCCD; --shadow:0 18px 44px -22px rgba(11,59,46,.42); --shadow-sm:0 8px 22px -14px rgba(11,59,46,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:960px;margin:0 auto;padding:24px 18px 80px}
+a{color:var(--green-ink)}
+
+/* ── хиро ── */
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:30px 28px;box-shadow:var(--shadow)}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:18px}
+.hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
+.hdr .brand b{font-size:15px}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:30px;line-height:1.14;letter-spacing:-.02em;font-weight:800;max-width:19ch}
+.hdr p{margin-top:12px;font-size:15px;color:rgba(255,255,255,.82);max-width:58ch}
+.hdr .cta{margin-top:20px;display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-block;text-decoration:none;font-weight:700;font-size:14px;border-radius:999px;padding:11px 20px;transition:transform .15s ease}
+.btn:active{transform:translateY(1px)}
+.btn-gold{background:var(--gold-bright);color:#3D2B05}
+.btn-gold:hover{background:#F7D48E}
+.btn-ghost{border:1px solid rgba(255,255,255,.35);color:#fff}
+.btn-ghost:hover{border-color:rgba(255,255,255,.7)}
+
+/* ── секции ── */
+h2{font-size:21px;letter-spacing:-.015em;margin:44px 0 6px}
+.sub{font-size:13.5px;color:var(--muted);max-width:62ch;margin-bottom:16px}
+
+/* вопросы-ответы */
+.qa{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.qa .q{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 17px;box-shadow:var(--shadow-sm)}
+.qa .q b{display:block;font-size:14.5px;letter-spacing:-.01em;color:var(--pine)}
+.qa .q p{margin-top:6px;font-size:13px;color:var(--muted);line-height:1.55}
+.qa .q p strong{color:var(--ink);font-weight:600}
+
+/* шаги звонка */
+.step{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-sm);margin-top:12px;padding:17px 18px;display:grid;grid-template-columns:1fr 264px;gap:18px;align-items:center}
+.step.noimg{grid-template-columns:1fr}
+.step .sn{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--pine);border-radius:999px;padding:5px 12px;margin-bottom:9px}
+.step h3{font-size:16px;letter-spacing:-.01em}
+.step p{margin-top:6px;font-size:13.5px;color:var(--muted);line-height:1.55}
+.step p b{color:var(--ink)}
+.links{margin-top:11px;display:flex;gap:8px;flex-wrap:wrap}
+.lnk{display:inline-block;text-decoration:none;font-size:12.5px;font-weight:700;color:var(--green-ink);background:var(--green-soft);border:1px solid #CDE4D8;border-radius:999px;padding:6px 13px}
+.lnk:hover{border-color:var(--green)}
+.shot{max-height:430px;overflow:hidden;border-radius:12px;border:1px solid var(--line);background:#fff}
+.shot img{width:100%;display:block}
+.cap{margin-top:6px;font-size:11.5px;color:var(--faint);text-align:center}
+
+/* все ссылки */
+.grid-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(216px,1fr));gap:10px}
+.gl{display:block;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px;box-shadow:var(--shadow-sm);transition:transform .15s ease}
+.gl:hover{transform:translateY(-2px);border-color:var(--green)}
+.gl b{display:block;font-size:13.5px;color:var(--pine);letter-spacing:-.01em}
+.gl span{display:block;margin-top:4px;font-size:12px;color:var(--muted);line-height:1.45}
+.gl em{display:block;margin-top:7px;font-style:normal;font-size:12px;font-weight:700;color:var(--gold-ink)}
+
+/* статус */
+.status{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:17px 19px;margin-top:14px}
+.status p{font-size:13.5px;color:var(--muted);line-height:1.6}
+.status p b{color:var(--ink)}
+.status p + p{margin-top:8px}
+
+footer{margin-top:44px;font-size:12px;color:var(--faint)}
+
+@media (max-width:740px){
+  .qa{grid-template-columns:1fr}
+  .step{grid-template-columns:1fr}
+  .step img{max-width:340px;margin:0 auto}
+  .hdr h1{font-size:25px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hdr">
+  <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ</b><small>ИНСТРУМЕНТЫ ПРОДАЖ</small></div></div>
+  <h1>Обнулятор — пульт сделки в amoCRM</h1>
+  <p>Считает маршрут клиента по закону, отправляет персональную презентацию и фиксирует исход звонка, не выходя из карточки сделки.</p>
+  <div class="cta">
+    <a class="btn btn-gold" href="../calc-widget/in-amo.html" target="_blank" rel="noopener">Открыть прототип пульта ↗</a>
+    <a class="btn btn-ghost" href="../calc-widget/in-amo.html?ki=1" target="_blank" rel="noopener">Демо: КИ загружена ↗</a>
+  </div>
+</header>
+
+<h2>Какие вопросы менеджера он закрывает</h2>
+<p class="sub">Шесть вопросов, которые раньше решались калькулятором, памятью и «вроде отправлял» — теперь решает пульт.</p>
+<div class="qa">
+  <div class="q"><b>«Что предложить этому клиенту?»</b>
+    <p>Вводишь долги со слов — пульт считает маршрут по 127-ФЗ: <strong>РДГ</strong> (платёж плана, вилка 60/36 месяцев, ипотека вне плана) или <strong>списание</strong> (что спишется и выгода). Вердикт обновляется на каждой цифре.</p></div>
+  <div class="q"><b>«Какие суммы называть?»</b>
+    <p>Цена-канон вшита: <strong class="num">13 500 ₽/мес · 189 000 · VIP 169 000 · госплатежи 50 000 отдельно</strong>. Самодеятельность с цифрами исключена — все страницы считают из одного ядра.</p></div>
+  <div class="q"><b>«Отправил презентацию — а он открыл?»</b>
+    <p>Клиент получает короткую ссылку, каждое открытие видно. <strong>Открыл — сделка «горячая»</strong>, менеджер перезванивает в момент интереса, а не наугад.</p></div>
+  <div class="q"><b>«Чем зацепить недожатого?»</b>
+    <p>Запрос кредитной истории как обмен: «пришлёте отчёт — юрист бесплатно сделает заключение». Черновик со слов показывает выводы <strong>с пропусками</strong>, и пропуски продают запрос сами.</p></div>
+  <div class="q"><b>«КИ пришла — что с ней делать?»</b>
+    <p>Пульт читает PDF трёх бюро за секунды: долги раскладываются по типам, заключение становится точным, и <strong>та же ссылка клиента</strong> начинает показывать его реальных кредиторов.</p></div>
+  <div class="q"><b>«Где клиент на пути к оплате?»</b>
+    <p>Одна вечная ссылка проходит весь путь: со слов → по КИ → подписал → оплатил. Договор, подпись по СМС и оплата по СБП — последние экраны той же презентации.</p></div>
+</div>
+
+<h2>Как работает: путь одного звонка</h2>
+<p class="sub">Пять шагов от «алло» до денег. Каждая кнопка ниже — живой прототип, открывается в новой вкладке.</p>
+
+<div class="step">
+  <div>
+    <span class="sn">Шаг 1</span>
+    <h3>Ввод со слов — вердикт сразу</h3>
+    <p>Менеджер отмечает типы долгов, суммы, доход, детей и регион. Пульт показывает маршрут, платёж плана и блок <b>«Клиенту голосом»</b> — три опорные цифры для разговора.</p>
+    <div class="links"><a class="lnk" href="../calc-widget/in-amo.html" target="_blank" rel="noopener">Пульт: первый звонок ↗</a></div>
+  </div>
+  <div><div class="shot"><img src="img/s2-filled.png" alt="Заполненный пульт с вердиктом РДГ"></div><div class="cap">Пульт в карточке сделки: вердикт и расчёт</div></div>
+</div>
+
+<div class="step">
+  <div>
+    <span class="sn">Шаг 2</span>
+    <h3>«✈ Отправить презентацию клиенту»</h3>
+    <p>Одна кнопка: расчёт сохранён, цифры записаны в поля сделки, клиенту в чат ушла персональная презентация. Менеджер ведёт по ней голосом — <b>страница сама не продаёт, продаёт звонок</b>.</p>
+    <div class="links">
+      <a class="lnk" href="../client-presentation-rdg/" target="_blank" rel="noopener">Презентация РДГ ↗</a>
+      <a class="lnk" href="../client-presentation-v2/" target="_blank" rel="noopener">Презентация «Списание долга» ↗</a>
+    </div>
+  </div>
+  <div><div class="shot"><img src="img/s4-chat-send.png" alt="Сообщение с презентацией в чате клиента"></div><div class="cap">Клиент получает ссылку в чат</div></div>
+</div>
+
+<div class="step">
+  <div>
+    <span class="sn">Шаг 3</span>
+    <h3>Не купил — уходит с запросом КИ</h3>
+    <p>Каждый недожатый звонок заканчивается ступенью: оплата, частичка от 1 000 ₽, подпись с датой или запрос кредитной истории. Дожим-сообщения с цифрами клиента пульт собирает сам, менеджеру остаётся отправить.</p>
+    <div class="links">
+      <a class="lnk" href="../calc-widget/ki.html" target="_blank" rel="noopener">Заключение юриста: демо ↗</a>
+      <a class="lnk" href="../ki-guide/" target="_blank" rel="noopener">Инструкция «КИ за 5 минут» ↗</a>
+    </div>
+  </div>
+  <div><div class="shot"><img src="img/s5-chat-dozhim.png" alt="Дожим-сообщения с цифрами клиента в чате"></div><div class="cap">Дожим-сообщения собираются с цифрами клиента</div></div>
+</div>
+
+<div class="step">
+  <div>
+    <span class="sn">Шаг 4</span>
+    <h3>КИ пришла — всё бросаем</h3>
+    <p>Пульт читает отчёты (Скоринг Бюро · НБКИ · Кредистория), долги становятся точными, юрзаключение — боевым. <b>Та же ссылка клиента</b> теперь показывает его реальных кредиторов и точную выгоду.</p>
+    <div class="links">
+      <a class="lnk" href="../calc-widget/in-amo.html?ki=1" target="_blank" rel="noopener">Пульт: КИ загружена ↗</a>
+      <a class="lnk" href="../client-presentation-rdg/?ki=1" target="_blank" rel="noopener">Презентация: точные цифры ↗</a>
+    </div>
+  </div>
+  <div><div class="shot"><img src="img/s6-ki.png" alt="Пульт с загруженной кредитной историей"></div><div class="cap">Отчёты прочитаны, расчёт точный</div></div>
+</div>
+
+<div class="step noimg">
+  <div>
+    <span class="sn">Шаг 5</span>
+    <h3>Договор → подпись по СМС → оплата</h3>
+    <p>Финал на той же странице: клиент проходит договор, подписывает кодом из СМС и платит по СБП. После подписи ссылка сама превращается в экран «договор подписан — остался платёж», после оплаты — в «Готово, вы в работе».</p>
+    <div class="links">
+      <a class="lnk" href="../client-presentation-rdg/?ki=1&amp;signed=1" target="_blank" rel="noopener">Дожим-режим: подписал, не оплатил ↗</a>
+    </div>
+  </div>
+</div>
+
+<h2>Все живые прототипы</h2>
+<p class="sub">Открываются как есть, с демо-данными. Параметры ?ki=1 и ?signed=1 имитируют состояния — в боевой версии их ставит сервер.</p>
+<div class="grid-l">
+  <a class="gl" href="../calc-widget/in-amo.html" target="_blank" rel="noopener"><b>Пульт сделки</b><span>первый звонок, расчёт со слов</span><em>открыть ↗</em></a>
+  <a class="gl" href="../calc-widget/in-amo.html?ki=1" target="_blank" rel="noopener"><b>Пульт: по КИ</b><span>отчёты загружены, точный расчёт</span><em>открыть ↗</em></a>
+  <a class="gl" href="../client-presentation-rdg/" target="_blank" rel="noopener"><b>Презентация РДГ</b><span>клиентская, реструктуризация</span><em>открыть ↗</em></a>
+  <a class="gl" href="../client-presentation-v2/" target="_blank" rel="noopener"><b>Презентация «Списание»</b><span>клиентская, банкротство</span><em>открыть ↗</em></a>
+  <a class="gl" href="../client-presentation-rdg/?ki=1&amp;signed=1" target="_blank" rel="noopener"><b>Дожим-режим</b><span>подписал — остался платёж</span><em>открыть ↗</em></a>
+  <a class="gl" href="../calc-widget/ki.html" target="_blank" rel="noopener"><b>Юр. заключение</b><span>документ по КИ, демо-данные</span><em>открыть ↗</em></a>
+  <a class="gl" href="../ki-guide/" target="_blank" rel="noopener"><b>«КИ за 5 минут»</b><span>клиентская инструкция</span><em>открыть ↗</em></a>
+  <a class="gl" href="../widget-states/" target="_blank" rel="noopener"><b>Памятка менеджера</b><span>8 шагов работы с пультом</span><em>открыть ↗</em></a>
+</div>
+
+<h2>Статус</h2>
+<div class="status">
+  <p><b>Прототип готов целиком</b> и является эталоном боевой версии: вёрстка, формулы, состояния и тексты переносятся один в один.</p>
+  <p><b>ТЗ фазы 1 для разработки готово:</b> виджет в amoCRM, движок (короткие ссылки, трекинг открытий, поля сделки, Salebot, вебхуки подписи и оплаты), КИ-контур с шифрованием. Демо-параметры из ссылок выше в проде заменяет состояние с сервера: у клиента одна вечная ссылка без параметров.</p>
+</div>
+
+<footer>ДОНУЛЯ · внутренняя страница инструмента · не индексируется</footer>
+
+</div>
+</body>
+</html>
