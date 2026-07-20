@@ -238,7 +238,21 @@ h1 .hl{color:var(--green)}
 .save-hero .ss b{color:#9FE8C6}
 .bars{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);padding:15px 16px;margin-top:12px}
 .bar + .bar{margin-top:12px}
-/* «было → станет» горизонтальными полосами (вариант A примерки, выбор заказчика): длина полосы = сумма */
+/* финальная спека заказчика: заголовок-тезис карт, вертикальные столбики платежа, золото = только выгода */
+.svhead{font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:12px}
+.duoV{display:flex;gap:18px;justify-content:space-around;position:relative}
+.duoV:after{content:"";position:absolute;left:4%;right:4%;bottom:0;border-bottom:1px solid var(--line)}
+.vcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px}
+.vcol>span{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.vcol b{font-size:18px;font-weight:800;letter-spacing:-.01em;color:var(--alert);white-space:nowrap}
+.vcol b.us{font-size:22px;color:var(--green-ink)}
+.vwell{height:110px;display:flex;align-items:flex-end;justify-content:center;width:100%}
+.vwell i{display:block;width:64px;border-radius:10px 10px 3px 3px}
+.vnow{height:100%;background:#E4B8AC}
+.vus{background:var(--green)}
+.goldplate{margin-top:16px;background:linear-gradient(90deg,#E8C775 0%,#D9AE4F 100%);color:#3A2E0B;border-radius:12px;padding:12px 15px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:700;text-align:center}
+.goldplate b{font-size:22px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+/* «было → станет» горизонтальными полосами (кейс-блок): длина полосы = сумма */
 .hrow{margin-top:4px}
 .hrow+.hrow{margin-top:14px}
 .hl{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;color:var(--muted);margin-bottom:6px;gap:10px}
@@ -497,11 +511,14 @@ h1 .hl{color:var(--green)}
         <!-- «сейчас → станете платить → выгода» одной картой (правка заказчика 20.07 вечер:
              хиро и бары дублировали одни числа — теперь каждая цифра ровно один раз, выгода = итог-плашка в стиле кейс-блока) -->
         <div class="bars stg">
-          <div class="cs-badge">Экономия в месяц</div>
-          <!-- «было → станет» горизонтальными полосами (выбор заказчика 20.07 ночь, вариант A примерки): длина = сумма -->
-          <div class="hrow"><div class="hl"><span>Платите сейчас</span><b class="num" id="cmpPayNow">—</b></div><div class="htrack"><i class="hnow"></i></div></div>
-          <div class="hrow"><div class="hl"><span>Будете платить с нами</span><b class="num us" id="cmpUsMonthly">—</b></div><div class="htrack"><i class="hus" id="cmpUsBar" style="width:60%"></i></div></div>
-          <div class="bar-save"><span>Ваша выгода — каждый месяц</span><b class="num" id="cmpSave">—</b></div>
+          <!-- финальная спека заказчика 20.07 ночь: заголовок-тезис с процентом, ВЕРТИКАЛЬНЫЕ столбики (разница читается быстрее),
+               под графиком золотая плашка «Вы сохраняете…» — жёлтый на экране = только выгода -->
+          <div class="svhead" id="svHead">Платёж снизится на ~40%</div>
+          <div class="duoV">
+            <div class="vcol"><span>сейчас</span><b class="num" id="cmpPayNow">—</b><div class="vwell"><i class="vnow"></i></div></div>
+            <div class="vcol"><span>с нами</span><b class="num us" id="cmpUsMonthly">—</b><div class="vwell"><i class="vus" id="cmpUsBar" style="height:60%"></i></div></div>
+          </div>
+          <div class="goldplate"><span>Вы сохраняете</span><b class="num" id="cmpSave">—</b><span>каждый месяц</span></div>
           <div class="bnote">Платёж по плану, который утвердит суд. Услуги ДОНУЛЯ — отдельно: <span class="num" id="svcLine1">13 500 ₽/мес, 14 платежей</span> (ниже). Проценты и пени остановлены — долг больше не растёт.</div>
         </div>
 
@@ -523,10 +540,10 @@ h1 .hl{color:var(--green)}
 
         <!-- ВЫГОДА — формат кейсов заказчика (PDF 20.07): три числа одной историей. Главная задача экрана — выгода. -->
         <div class="case stg" id="caseBlock" style="display:none">
-          <div class="cs-badge">Выгода</div>
-          <div class="hrow"><div class="hl"><span>Без нас вы отдадите</span><b class="num" id="csNoUs">—</b></div><div class="htrack"><i class="hnow"></i></div><small class="hnote" id="csWhy">при просрочках долг не уменьшается — вы платите деньги, которые не брали</small></div>
-          <div class="hrow"><div class="hl"><span>По плану РДГ вы отдадите</span><b class="num us" id="csPlan">—</b></div><div class="htrack"><i class="hus" id="csPlanBar" style="width:60%"></i></div><small class="hnote">тело долга + 7% управляющего · рост процентов заморожен, утверждает суд</small></div>
-          <div class="cs-save"><span>Экономия:</span><b class="num" id="csSave">—</b></div>
+          <div class="svhead">Сколько вы отдадите всего</div>
+          <div class="hrow"><div class="hl"><span>Если ничего не менять</span><b class="num" id="csNoUs">—</b></div><div class="htrack"><i class="hnow"></i></div><small class="hnote" id="csWhy">при просрочках долг не уменьшается — вы платите деньги, которые не брали</small></div>
+          <div class="hrow"><div class="hl"><span>По нашему плану</span><b class="num us" id="csPlan">—</b></div><div class="htrack"><i class="hus" id="csPlanBar" style="width:60%"></i></div><small class="hnote">тело долга + 7% управляющего · рост процентов заморожен, утверждает суд</small></div>
+          <div class="goldplate"><span>Экономия:</span><b class="num" id="csSave">—</b></div>
         </div>
 
         <div class="proofline stg">✓ Списали долги более чем у 10 000 человек</div>
@@ -990,7 +1007,8 @@ document.querySelectorAll('.otp input').forEach((inp,i,all)=>{
   /* разворот «Как посчитана экономия» — только когда добавляет к барам новое (переплата банкам и полная экономия из nous);
      без nous он лишь повторял строку «С нами» — дубль убран (правка заказчика 20.07 вечер) */
   if(noUs<=0){document.getElementById('calcBtn').style.display='none';}
-  set('cmpSave','~'+fmt(Math.round(Math.max(0,saveM)))+' ₽/мес');
+  set('cmpSave','~'+fmt(Math.round(Math.max(0,saveM)))+' ₽');
+  if(CLIENT_PAY>0)document.getElementById('svHead').textContent='Платёж снизится на ~'+Math.max(1,Math.round((1-usMonthly/CLIENT_PAY)*100))+'%';
   /* полная экономия за план — в развороте «Как посчитана экономия» (решение заказчика 20.07) */
   const totalSave=noUs>0?Math.round(noUs-planTotal(CLIENT.debt,RDG_TERM)):0;
   if(totalSave>0){
@@ -1001,7 +1019,7 @@ document.querySelectorAll('.otp input').forEach((inp,i,all)=>{
   }
   set('cmpPayNow','~'+fmt(CLIENT_PAY)+' ₽/мес');
   set('cmpUsMonthly','~'+fmt(usMonthly)+' ₽/мес');
-  document.getElementById('cmpUsBar').style.width=(CLIENT_PAY>0?Math.max(8,Math.min(100,Math.round(usMonthly/CLIENT_PAY*100))):100)+'%'; /* полоса «станет»: длина = доля от «сейчас» */
+  document.getElementById('cmpUsBar').style.height=(CLIENT_PAY>0?Math.max(24,Math.min(100,Math.round(usMonthly/CLIENT_PAY*100))):100)+'%'; /* столбик «с нами»: высота = доля от «сейчас» */
   set('cmpDebt',fmt(CLIENT.debt)+' ₽'); set('cmpPay2','~'+fmt(CLIENT_PAY)+' ₽');
   if(noUs>0){ set('cmpNoUs','~'+fmt(noUs)+' ₽'); set('cmpInterest',fmt(interest)+' ₽'); }
   else{ document.querySelector('.cmp .cr.bad').style.display='none'; } /* без честной базы строку не выдумываем */
