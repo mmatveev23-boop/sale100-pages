@@ -196,6 +196,13 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw .lbtn:active{transform:scale(.97)}
 .dw .lbtn.hi{border-color:#0F6B4F;background:#E9F3EE}
 .dw .lbtn.mut,.dw .lbtn:disabled{color:#7c8894;cursor:default}
+/* исход звонка (правка заказчика 17.07: дата оплаты вбивается в пульте; контракт ТЗ §10.2) */
+.olrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
+.obtn{border:1px solid #d8dee3;border-radius:8px;background:#fff;color:#5c6874;padding:8px 4px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:background .15s ease-out,border-color .15s ease-out,color .15s ease-out}
+.obtn:active{transform:scale(.97)}
+.obtn.on{border-color:#0F6B4F;background:#E9F3EE;color:#0B5540}
+.dw label.ocki{display:flex;align-items:center;gap:7px;margin:9px 0 0;font-size:11.5px;font-weight:600;color:#5c6874;text-transform:none;letter-spacing:0;cursor:pointer}
+.ocki input{width:auto;accent-color:#0F6B4F}
 .dw .wnote{margin-top:9px;font-size:11px;color:#94a0ab;line-height:1.5}
 .dw .wnote b{color:#5c6874;font-weight:700}
 .dw .wnote a{color:#0B5540;font-weight:700}
@@ -228,6 +235,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
     <div class="frow"><span>Офиц. доход</span><b id="f_income">—</b></div>
     <div class="frow"><span>Тип услуги</span><b id="f_route">—</b></div>
     <div class="frow"><span>Платёж по плану (предв.)</span><b id="f_pay">—</b></div>
+    <div class="frow"><span>Дата след. шага</span><b id="f_next">—</b></div>
     <div class="frow"><span>Размер ежемесячного платежа</span><b>…</b></div>
     <div class="frow"><span>Ссылка на КАД</span><b>…</b></div>
     <div class="frow"><span>МПП 2 уровня</span><b>Гасанова Шафаг</b></div>
@@ -359,6 +367,23 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <button class="lbtn" onclick="copyDz('think',this)">✉ Не подписал</button>
             <button class="lbtn" id="w_dzKi" onclick="copyDz('ki',this)">✉ По КИ</button>
           </div>
+
+          <!-- ИСХОД ЗВОНКА (решение заказчика 17.07: дата оплаты вбивается в пульте; лестница ТЗ §10.2, signed_date без даты не сохраняется) -->
+          <label style="margin-top:12px">Исход звонка — фиксируется в конце разговора</label>
+          <div class="olrow">
+            <button class="obtn" data-oc="full_payment" onclick="pickOutcome(this)">💰 Оплатил</button>
+            <button class="obtn" data-oc="partial" onclick="pickOutcome(this)">💵 Частичка</button>
+            <button class="obtn" data-oc="signed_date" onclick="pickOutcome(this)">📝 Подписал · дата</button>
+            <button class="obtn" data-oc="not_signed" onclick="pickOutcome(this)">Не подписал</button>
+            <button class="obtn" data-oc="signed_not_paid" onclick="pickOutcome(this)">Подписал, не оплатил</button>
+            <button class="obtn" data-oc="refusal" onclick="pickOutcome(this)">🚫 Отказ</button>
+          </div>
+          <div id="oc_date" class="rowf" style="display:none"><span class="rlab">Дата оплаты · <b style="color:#A8442E">обязательно</b></span><input id="oc_d" class="rin" type="date" style="width:118px"><input id="oc_t" class="rin" type="time" style="width:72px" title="время — если клиент назвал"></div>
+          <div id="oc_amt" class="rowf" style="display:none"><span class="rlab">Сумма частички, ₽ · от 1 000</span><input id="oc_a" class="rin" type="number" min="1000" placeholder="1 000"></div>
+          <div id="oc_q" style="display:none"><input id="oc_quote" type="text" placeholder="дословная цитата отказа — «не звоните больше»" style="margin-top:6px"></div>
+          <label class="ocki" id="oc_kiwrap" style="display:none"><input type="checkbox" id="oc_ki" checked> КИ запрошена голосом</label>
+          <button class="sbtn" id="oc_fix" style="display:none" onclick="fixOutcome()">Зафиксировать исход</button>
+          <div class="sstat none" id="oc_stat" style="display:none"></div>
         </div>
 
         </div><!-- /w_more -->
@@ -841,6 +866,57 @@ function sendPresentation(){
   t.style.display='block';
   t.innerHTML='✈ Презентация ('+last.route+') отправлена клиенту'+(kiLoaded?' — точные числа по КИ.':' — числа со слов, уточним по КИ.');
   setTimeout(()=>{t.style.display='none';},6000);
+}
+/* ── исход звонка (решение заказчика 17.07: дата оплаты вбивается в пульте; контракт ТЗ §10.2 —
+   signed_date без даты / частичка <1000 / отказ без цитаты не сохраняются; «КИ запрошена» — флаг, не исход) ── */
+let ocSel=null;
+const OC_LABEL={full_payment:'полная оплата',partial:'частичка',signed_date:'подписал + дата оплаты',not_signed:'не подписал',signed_not_paid:'подписал, не оплатил',refusal:'отказ'};
+function ocShow(id,v){document.getElementById(id).style.display=v?'':'none';}
+function pickOutcome(btn){
+  ocSel=btn.dataset.oc;
+  document.querySelectorAll('.obtn').forEach(b=>b.classList.toggle('on',b===btn));
+  ocShow('oc_date',ocSel==='signed_date');
+  ocShow('oc_amt',ocSel==='partial');
+  ocShow('oc_q',ocSel==='refusal');
+  /* «КИ запрошена голосом» — для всех недожатых исходов (канон «не купил → запрос КИ обязателен») */
+  const ki=!(ocSel==='full_payment'||ocSel==='refusal');
+  document.getElementById('oc_kiwrap').style.display=ki?'flex':'none';
+  if(ki) document.getElementById('oc_ki').checked=true;
+  ocShow('oc_fix',true);
+  document.getElementById('oc_stat').style.display='none';
+  if(ocSel==='signed_date') document.getElementById('oc_d').focus();
+}
+function fixOutcome(){
+  if(!ocSel) return;
+  const st=document.getElementById('oc_stat');
+  const bad=m=>{st.className='sstat warn';st.textContent=m;st.style.display='';};
+  let extra='';
+  if(ocSel==='signed_date'){
+    const d=document.getElementById('oc_d').value;
+    if(!d){bad('Без даты оплаты исход не сохранится — спросите дату');return;}
+    const t=document.getElementById('oc_t').value;
+    const dd=new Date(d+'T'+(t||'12:00'));
+    extra=dd.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+(t?' '+t:'');
+    document.getElementById('f_next').textContent=dd.toLocaleDateString('ru-RU')+(t?' '+t:''); /* поле пишет движок, менеджер не дублирует */
+  }
+  if(ocSel==='partial'){
+    const a=+document.getElementById('oc_a').value||0;
+    if(a<1000){bad('Частичка — от 1 000 ₽');return;}
+    extra=fmt(a)+' ₽';
+  }
+  if(ocSel==='refusal'){
+    const q=document.getElementById('oc_quote').value.trim();
+    if(!q){bad('Отказ фиксируется только с дословной цитатой клиента');return;}
+    extra='«'+q+'»';
+  }
+  const ki=document.getElementById('oc_kiwrap').style.display!=='none'&&document.getElementById('oc_ki').checked;
+  st.className='sstat sent';
+  st.textContent='✓ '+OC_LABEL[ocSel]+(extra?' · '+extra:'')+(ki?' · КИ запрошена':'');
+  st.style.display='';
+  const t2=document.getElementById('w_toast');
+  t2.style.display='block';
+  t2.innerHTML='Исход зафиксирован. В проде движок запишет поля сделки'+(ocSel==='signed_date'?' («Дата след. шага» уже в карточке слева)':'')+(ki?', поставит «КИ запрошена»':'')+' и запустит автокасания Д0.';
+  setTimeout(()=>{t2.style.display='none';},6000);
 }
 /* пометить данные как «по КИ» (старый ОКБ-путь: одно точное число долга вместо конструктора) */
 function markKi(count){
