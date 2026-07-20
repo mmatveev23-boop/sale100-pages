@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ДОНУЛЯ — ваши условия · макет-вариант «бенто»</title>
+<!-- МАКЕТ-ВАРИАНТ клиентской презентации (заказчик 20.07 ночь): bento-сетка в духе Apple/Linear.
+     Структура продажи, каноном заказчика: боль → цена бездействия → решение → доказательства → оффер → следующий шаг.
+     «Дизайн лишь не должен мешать»: токены и голос системы ДОНУЛЯ, один акцент (зелёный), золото = деньги/выгода.
+     ДЕМО-ДАННЫЕ канона (долг 1 240 000, 61 500 → 36 856, выгода ~24 644/мес). ВАРИАНТ ДЛЯ ОБСУЖДЕНИЯ:
+     боевые презентации не заменяет, в связку не включён. -->
+<style>
+@font-face{font-family:"Golos Text";src:url(../calc-widget/fonts/golos-var-cyrillic.woff2) format("woff2");font-weight:400 800;font-display:swap;unicode-range:U+0400-04FF,U+2010-2027,U+20BD}
+@font-face{font-family:"Golos Text";src:url(../calc-widget/fonts/golos-var-latin.woff2) format("woff2");font-weight:400 800;font-display:swap;unicode-range:U+0000-00FF,U+2013-2014,U+2018-201F,U+2026}
+:root{
+  --paper:#FAF7F2; --card:#FFFFFF; --ink:#1C1A16; --muted:#68625A; --faint:#9B948A;
+  --pine:#0B3B2E; --pine-2:#0E4838;
+  --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E9F3EE;
+  --gold:#C99A33; --gold-soft:#FBF3DC; --gold-ink:#8A6212; --gold-hi:#F4C775;
+  --alert:#A8442E; --alert-soft:#FAEDE8;
+  --line:rgba(28,26,22,.11);
+  --ease:cubic-bezier(.23,1,.32,1);
+  --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:880px;margin:0 auto;padding:0 18px 40px}
+.top{background:linear-gradient(165deg,var(--pine-2) 0%,var(--pine) 70%);color:#fff;padding:13px 18px}
+.top .tin{max-width:880px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.top .brand{font-size:16px;font-weight:800;letter-spacing:.02em}
+.top .brand small{display:block;font-size:9.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.top .live{display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(255,255,255,.8)}
+.top .live i{width:7px;height:7px;border-radius:50%;background:#9FE8C6;font-style:normal}
+/* секции: заголовок тихий, контент — бенто */
+.sec{margin-top:26px}
+.sec>h2{font-size:13px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--green-ink)}
+.sec>h2 small{display:inline-block;margin-right:8px;color:var(--faint);font-weight:700}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+.b{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 17px;display:flex;flex-direction:column;justify-content:space-between;gap:8px;min-height:118px}
+.b .l{font-size:12.5px;font-weight:600;color:var(--muted)}
+.b .v{font-size:23px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.b .s{font-size:12px;color:var(--muted);line-height:1.45}
+.b.w2{grid-column:span 2}.b.w4{grid-column:span 4}
+/* вариации фонов — бенто не «белым по белому» */
+.b.dark{background:linear-gradient(165deg,#3E2723 0%,#2A1714 100%);border:0;color:#fff}
+.b.dark .l{color:rgba(255,255,255,.6)}.b.dark .s{color:rgba(255,255,255,.75)}
+.b.dark .v{color:#F2B8A2}
+.b.hero{background:radial-gradient(120% 90% at 85% -10%,#135741 0%,transparent 55%),linear-gradient(165deg,#0C4233 0%,#0B3B2E 60%,#082A21 100%);border:0;color:#fff;min-height:170px}
+.b.hero .l{color:rgba(255,255,255,.65)}
+.b.hero .v{font-size:38px;color:var(--gold-hi)}
+.b.hero .s{color:rgba(255,255,255,.8)}
+.b.soft{background:var(--green-soft);border-color:rgba(15,107,79,.18)}
+.b.goldc{background:var(--gold-soft);border-color:rgba(201,154,51,.35)}
+.b.goldc .v{color:var(--gold-ink)}
+.b .bar{height:12px;border-radius:6px;background:#E4B8AC;margin-top:4px}
+.b .bar.us{background:var(--green);width:60%}
+.b .v .un{font-size:14px;font-weight:700;color:inherit;opacity:.75}
+.b .bad{color:var(--alert)}
+.proof{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:var(--green-ink)}
+.proof svg{flex:none}
+.case-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line)}
+.case-row:last-child{border-bottom:0;padding-bottom:0}
+.case-row b{font-size:16.5px;white-space:nowrap}
+.offer-line{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13px;padding:6px 0}
+.offer-line b{white-space:nowrap}
+.offer-line span{color:var(--muted)}
+.step{display:flex;gap:10px;align-items:flex-start;font-size:13px}
+.step i{flex:none;width:21px;height:21px;border-radius:50%;background:var(--green-soft);color:var(--green-ink);font-style:normal;font-weight:800;font-size:11.5px;display:flex;align-items:center;justify-content:center}
+.cta{display:block;width:100%;margin-top:14px;background:var(--green);color:#fff;text-align:center;text-decoration:none;font-size:16px;font-weight:700;padding:16px;border:0;border-radius:14px;cursor:pointer;transition:transform .15s var(--ease)}
+.cta:active{transform:translateY(1px)}
+.cnote{margin-top:8px;text-align:center;font-size:12px;color:var(--muted)}
+.req{margin-top:22px;text-align:center;font-size:11px;color:var(--faint)}
+@media (prefers-reduced-motion:no-preference){
+  .rise{animation:rise .5s var(--ease) both}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+}
+@media (max-width:679px){
+  .bento{grid-template-columns:1fr 1fr}
+  .b.w2{grid-column:span 2}.b.w4{grid-column:span 2}
+  .b .v{font-size:20px}.b.hero .v{font-size:31px}
+}
+</style>
+</head>
+<body>
+
+<div class="top"><div class="tin">
+  <div class="brand">ДОНУЛЯ<small>реструктуризация долгов · 127-ФЗ</small></div>
+  <div class="live"><i></i>идёт звонок · эксперт на линии</div>
+</div></div>
+
+<div class="wrap">
+
+  <!-- 1 · БОЛЬ -->
+  <section class="sec rise">
+    <h2><small>1</small>Что происходит сейчас</h2>
+    <div class="bento">
+      <div class="b w2"><div class="l">Ваш долг</div><div class="v num">1 240 000 <span class="un">₽</span></div><div class="s">и он не уменьшается: платежи уходят в проценты</div></div>
+      <div class="b w2"><div class="l">Платите каждый месяц</div><div class="v num bad">~61 500 <span class="un">₽</span></div><div class="bar"></div></div>
+    </div>
+  </section>
+
+  <!-- 2 · ЦЕНА БЕЗДЕЙСТВИЯ -->
+  <section class="sec rise">
+    <h2><small>2</small>Если ничего не менять</h2>
+    <div class="bento">
+      <div class="b w4 dark"><div class="l">При просрочках долг не уменьшается — вы платите деньги, которые не брали</div><div class="v num">отдадите до ~2 214 000 ₽</div><div class="s">текущий платёж × срок плана · расчёт уточним по кредитной истории</div></div>
+    </div>
+  </section>
+
+  <!-- 3 · РЕШЕНИЕ: что вы получаете -->
+  <section class="sec rise">
+    <h2><small>3</small>Что вы получаете с планом РДГ</h2>
+    <div class="bento">
+      <div class="b hero w2"><div class="l">Ваша выгода — каждый месяц</div><div class="v num">~24 644 ₽</div><div class="s">платёж снижается, разница остаётся в семье</div></div>
+      <div class="b w2"><div class="l">Будете платить</div><div class="v num">~36 856 <span class="un">₽/мес</span></div><div class="bar us"></div><div class="s">платёж по плану — его утверждает суд</div></div>
+      <div class="b w2 soft"><div class="l">Рост долга</div><div class="v">Заморожен</div><div class="s">проценты и пени остановятся — долг перестанет расти</div></div>
+      <div class="b"><div class="l">Статус</div><div class="v">Не банкрот</div><div class="s">это план выплат, не банкротство</div></div>
+      <div class="b"><div class="l">Коллекторы</div><div class="v">Звонки — на нас</div><div class="s">общение с кредиторами берём на себя</div></div>
+    </div>
+  </section>
+
+  <!-- 4 · ДОКАЗАТЕЛЬСТВА -->
+  <section class="sec rise">
+    <h2><small>4</small>Почему нам можно верить</h2>
+    <div class="bento">
+      <div class="b w2 soft"><div class="proof"><svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/></svg>Списали долги более чем у 10 000 человек</div><div class="s" style="margin-top:6px">работаем официально · договор с гарантией возврата</div></div>
+      <div class="b w2"><div class="l">Кейс из практики</div>
+        <div>
+          <div class="case-row"><span>Без нас отдал бы</span><b class="num bad">~9 927 360 ₽</b></div>
+          <div class="case-row"><span>По плану РДГ</span><b class="num">~1 070 000 ₽</b></div>
+          <div class="case-row"><span>Экономия</span><b class="num" style="color:var(--green-ink)">~8 857 360 ₽</b></div>
+        </div>
+      </div>
+      <div class="b w4 goldc"><div class="l">Точность</div><div class="v" style="font-size:16px">Расчёт по вашей кредитной истории</div><div class="s">все суммы и условия — те, что войдут в договор; итог утверждает суд</div></div>
+    </div>
+  </section>
+
+  <!-- 5 · ОФФЕР -->
+  <section class="sec rise">
+    <h2><small>5</small>Условия</h2>
+    <div class="bento">
+      <div class="b w2"><div class="l">Услуги ДОНУЛЯ</div><div class="v num">13 500 <span class="un">₽/мес</span></div>
+        <div>
+          <div class="offer-line"><span>рассрочка</span><b class="num">14 платежей · всего 189 000 ₽</b></div>
+          <div class="offer-line"><span>оплата сразу · VIP</span><b class="num">169 000 ₽ · экономия 20 000 ₽</b></div>
+          <div class="offer-line"><span>госплатежи, отдельно</span><b class="num">50 000 ₽ — напрямую государству</b></div>
+        </div>
+      </div>
+      <div class="b soft"><div class="l">Гарантия · п. 6.2</div><div class="v" style="font-size:16px">Нет плана — вернём деньги</div><div class="s">возврат за 7 рабочих дней</div></div>
+      <div class="b"><div class="l">Подарок</div><div class="v" style="font-size:16px">SIM-карта · год связи</div><div class="s">новый номер, которого нет у коллекторов</div></div>
+    </div>
+  </section>
+
+  <!-- 6 · СЛЕДУЮЩИЙ ШАГ -->
+  <section class="sec rise">
+    <h2><small>6</small>Следующий шаг — прямо на звонке</h2>
+    <div class="bento">
+      <div class="b w4">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div class="step"><i>1</i><div>Подпишите договор кодом из СМС<br><span style="color:var(--muted);font-size:12px">без паспорта · код и есть подпись</span></div></div>
+          <div class="step"><i>2</i><div>Внесите любую сумму сегодня<br><span style="color:var(--muted);font-size:12px">зачёт в первый платёж</span></div></div>
+          <div class="step"><i>3</i><div>Юрист начинает сегодня<br><span style="color:var(--muted);font-size:12px">заявление · кредиторы · защита от звонков</span></div></div>
+        </div>
+        <button class="cta">Всё верно — подписываем</button>
+        <div class="cnote">ничего не подписывается и не списывается без вашего согласия</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="req">Макет-вариант для обсуждения · демо-данные · ДОНУЛЯ · ИП Плешаков Руслан Тамазиевич · ИНН 470516340503</div>
+</div>
+
+<script>
+/* макет статичен: цифры демо-канона; при одобрении варианта данные поедут из тех же параметров, что у презентаций */
+</script>
+</body>
+</html>
