@@ -270,15 +270,17 @@ h1 .hl{color:var(--green)}
 .if-sub b{color:#F4C775}
 .ifbar{display:flex;height:22px;border-radius:11px;overflow:hidden;margin-top:14px;background:rgba(255,255,255,.14)}
 .ifbar i{display:block;height:100%}
-.ifbar i.d{background:#E8C87E}
-.ifbar i.o{background:#E4653F}
+.ifbar i.d{background:#EFE3D6}
+.ifbar i.o{background:#FF6B45}
 .if-legend{margin-top:8px;display:flex;justify-content:space-between;gap:10px;font-size:12px;color:rgba(255,255,255,.85);flex-wrap:wrap}
 .if-legend u{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;text-decoration:none;vertical-align:-1px}
-.if-legend u.d{background:#E8C87E}
-.if-legend u.o{background:#E4653F}
+.if-legend u.d{background:#EFE3D6}
+.if-legend u.o{background:#FF6B45}
 .if-legend b{color:#fff;font-variant-numeric:tabular-nums}
-.if-pen{margin-top:13px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:10px 13px;font-size:13px;line-height:1.5;color:rgba(255,255,255,.88)}
-.if-pen b{color:#F4C775;font-variant-numeric:tabular-nums}
+.if-pen{margin-top:13px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px 13px;text-align:center}
+.if-pen .ip-lab{display:block;font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.82)}
+.if-pen .ip-big{display:block;margin-top:4px;font-size:27px;line-height:1;font-weight:800;letter-spacing:-.02em;color:#F4C775;font-variant-numeric:tabular-nums}
+.if-pen .ip-cap{display:block;margin-top:4px;font-size:12px;color:rgba(255,255,255,.7)}
 .ifphrase{margin-top:14px;text-align:center;font-size:16.5px;font-weight:800;color:#fff;letter-spacing:-.01em}
 
 .whatwedo{background:var(--green-soft);border:1px solid rgba(15,107,79,.25);border-radius:var(--r-box);padding:13px 15px;margin-top:12px}
@@ -511,7 +513,11 @@ h1 .hl{color:var(--green)}
             <span><u class="d"></u>Долг <b class="num" id="ifVizD">—</b></span>
             <span><u class="o"></u>Переплата <b class="num" id="ifVizO">—</b></span>
           </div>
-          <div class="if-pen num">Не сможете платить — долг вырастет ещё на <b id="ifPen">—</b> за год просрочки</div>
+          <div class="if-pen num">
+            <span class="ip-lab">Не сможете платить — долг вырастет ещё на</span>
+            <b class="ip-big" id="ifPen">—</b>
+            <span class="ip-cap">дополнительные проценты за год просрочки</span>
+          </div>
           <div class="ifphrase">Вы заплатите деньги, которые не брали!</div>
         </div>
 
