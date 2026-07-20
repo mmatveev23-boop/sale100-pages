@@ -261,33 +261,18 @@ h1 .hl{color:var(--green)}
 .creditors .crnote{margin-top:9px;padding-top:9px;border-top:1px solid var(--line);font-size:12px;color:var(--alert);line-height:1.5}
 .creditors .crrow .od{font-style:normal;font-size:10px;font-weight:700;color:var(--alert);background:#FAEDE8;padding:1px 6px;border-radius:5px;margin-left:6px;white-space:nowrap}
 /* «если ничего не делать» — дожимной контраст под барами (числа клиента; со слов — по средним ставкам) */
-/* «Что будет, если ничего не делать» — тёмная карточка-потеря, зеркало зелёной выгоды (правка заказчика 20.07) */
-.ifno{margin-top:12px;background:radial-gradient(120% 140% at 85% -20%,#A8442E 0%,transparent 55%),linear-gradient(165deg,#8F3A26 0%,#6E2A18 55%,#571F10 100%);color:#fff;border-radius:var(--r-box,14px);padding:20px 16px 18px;box-shadow:0 14px 34px -18px rgba(87,31,16,.55)}
-.ifno .na-h2{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.62);text-align:center}
-.if-big{text-align:center;font-size:36px;font-weight:800;letter-spacing:-.02em;color:#F4C775;margin-top:8px;line-height:1}
-.if-big small{font-size:17px;font-weight:600;color:rgba(255,255,255,.7)}
-.if-sub{text-align:center;margin-top:7px;font-size:13px;color:rgba(255,255,255,.82)}
-.if-sub b{color:#F4C775}
-.ifbar{display:flex;height:22px;border-radius:11px;overflow:hidden;margin-top:14px;background:rgba(255,255,255,.14)}
-.ifbar i{display:block;height:100%}
-.ifbar i.d{background:#EFE3D6}
-.ifbar i.o{background:#FF6B45}
-.if-legend{margin-top:8px;display:flex;justify-content:space-between;gap:10px;font-size:12px;color:rgba(255,255,255,.85);flex-wrap:wrap}
-.if-legend u{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;text-decoration:none;vertical-align:-1px}
-.if-legend u.d{background:#EFE3D6}
-.if-legend u.o{background:#FF6B45}
-.if-legend b{color:#fff;font-variant-numeric:tabular-nums}
-.if-pen{margin-top:13px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px 13px;text-align:center}
-.if-pen .ip-lab{display:block;font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.82)}
-.if-pen .ip-big{display:block;margin-top:6px;font-size:34px;line-height:1;font-weight:800;letter-spacing:-.02em;color:#F4C775;font-variant-numeric:tabular-nums}
-.if-pen .ip-cap{display:block;margin-top:4px;font-size:12px;color:rgba(255,255,255,.7)}
-.ifphrase{margin-top:14px;text-align:center;font-size:16.5px;font-weight:800;color:#fff;letter-spacing:-.01em}
-.if-scn{margin-top:14px;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.55)}
-.saveband{margin-top:12px;background:radial-gradient(120% 130% at 85% -15%,#1B7A55 0%,transparent 55%),linear-gradient(165deg,#128257 0%,#0F6B4F 55%,#0B5540 100%);color:#fff;border-radius:var(--r-box,16px);padding:16px;text-align:center;box-shadow:0 14px 32px -18px rgba(11,85,64,.6)}
-.saveband .sb-l{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.65)}
-.saveband .sb-v{margin-top:6px;font-size:34px;line-height:1;font-weight:800;letter-spacing:-.02em;color:#F4C775;font-variant-numeric:tabular-nums}
-.saveband .sb-s{margin-top:7px;font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.85)}
-.saveband .sb-s b{color:#fff;font-variant-numeric:tabular-nums}
+
+/* кейс-блок «Выгода» (формат PDF кейсов заказчика 20.07) */
+.case{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-box,16px);padding:15px 17px;box-shadow:0 8px 22px -14px rgba(11,59,46,.4)}
+.cs-badge{display:inline-block;background:var(--green);color:#fff;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:8px;padding:4px 12px}
+.cs-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.cs-row span{font-size:13px;color:var(--muted);line-height:1.4}
+.cs-row span small{display:block;margin-top:3px;font-size:11.5px;color:var(--faint)}
+.cs-row b{font-size:19px;font-weight:800;letter-spacing:-.01em;color:var(--ink);white-space:nowrap}
+.cs-row b.bad{color:var(--brick,#A8442E)}
+.cs-save{margin-top:12px;background:linear-gradient(165deg,#128257 0%,#0F6B4F 60%,#0B5540 100%);color:#fff;border-radius:12px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.cs-save span{font-size:14px;font-weight:700}
+.cs-save b{font-size:25px;font-weight:800;letter-spacing:-.02em;color:#F4C775;white-space:nowrap}
 
 .whatwedo{background:var(--green-soft);border:1px solid rgba(15,107,79,.25);border-radius:var(--r-box);padding:13px 15px;margin-top:12px}
 .whatwedo .wd-h{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--green-ink);margin-bottom:5px}
@@ -511,29 +496,12 @@ h1 .hl{color:var(--green)}
         </div>
         </div>
 
-        <div class="ifno stg" id="ifNothing" style="display:none">
-          <div class="na-h2">Что будет, если ничего не делать</div>
-          <div class="if-scn">Если платить исправно</div>
-          <div class="if-big num" id="ifTotal">—</div>
-          <div class="if-sub num">столько отдадите банкам по своим договорам · из них проценты <b id="ifInterest">—</b></div>
-          <div class="ifbar"><i class="d" id="ifBarD"></i><i class="o" id="ifBarO"></i></div>
-          <div class="if-legend">
-            <span><u class="d"></u>Долг <b class="num" id="ifVizD">—</b></span>
-            <span><u class="o"></u>Переплата <b class="num" id="ifVizO">—</b></span>
-          </div>
-          <div class="if-scn">Если пойдут просрочки</div>
-          <div class="if-pen num">
-            <span class="ip-lab">Долг перестаёт уменьшаться — за <span id="ifPenTerm">60</span> месяцев отдадите</span>
-            <b class="ip-big" id="ifPenTotal">—</b>
-            <span class="ip-cap">проценты начисляются дальше: <b id="ifPen">—</b> в год</span>
-          </div>
-          <div class="ifphrase">Вы заплатите деньги, которые не брали!</div>
-        </div>
-
-        <div class="saveband stg" id="saveBand" style="display:none">
-          <div class="sb-l">Экономия с нами</div>
-          <div class="sb-v num" id="saveBandV">—</div>
-          <div class="sb-s num">даже платя исправно — <b id="saveBandMin">—</b> на процентах · по плану суда отдадите <b id="saveBandPlan">—</b></div>
+        <!-- ВЫГОДА — формат кейсов заказчика (PDF 20.07): три числа одной историей. Главная задача экрана — выгода. -->
+        <div class="case stg" id="caseBlock" style="display:none">
+          <div class="cs-badge">Выгода</div>
+          <div class="cs-row"><span>Без нас вы отдадите<small id="csWhy">при просрочках долг не уменьшается — вы платите деньги, которые не брали</small></span><b class="num bad" id="csNoUs">—</b></div>
+          <div class="cs-row"><span>По плану РДГ вы отдадите<small>тело долга + 7% управляющего · рост процентов заморожен, утверждает суд</small></span><b class="num" id="csPlan">—</b></div>
+          <div class="cs-save"><span>Экономия:</span><b class="num" id="csSave">—</b></div>
         </div>
 
         <div class="whatwedo stg">
@@ -1003,34 +971,17 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   else{ document.querySelector('.cmp .cr.bad').style.display='none'; } /* без честной базы строку не выдумываем */
   set('cmpUsPay2','~'+fmt(plan)+' ₽/мес');
   set('planTerm',RDG_TERM);
-  /* «Что будет, если ничего не делать»: только честные цифры из nous (без базы — блок скрыт) */
+  /* кейс-блок «Выгода» (формат PDF заказчика 20.07): без нас → по плану → экономия */
   if(noUs>0){
-    const growY=(KION?KI.interest:Math.round(CLIENT.debt*0.307/12))*12;
-    document.getElementById('ifNothing').style.display='';
-    document.getElementById('ifTotal').innerHTML='~'+fmt(noUs)+' <small>₽</small>';
-    document.getElementById('ifInterest').textContent='~'+fmt(interest)+' ₽';
-    document.getElementById('ifPen').textContent='+~'+fmt(growY)+' ₽';
-    /* сценарий просрочек — методика кейсов (решение заказчика 20.07): платёж не гасит долг, отдадите ~платёж × срок плана */
-    if(CLIENT_PAY>0){
-      const overduePay=CLIENT_PAY*RDG_TERM;
-      const planAll=Math.round(planTotal(CLIENT.debt,RDG_TERM));
-      document.getElementById('ifPenTerm').textContent=RDG_TERM;
-      document.getElementById('ifPenTotal').textContent='до ~'+fmt(overduePay)+' ₽';
-      const saveMax=overduePay-planAll, saveMin=Math.round(noUs-planAll);
-      if(saveMax>0){
-        document.getElementById('saveBand').style.display='';
-        document.getElementById('saveBandV').textContent='до ~'+fmt(saveMax)+' ₽';
-        document.getElementById('saveBandMin').textContent='~'+fmt(Math.max(0,saveMin))+' ₽';
-        document.getElementById('saveBandPlan').textContent='~'+fmt(planAll)+' ₽';
-      }
-    }else{
-      document.getElementById('ifPenTotal').textContent='—';
-    }
-    document.getElementById('ifBarD').style.width=Math.round(CLIENT.debt/noUs*100)+'%';
-    document.getElementById('ifBarO').style.width=(100-Math.round(CLIENT.debt/noUs*100))+'%';
-    document.getElementById('ifVizD').textContent=fmt(CLIENT.debt)+' ₽';
-    document.getElementById('ifVizO').textContent='~'+fmt(interest)+' ₽';
+    const planAll=Math.round(planTotal(CLIENT.debt,RDG_TERM));
+    const base=CLIENT_PAY>0?CLIENT_PAY*RDG_TERM:noUs;
+    document.getElementById('caseBlock').style.display='';
+    document.getElementById('csNoUs').textContent=(CLIENT_PAY>0?'до ~':'~')+fmt(base)+' ₽';
+    if(CLIENT_PAY<=0) document.getElementById('csWhy').textContent='долг + проценты по вашим ставкам и срокам';
+    document.getElementById('csPlan').textContent='~'+fmt(planAll)+' ₽';
+    document.getElementById('csSave').textContent=(CLIENT_PAY>0?'до ~':'~')+fmt(Math.max(0,base-planAll))+' ₽';
   }
+
   const svcM=Math.round(RASS_TOTAL/RM);
   const s1=document.getElementById('svcLine1'); if(s1) s1.textContent=fmt(svcM)+' \u20bd/\u043c\u0435\u0441, '+RM+' \u043f\u043b\u0430\u0442\u0435\u0436\u0435\u0439';
   const s2=document.getElementById('svcLine2'); if(s2) s2.textContent=fmt(svcM)+' \u20bd \u00d7 '+RM+' \u043f\u043b\u0430\u0442\u0435\u0436\u0435\u0439';
