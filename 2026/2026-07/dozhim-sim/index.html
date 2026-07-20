@@ -164,8 +164,10 @@ const name=(Q.get('name')||'').trim().slice(0,60);
 if(name){document.getElementById('h1t').textContent=name+', хорошие новости: акция по SIM-карте продлена';}
 const pass=new URLSearchParams(location.search);
 pass.delete('route');
-const qs=pass.toString();
-document.getElementById('goBtn').href='../presentation-'+(route==='bfl'?'v2':'rdg')+'/index.html'+(qs?'?'+qs:'');
+/* дожим всегда ведёт НА ОПЛАТУ (решение заказчика 20.07 ночь): go=pay открывает флоу сразу на подписи/оплате —
+   не подписал → сначала подпись (канон «подпись обязательна перед деньгами»), подписал (signed=1) → сразу оплата */
+pass.set('go','pay');
+document.getElementById('goBtn').href='../presentation-'+(route==='bfl'?'v2':'rdg')+'/index.html?'+pass.toString();
 </script>
 </body>
 </html>
