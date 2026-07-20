@@ -252,6 +252,14 @@ h1 .hl{color:var(--green)}
 .vus{background:var(--green)}
 .goldplate{margin-top:16px;background:linear-gradient(90deg,#E8C775 0%,#D9AE4F 100%);color:#3A2E0B;border-radius:12px;padding:12px 15px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;font-size:13.5px;font-weight:700;text-align:center}
 .goldplate b{font-size:22px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+/* кейс-блок двумя колонками (макет заказчика): полосы в одном масштабе — колонки равной ширины */
+.cs2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:2px}
+.c2col>span{display:block;font-size:13.5px;color:var(--muted)}
+.c2col b{display:block;margin-top:2px;font-size:19px;font-weight:800;letter-spacing:-.01em;color:var(--alert);white-space:nowrap}
+.c2col b.us{color:var(--green-ink)}
+.c2track{margin-top:7px}
+.c2track i{display:block;height:14px;border-radius:7px}
+@media (max-width:480px){.c2col b{font-size:15.5px}}
 /* «было → станет» горизонтальными полосами (кейс-блок): длина полосы = сумма */
 .hrow{margin-top:4px}
 .hrow+.hrow{margin-top:14px}
@@ -259,8 +267,8 @@ h1 .hl{color:var(--green)}
 .hl b{font-size:19px;font-weight:800;letter-spacing:-.01em;white-space:nowrap;color:var(--alert)}
 .hl b.us{color:var(--green-ink)}
 .htrack i{display:block;height:16px;border-radius:8px}
-.htrack .hnow{background:#E4B8AC;width:100%}
-.htrack .hus{background:var(--green)}
+.htrack .hnow,.c2track .hnow{background:#E4B8AC;width:100%}
+.htrack .hus,.c2track .hus{background:var(--green)}
 .hnote{display:block;margin-top:6px;font-size:11.5px;color:var(--faint);line-height:1.4}
 .bar .bl{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:6px}
 .bar .bl span{color:var(--muted)}
@@ -541,8 +549,11 @@ h1 .hl{color:var(--green)}
         <!-- ВЫГОДА — формат кейсов заказчика (PDF 20.07): три числа одной историей. Главная задача экрана — выгода. -->
         <div class="case stg" id="caseBlock" style="display:none">
           <div class="svhead">Сколько вы отдадите всего</div>
-          <div class="hrow"><div class="hl"><span>Если ничего не менять</span><b class="num" id="csNoUs">—</b></div><div class="htrack"><i class="hnow"></i></div><small class="hnote" id="csWhy">при просрочках долг не уменьшается — вы платите деньги, которые не брали</small></div>
-          <div class="hrow"><div class="hl"><span>По нашему плану</span><b class="num us" id="csPlan">—</b></div><div class="htrack"><i class="hus" id="csPlanBar" style="width:60%"></i></div><small class="hnote">тело долга + 7% управляющего · рост процентов заморожен, утверждает суд</small></div>
+          <!-- две колонки рядом (макет заказчика 20.07 ночь): полосы в одном масштабе, сравнение считывается сразу -->
+          <div class="cs2">
+            <div class="c2col"><span>Если ничего не менять</span><b class="num" id="csNoUs">—</b><div class="c2track"><i class="hnow"></i></div><small class="hnote" id="csWhy">при просрочках долг не уменьшается — вы платите деньги, которые не брали</small></div>
+            <div class="c2col"><span>По нашему плану</span><b class="num us" id="csPlan">—</b><div class="c2track"><i class="hus" id="csPlanBar" style="width:60%"></i></div><small class="hnote">тело долга + 7% управляющего · рост процентов заморожен, утверждает суд</small></div>
+          </div>
           <div class="goldplate"><span>Экономия:</span><b class="num" id="csSave">—</b></div>
         </div>
 
