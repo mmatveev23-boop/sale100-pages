@@ -265,7 +265,7 @@ h1 .hl{color:var(--green)}
 .ps-sep{margin:10px 0;border-top:1px solid var(--line)}
 .ps-note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:6px}
 .ps-note b{color:var(--ink)}
-@media (max-width:559px){.pm2{grid-template-columns:1fr}.pmchart{padding-left:56px}}
+@media (max-width:679px){.pm2{grid-template-columns:1fr}.pmchart{padding-left:56px}}
 /* кейс-блок: пунктирная шкала + золотая карточка экономии */
 .cs3{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin-top:2px}
 .c2track.dash{border:1px dashed rgba(28,26,22,.22);border-radius:9px;padding:2px}
@@ -274,7 +274,7 @@ h1 .hl{color:var(--green)}
 .ecoCard span{display:block;font-size:12.5px;font-weight:700;color:var(--gold-ink)}
 .ecoCard b{display:block;margin-top:2px;font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--gold-ink);white-space:nowrap}
 .csfoot{margin-top:10px}
-@media (max-width:559px){.cs3{grid-template-columns:1fr}.ecoCard{padding:10px 14px}}
+@media (max-width:679px){.cs3{grid-template-columns:1fr}.ecoCard{padding:10px 14px}}
 /* анимации графиков (заказчик 20.07 ночь + скилл-канон): столбики вырастают, полосы наполняются,
    панель выгоды и карточка экономии входят после — драматургия «сейчас → станет → выгода» */
 @media (prefers-reduced-motion:no-preference){
@@ -293,7 +293,9 @@ h1 .hl{color:var(--green)}
 .vus{background:var(--green)}
 /* кейс-блок двумя колонками (макет заказчика): полосы в одном масштабе — колонки равной ширины */
 .cs2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:2px}
+.c2col{display:flex;flex-direction:column}
 .c2col>span{display:block;font-size:13.5px;color:var(--muted)}
+.c2col b{margin-top:auto} /* число+полоса прижаты к низу: перенос заголовка не роняет линию полос */
 .c2col b{display:block;margin-top:2px;font-size:19px;font-weight:800;letter-spacing:-.01em;color:#D6362B;white-space:nowrap}
 .c2col b.us{color:var(--green-ink)}
 .c2track{margin-top:7px}
