@@ -139,7 +139,10 @@ h1 .hl{color:var(--green)}
   radial-gradient(130% 110% at 90% -10%, #14604A 0%, transparent 60%),
   linear-gradient(150deg,#0E4838, #082A21);color:#fff;padding:18px;box-shadow:0 20px 40px -22px rgba(8,42,33,.6);overflow:hidden}
 .sim .logo svg{width:96px!important;height:auto!important;opacity:.95;display:block}
-.sim .chip{position:absolute;left:18px;top:52%;width:44px}
+.sim .simcut{position:absolute;left:16px;top:52%;transform:translateY(-46%);width:98px}
+.sim .freeYear{position:absolute;right:18px;top:49%;transform:translateY(-50%);text-align:right}
+.sim .freeYear small{display:block;font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:rgba(255,255,255,.65)}
+.sim .freeYear b{font-size:20px;font-weight:800;letter-spacing:-.01em;color:#fff}
 .sim .tagline{position:absolute;left:18px;bottom:16px;max-width:52%;font-size:10px;line-height:1.35;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.65)}
 .sim .msisdn{position:absolute;right:18px;bottom:16px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.85)}
 
@@ -153,6 +156,8 @@ h1 .hl{color:var(--green)}
 .simhero .sim .logo svg text{fill:#C42A21}
 .simhero .sim .tagline{color:#8C1B14;font-weight:700}
 .simhero .sim .msisdn{color:#3A2A26}
+.simhero .sim .freeYear small{color:#8C1B14}
+.simhero .sim .freeYear b{color:#C42A21}
 .simhero .sim .site{position:absolute;right:18px;bottom:36px;font-size:11px;font-weight:800;color:#C42A21}
 .simhero .sec{background:transparent;border:0;box-shadow:none;padding:2px 2px 0;margin-top:12px}
 .simhero .cl{color:rgba(255,255,255,.92)}
@@ -242,7 +247,7 @@ h1 .hl{color:var(--green)}
 .svhead{font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:12px}
 .cardh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .cardh .svhead{margin-bottom:8px}
-.chip{font-size:12px;font-weight:700;color:var(--green-ink);background:var(--green-soft);border:1px solid rgba(15,107,79,.2);border-radius:999px;padding:5px 12px;white-space:nowrap;margin-bottom:8px}
+.tagchip{font-size:12px;font-weight:700;color:var(--green-ink);background:var(--green-soft);border:1px solid rgba(15,107,79,.2);border-radius:999px;padding:5px 12px;white-space:nowrap;margin-bottom:8px}
 /* график с осью + боковая панель (макет заказчика) */
 .pm2{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-top:6px}
 .pmchart{position:relative;padding-left:64px;display:flex;flex-direction:column;justify-content:flex-end}
@@ -282,7 +287,7 @@ h1 .hl{color:var(--green)}
   .scr.on .pwell .vus{animation-delay:.28s}
   .scr.on .parrow{opacity:0;animation:pfade .35s var(--ease) forwards;animation-delay:.72s}
   .scr.on .pmside{opacity:0;animation:rise .45s var(--ease) forwards;animation-delay:.4s}
-  .scr.on .chip{opacity:0;animation:pfade .35s var(--ease) forwards;animation-delay:.55s}
+  .scr.on .tagchip{opacity:0;animation:pfade .35s var(--ease) forwards;animation-delay:.55s}
   .scr.on .c2track i{transform-origin:left;animation:barAcross .6s var(--ease) both;animation-delay:.15s}
   .scr.on .ecoCard{opacity:0;animation:rise .45s var(--ease) forwards;animation-delay:.5s}
 }
@@ -302,14 +307,8 @@ h1 .hl{color:var(--green)}
 .c2track i{display:block;height:14px;border-radius:7px}
 @media (max-width:480px){.c2col b{font-size:15.5px}}
 /* «было → станет» горизонтальными полосами (кейс-блок): длина полосы = сумма */
-.hrow{margin-top:4px}
-.hrow+.hrow{margin-top:14px}
-.hl{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;color:var(--muted);margin-bottom:6px;gap:10px}
-.hl b{font-size:19px;font-weight:800;letter-spacing:-.01em;white-space:nowrap;color:var(--alert)}
-.hl b.us{color:var(--green-ink)}
-.htrack i{display:block;height:16px;border-radius:8px}
-.htrack .hnow,.c2track .hnow{background:linear-gradient(90deg,#E05248 0%,#C3352B 100%);width:100%}
-.htrack .hus,.c2track .hus{background:var(--green)}
+.c2track .hnow{background:linear-gradient(90deg,#E05248 0%,#C3352B 100%);width:100%}
+.c2track .hus{background:var(--green)}
 .hnote{display:block;margin-top:6px;font-size:11.5px;color:var(--faint);line-height:1.4}
 .bar .bl{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:6px}
 .bar .bl span{color:var(--muted)}
@@ -559,7 +558,7 @@ h1 .hl{color:var(--green)}
              хиро и бары дублировали одни числа — теперь каждая цифра ровно один раз, выгода = итог-плашка в стиле кейс-блока) -->
         <div class="bars stg">
           <!-- макет заказчика 20.07 ночь (подогнан под систему): график с осью и стрелкой + боковая панель «Вы экономите» -->
-          <div class="cardh"><div class="svhead" id="svHead">Платёж снизится на ~40%</div><span class="chip">✓ платите меньше каждый месяц</span></div>
+          <div class="cardh"><div class="svhead" id="svHead">Платёж снизится на ~40%</div><span class="tagchip">✓ платите меньше каждый месяц</span></div>
           <div class="pm2">
             <div class="pmchart">
               <div class="paxis" id="pmAxis" aria-hidden="true"></div>
@@ -705,7 +704,17 @@ h1 .hl{color:var(--green)}
 </clipPath>
 </defs>
 </svg></div>
-          <svg class="chip" viewBox="0 0 64 50" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="simgold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ecd488"/><stop offset=".5" stop-color="#caa948"/><stop offset="1" stop-color="#ad8c34"/></linearGradient></defs><path d="M3 1.5 H49 L62.5 13 V46 a2.5 2.5 0 0 1-2.5 2.5 H5.5 A2.5 2.5 0 0 1 3 46 Z" fill="url(#simgold)" stroke="#947128" stroke-width="1"/><path d="M0 25 H64 M22.5 1 V49 M42 1 V49" stroke="#947128" stroke-width="1.8" opacity=".65"/><rect x="23.5" y="16.5" width="17" height="17" rx="3" fill="none" stroke="#947128" stroke-width="1.8" opacity=".65"/></svg>
+          <!-- карта по референсу заказчика 20.07 ночь: контур-вырез SIM с золотым чипом + видимая выгода «год связи — бесплатно» -->
+          <svg class="simcut" viewBox="0 0 150 110" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs><linearGradient id="simgoldG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ecd488"/><stop offset=".5" stop-color="#caa948"/><stop offset="1" stop-color="#ad8c34"/></linearGradient></defs>
+            <path d="M17 3 H100 L147 44 V93 Q147 107 133 107 H17 Q3 107 3 93 V17 Q3 3 17 3 Z" fill="none" stroke="#C42A21" stroke-width="3.4" stroke-linecap="round" stroke-dasharray="64 13"/>
+            <g transform="translate(45 31)">
+              <path d="M3 1.5 H49 L62.5 13 V46 a2.5 2.5 0 0 1-2.5 2.5 H5.5 A2.5 2.5 0 0 1 3 46 Z" fill="url(#simgoldG)" stroke="#947128" stroke-width="1"/>
+              <path d="M0 25 H64 M22.5 1 V49 M42 1 V49" stroke="#947128" stroke-width="1.8" opacity=".65"/>
+              <rect x="23.5" y="16.5" width="17" height="17" rx="3" fill="none" stroke="#947128" stroke-width="1.8" opacity=".65"/>
+            </g>
+          </svg>
+          <div class="freeYear"><small>связь на год</small><b>бесплатно</b></div>
           <div class="tagline">Блокировка звонков от коллекторов</div>
           <div class="site num">донуля.рф</div>
           <div class="msisdn num">+7 932 499-00-00</div>
