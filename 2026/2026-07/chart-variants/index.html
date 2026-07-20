@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ДОНУЛЯ — примерка графиков «было → станет»</title>
+<!-- ПРИМЕРКА ГРАФИКОВ (заказчик 20.07 ночь: «столбики грубовато, какие используют в основном?»).
+     4 варианта одного сравнения 61 500 → 36 856 на токенах системы. Страница-выбор, боевое не трогает. -->
+<style>
+@font-face{font-family:"Golos Text";src:url(../calc-widget/fonts/golos-var-cyrillic.woff2) format("woff2");font-weight:400 800;font-display:swap;unicode-range:U+0400-04FF,U+2010-2027,U+20BD}
+@font-face{font-family:"Golos Text";src:url(../calc-widget/fonts/golos-var-latin.woff2) format("woff2");font-weight:400 800;font-display:swap;unicode-range:U+0000-00FF,U+2013-2014,U+2018-201F,U+2026}
+:root{--paper:#FAF7F2;--card:#FFF;--ink:#1C1A16;--muted:#68625A;--faint:#9B948A;--pine:#0B3B2E;
+--green:#0F6B4F;--green-ink:#0B5540;--green-soft:#E9F3EE;--gold-hi:#F4C775;--gold-ink:#8A6212;
+--alert:#A8442E;--rose:#E4B8AC;--line:rgba(28,26,22,.11);--r:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.note{margin-top:6px;font-size:13px;color:var(--muted)}
+.vh{margin:26px 0 10px;font-size:12.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--green-ink)}
+.vh small{display:block;margin-top:2px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--faint);font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px 17px}
+.badge{display:inline-block;background:var(--green);color:#fff;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:8px;padding:4px 12px;margin-bottom:12px}
+.save{margin-top:14px;background:linear-gradient(165deg,#128257 0%,#0F6B4F 60%,#0B5540 100%);color:#fff;border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.save span{font-size:12.5px;font-weight:700}
+.save b{font-size:18px;font-weight:800;color:var(--gold-hi);white-space:nowrap}
+
+/* A · Горизонтальные полосы */
+.hrow{margin-top:4px}
+.hrow+.hrow{margin-top:14px}
+.hl{display:flex;justify-content:space-between;align-items:baseline;font-size:13.5px;color:var(--muted);margin-bottom:6px}
+.hl b{font-size:19px;font-weight:800;letter-spacing:-.01em;color:var(--alert)}
+.hl b.us{color:var(--green-ink)}
+.htrack i{display:block;height:16px;border-radius:8px}
+.htrack .now{background:var(--rose);width:100%}
+.htrack .us{background:var(--green);width:60%}
+
+/* B · Тонкие столбики */
+.duoB{position:relative;display:flex;justify-content:space-around;align-items:flex-end;gap:20px;margin-top:4px}
+.bcol{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1}
+.bcol b{font-size:19px;font-weight:800;color:var(--alert);white-space:nowrap}
+.bcol b.us{color:var(--green-ink)}
+.bwell{height:120px;display:flex;align-items:flex-end;justify-content:center}
+.bwell i{display:block;width:64px;border-radius:10px}
+.bcol .cn{height:100%;background:var(--rose)}
+.bcol .cu{height:60%;background:var(--green)}
+.bcol span{font-size:12.5px;color:var(--muted);text-align:center}
+.duoB .base{position:absolute;left:6%;right:6%;bottom:31px;border-bottom:1px solid var(--line)}
+
+/* C · Слоуп (линия вниз) */
+.slope{position:relative;margin-top:4px}
+.slope svg{display:block;width:100%;height:150px}
+.sl-lab{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-top:2px}
+.sl-num{position:absolute;font-weight:800;font-size:19px;letter-spacing:-.01em}
+.sl-num.was{left:0;top:0;color:var(--alert)}
+.sl-num.now{right:0;bottom:34px;color:var(--green-ink)}
+
+/* D · Одна полоса-разбивка */
+.split{margin-top:6px}
+.split .st{display:flex;justify-content:space-between;font-size:13.5px;color:var(--muted);margin-bottom:8px}
+.split .st b{color:var(--ink);font-size:16px}
+.sbar{display:flex;height:34px;border-radius:10px;overflow:hidden}
+.sbar .pay{background:var(--green);width:60%}
+.sbar .win{background:linear-gradient(90deg,#E8C775,#D9AE4F);width:40%}
+.slegend{display:flex;gap:18px;margin-top:10px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.slegend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+.slegend .pay i{background:var(--green)}
+.slegend .win i{background:#D9AE4F}
+.slegend b{color:var(--ink)}
+.slegend .win b{color:var(--gold-ink)}
+.req{margin-top:26px;text-align:center;font-size:11px;color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Примерка графика «было → станет»</h1>
+<p class="note">Одни и те же цифры · 4 подачи. Плашка выгоды везде одинаковая — сравниваем только график.</p>
+
+<div class="vh">Вариант A · Горизонтальные полосы<small>стандарт банковских приложений: длина = сумма, числа выровнены — читается быстрее всего</small></div>
+<div class="card"><div class="badge">Экономия в месяц</div>
+  <div class="hrow"><div class="hl"><span>Платите сейчас</span><b class="num">~61 500 ₽/мес</b></div><div class="htrack"><i class="now"></i></div></div>
+  <div class="hrow"><div class="hl"><span>Будете платить с нами</span><b class="num us">~36 856 ₽/мес</b></div><div class="htrack"><i class="us"></i></div></div>
+  <div class="save"><span>Ваша выгода — каждый месяц</span><b class="num">~24 644 ₽/мес</b></div>
+</div>
+
+<div class="vh">Вариант B · Тонкие столбики<small>как сейчас, но изящнее: узкие колонки на общей базовой линии, воздух вокруг</small></div>
+<div class="card"><div class="badge">Экономия в месяц</div>
+  <div class="duoB"><div class="base"></div>
+    <div class="bcol"><b class="num">~61 500 ₽</b><div class="bwell"><i class="cn"></i></div><span>платите сейчас</span></div>
+    <div class="bcol"><b class="num us">~36 856 ₽</b><div class="bwell"><i class="cu"></i></div><span>будете платить</span></div>
+  </div>
+  <div class="save"><span>Ваша выгода — каждый месяц</span><b class="num">~24 644 ₽/мес</b></div>
+</div>
+
+<div class="vh">Вариант C · Линия вниз (слоуп)<small>финансовая классика «до/после»: наклон показывает снижение одним движением глаза</small></div>
+<div class="card"><div class="badge">Экономия в месяц</div>
+  <div class="slope">
+    <b class="sl-num was num">~61 500 ₽</b><b class="sl-num now num">~36 856 ₽</b>
+    <svg viewBox="0 0 100 44" preserveAspectRatio="none" aria-hidden="true">
+      <line x1="4" y1="12" x2="96" y2="30" stroke="#0F6B4F" stroke-width="2.6" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+      <circle cx="4" cy="12" r="3.2" fill="#A8442E" vector-effect="non-scaling-stroke"/>
+      <circle cx="96" cy="30" r="3.2" fill="#0F6B4F" vector-effect="non-scaling-stroke"/>
+    </svg>
+    <div class="sl-lab"><span>платите сейчас</span><span>будете платить с нами</span></div>
+  </div>
+  <div class="save"><span>Ваша выгода — каждый месяц</span><b class="num">~24 644 ₽/мес</b></div>
+</div>
+
+<div class="vh">Вариант D · Полоса-разбивка<small>самый «продающий»: весь платёж = полоса, золотой кусок — то, что остаётся в семье</small></div>
+<div class="card"><div class="badge">Экономия в месяц</div>
+  <div class="split">
+    <div class="st"><span>Ваш платёж сейчас</span><b class="num">~61 500 ₽/мес</b></div>
+    <div class="sbar"><div class="pay"></div><div class="win"></div></div>
+    <div class="slegend">
+      <span class="pay"><i></i>будете платить с нами <b class="num">~36 856 ₽</b></span>
+      <span class="win"><i></i>останется в семье <b class="num">~24 644 ₽</b></span>
+    </div>
+  </div>
+  <div class="save"><span>Ваша выгода — каждый месяц</span><b class="num">~24 644 ₽/мес</b></div>
+</div>
+
+<div class="req">Примерка для выбора · демо-цифры · боевые страницы не изменены</div>
+</div>
+</body>
+</html>
