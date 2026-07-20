@@ -351,10 +351,12 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
              сохранение имущества (только БФЛ-«сохранение», 60 000 ₽/объект, в рассрочку) -->
         <div class="actsep">Рассрочка · график на странице клиента</div>
         <div class="rowf"><span class="rlab">Дата 1-го платежа · пусто = ближайшее 25-е</span><input id="w_payDate" class="rin" type="date" style="width:126px" onchange="rassLine()"></div>
+        <div class="rowf"><span class="rlab">День ежемес. платежа · пусто = как у первого</span><input id="w_payDay" class="rin" type="number" min="1" max="31" placeholder="25"></div>
         <div class="rowf"><span class="rlab">Срок рассрочки, мес</span><input id="w_rassM" class="rin" type="number" min="2" max="24" value="14" oninput="rassLine()"></div>
         <div class="rowf freeline"><span class="rlab">Итог услуг неизменен</span><b id="w_rassLine">189 000 ₽ · платёж 13 500 ₽/мес</b></div>
         <label style="margin-top:10px">Допродукты</label>
         <label class="ocki" style="margin-top:4px"><input type="checkbox" id="w_adv" onchange="advUI()"> Адвокатский запрет</label>
+        <div class="rowf freeline" id="w_advNote" style="display:none"><span class="rlab">Рассрочка запрета</span><b>5 000 ₽ первый платёж + 20 000 ₽ частями</b></div>
         <div class="rowf" id="w_advRow" style="display:none"><span class="rlab">Оплата запрета</span><div class="seg sm" id="w_advMode" style="width:196px"><button class="on" data-am="once" onclick="setAdvMode(this)">разом · 20 000</button><button data-am="rass" onclick="setAdvMode(this)">рассрочка · 25 000</button></div></div>
         <label class="ocki" id="w_keepWrap" style="display:none"><input type="checkbox" id="w_keep" onchange="keepUI()"> Сохранение имущества · 60 000 ₽/объект · в рассрочку</label>
         <div class="rowf" id="w_keepRow" style="display:none"><span class="rlab">Объектов (залог/ипотека)</span><input id="w_keepN" class="rin" type="number" min="1" value="1"></div>
@@ -885,19 +887,21 @@ function sendPresentation(){
   setTimeout(()=>{t.style.display='none';},6000);
 }
 /* ── рассрочка и допродукты (решение заказчика 20.07): дата/срок графика + адвокатский запрет 20 000/25 000 + сохранение 60 000/объект ── */
-const ADVOCATE_ONCE=20000, ADVOCATE_RASS=25000, KEEP_PER_OBJ=60000;
+const ADVOCATE_ONCE=20000, ADVOCATE_RASS=25000, ADVOCATE_RASS_FIRST=5000, KEEP_PER_OBJ=60000; /* рассрочка запрета = 5 000 первым платежом + 20 000 частями (заказчик 20.07) */
 function rassLine(){
   const rm=Math.max(2,Math.min(24,Math.round(+document.getElementById('w_rassM').value||14)));
   const pay=Math.round(189000/rm);
   document.getElementById('w_rassLine').textContent='189 000 ₽ · платёж '+(rm===14?'':'~')+fmt(pay)+' ₽/мес'+(rm===14?'':' · '+rm+' мес');
 }
-function advUI(){document.getElementById('w_advRow').style.display=document.getElementById('w_adv').checked?'':'none';}
+function advUI(){const on=document.getElementById('w_adv').checked;document.getElementById('w_advRow').style.display=on?'':'none';advNote();}
+function advNote(){const on=document.getElementById('w_adv').checked&&advMode()==='rass';document.getElementById('w_advNote').style.display=on?'':'none';}
 function keepUI(){document.getElementById('w_keepRow').style.display=(prod==='bfl'&&document.getElementById('w_keep').checked)?'':'none';}
-function setAdvMode(btn){document.querySelectorAll('#w_advMode button').forEach(x=>x.classList.toggle('on',x===btn));}
+function setAdvMode(btn){document.querySelectorAll('#w_advMode button').forEach(x=>x.classList.toggle('on',x===btn));advNote();}
 function advMode(){const b=document.querySelector('#w_advMode button.on');return b?b.dataset.am:'once';}
 function rassParams(){
   const p={};
   const pd=document.getElementById('w_payDate').value; if(pd) p.pd=pd;
+  const md=Math.round(+document.getElementById('w_payDay').value||0); if(md>=1&&md<=31) p.md=md;
   const rm=Math.max(2,Math.min(24,Math.round(+document.getElementById('w_rassM').value||14))); if(rm!==14) p.rm=rm;
   if(document.getElementById('w_adv').checked){p.adv=1;p.advm=advMode();}
   if(prod==='bfl'&&document.getElementById('w_keep').checked){p.keep=Math.max(1,Math.round(+document.getElementById('w_keepN').value||1));}

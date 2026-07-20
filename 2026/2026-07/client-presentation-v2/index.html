@@ -791,7 +791,8 @@ const PD=(m=>m?new Date(m[0]+'T12:00'):null)((Q.get('pd')||'').match(/^\d{4}-\d{
 const RM=Math.max(2,Math.min(24,Math.round(+Q.get('rm')||RASS_M)));
 const ADV=Q.get('adv')==='1', ADV_RASS=Q.get('advm')==='rass', ADV_PRICE=ADV_RASS?25000:20000;
 const KEEP_N=Math.max(0,Math.min(9,Math.round(+Q.get('keep')||0))), KEEP_SUM=KEEP_N*60000;
-const SCHED_DAY=PD?PD.getDate():PAY_DAY;
+const MD=(v=>v>=1&&v<=31?v:0)(Math.round(+Q.get('md')||0));
+const SCHED_DAY=MD||(PD?PD.getDate():PAY_DAY); /* день ежемесячных платежей: ?md, иначе день первой даты, иначе 25 */
 const fmt=n=>n.toLocaleString('ru-RU');
 
 let step=0, tariff='rassrochka', kd=true, sim=true;
@@ -819,7 +820,14 @@ function next(){show(step+1)}
 function prev(){show(step-1)}
 
 /* ============ ТАРИФ / ДОКТОР ============ */
-function months(n){const out=[];const d=PD||new Date();if(!PD)d.setDate(PAY_DAY);for(let i=0;i<n;i++){const m=new Date(d.getFullYear(),d.getMonth()+i,SCHED_DAY);out.push(m.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}));}return out;}
+function months(n){const out=[];
+  if(PD){out.push(PD.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}));
+    let base=new Date(PD.getFullYear(),PD.getMonth(),SCHED_DAY);
+    if(base<=PD) base=new Date(PD.getFullYear(),PD.getMonth()+1,SCHED_DAY);
+    for(let i=1;i<n;i++){const m=new Date(base.getFullYear(),base.getMonth()+(i-1),SCHED_DAY);out.push(m.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}));}
+  }else{const d=new Date();d.setDate(SCHED_DAY);
+    for(let i=0;i<n;i++){const m=new Date(d.getFullYear(),d.getMonth()+i,SCHED_DAY);out.push(m.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}));}}
+  return out;}
 function renderSched(el,n,pay){
   el.innerHTML=months(n).map((m,i)=>`<div class="sr"><span>${i+1} · ${m}</span><b class="num">${fmt(pay)} ₽</b></div>`).join('');
 }
@@ -841,9 +849,9 @@ function recalc(){
   /* допродукты (решение заказчика 20.07) */
   if(ADV){
     document.getElementById('advBlock').style.display='';
-    document.getElementById('advBlockV').textContent=fmt(ADV_PRICE)+' ₽ · '+(ADV_RASS?'в рассрочку':'разом');
+    document.getElementById('advBlockV').textContent=ADV_RASS?'5 000 ₽ сегодня + 20 000 ₽ частями':fmt(ADV_PRICE)+' ₽ · разом';
     document.getElementById('docAdv').style.display='';
-    document.getElementById('docAdvV').textContent=fmt(ADV_PRICE)+' ₽ · '+(ADV_RASS?'в рассрочку':'разом');
+    document.getElementById('docAdvV').textContent=ADV_RASS?'25 000 ₽ · 5 000 сегодня, 20 000 частями':fmt(ADV_PRICE)+' ₽ · разом';
   }
   if(KEEP_N>0){
     document.getElementById('keepBlock').style.display='';
