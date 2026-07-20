@@ -387,6 +387,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <div class="lrow" style="margin-top:4px">
             <button class="lbtn" onclick="copyDz('open',this)">✉ Не открыл</button>
             <button class="lbtn" onclick="copyDz('think',this)">✉ Не подписал</button>
+            <button class="lbtn" onclick="copyDz('sim',this)">✉ SIM-акция</button>
             <button class="lbtn" id="w_dzKi" onclick="copyDz('ki',this)">✉ По КИ</button>
           </div>
 
@@ -1247,6 +1248,13 @@ function dzText(kind){
     const growTxt=grow>0?'долг растёт: ~+'+fmt(grow)+' ₽ процентов в месяц (+'+fmt(grow*12)+' ₽ за год)':'долг продолжает расти по ставкам ваших договоров';
     return name+', пока решение откладывается — '+growTxt+'.\nПосмотрите, что вы получите: вот пример юридического заключения, которое юрист готовит по кредитному отчёту — все договоры с вердиктами, точный платёж, что с имуществом: '+sample+'\nСделаем такое же по вам — бесплатно и ни к чему не обязывает. Нужен только ваш отчёт: скачивается за 5 минут, инструкция: '+guide+' Пришлёте PDF сюда — юрист возьмёт в работу.\nЗавтра он как раз посмотрит ваш случай — наберу вам на пару минут. Ваш расчёт: '+pres;
   }
+  if(kind==='sim'){
+    /* дожим SIM-акцией (заказчик 20.07 ночь): «продлили акцию» — страница ../dozhim-sim/ с теми же параметрами + route */
+    const route=last.route==='БФЛ'?'bfl':'rdg';
+    const qs=pres.split('?')[1]||'';
+    const sim=abs('../dozhim-sim/index.html'+(qs?'?'+qs+'&':'?')+'route='+route);
+    return name+', хорошие новости: мы продлили для вас акцию по SIM-карте — новый номер, которого нет у коллекторов, и связь на год бесплатно. Условие простое: подписать договор и внести любую сумму сегодня. Всё уже готово на вашей странице: '+sim;
+  }
   /* ki: заключение по реальному отчёту готово; главная фраза — по маршруту */
   const opinion=abs((document.getElementById('w_kiFile').getAttribute('href')||'./ki.html').replace(/[#&]print=1/,''));
   const main=last.route==='БФЛ'
@@ -1260,7 +1268,7 @@ function dzChatMsg(kind,txt){
   let m=document.getElementById('tr_dz_'+kind);
   if(!m){m=document.createElement('div');m.className='msgcard';m.id='tr_dz_'+kind;feed.insertBefore(m,feed.querySelector('.note'));}
   const time=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-  const names={open:'Не открыл',think:'Не подписал',ki:'По КИ'};
+  const names={open:'Не открыл',think:'Не подписал',ki:'По КИ',sim:'SIM-акция'};
   const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const html=esc(txt).replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline;word-break:break-all">$1</a>').replace(/\n/g,'<br>');
   m.innerHTML='<div class="who">Salebot → клиенту · дожим «'+names[kind]+'» · тренажёр</div><div class="bubble"><small>'+time+' ✓ Отправлено</small>'+html+'</div>';
