@@ -236,8 +236,6 @@ h1 .hl{color:var(--green)}
 .save-hero .sv{margin-top:6px;font-size:46px;font-weight:800;letter-spacing:-.02em;line-height:1;color:#F4C775}
 .save-hero .ss{margin-top:8px;font-size:14px;color:rgba(255,255,255,.82)}
 .save-hero .ss b{color:#9FE8C6}
-.save-hero .st{margin-top:10px;display:inline-block;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:6px 14px;font-size:13.5px;font-weight:700;color:#fff}
-.save-hero .st b{color:#F4C775;font-variant-numeric:tabular-nums}
 .bars{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);padding:15px 16px;margin-top:12px}
 .bar + .bar{margin-top:12px}
 .bar .bl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
@@ -483,7 +481,6 @@ h1 .hl{color:var(--green)}
           <div class="sl">Ваша выгода с нами — каждый месяц</div>
           <div class="sv num" id="cmpSave">—</div>
           <div class="ss num" id="cmpSaveSub">—</div>
-          <div class="st num" id="cmpSaveTotal" style="display:none">за план целиком сэкономите <b id="cmpSaveTotalV">—</b> на процентах</div>
         </div>
 
         <div class="bars stg">
@@ -504,6 +501,7 @@ h1 .hl{color:var(--green)}
           <div class="ch">По вашим цифрам: долг <b class="num" id="cmpDebt">—</b>, платите <b class="num" id="cmpPay2">—</b> в месяц</div>
           <div class="cr bad"><span>Вернёте банкам, если платить по своим договорам<small>долг + проценты по вашим ставкам и срокам · из них переплата ~<span class="num" id="cmpInterest">—</span></small></span><b class="num" id="cmpNoUs">—</b></div>
           <div class="cr"><span>С нами<small>план на <span class="num" id="planTerm">36</span> мес: рост процентов заморожен — тело долга + вознаграждение управляющего 7%, утверждает суд. Услуги ДОНУЛЯ — отдельно: <span class="num" id="svcLine2">13 500 ₽ × 14 платежей</span></small></span><b class="num" id="cmpUsPay2">—</b></div>
+          <div class="cr" id="cmpTotalRow" style="display:none"><span>Экономия на процентах<small>переплата банкам <span class="num" id="cmpTotBank">—</span> → по плану <span class="num" id="cmpTotPlan">—</span> (7% управляющего)</small></span><b class="num" id="cmpTotalV">—</b></div>
         </div>
         </div>
 
@@ -975,11 +973,13 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   }
   set('cmpSave','~'+fmt(Math.round(Math.max(0,saveM)))+' ₽/мес');
   document.getElementById('cmpSaveSub').innerHTML='платёж снижается: ~'+fmt(CLIENT_PAY)+' → ~'+fmt(usMonthly)+' ₽/мес'+(interest>0?' · переплата банкам ~<b>'+fmt(interest)+' ₽</b> останавливается':'');
-  /* полная экономия за план (решение заказчика 20.07: обе цифры — месячная главной + всего) */
+  /* полная экономия за план — в развороте «Как посчитана экономия» (решение заказчика 20.07) */
   const totalSave=noUs>0?Math.round(noUs-planTotal(CLIENT.debt,RDG_TERM)):0;
   if(totalSave>0){
-    document.getElementById('cmpSaveTotal').style.display='';
-    document.getElementById('cmpSaveTotalV').textContent='~'+fmt(totalSave)+' ₽';
+    document.getElementById('cmpTotalRow').style.display='';
+    document.getElementById('cmpTotalV').textContent='~'+fmt(totalSave)+' ₽';
+    document.getElementById('cmpTotBank').textContent='~'+fmt(interest)+' ₽';
+    document.getElementById('cmpTotPlan').textContent='~'+fmt(Math.round(CLIENT.debt*0.07))+' ₽';
   }
   set('cmpPayNow','~'+fmt(CLIENT_PAY)+' ₽/мес');
   set('cmpUsMonthly','~'+fmt(usMonthly)+' ₽/мес');
