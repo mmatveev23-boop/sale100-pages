@@ -622,7 +622,7 @@ h1 .hl{color:var(--green)}
           <button class="trf" id="simN" onclick="setSim(false)"><div><div class="tn">Мне не нужна</div><small>на цену и условия не влияет</small></div><span class="rad"></span></button>
         </div>
 
-        <div class="timer stg"><span>Акция действует, пока идёт звонок</span><b class="num" id="simTimer">60:00</b></div>
+        <div class="timer stg"><span>Акция действует только сегодня — при подписании договора и оплате любой суммы</span></div>
       </section>
 
       <!-- 4 · ОФОРМЛЕНИЕ -->
@@ -686,7 +686,7 @@ h1 .hl{color:var(--green)}
       <!-- 6 · ПОДПИСЬ -->
       <section class="scr" data-name="Шаг 5 из 6 · Подпись">
         <h1>Подпишите договор кодом из СМС</h1>
-        <p class="sub">Мы отправили код на <b class="nowrap num">+7 982 …</b>. Продиктуйте его эксперту или введите сами.</p>
+        <p class="sub">Мы отправили код на <b class="nowrap num">+7 982 …</b>. Введите его — этот код и есть ваша подпись.</p>
 
         <div class="otp stg">
           <input maxlength="1" inputmode="numeric" aria-label="Цифра 1"><input maxlength="1" inputmode="numeric" aria-label="Цифра 2"><input maxlength="1" inputmode="numeric" aria-label="Цифра 3"><input maxlength="1" inputmode="numeric" aria-label="Цифра 4">
@@ -938,9 +938,6 @@ document.querySelectorAll('.otp input').forEach((inp,i,all)=>{
   inp.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!inp.value&&i>0)all[i-1].focus();});
 });
 
-/* ============ ТАЙМЕР SIM ============ */
-let tleft=60*60;
-setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padStart(2,'0'),s=String(tleft%60).padStart(2,'0');document.getElementById('simTimer').textContent=m+':'+s;}},1000);
 
 /* сравнение «по вашим цифрам». Честная база «без нас» = долг + проценты по ставкам и срокам договоров —
    приходит из виджета параметром nous (со слов — средние ставки, по КИ — точные тела).
