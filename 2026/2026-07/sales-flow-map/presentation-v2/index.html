@@ -813,13 +813,19 @@ function months(n){const out=[];
   }else{const d=new Date();d.setDate(SCHED_DAY);
     for(let i=0;i<n;i++){const m=new Date(d.getFullYear(),d.getMonth()+i,SCHED_DAY);out.push(m.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}));}}
   return out;}
-function renderSched(el,n,pay){
-  el.innerHTML=months(n).map((m,i)=>`<div class="sr"><span>${i+1} · ${m}</span><b class="num">${fmt(pay)} ₽</b></div>`).join('');
+function renderSched(el,n,first,rest){
+  el.innerHTML=months(n).map((m,i)=>`<div class="sr"><span>${i+1} · ${m}</span><b class="num">${fmt(i===0?first:rest)} ₽</b></div>`).join('');
 }
 function recalc(){
   const kdOn=kd, vip=tariff==='vip';
   const term=RM+(kdOn?KD_M:0), total=RASS_TOTAL+(kdOn?KD_PRICE:0);
   const m=Math.round(total/term);
+  /* допы в общий график (решение заказчика 20.07): запрет 5 000 к первому + 20 000 долями (или 20 000 разом к первому); сохранение — долями */
+  const addTotal=((ADV&&ADV_RASS)?20000:0)+KEEP_SUM;
+  const addF=ADV?(ADV_RASS?5000:20000):0;
+  const addBase=Math.round(addTotal/RM), addKd=Math.round(addTotal/term);
+  const mB=Math.round(RASS_TOTAL/RM);
+  const mBAll=mB+addBase, firstBAll=mBAll+addF;
   /* герой на шаге 1 всегда показывает базу без доктора (канон) */
   document.getElementById('heroPay').innerHTML=vip?`${fmt(VIP)} <small>₽ разом</small>`:`${fmt(Math.round(RASS_TOTAL/RM))} <small>₽ / месяц</small>`;
   document.getElementById('heroSub').innerHTML=vip
@@ -827,32 +833,32 @@ function recalc(){
     :`${RM} платежей · услуги целиком ${fmt(RASS_TOTAL)} ₽ · <b>VIP при оплате сразу ${fmt(VIP)} ₽ (выгода 20 000 ₽)</b>`;
   document.getElementById('schedShort').style.display=vip?'none':'';
   document.getElementById('schedBtn').style.display=vip?'none':'';
-  document.getElementById('schFirst').textContent=fmt(Math.round(RASS_TOTAL/RM))+' ₽';
-  document.getElementById('schRest').textContent=(RM-1)+' × '+fmt(Math.round(RASS_TOTAL/RM))+' ₽ · каждое '+SCHED_DAY+'-е число';
-  renderSched(document.getElementById('schedList'),RM,Math.round(RASS_TOTAL/RM));
+  document.getElementById('schFirst').textContent=fmt(firstBAll)+' ₽';
+  document.getElementById('schRest').textContent=(RM-1)+' × '+fmt(mBAll)+' ₽ · каждое '+SCHED_DAY+'-е число';
+  renderSched(document.getElementById('schedList'),RM,firstBAll,mBAll);
   if(PD){document.getElementById('schFirstLab').textContent='Первый платёж · '+months(1)[0].replace(' г.','');}
   /* допродукты (решение заказчика 20.07) */
   if(ADV){
     document.getElementById('advBlock').style.display='';
-    document.getElementById('advBlockV').textContent=ADV_RASS?'5 000 ₽ сегодня + 20 000 ₽ частями':fmt(ADV_PRICE)+' ₽ · разом';
+    document.getElementById('advBlockV').textContent=ADV_RASS?('5 000 ₽ с первым платежом + ~'+fmt(Math.round(20000/RM))+' ₽/мес в графике'):'20 000 ₽ · с первым платежом';
     document.getElementById('docAdv').style.display='';
-    document.getElementById('docAdvV').textContent=ADV_RASS?'25 000 ₽ · 5 000 сегодня, 20 000 частями':fmt(ADV_PRICE)+' ₽ · разом';
+    document.getElementById('docAdvV').textContent=ADV_RASS?('25 000 ₽ · 5 000 с первым, ~'+fmt(Math.round(20000/RM))+' ₽/мес в графике'):'20 000 ₽ · с первым платежом';
   }
   if(KEEP_N>0){
     document.getElementById('keepBlock').style.display='';
     document.getElementById('keepBlockLab').textContent='Сохранение имущества · '+KEEP_N+' '+(KEEP_N===1?'объект':KEEP_N<5?'объекта':'объектов');
-    document.getElementById('keepBlockV').textContent=fmt(KEEP_SUM)+' ₽ · в рассрочку';
+    document.getElementById('keepBlockV').textContent=fmt(KEEP_SUM)+' ₽ · ~'+fmt(Math.round(KEEP_SUM/RM))+' ₽/мес в графике';
     document.getElementById('docKeep').style.display='';
-    document.getElementById('docKeepV').textContent=fmt(KEEP_SUM)+' ₽ · в рассрочку';
+    document.getElementById('docKeepV').textContent=fmt(KEEP_SUM)+' ₽ · ~'+fmt(Math.round(KEEP_SUM/RM))+' ₽/мес в графике';
   }
-  renderSched(document.getElementById('schedListKd'),term,m);
+  renderSched(document.getElementById('schedListKd'),term,m+addKd+addF,m+addKd);
   /* договор и оплата */
   document.getElementById('docKdRow').style.display=kdOn?'':'none';
   document.getElementById('docTotal').textContent=fmt(vip?VIP:RASS_TOTAL)+' ₽'+(vip?' · VIP':'');
   document.getElementById('docPlan').textContent=vip
     ?(kdOn?`единовременно + доктор ${fmt(KD_PRICE)} ₽`:'единовременно')
-    :`${term} платежей по ${fmt(m)} ₽, ${SCHED_DAY}-е число`;
-  const first=vip?VIP+(kdOn?KD_PRICE:0):m;
+    :`${term} платежей по ${addKd?'~':''}${fmt(m+addKd)} ₽, ${SCHED_DAY}-е число${addF?' · первый '+fmt(m+addKd+addF)+' ₽':''}`;
+  const first=vip?VIP+(kdOn?KD_PRICE:0):m+addKd+addF;
   document.getElementById('docFirst').textContent=fmt(first)+' ₽';
   document.getElementById('payAmount').innerHTML=`${fmt(first)} <small>₽</small>`;
   document.getElementById('payExact').textContent=fmt(first);

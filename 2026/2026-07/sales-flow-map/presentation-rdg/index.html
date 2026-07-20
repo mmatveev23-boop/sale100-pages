@@ -811,33 +811,37 @@ function months(n){const out=[];
   }else{const d=new Date();d.setDate(SCHED_DAY);
     for(let i=0;i<n;i++){const m=new Date(d.getFullYear(),d.getMonth()+i,SCHED_DAY);out.push(m.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}));}}
   return out;}
-function renderSched(el,n,pay){
-  el.innerHTML=months(n).map((m,i)=>`<div class="sr"><span>${i+1} · ${m}</span><b class="num">${fmt(pay)} ₽</b></div>`).join('');
+function renderSched(el,n,first,rest){
+  el.innerHTML=months(n).map((m,i)=>`<div class="sr"><span>${i+1} · ${m}</span><b class="num">${fmt(i===0?first:rest)} ₽</b></div>`).join('');
 }
 function recalc(){
   const vip=tariff==='vip';
   const m=Math.round(RASS_TOTAL/RM);
+  /* допы в общий график (решение заказчика 20.07): те же даты и срок; запрет: 5 000 к первому + 20 000 долями (или 20 000 разом к первому) */
+  const addM=(ADV&&ADV_RASS)?Math.round(20000/RM):0;
+  const addF=ADV?(ADV_RASS?5000:20000):0;
+  const mAll=m+addM, firstAll=mAll+addF;
   document.getElementById('heroPay').innerHTML=vip?`${fmt(VIP)} <small>₽ разом</small>`:`${fmt(m)} <small>₽ / месяц</small>`;
   document.getElementById('heroSub').innerHTML=vip
     ?`оплата одним платежом · <b>экономия 20 000 ₽</b> · госплатежи 50 000 ₽ отдельно`
     :`${RM} платежей · услуги целиком ${fmt(RASS_TOTAL)} ₽ · <b>VIP при оплате сразу ${fmt(VIP)} ₽ (выгода 20 000 ₽)</b>`;
   document.getElementById('schedShort').style.display=vip?'none':'';
   document.getElementById('schedBtn').style.display=vip?'none':'';
-  document.getElementById('schFirst').textContent=fmt(m)+' ₽';
-  document.getElementById('schRest').textContent=(RM-1)+' × '+fmt(m)+' ₽ · каждое '+SCHED_DAY+'-е число';
-  renderSched(document.getElementById('schedList'),RM,m);
+  document.getElementById('schFirst').textContent=fmt(firstAll)+' ₽';
+  document.getElementById('schRest').textContent=(RM-1)+' × '+fmt(mAll)+' ₽ · каждое '+SCHED_DAY+'-е число';
+  renderSched(document.getElementById('schedList'),RM,firstAll,mAll);
   if(PD){document.getElementById('schFirstLab').textContent='Первый платёж · '+months(1)[0].replace(' г.','');}
   /* допродукт: адвокатский запрет (решение заказчика 20.07) */
   if(ADV){
     document.getElementById('advBlock').style.display='';
-    document.getElementById('advBlockV').textContent=ADV_RASS?'5 000 ₽ сегодня + 20 000 ₽ частями':fmt(ADV_PRICE)+' ₽ · разом';
+    document.getElementById('advBlockV').textContent=ADV_RASS?('5 000 ₽ с первым платежом + ~'+fmt(addM)+' ₽/мес в графике'):'20 000 ₽ · с первым платежом';
     document.getElementById('docAdv').style.display='';
-    document.getElementById('docAdvV').textContent=ADV_RASS?'25 000 ₽ · 5 000 сегодня, 20 000 частями':fmt(ADV_PRICE)+' ₽ · разом';
+    document.getElementById('docAdvV').textContent=ADV_RASS?('25 000 ₽ · 5 000 с первым, ~'+fmt(addM)+' ₽/мес в графике'):'20 000 ₽ · с первым платежом';
   }
   /* договор и оплата (кредитного доктора в РДГ нет) */
   document.getElementById('docTotal').textContent=fmt(vip?VIP:RASS_TOTAL)+' ₽'+(vip?' · VIP':'');
-  document.getElementById('docPlan').textContent=vip?'единовременно':`${RM} платежей по ${fmt(m)} ₽, ${SCHED_DAY}-е число`;
-  const first=vip?VIP:m;
+  document.getElementById('docPlan').textContent=vip?'единовременно':`${RM} платежей по ${addM?'~':''}${fmt(mAll)} ₽, ${SCHED_DAY}-е число${addF?' · первый '+fmt(firstAll)+' ₽':''}`;
+  const first=vip?VIP:firstAll;
   document.getElementById('docFirst').textContent=fmt(first)+' ₽';
   document.getElementById('payAmount').innerHTML=`${fmt(first)} <small>₽</small>`;
   document.getElementById('payExact').textContent=fmt(first);
