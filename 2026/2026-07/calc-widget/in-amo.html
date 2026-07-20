@@ -346,6 +346,19 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <!-- «Клиенту голосом» — строки Камрана: внизу формы, где менеджер оказывается после ввода (правка заказчика 15.07) -->
           <div class="voice" id="w_voice" style="display:none"></div>
 
+        <!-- РАССРОЧКА И ДОПРОДУКТЫ (решение заказчика 20.07): дата 1-го платежа и срок задаются ДО отправки —
+             страница клиента открывается с готовым графиком; допы: адвокатский запрет (оба продукта, 20 000 разом / 25 000 рассрочка),
+             сохранение имущества (только БФЛ-«сохранение», 60 000 ₽/объект, в рассрочку) -->
+        <div class="actsep">Рассрочка · график на странице клиента</div>
+        <div class="rowf"><span class="rlab">Дата 1-го платежа · пусто = ближайшее 25-е</span><input id="w_payDate" class="rin" type="date" style="width:126px" onchange="rassLine()"></div>
+        <div class="rowf"><span class="rlab">Срок рассрочки, мес</span><input id="w_rassM" class="rin" type="number" min="2" max="24" value="14" oninput="rassLine()"></div>
+        <div class="rowf freeline"><span class="rlab">Итог услуг неизменен</span><b id="w_rassLine">189 000 ₽ · платёж 13 500 ₽/мес</b></div>
+        <label style="margin-top:10px">Допродукты</label>
+        <label class="ocki" style="margin-top:4px"><input type="checkbox" id="w_adv" onchange="advUI()"> Адвокатский запрет</label>
+        <div class="rowf" id="w_advRow" style="display:none"><span class="rlab">Оплата запрета</span><div class="seg sm" id="w_advMode" style="width:196px"><button class="on" data-am="once" onclick="setAdvMode(this)">разом · 20 000</button><button data-am="rass" onclick="setAdvMode(this)">рассрочка · 25 000</button></div></div>
+        <label class="ocki" id="w_keepWrap" style="display:none"><input type="checkbox" id="w_keep" onchange="keepUI()"> Сохранение имущества · 60 000 ₽/объект · в рассрочку</label>
+        <div class="rowf" id="w_keepRow" style="display:none"><span class="rlab">Объектов (залог/ипотека)</span><input id="w_keepN" class="rin" type="number" min="1" value="1"></div>
+
         <div class="actsep">Действия ⚡</div>
         <div id="pane_act">
           <!-- «одна сумма к оплате» (правка заказчика 16.07): частичку выторговывает менеджер голосом, страница показывает её как факт -->
@@ -632,6 +645,9 @@ function calc(){
   const P60=planCalc(body,60), P36=planCalc(body,36), PE=planCalc(body,term);
   const v=document.getElementById('w_verdict'), kvs=document.getElementById('w_kvs');
   document.getElementById('w_rdgFields').style.display=prod==='rdg'?'':'none';
+  /* сохранение имущества — только БФЛ-«сохранение» (решение заказчика 20.07) */
+  document.getElementById('w_keepWrap').style.display=prod==='bfl'?'flex':'none';
+  document.getElementById('w_keepRow').style.display=(prod==='bfl'&&document.getElementById('w_keep').checked)?'':'none';
   /* доход/дети/регион нужны в ОБОИХ продуктах: в РДГ — допуск к плану, в БФЛ — удержания сверх ПМ семьи (ст. 213.25) */
   document.getElementById('w_rdgIncome').style.display='';
   document.getElementById('row_income').style.display='';
@@ -781,8 +797,9 @@ function presentUrl(){
   const ki=kiLoaded?{ki:1}:{}; /* КИ загружена → презентация показывает точные числа + блок кредиторов */
   const dueV=parseFloat(document.getElementById('w_due').value)||0;
   const due=dueV>0?{due:Math.max(1000,Math.round(dueV))}:{}; /* частичка от менеджера: минимум 1 000 (канон) */
-  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,...due,term:last.eff,...(last.nous>0?{nous:last.nous}:{})}); /* РДГ идёт по телу плана (без ипотеки) */
-  if(last.route==='БФЛ') return '../client-presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,...due});
+  const rp=rassParams(); /* дата 1-го платежа, срок, допродукты (решение заказчика 20.07) */
+  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,...due,term:last.eff,...(last.nous>0?{nous:last.nous}:{}),...rp}); /* РДГ идёт по телу плана (без ипотеки) */
+  if(last.route==='БФЛ') return '../client-presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,...due,...rp});
   return null;
 }
 /* строка данных + primary-кнопка + статус отправки — единый рендер состояния */
@@ -867,6 +884,26 @@ function sendPresentation(){
   t.innerHTML='✈ Презентация ('+last.route+') отправлена клиенту'+(kiLoaded?' — точные числа по КИ.':' — числа со слов, уточним по КИ.');
   setTimeout(()=>{t.style.display='none';},6000);
 }
+/* ── рассрочка и допродукты (решение заказчика 20.07): дата/срок графика + адвокатский запрет 20 000/25 000 + сохранение 60 000/объект ── */
+const ADVOCATE_ONCE=20000, ADVOCATE_RASS=25000, KEEP_PER_OBJ=60000;
+function rassLine(){
+  const rm=Math.max(2,Math.min(24,Math.round(+document.getElementById('w_rassM').value||14)));
+  const pay=Math.round(189000/rm);
+  document.getElementById('w_rassLine').textContent='189 000 ₽ · платёж '+(rm===14?'':'~')+fmt(pay)+' ₽/мес'+(rm===14?'':' · '+rm+' мес');
+}
+function advUI(){document.getElementById('w_advRow').style.display=document.getElementById('w_adv').checked?'':'none';}
+function keepUI(){document.getElementById('w_keepRow').style.display=(prod==='bfl'&&document.getElementById('w_keep').checked)?'':'none';}
+function setAdvMode(btn){document.querySelectorAll('#w_advMode button').forEach(x=>x.classList.toggle('on',x===btn));}
+function advMode(){const b=document.querySelector('#w_advMode button.on');return b?b.dataset.am:'once';}
+function rassParams(){
+  const p={};
+  const pd=document.getElementById('w_payDate').value; if(pd) p.pd=pd;
+  const rm=Math.max(2,Math.min(24,Math.round(+document.getElementById('w_rassM').value||14))); if(rm!==14) p.rm=rm;
+  if(document.getElementById('w_adv').checked){p.adv=1;p.advm=advMode();}
+  if(prod==='bfl'&&document.getElementById('w_keep').checked){p.keep=Math.max(1,Math.round(+document.getElementById('w_keepN').value||1));}
+  return p;
+}
+
 /* ── исход звонка (решение заказчика 17.07: дата оплаты вбивается в пульте; контракт ТЗ §10.2 —
    signed_date без даты / частичка <1000 / отказ без цитаты не сохраняются; «КИ запрошена» — флаг, не исход) ── */
 let ocSel=null;
