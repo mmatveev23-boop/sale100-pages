@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ДОНУЛЯ — ваши условия · макет-вариант «editorial»</title>
+<!-- МАКЕТ-ВАРИАНТ №2 клиентской презентации (заказчик 20.07 ночь): Big Typography / Editorial.
+     Один тезис = один слайд-экран, огромный заголовок, минимум текста — слайд читается за 3 секунды.
+     Структура продажи: боль → цена бездействия → решение → выгода → доказательства → оффер → следующий шаг.
+     Токены и голос ДОНУЛЯ; один намеренный тёмный слайд (цена бездействия) как цветовой удар.
+     ДЕМО-ДАННЫЕ канона. ВАРИАНТ ДЛЯ ОБСУЖДЕНИЯ: боевое не заменяет, в связку не включён. -->
+<style>
+@font-face{font-family:"Golos Text";src:url(../calc-widget/fonts/golos-var-cyrillic.woff2) format("woff2");font-weight:400 800;font-display:swap;unicode-range:U+0400-04FF,U+2010-2027,U+20BD}
+@font-face{font-family:"Golos Text";src:url(../calc-widget/fonts/golos-var-latin.woff2) format("woff2");font-weight:400 800;font-display:swap;unicode-range:U+0000-00FF,U+2013-2014,U+2018-201F,U+2026}
+:root{
+  --paper:#FAF7F2; --ink:#1C1A16; --muted:#68625A; --faint:#9B948A;
+  --pine:#0B3B2E; --green:#0F6B4F; --green-ink:#0B5540;
+  --gold-ink:#8A6212; --gold-hi:#F4C775; --alert:#A8442E;
+  --line:rgba(28,26,22,.11); --ease:cubic-bezier(.23,1,.32,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-snap-type:y proximity}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+h1 .num,h2 .num{white-space:nowrap} /* сумма не рвётся посреди числа */
+.top{position:fixed;inset:0 0 auto 0;z-index:5;display:flex;justify-content:space-between;align-items:center;padding:14px 20px;pointer-events:none}
+.top .brand{font-size:15px;font-weight:800;color:var(--pine)}
+.top .live{font-size:11.5px;color:var(--muted)}
+.top.inv .brand{color:#fff}.top.inv .live{color:rgba(255,255,255,.7)}
+.slide{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:84px 20px 64px;scroll-snap-align:start;position:relative}
+.slide .in{max-width:820px;margin:0 auto;width:100%}
+h1,h2{font-weight:800;letter-spacing:-.03em;line-height:1.04;font-size:clamp(38px,8.2vw,84px)}
+.acc{color:var(--green-ink)}
+.gold{color:var(--gold-ink)}
+.bad{color:var(--alert)}
+.sub{margin-top:22px;font-size:clamp(15px,2.2vw,19px);color:var(--muted);max-width:34ch;line-height:1.55}
+.sub b{color:var(--ink);font-weight:700}
+.kv{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px 26px;font-size:14.5px;color:var(--muted)}
+.kv b{color:var(--ink)}
+/* тёмный слайд — один, намеренно: цена бездействия */
+.slide.dark{background:linear-gradient(170deg,#2A1714 0%,#1C0E0B 100%)}
+.slide.dark h2{color:#F2B8A2}
+.slide.dark .sub{color:rgba(255,255,255,.75)}
+.slide.dark .sub b{color:#fff}
+/* финал — зелёный, как обложка договора */
+.slide.deal{background:radial-gradient(120% 90% at 85% -10%,#135741 0%,transparent 55%),linear-gradient(165deg,#0C4233 0%,#0B3B2E 60%,#082A21 100%)}
+.slide.deal h2{color:#fff}
+.slide.deal h2 .gold{color:var(--gold-hi)}
+.slide.deal .sub{color:rgba(255,255,255,.8)}
+.slide.deal .sub b{color:#fff}
+.cta{display:inline-block;margin-top:30px;background:var(--gold-hi);color:#082A21;text-decoration:none;font-size:17px;font-weight:800;padding:17px 34px;border:0;border-radius:14px;cursor:pointer;transition:transform .15s var(--ease)}
+.cta:active{transform:translateY(1px)}
+.cnote{margin-top:12px;font-size:12.5px;color:rgba(255,255,255,.65)}
+.next{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:12px;color:var(--faint)}
+.hr{margin-top:26px;width:64px;height:4px;border-radius:2px;background:var(--green)}
+.slide.dark .hr{background:#F2B8A2}
+.req{padding:0 20px 26px;text-align:center;font-size:11px;color:var(--faint)}
+@media (prefers-reduced-motion:no-preference){
+  .in{animation:rise .6s var(--ease) both}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+
+<div class="top" id="topbar"><div class="brand">ДОНУЛЯ</div><div class="live">идёт звонок · эксперт на линии</div></div>
+
+<!-- 1 · БОЛЬ -->
+<section class="slide"><div class="in">
+  <h1>Долг <span class="num">1 240 000 ₽</span><br>не уменьшается.</h1>
+  <div class="hr"></div>
+  <p class="sub">Вы платите <b class="num">~61 500 ₽</b> в месяц, и почти всё уходит в проценты.</p>
+</div><div class="next">листайте — эксперт объяснит каждый экран</div></section>
+
+<!-- 2 · ЦЕНА БЕЗДЕЙСТВИЯ -->
+<section class="slide dark"><div class="in">
+  <h2>Если ничего не менять — отдадите до <span class="num">~2 214 000 ₽</span>.</h2>
+  <div class="hr"></div>
+  <p class="sub">При просрочках долг не уменьшается: вы платите деньги, которые не брали.</p>
+</div></section>
+
+<!-- 3 · РЕШЕНИЕ -->
+<section class="slide"><div class="in">
+  <h2>Платёж станет <span class="acc num">~36 856 ₽</span>.</h2>
+  <div class="hr"></div>
+  <p class="sub"><b>План по 127-ФЗ.</b> Рост долга замораживается, план утверждает суд. Вы — не банкрот.</p>
+</div></section>
+
+<!-- 4 · ВЫГОДА -->
+<section class="slide"><div class="in">
+  <h2><span class="gold num">~24 644 ₽</span> остаются в семье. Каждый месяц.</h2>
+  <div class="hr"></div>
+  <p class="sub">Разница между платежом сейчас и платежом по плану.</p>
+</div></section>
+
+<!-- 5 · ДОКАЗАТЕЛЬСТВА -->
+<section class="slide"><div class="in">
+  <h2><span class="acc num">10 000</span> человек уже списали долги с нами.</h2>
+  <div class="hr"></div>
+  <p class="sub">Кейс из практики: вместо <b class="num">~9 927 360 ₽</b> клиент отдал <b class="num">~1 070 000 ₽</b>.</p>
+  <div class="kv"><span>работаем официально</span><span>расчёт — по вашей кредитной истории</span><span>итог утверждает суд</span></div>
+</div></section>
+
+<!-- 6 · ОФФЕР -->
+<section class="slide"><div class="in">
+  <h2>Услуги: <span class="acc num">13 500 ₽</span> в месяц.</h2>
+  <div class="hr"></div>
+  <p class="sub"><b class="num">14 платежей · всего 189 000 ₽.</b> Сразу — 169 000 ₽ (экономия 20 000 ₽). Госплатежи 50 000 ₽ — отдельно, напрямую государству.</p>
+  <div class="kv"><span><b>Гарантия · п. 6.2:</b> нет плана — вернём деньги</span><span><b>Подарок:</b> SIM-карта, год связи</span></div>
+</div></section>
+
+<!-- 7 · СЛЕДУЮЩИЙ ШАГ -->
+<section class="slide deal"><div class="in">
+  <h2>Подпишем <span class="gold">сейчас</span>?</h2>
+  <div class="hr" style="background:var(--gold-hi)"></div>
+  <p class="sub">Код из СМС — это подпись. Любая сумма сегодня — и юрист начинает работу сегодня.</p>
+  <button class="cta">Всё верно — подписываем</button>
+  <div class="cnote">ничего не подписывается и не списывается без вашего согласия</div>
+</div></section>
+
+<div class="req">Макет-вариант для обсуждения · демо-данные · ДОНУЛЯ · ИП Плешаков Руслан Тамазиевич · ИНН 470516340503</div>
+
+<script>
+/* шапка перекрашивается на тёмных слайдах; лёгкий IO — без скролл-обработчиков */
+const top=document.getElementById('topbar');
+const dark=[...document.querySelectorAll('.slide.dark,.slide.deal')];
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)top.classList.add('inv');else if(!dark.some(d=>{const r=d.getBoundingClientRect();return r.top<90&&r.bottom>90;}))top.classList.remove('inv');});},{rootMargin:'-2% 0px -85% 0px'});
+dark.forEach(d=>io.observe(d));
+</script>
+</body>
+</html>
