@@ -238,9 +238,9 @@ h1 .hl{color:var(--green)}
 .save-hero .ss b{color:#9FE8C6}
 .bars{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);padding:15px 16px;margin-top:12px}
 .bar + .bar{margin-top:12px}
-.bar .bl{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
+.bar .bl{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:6px}
 .bar .bl span{color:var(--muted)}
-.bar .bl b{font-weight:800}
+.bar .bl b{font-weight:800;font-size:19px;letter-spacing:-.01em;white-space:nowrap}
 .bar i{display:block;height:14px;border-radius:7px}
 .bar.now i{background:#E4B8AC}
 .bar.now .bl b{color:var(--alert)}
@@ -248,9 +248,9 @@ h1 .hl{color:var(--green)}
 .bar.us .bl b{color:var(--green-ink)}
 .bars .bnote{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
 /* итог-плашка выгоды внутри карты баров — тот же визуальный язык, что .cs-save кейс-блока (зелёный градиент + золото) */
-.bars .bar-save{margin-top:14px;background:linear-gradient(165deg,#128257 0%,#0F6B4F 60%,#0B5540 100%);color:#fff;border-radius:12px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.bars .bar-save span{font-size:13.5px;font-weight:700}
-.bars .bar-save b{font-size:27px;font-weight:800;letter-spacing:-.02em;color:#F4C775;white-space:nowrap}
+.bars .bar-save{margin-top:14px;background:linear-gradient(165deg,#128257 0%,#0F6B4F 60%,#0B5540 100%);color:#fff;border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.bars .bar-save span{font-size:12.5px;font-weight:700}
+.bars .bar-save b{font-size:18px;font-weight:800;letter-spacing:-.01em;color:#F4C775;white-space:nowrap}
 /* состояние «по КИ» и «подписал-не-оплатил» */
 .kibadge{margin-top:8px;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:5px 11px}
 .kibadge.words{color:var(--muted);background:#EFEBE3} /* «со слов» — приглушённый; при КИ его заменяет kiBadge */
@@ -270,13 +270,13 @@ h1 .hl{color:var(--green)}
 .case{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-box,16px);padding:15px 17px;box-shadow:0 8px 22px -14px rgba(11,59,46,.4)}
 .cs-badge{display:inline-block;background:var(--green);color:#fff;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-radius:8px;padding:4px 12px}
 .cs-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
-.cs-row span{font-size:13px;color:var(--muted);line-height:1.4}
-.cs-row span small{display:block;margin-top:3px;font-size:11.5px;color:var(--faint)}
-.cs-row b{font-size:19px;font-weight:800;letter-spacing:-.01em;color:var(--ink);white-space:nowrap}
+.cs-row span{font-size:14.5px;color:var(--muted);line-height:1.4}
+.cs-row span small{display:block;margin-top:3px;font-size:12px;color:var(--faint)}
+.cs-row b{font-size:22px;font-weight:800;letter-spacing:-.01em;color:var(--ink);white-space:nowrap}
 .cs-row b.bad{color:var(--brick,#A8442E)}
-.cs-save{margin-top:12px;background:linear-gradient(165deg,#128257 0%,#0F6B4F 60%,#0B5540 100%);color:#fff;border-radius:12px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.cs-save span{font-size:14px;font-weight:700}
-.cs-save b{font-size:25px;font-weight:800;letter-spacing:-.02em;color:#F4C775;white-space:nowrap}
+.cs-save{margin-top:12px;background:linear-gradient(165deg,#128257 0%,#0F6B4F 60%,#0B5540 100%);color:#fff;border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.cs-save span{font-size:12.5px;font-weight:700}
+.cs-save b{font-size:18px;font-weight:800;letter-spacing:-.01em;color:#F4C775;white-space:nowrap}
 
 .whatwedo{background:var(--green-soft);border:1px solid rgba(15,107,79,.25);border-radius:var(--r-box);padding:13px 15px;margin-top:12px}
 .whatwedo .wd-h{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--green-ink);margin-bottom:5px}
