@@ -476,7 +476,7 @@ h1 .hl{color:var(--green)}
         </div>
 
         <div class="tariffs stg">
-          <button class="trf sel" id="trfR" onclick="setTariff('rassrochka')"><div><div class="tn">Рассрочка на 14 месяцев</div><small class="num">13 500 ₽/мес · без банка и процентов</small></div><span class="rad"></span></button>
+          <button class="trf sel" id="trfR" onclick="setTariff('rassrochka')"><div><div class="tn" id="trfRTitle">Рассрочка на 14 месяцев</div><small class="num" id="trfRSub">13 500 ₽/мес · без банка и процентов</small></div><span class="rad"></span></button>
           <button class="trf" id="trfV" onclick="setTariff('vip')"><div><div class="tn">Оплата сразу · VIP</div><small class="num">169 000 ₽ · экономия 20 000 ₽</small></div><span class="rad"></span></button>
         </div>
 
@@ -903,6 +903,10 @@ function toggleCalc(){
   d.style.display=open?'':'none';
   b.textContent=open?'Скрыть расчёт':'Как посчитана выгода';
 }
+(function(){const m=Math.round(RASS_TOTAL/RM);
+  document.getElementById('trfRTitle').textContent='\u0420\u0430\u0441\u0441\u0440\u043e\u0447\u043a\u0430 \u043d\u0430 '+RM+' \u043c\u0435\u0441\u044f\u0446\u0435\u0432';
+  const sub=document.getElementById('trfRSub');
+  sub.textContent=sub.textContent.replace(/^[\d\s\u00a0\u202f]+\u20bd/, fmt(m)+' \u20bd');})();
 function setTariff(t){tariff=t;document.getElementById('trfR').classList.toggle('sel',t==='rassrochka');document.getElementById('trfV').classList.toggle('sel',t==='vip');recalc();}
 function setKd(v){kd=v;document.getElementById('kdY').classList.toggle('sel',v);document.getElementById('kdN').classList.toggle('sel',!v);recalc();}
 function renderKdDelta(){
