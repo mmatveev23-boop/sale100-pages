@@ -773,6 +773,10 @@ const KION=Q.get('ki')==='1', SIGNED=Q.get('signed')==='1', PART=Math.max(0,+Q.g
 /* ?due=N — «одна сумма к оплате» от менеджера (частичка, выторгована голосом): экран оплаты показывает её как факт.
    Действует до внесения денег: если есть ?part (уже внёс) — сумму ведёт part-логика, due игнорируется. */
 const DUE=Math.max(0,+Q.get('due')||0);
+/* данные для договора из пульта (заказчик 20.07): ?fio — полное ФИО, ?dob=ГГГГ-ММ-ДД — дата рождения;
+   префиллят экран «Оформление» и подставляются в текст договора при просмотре */
+const FIO=(Q.get('fio')||'').trim().slice(0,80);
+const DOB=(m=>m?m[3]+'.'+m[2]+'.'+m[1]:'')((Q.get('dob')||'').match(/^(\d{4})-(\d{2})-(\d{2})$/));
 /* канонный демо-набор КИ — реальный обезличенный отчёт «Скоринг Бюро» 10.07.2026: 13 действующих договоров на 3 029 036 ₽ (для списания — полный долг).
    Просрочек сейчас нет, но по 15 договорам были; рейтинг 508, 52 отказа. payNow = среднемес. платёж из отчёта */
 const KI={debt:3029036, count:13, interest:72000, payNow:119718, overdueHist:15, rating:508, refused:52, mfo:4, maxRate:292,
@@ -975,6 +979,9 @@ if(Q.get('name')){
   const f=document.getElementById('fio');
   if(f){ f.value=CLIENT.name; document.getElementById('docFio').textContent=CLIENT.name; }
 }
+/* полное ФИО и дата рождения из пульта — приоритет над коротким ?name */
+if(FIO){ const f=document.getElementById('fio'); if(f)f.value=FIO; const d=document.getElementById('docFio'); if(d)d.textContent=FIO; }
+if(DOB){ const d=document.getElementById('dob'); if(d)d.value=DOB; }
 /* состояние «по КИ»: бейдж + блок кредиторов из реального обезличенного отчёта; без КИ — бейдж «со слов» */
 if(KION){
   document.getElementById('wordsBadge').style.display='none';
@@ -1041,11 +1048,58 @@ const b64url=(b64,type)=>{const bin=atob(b64),bytes=new Uint8Array(bin.length);f
   }catch(e){document.querySelectorAll('[data-dl-contract]').forEach(a=>a.style.display='none');}
 })();
 let contractUrl=null;
+/* просмотр договора = живой мерж шаблона (заказчик 20.07 «обнулятор формирует договор»):
+   рассрочка, доктор и допы из состояния страницы (математика зеркалит recalc), личные данные с экрана «Оформление»
+   (только если пульт прислал ?fio/?dob, иначе образец не трогаем), остальные merge-поля amo → пропуск
+   «вносится при оформлении». Чинит дыру: раньше клиент видел в договоре сырые {{Сделка|…}}. Пересборка при каждом открытии */
+function buildContract(){
+  const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const bin=atob(CONTRACT_HTML_B64),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  let h=new TextDecoder('utf-8').decode(bytes);
+  const gap='__________ (вносится при оформлении)';
+  /* значение поля экрана «Оформление», если оно отличается от демо-дефолта (иначе пусто) */
+  const live=id=>{const el=document.getElementById(id);return el&&el.value&&el.value.trim()!==el.defaultValue?el.value.trim():'';};
+  const vip=tariff==='vip', kdOn=kd;
+  const term=RM+(kdOn?KD_M:0), total=RASS_TOTAL+(kdOn?KD_PRICE:0), m=Math.round(total/term);
+  const addTotal=((ADV&&ADV_RASS)?20000:0)+KEEP_SUM, addF=ADV?(ADV_RASS?5000:20000):0, addKd=Math.round(addTotal/term);
+  const mAll=m+addKd, firstPay=vip?VIP+(kdOn?KD_PRICE:0):mAll+addF;
+  const svcTotal=vip?VIP+(kdOn?KD_PRICE:0):total;
+  const pd1=PD?PD.toLocaleDateString('ru-RU'):'';
+  const rep=[
+    ['{{Сделка|Тип услуги|722821}}','Списание долга · 127-ФЗ'+(kdOn?' + Кредитный доктор':'')+(vip?' · VIP':'')],
+    ['{{Сделка|Сумма договора(тп)|680116}} руб.',fmt(svcTotal)+' руб.'],
+    ['{{Сделка|Сумма первого платежа(тп)|680120}} руб.',fmt(firstPay)+' руб.'],
+    ['{{Сделка|Дата первого платежа|670503}} г.',pd1?pd1+' г.':'определяется Сторонами при заключении договора'],
+    ['{{Сделка|Рассрочка (период)|719961}} месяцев',vip?'без рассрочки · оплата одним платежом':term+' месяцев'],
+    ['{{Сделка|Рассрочка (ежемес. платеж)|719979}} руб.',vip?'—':fmt(mAll)+' руб.'],
+    ['Ежемесячно не позднее {{Сделка|Дата платежа (число)|660257}} числа каждого месяца',vip?'Оплата одним платежом при заключении договора':'Ежемесячно не позднее '+SCHED_DAY+'-го числа каждого месяца'],
+    ['{{Payer|Номер по порядку}}',vip?'1':'1–'+term],
+    ['{{Payer|Сумма}}',vip?fmt(firstPay)+' ₽':'первый '+fmt(firstPay)+' ₽, далее '+fmt(mAll)+' ₽'],
+    ['{{Payer|Дата ожидания}}',vip?(pd1||'при заключении договора'):(pd1?'с '+pd1+', ':'')+'каждое '+SCHED_DAY+'-е число'],
+    ['стоимость услуг 189 000 ₽, рассрочка 14 месяцев','стоимость услуг '+fmt(svcTotal)+' ₽'+(vip?', оплата одним платежом':', рассрочка '+term+' месяцев')]
+  ];
+  if(FIO||DOB){
+    const fio=live('fio')||FIO, dob=live('dob')||DOB, pass=live('pass'), issued=live('issued'), phone=live('phone');
+    const shrt=(p=>p.length>1?p[0]+' '+p.slice(1).map(x=>x[0].toUpperCase()+'.').join(' '):p[0]||'')(esc(fio).split(/\s+/).filter(Boolean));
+    rep.push(
+      ['Ковалёва Виктория Юрьевна',fio?esc(fio):gap],
+      ['Ковалёва В. Ю.',shrt||gap],
+      ['40 17 № 682 394',pass?esc(pass):gap],
+      ['Дата рождения: {{Сделка|Дата рождения|722309}}','Дата рождения: '+(dob?esc(dob):gap)],
+      ['Выдан: {{Сделка|дата выдачи паспорта (д)|699917}} {{Сделка|кем выдан паспорт (д)|699915}}','Выдан: '+(issued?esc(issued):gap)],
+      ['Контактный телефон: {{Контакт|Телефон|572517}}','Контактный телефон: '+(phone?esc(phone):gap)]
+    );
+  }
+  for(const p of rep)h=h.split(p[0]).join(p[1]);
+  h=h.replace(/\{\{[^{}]{1,80}\}\}/g,gap); /* всё оставшееся из merge-полей amo — аккуратный пропуск */
+  return URL.createObjectURL(new Blob([h],{type:'text/html'}));
+}
 function openContract(){
   try{
-    if(!contractUrl)contractUrl=b64url(CONTRACT_HTML_B64,'text/html');
+    if(contractUrl)URL.revokeObjectURL(contractUrl);
+    contractUrl=buildContract();
     const f=document.getElementById('cFrame');
-    if(!f.src)f.src=contractUrl;
+    f.src=contractUrl;
   }catch(e){return;}
   document.getElementById('cModal').hidden=false;
   document.documentElement.style.overflow='hidden';

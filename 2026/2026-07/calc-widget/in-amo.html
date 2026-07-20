@@ -346,6 +346,13 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <!-- «Клиенту голосом» — строки Камрана: внизу формы, где менеджер оказывается после ввода (правка заказчика 15.07) -->
           <div class="voice" id="w_voice" style="display:none"></div>
 
+        <!-- ДАННЫЕ ДЛЯ ДОГОВОРА (запрос заказчика 20.07): обнулятор формирует договор — ФИО и дата рождения
+             уходят в ссылку (?fio/?dob), префиллят экран «Оформление» и подставляются в текст договора.
+             Поля необязательные: пусто = данные вносит эксперт на странице со слов клиента, дефолт-демо не меняется -->
+        <div class="actsep">Клиент · в договор</div>
+        <div class="rowf"><span class="rlab">ФИО полностью · как в паспорте</span><input id="w_fio" class="rin" type="text" placeholder="Фамилия Имя Отчество" autocomplete="off" oninput="updateSendUI()"></div>
+        <div class="rowf"><span class="rlab">Дата рождения</span><input id="w_dob" class="rin" type="date" style="width:126px" onchange="updateSendUI()"></div>
+
         <!-- РАССРОЧКА И ДОПРОДУКТЫ (решение заказчика 20.07): дата 1-го платежа и срок задаются ДО отправки —
              страница клиента открывается с готовым графиком; допы: адвокатский запрет (оба продукта, 20 000 разом / 25 000 рассрочка),
              сохранение имущества (только БФЛ-«сохранение», 60 000 ₽/объект, в рассрочку) -->
@@ -800,8 +807,12 @@ function presentUrl(){
   const dueV=parseFloat(document.getElementById('w_due').value)||0;
   const due=dueV>0?{due:Math.max(1000,Math.round(dueV))}:{}; /* частичка от менеджера: минимум 1 000 (канон) */
   const rp=rassParams(); /* дата 1-го платежа, срок, допродукты (решение заказчика 20.07) */
-  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,...due,term:last.eff,...(last.nous>0?{nous:last.nous}:{}),...rp}); /* РДГ идёт по телу плана (без ипотеки) */
-  if(last.route==='БФЛ') return '../client-presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,...due,...rp});
+  /* данные для договора (заказчик 20.07): ФИО и дата рождения — на экран «Оформление» и в текст договора */
+  const fioV=(document.getElementById('w_fio').value||'').trim().slice(0,80);
+  const dobV=document.getElementById('w_dob').value||'';
+  const pers={...(fioV?{fio:fioV}:{}),...(dobV?{dob:dobV}:{})};
+  if(last.route==='РДГ') return '../client-presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,...due,term:last.eff,...(last.nous>0?{nous:last.nous}:{}),...rp,...pers}); /* РДГ идёт по телу плана (без ипотеки) */
+  if(last.route==='БФЛ') return '../client-presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,...due,...rp,...pers});
   return null;
 }
 /* строка данных + primary-кнопка + статус отправки — единый рендер состояния */
