@@ -287,6 +287,18 @@ h1 .hl{color:var(--green)}
 .whatwedo .wf span{color:var(--muted);flex-shrink:0}
 .whatwedo .wf b{font-weight:600;text-align:right;color:var(--ink)}
 .whatwedo .wd-note{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5}
+/* бенто-тезисы «что делаем» (решение заказчика 20.07 ночь, приём макета-бенто): выгоды словами, ни одной новой цифры */
+.wd-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wdc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.wdc b{display:block;font-size:14px;font-weight:800;letter-spacing:-.01em;color:var(--green-ink);line-height:1.25}
+.wdc small{display:block;margin-top:3px;font-size:11.5px;color:var(--muted);line-height:1.4}
+/* тёмный акцент цены бездействия (приём editorial-макета): боль тёмная → план спокойный → экономия зелёная */
+.cs-row.csd{background:linear-gradient(165deg,#3E2723 0%,#2A1714 100%);border-bottom:0;border-radius:12px;padding:11px 14px;margin-bottom:6px}
+.cs-row.csd span{color:rgba(255,255,255,.85)}
+.cs-row.csd span small{color:rgba(255,255,255,.55)}
+.cs-row.csd b.bad{color:#F2B8A2}
+/* соцпруф (формулировка одобрена заказчиком ранее для образца заключения) */
+.proofline{margin-top:10px;text-align:center;font-size:13px;font-weight:700;color:var(--green-ink)}
 .cmp .duo{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
 .cmp .duo > div{padding:11px 15px}
 .cmp .duo > div + div{border-left:1px solid var(--line)}
@@ -501,17 +513,23 @@ h1 .hl{color:var(--green)}
         <!-- ВЫГОДА — формат кейсов заказчика (PDF 20.07): три числа одной историей. Главная задача экрана — выгода. -->
         <div class="case stg" id="caseBlock" style="display:none">
           <div class="cs-badge">Выгода</div>
-          <div class="cs-row"><span>Без нас вы отдадите<small id="csWhy">при просрочках долг не уменьшается — вы платите деньги, которые не брали</small></span><b class="num bad" id="csNoUs">—</b></div>
+          <div class="cs-row csd"><span>Без нас вы отдадите<small id="csWhy">при просрочках долг не уменьшается — вы платите деньги, которые не брали</small></span><b class="num bad" id="csNoUs">—</b></div>
           <div class="cs-row"><span>По плану РДГ вы отдадите<small>тело долга + 7% управляющего · рост процентов заморожен, утверждает суд</small></span><b class="num" id="csPlan">—</b></div>
           <div class="cs-save"><span>Экономия:</span><b class="num" id="csSave">—</b></div>
         </div>
 
+        <div class="proofline stg">✓ Списали долги более чем у 10 000 человек</div>
+
         <div class="whatwedo stg">
           <div class="wd-h">Что делаем и сроки</div>
-          <div class="wd-t"><b>Реструктуризация долгов по 127-ФЗ.</b> Как только суд принимает заявление, платежи банкам прекращаются (ст. 213.4): всё это время вы платите только нам, а не по кредитам. Дальше — по графику, утверждённому судом, вы не признаётесь банкротом.</div>
+          <div class="wd-cards">
+            <div class="wdc"><b>Вы — не банкрот</b><small>реструктуризация — план выплат по 127-ФЗ</small></div>
+            <div class="wdc"><b>Платежи банкам — на паузу</b><small>с принятия заявления судом · ст. 213.4 · платите только нам</small></div>
+            <div class="wdc"><b>График утверждает суд</b><small>итог зафиксирован официально</small></div>
+            <div class="wdc"><b>Звонки кредиторов — на нас</b><small>общение с банками берём на себя</small></div>
+          </div>
           <div class="wd-facts">
-            <div class="wf"><span>Выгода</span><b>сразу — платежи банкам прекращаются</b></div>
-            <div class="wf"><span>К суду</span><b>2–3 месяца (госплатежи заранее — ~2)</b></div>
+                        <div class="wf"><span>К суду</span><b>2–3 месяца (госплатежи заранее — ~2)</b></div>
             <div class="wf"><span>Заседание и процедура</span><b>~1 + ~6 месяцев</b></div>
             <div class="wf"><span>Всего с подготовкой</span><b>~8–9 месяцев</b></div>
           </div>
@@ -711,10 +729,14 @@ h1 .hl{color:var(--green)}
         </div>
         <div class="whatwedo stg" id="whatWeDo" style="display:none">
           <div class="wd-h">Что делаем и сроки</div>
-          <div class="wd-t"><b>Реструктуризация долгов по 127-ФЗ.</b> Как только суд принимает заявление, платежи банкам прекращаются (ст. 213.4): всё это время вы платите только нам, а не по кредитам. Дальше — по графику, утверждённому судом, вы не признаётесь банкротом.</div>
+          <div class="wd-cards">
+            <div class="wdc"><b>Вы — не банкрот</b><small>реструктуризация — план выплат по 127-ФЗ</small></div>
+            <div class="wdc"><b>Платежи банкам — на паузу</b><small>с принятия заявления судом · ст. 213.4 · платите только нам</small></div>
+            <div class="wdc"><b>График утверждает суд</b><small>итог зафиксирован официально</small></div>
+            <div class="wdc"><b>Звонки кредиторов — на нас</b><small>общение с банками берём на себя</small></div>
+          </div>
           <div class="wd-facts">
-            <div class="wf"><span>Выгода</span><b>сразу — платежи банкам прекращаются</b></div>
-            <div class="wf"><span>К суду</span><b>2–3 месяца (госплатежи заранее — ~2)</b></div>
+                        <div class="wf"><span>К суду</span><b>2–3 месяца (госплатежи заранее — ~2)</b></div>
             <div class="wf"><span>Заседание и процедура</span><b>~1 + ~6 месяцев</b></div>
             <div class="wf"><span>Всего с подготовкой</span><b>~8–9 месяцев</b></div>
           </div>
