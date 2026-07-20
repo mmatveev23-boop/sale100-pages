@@ -495,6 +495,7 @@ h1 .hl{color:var(--green)}
         </div>
 
         <div class="sched stg" id="schedShort">
+          <div class="sr" id="schIncl" style="display:none"><span style="color:var(--muted);font-size:11.5px">В графике уже учтено</span><b class="num" id="schInclV" style="font-size:11.5px;color:var(--muted);font-weight:600"></b></div>
           <div class="sr hero"><span id="schFirstLab">Первый платёж · сегодня</span><b class="num" id="schFirst">13 500 ₽</b></div>
           <div class="sr"><span>Дальше</span><b class="num" id="schRest">13 × 13 500 ₽ · каждое 25-е число</b></div>
         </div>
@@ -830,13 +831,18 @@ function recalc(){
   document.getElementById('schFirst').textContent=fmt(firstAll)+' ₽';
   document.getElementById('schRest').textContent=(RM-1)+' × '+fmt(mAll)+' ₽ · каждое '+SCHED_DAY+'-е число';
   renderSched(document.getElementById('schedList'),RM,firstAll,mAll);
+  (function(){const parts=['услуги'];
+    if(ADV&&ADV_RASS)parts.push('адвокатский запрет');
+    if(typeof KEEP_N!=='undefined'&&KEEP_N>0)parts.push('сохранение имущества');
+    if(parts.length>1){document.getElementById('schIncl').style.display='';document.getElementById('schInclV').textContent=parts.join(' + ');}
+    else{document.getElementById('schIncl').style.display='none';}})();
   if(PD){document.getElementById('schFirstLab').textContent='Первый платёж · '+months(1)[0].replace(' г.','');}
   /* допродукт: адвокатский запрет (решение заказчика 20.07) */
   if(ADV){
     document.getElementById('advBlock').style.display='';
-    document.getElementById('advBlockV').textContent=ADV_RASS?('5 000 ₽ с первым платежом + ~'+fmt(addM)+' ₽/мес в графике'):'20 000 ₽ · с первым платежом';
+    document.getElementById('advBlockV').textContent=ADV_RASS?'25 000 ₽ · уже в графике платежей':'20 000 ₽ · в первом платеже';
     document.getElementById('docAdv').style.display='';
-    document.getElementById('docAdvV').textContent=ADV_RASS?('25 000 ₽ · 5 000 с первым, ~'+fmt(addM)+' ₽/мес в графике'):'20 000 ₽ · с первым платежом';
+    document.getElementById('docAdvV').textContent=ADV_RASS?'25 000 ₽ · включён в график платежей':'20 000 ₽ · в первом платеже';
   }
   /* договор и оплата (кредитного доктора в РДГ нет) */
   document.getElementById('docTotal').textContent=fmt(vip?VIP:RASS_TOTAL)+' ₽'+(vip?' · VIP':'');

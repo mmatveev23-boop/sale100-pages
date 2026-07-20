@@ -466,6 +466,7 @@ h1 .hl{color:var(--green)}
         </div>
 
         <div class="sched stg" id="schedShort">
+          <div class="sr" id="schIncl" style="display:none"><span style="color:var(--muted);font-size:11.5px">В графике уже учтено</span><b class="num" id="schInclV" style="font-size:11.5px;color:var(--muted);font-weight:600"></b></div>
           <div class="sr hero"><span id="schFirstLab">Первый платёж · сегодня</span><b class="num" id="schFirst">13 500 ₽</b></div>
           <div class="sr"><span>Дальше</span><b class="num" id="schRest">13 × 13 500 ₽ · каждое 25-е число</b></div>
         </div>
@@ -836,20 +837,25 @@ function recalc(){
   document.getElementById('schFirst').textContent=fmt(firstBAll)+' ₽';
   document.getElementById('schRest').textContent=(RM-1)+' × '+fmt(mBAll)+' ₽ · каждое '+SCHED_DAY+'-е число';
   renderSched(document.getElementById('schedList'),RM,firstBAll,mBAll);
+  (function(){const parts=['услуги'];
+    if(ADV&&ADV_RASS)parts.push('адвокатский запрет');
+    if(typeof KEEP_N!=='undefined'&&KEEP_N>0)parts.push('сохранение имущества');
+    if(parts.length>1){document.getElementById('schIncl').style.display='';document.getElementById('schInclV').textContent=parts.join(' + ');}
+    else{document.getElementById('schIncl').style.display='none';}})();
   if(PD){document.getElementById('schFirstLab').textContent='Первый платёж · '+months(1)[0].replace(' г.','');}
   /* допродукты (решение заказчика 20.07) */
   if(ADV){
     document.getElementById('advBlock').style.display='';
-    document.getElementById('advBlockV').textContent=ADV_RASS?('5 000 ₽ с первым платежом + ~'+fmt(Math.round(20000/RM))+' ₽/мес в графике'):'20 000 ₽ · с первым платежом';
+    document.getElementById('advBlockV').textContent=ADV_RASS?'25 000 ₽ · уже в графике платежей':'20 000 ₽ · в первом платеже';
     document.getElementById('docAdv').style.display='';
-    document.getElementById('docAdvV').textContent=ADV_RASS?('25 000 ₽ · 5 000 с первым, ~'+fmt(Math.round(20000/RM))+' ₽/мес в графике'):'20 000 ₽ · с первым платежом';
+    document.getElementById('docAdvV').textContent=ADV_RASS?'25 000 ₽ · включён в график платежей':'20 000 ₽ · в первом платеже';
   }
   if(KEEP_N>0){
     document.getElementById('keepBlock').style.display='';
     document.getElementById('keepBlockLab').textContent='Сохранение имущества · '+KEEP_N+' '+(KEEP_N===1?'объект':KEEP_N<5?'объекта':'объектов');
-    document.getElementById('keepBlockV').textContent=fmt(KEEP_SUM)+' ₽ · ~'+fmt(Math.round(KEEP_SUM/RM))+' ₽/мес в графике';
+    document.getElementById('keepBlockV').textContent=fmt(KEEP_SUM)+' ₽ · уже в графике платежей';
     document.getElementById('docKeep').style.display='';
-    document.getElementById('docKeepV').textContent=fmt(KEEP_SUM)+' ₽ · ~'+fmt(Math.round(KEEP_SUM/RM))+' ₽/мес в графике';
+    document.getElementById('docKeepV').textContent=fmt(KEEP_SUM)+' ₽ · включено в график платежей';
   }
   renderSched(document.getElementById('schedListKd'),term,m+addKd+addF,m+addKd);
   /* договор и оплата */
