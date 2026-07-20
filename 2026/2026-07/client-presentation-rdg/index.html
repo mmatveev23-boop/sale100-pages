@@ -247,6 +247,10 @@ h1 .hl{color:var(--green)}
 .bar.us i{background:var(--green)}
 .bar.us .bl b{color:var(--green-ink)}
 .bars .bnote{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+/* итог-плашка выгоды внутри карты баров — тот же визуальный язык, что .cs-save кейс-блока (зелёный градиент + золото) */
+.bars .bar-save{margin-top:14px;background:linear-gradient(165deg,#128257 0%,#0F6B4F 60%,#0B5540 100%);color:#fff;border-radius:12px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.bars .bar-save span{font-size:13.5px;font-weight:700}
+.bars .bar-save b{font-size:27px;font-weight:800;letter-spacing:-.02em;color:#F4C775;white-space:nowrap}
 /* состояние «по КИ» и «подписал-не-оплатил» */
 .kibadge{margin-top:8px;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:5px 11px}
 .kibadge.words{color:var(--muted);background:#EFEBE3} /* «со слов» — приглушённый; при КИ его заменяет kiBadge */
@@ -468,15 +472,12 @@ h1 .hl{color:var(--green)}
         <div class="kibadge stg" id="kiBadge" style="display:none">✓ Рассчитано по вашей кредитной истории · <b id="kiCount">22</b>&nbsp;<span id="kiCountW">договора</span></div>
         <div class="kibadge words stg" id="wordsBadge">🎤 Предварительный расчёт со слов — уточним по кредитной истории</div>
 
-        <div class="save-hero stg">
-          <div class="sl">Ваша выгода с нами — каждый месяц</div>
-          <div class="sv num" id="cmpSave">—</div>
-          <div class="ss num" id="cmpSaveSub">—</div>
-        </div>
-
+        <!-- «сейчас → станете платить → выгода» одной картой (правка заказчика 20.07 вечер:
+             хиро и бары дублировали одни числа — теперь каждая цифра ровно один раз, выгода = итог-плашка в стиле кейс-блока) -->
         <div class="bars stg">
           <div class="bar now"><div class="bl"><span>Платите сейчас</span><b class="num" id="cmpPayNow">—</b></div><i style="width:100%"></i></div>
           <div class="bar us"><div class="bl"><span>Будете платить с нами</span><b class="num" id="cmpUsMonthly">—</b></div><i id="cmpUsBar" style="width:68%"></i></div>
+          <div class="bar-save"><span>Ваша выгода — каждый месяц</span><b class="num" id="cmpSave">—</b></div>
           <div class="bnote">Платёж по плану, который утвердит суд. Услуги ДОНУЛЯ — отдельно: <span class="num" id="svcLine1">13 500 ₽/мес, 14 платежей</span> (ниже). Проценты и пени остановлены — долг больше не растёт.</div>
         </div>
 
@@ -951,14 +952,14 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   const usMonthly=plan; /* бар «с нами» = платёж по плану; услуги 13 500 — отдельно (канон скрипта) */
   const saveM=CLIENT_PAY-usMonthly;
   const set=(id,v)=>document.getElementById(id).textContent=v;
-  /* платёж клиента неизвестен или выгоды нет — хиро и бары не показываем (не выдумываем цифру) */
+  /* платёж клиента неизвестен или выгоды нет — карту «сейчас → станете → выгода» не показываем (не выдумываем цифру) */
   if(CLIENT_PAY<=0||saveM<=0){
-    document.querySelector('.save-hero').style.display='none';
     document.querySelector('.bars').style.display='none';
-    if(CLIENT_PAY<=0){document.getElementById('calcBtn').style.display='none';}
   }
+  /* разворот «Как посчитана экономия» — только когда добавляет к барам новое (переплата банкам и полная экономия из nous);
+     без nous он лишь повторял строку «С нами» — дубль убран (правка заказчика 20.07 вечер) */
+  if(noUs<=0){document.getElementById('calcBtn').style.display='none';}
   set('cmpSave','~'+fmt(Math.round(Math.max(0,saveM)))+' ₽/мес');
-  document.getElementById('cmpSaveSub').innerHTML='платёж снижается: ~'+fmt(CLIENT_PAY)+' → ~'+fmt(usMonthly)+' ₽/мес'+(interest>0?' · переплата банкам ~<b>'+fmt(interest)+' ₽</b> останавливается':'');
   /* полная экономия за план — в развороте «Как посчитана экономия» (решение заказчика 20.07) */
   const totalSave=noUs>0?Math.round(noUs-planTotal(CLIENT.debt,RDG_TERM)):0;
   if(totalSave>0){
