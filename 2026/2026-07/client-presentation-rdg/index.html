@@ -467,7 +467,7 @@ h1 .hl{color:var(--green)}
 
       <!-- 1 · ВЫЖИМКА -->
       <section class="scr" data-name="Шаг 1 из 6 · Условия">
-        <h1>Реструктуризация вашего долга <span class="hl nowrap" id="h1debt">1&nbsp;240&nbsp;000&nbsp;₽</span></h1>
+        <h1>Реструктуризация вашего долга</h1>
         <p class="sub">Уберём переплату по процентам и снизим ежемесячный платёж.</p>
         <div class="kibadge stg" id="kiBadge" style="display:none">✓ Рассчитано по вашей кредитной истории · <b id="kiCount">22</b>&nbsp;<span id="kiCountW">договора</span></div>
         <div class="kibadge words stg" id="wordsBadge">🎤 Предварительный расчёт со слов — уточним по кредитной истории</div>
@@ -475,6 +475,7 @@ h1 .hl{color:var(--green)}
         <!-- «сейчас → станете платить → выгода» одной картой (правка заказчика 20.07 вечер:
              хиро и бары дублировали одни числа — теперь каждая цифра ровно один раз, выгода = итог-плашка в стиле кейс-блока) -->
         <div class="bars stg">
+          <div class="cs-badge">Экономия в месяц</div>
           <div class="bar now"><div class="bl"><span>Платите сейчас</span><b class="num" id="cmpPayNow">—</b></div><i style="width:100%"></i></div>
           <div class="bar us"><div class="bl"><span>Будете платить с нами</span><b class="num" id="cmpUsMonthly">—</b></div><i id="cmpUsBar" style="width:68%"></i></div>
           <div class="bar-save"><span>Ваша выгода — каждый месяц</span><b class="num" id="cmpSave">—</b></div>
@@ -996,7 +997,6 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
 function toggleCalc(){const d=document.getElementById('calcDetail'),b=document.getElementById('calcBtn');const open=d.style.display==='none';d.style.display=open?'':'none';b.textContent=open?'Скрыть расчёт':'Как посчитана экономия';}
 
 /* подстановка клиента из URL-параметров (демо-связка из amo-виджета; в проде merge из CRM) */
-document.getElementById('h1debt').textContent=fmt(CLIENT.debt)+' ₽';
 document.getElementById('helloName').textContent=CLIENT.name;
 document.getElementById('doneName').textContent=CLIENT.name;
 if(Q.get('name')){
