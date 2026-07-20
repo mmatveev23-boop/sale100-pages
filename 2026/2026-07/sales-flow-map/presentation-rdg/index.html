@@ -975,8 +975,10 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   else{ document.querySelector('.cmp .cr.bad').style.display='none'; } /* без честной базы строку не выдумываем */
   set('cmpUsPay2','~'+fmt(plan)+' ₽/мес');
   set('planTerm',RDG_TERM);
-  /* кейс-блок «Выгода» (формат PDF заказчика 20.07): без нас → по плану → экономия */
-  if(noUs>0){
+  /* кейс-блок «Выгода» (формат PDF заказчика 20.07): без нас → по плану → экономия.
+     Показ при ЛЮБОЙ честной базе (фикс 20.07 вечер, «потерялась выгода»): известен платёж → база «платёж × срок»
+     (методика кейсов, nous не нужен) ИЛИ есть nous (фолбэк по договорам без платежа). Скрыт только когда нет ни того ни другого */
+  if(noUs>0||CLIENT_PAY>0){
     const planAll=Math.round(planTotal(CLIENT.debt,RDG_TERM));
     const base=CLIENT_PAY>0?CLIENT_PAY*RDG_TERM:noUs;
     document.getElementById('caseBlock').style.display='';
