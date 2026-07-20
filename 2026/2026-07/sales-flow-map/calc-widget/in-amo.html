@@ -356,8 +356,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <div class="rowf freeline"><span class="rlab">Итог услуг неизменен</span><b id="w_rassLine">189 000 ₽ · платёж 13 500 ₽/мес</b></div>
         <label style="margin-top:10px">Допродукты</label>
         <label class="ocki" style="margin-top:4px"><input type="checkbox" id="w_adv" onchange="advUI()"> Адвокатский запрет</label>
-        <div class="rowf freeline" id="w_advNote" style="display:none"><span class="rlab">Рассрочка запрета</span><b>5 000 ₽ первый платёж + 20 000 ₽ частями</b></div>
-        <div class="rowf" id="w_advRow" style="display:none"><span class="rlab">Оплата запрета</span><div class="seg sm" id="w_advMode" style="width:196px"><button class="on" data-am="once" onclick="setAdvMode(this)">разом · 20 000</button><button data-am="rass" onclick="setAdvMode(this)">рассрочка · 25 000</button></div></div>
+        <div class="rowf" id="w_advRow" style="display:none"><div class="seg sm" id="w_advMode" style="flex:1"><button class="on" data-am="once" onclick="setAdvMode(this)">разом · 20 000 ₽</button><button data-am="rass" onclick="setAdvMode(this)">рассрочка · 25 000 ₽</button></div></div>
+        <div class="kinote" id="w_advNote" style="display:none;margin-top:5px">Рассрочка запрета: <b>5 000 ₽ первый платёж + 20 000 ₽ частями</b></div>
         <label class="ocki" id="w_keepWrap" style="display:none"><input type="checkbox" id="w_keep" onchange="keepUI()"> Сохранение имущества · 60 000 ₽/объект · в рассрочку</label>
         <div class="rowf" id="w_keepRow" style="display:none"><span class="rlab">Объектов (залог/ипотека)</span><input id="w_keepN" class="rin" type="number" min="1" value="1"></div>
 
