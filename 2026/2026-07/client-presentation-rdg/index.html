@@ -496,12 +496,7 @@ h1 .hl{color:var(--green)}
           <div class="wd-note">Расчёт — по вашим цифрам, итог зафиксирует суд. Сроки процедурные — не зависят от того, считаем со слов или по КИ.</div>
         </div>
 
-        <div class="paysplit stg">
-          <div class="price" id="planCard">
-            <div class="pl">После утверждения плана · платёж по суду</div>
-            <div class="pv num" id="planPayHero">—</div>
-            <div class="ps num" id="planPaySub">единый платёж кредиторам по графику суда</div>
-          </div>
+        <div class="paysplit stg" style="grid-template-columns:1fr">
           <div class="price svc">
             <div class="pl">Услуги ДОНУЛЯ · нам</div>
             <div class="pv num" id="heroPay">13 500 <small>₽ / месяц</small></div>
@@ -937,9 +932,6 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   const svcM=Math.round(RASS_TOTAL/RM);
   const s1=document.getElementById('svcLine1'); if(s1) s1.textContent=fmt(svcM)+' \u20bd/\u043c\u0435\u0441, '+RM+' \u043f\u043b\u0430\u0442\u0435\u0436\u0435\u0439';
   const s2=document.getElementById('svcLine2'); if(s2) s2.textContent=fmt(svcM)+' \u20bd \u00d7 '+RM+' \u043f\u043b\u0430\u0442\u0435\u0436\u0435\u0439';
-  /* карточка «после утверждения плана» (решение заказчика 20.07): главная цифра будущего платежа клиента */
-  document.getElementById('planPayHero').innerHTML='~'+fmt(plan)+' <small>\u20bd / \u043c\u0435\u0441\u044f\u0446</small>';
-  document.getElementById('planPaySub').innerHTML='\u043f\u043b\u0430\u043d \u043d\u0430 '+RDG_TERM+' \u043c\u0435\u0441, \u0443\u0442\u0432\u0435\u0440\u0436\u0434\u0430\u0435\u0442 \u0441\u0443\u0434'+(CLIENT_PAY>0?' \u00b7 \u0441\u0435\u0439\u0447\u0430\u0441 \u043f\u043b\u0430\u0442\u0438\u0442\u0435 <b>~'+fmt(CLIENT_PAY)+' \u20bd</b>':'')+' \u00b7 \u0440\u043e\u0441\u0442 \u043f\u0440\u043e\u0446\u0435\u043d\u0442\u043e\u0432 \u0437\u0430\u043c\u043e\u0440\u043e\u0436\u0435\u043d';
 })();
 function toggleCalc(){const d=document.getElementById('calcDetail'),b=document.getElementById('calcBtn');const open=d.style.display==='none';d.style.display=open?'':'none';b.textContent=open?'Скрыть расчёт':'Как посчитана экономия';}
 
