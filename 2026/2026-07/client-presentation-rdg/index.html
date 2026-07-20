@@ -245,23 +245,25 @@ h1 .hl{color:var(--green)}
 .creditors .crnote{margin-top:9px;padding-top:9px;border-top:1px solid var(--line);font-size:12px;color:var(--alert);line-height:1.5}
 .creditors .crrow .od{font-style:normal;font-size:10px;font-weight:700;color:var(--alert);background:#FAEDE8;padding:1px 6px;border-radius:5px;margin-left:6px;white-space:nowrap}
 /* «если ничего не делать» — дожимной контраст под барами (числа клиента; со слов — по средним ставкам) */
-/* «Что будет, если ничего не делать» — деньги, не страшилки (правка заказчика 20.07) */
-.ifno{margin-top:12px;background:var(--brick-soft,#F8E3DC);border:1px solid rgba(168,68,46,.28);border-radius:var(--r-box,14px);padding:13px 15px}
-.ifno .na-h2{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--brick,#A8442E);margin-bottom:8px}
-.ifgrid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;align-items:center}
-.ifr{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:4px 0;font-size:12.5px;color:#6E2E1F;line-height:1.45}
-.ifr b{color:#5A2517;white-space:nowrap;font-variant-numeric:tabular-nums}
-.ifbar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:#EFD9CC}
+/* «Что будет, если ничего не делать» — тёмная карточка-потеря, зеркало зелёной выгоды (правка заказчика 20.07) */
+.ifno{margin-top:12px;background:radial-gradient(120% 140% at 85% -20%,#A8442E 0%,transparent 55%),linear-gradient(165deg,#8F3A26 0%,#6E2A18 55%,#571F10 100%);color:#fff;border-radius:var(--r-box,14px);padding:20px 16px 18px;box-shadow:0 14px 34px -18px rgba(87,31,16,.55)}
+.ifno .na-h2{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.62);text-align:center}
+.if-big{text-align:center;font-size:36px;font-weight:800;letter-spacing:-.02em;color:#F4C775;margin-top:8px;line-height:1}
+.if-big small{font-size:17px;font-weight:600;color:rgba(255,255,255,.7)}
+.if-sub{text-align:center;margin-top:7px;font-size:13px;color:rgba(255,255,255,.82)}
+.if-sub b{color:#F4C775}
+.ifbar{display:flex;height:22px;border-radius:11px;overflow:hidden;margin-top:14px;background:rgba(255,255,255,.14)}
 .ifbar i{display:block;height:100%}
-.ifbar i.d{background:#C99A33}
-.ifbar i.o{background:#A8442E}
-.iflegend{margin-top:7px;display:flex;flex-direction:column;gap:4px;font-size:11px;color:#6E2E1F}
-.iflegend u{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;text-decoration:none;vertical-align:-1px}
-.iflegend u.d{background:#C99A33}
-.iflegend u.o{background:#A8442E}
-.iflegend b{font-variant-numeric:tabular-nums;color:#5A2517}
-.ifphrase{margin-top:10px;font-weight:800;color:var(--brick,#A8442E);font-size:13.5px}
-@media (max-width:520px){.ifgrid{grid-template-columns:1fr}}
+.ifbar i.d{background:#E8C87E}
+.ifbar i.o{background:#E4653F}
+.if-legend{margin-top:8px;display:flex;justify-content:space-between;gap:10px;font-size:12px;color:rgba(255,255,255,.85);flex-wrap:wrap}
+.if-legend u{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;text-decoration:none;vertical-align:-1px}
+.if-legend u.d{background:#E8C87E}
+.if-legend u.o{background:#E4653F}
+.if-legend b{color:#fff;font-variant-numeric:tabular-nums}
+.if-pen{margin-top:13px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:10px 13px;font-size:13px;line-height:1.5;color:rgba(255,255,255,.88)}
+.if-pen b{color:#F4C775;font-variant-numeric:tabular-nums}
+.ifphrase{margin-top:14px;text-align:center;font-size:16.5px;font-weight:800;color:#fff;letter-spacing:-.01em}
 
 .whatwedo{background:var(--green-soft);border:1px solid rgba(15,107,79,.25);border-radius:var(--r-box);padding:13px 15px;margin-top:12px}
 .whatwedo .wd-h{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--green-ink);margin-bottom:5px}
@@ -489,20 +491,14 @@ h1 .hl{color:var(--green)}
 
         <div class="ifno stg" id="ifNothing" style="display:none">
           <div class="na-h2">Что будет, если ничего не делать</div>
-          <div class="ifgrid">
-            <div>
-              <div class="ifr"><span>Отдадите банку</span><b class="num" id="ifTotal">—</b></div>
-              <div class="ifr"><span>Отдадите на проценты</span><b class="num" id="ifInterest">—</b></div>
-              <div class="ifr"><span>Если не сможете оплачивать</span><b class="num" id="ifPen">—</b></div>
-            </div>
-            <div>
-              <div class="ifbar"><i class="d" id="ifBarD"></i><i class="o" id="ifBarO"></i></div>
-              <div class="iflegend">
-                <span><u class="d"></u>Долг <b class="num" id="ifVizD">—</b></span>
-                <span><u class="o"></u>Переплата <b class="num" id="ifVizO">—</b></span>
-              </div>
-            </div>
+          <div class="if-big num" id="ifTotal">—</div>
+          <div class="if-sub num">столько отдадите банкам по своим договорам · из них проценты <b id="ifInterest">—</b></div>
+          <div class="ifbar"><i class="d" id="ifBarD"></i><i class="o" id="ifBarO"></i></div>
+          <div class="if-legend">
+            <span><u class="d"></u>Долг <b class="num" id="ifVizD">—</b></span>
+            <span><u class="o"></u>Переплата <b class="num" id="ifVizO">—</b></span>
           </div>
+          <div class="if-pen num">Не сможете платить — долг вырастет ещё на <b id="ifPen">—</b> за год просрочки</div>
           <div class="ifphrase">Вы заплатите деньги, которые не брали!</div>
         </div>
 
@@ -965,9 +961,9 @@ setInterval(()=>{if(tleft>0){tleft--;const m=String(Math.floor(tleft/60)).padSta
   if(noUs>0){
     const growY=(KION?KI.interest:Math.round(CLIENT.debt*0.307/12))*12;
     document.getElementById('ifNothing').style.display='';
-    document.getElementById('ifTotal').textContent='~'+fmt(noUs)+' ₽';
+    document.getElementById('ifTotal').innerHTML='~'+fmt(noUs)+' <small>₽</small>';
     document.getElementById('ifInterest').textContent='~'+fmt(interest)+' ₽';
-    document.getElementById('ifPen').textContent='+~'+fmt(growY)+' ₽ процентов за год';
+    document.getElementById('ifPen').textContent='+~'+fmt(growY)+' ₽';
     document.getElementById('ifBarD').style.width=Math.round(CLIENT.debt/noUs*100)+'%';
     document.getElementById('ifBarO').style.width=(100-Math.round(CLIENT.debt/noUs*100))+'%';
     document.getElementById('ifVizD').textContent=fmt(CLIENT.debt)+' ₽';
