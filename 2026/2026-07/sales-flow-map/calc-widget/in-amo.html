@@ -50,6 +50,28 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .wg .wh{display:flex;align-items:center;gap:8px;padding:9px 12px;font-size:12.5px;font-weight:600;color:#5c6874;cursor:default}
 .wg .wh .chev{margin-left:auto;color:#b6bfc7;font-size:10px}
 
+/* ── плашка в колонке виджетов + модал по центру (редизайн заказчика 21.07: «клик по плашке → пульт по середине») ── */
+.dwPlate{display:flex;align-items:center;gap:9px;width:100%;background:#0B3B2E;border:none;border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;font-family:inherit;text-align:left;color:#fff;transition:transform .16s cubic-bezier(.23,1,.32,1),box-shadow .16s ease-out}
+.dwPlate .lg{width:24px;height:24px;border-radius:6px;background:#0F6B4F;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#F4C775;flex:none}
+.dwPlate b{display:block;font-size:12.5px}
+.dwPlate small{display:block;font-size:10px;color:rgba(255,255,255,.6)}
+.dwPlate .chevP{margin-left:auto;color:rgba(255,255,255,.55);font-size:12px}
+@media (hover:hover) and (pointer:fine){.dwPlate:hover{box-shadow:0 6px 16px -8px rgba(11,59,46,.55);transform:translateY(-1px)}}
+.dwPlate:active{transform:scale(.97)}
+.pultOverlay{position:fixed;inset:0;z-index:60;background:rgba(17,24,21,.46);backdrop-filter:blur(2px);display:none;align-items:flex-start;justify-content:center;padding:3.5vh 18px;opacity:0;transition:opacity .2s ease-out}
+.pultOverlay.on{opacity:1}
+.pultOverlay .dw{width:min(880px,96vw);max-height:93vh;display:flex;flex-direction:column;margin:0;border-radius:12px;overflow:hidden;transform:scale(.97);opacity:0;transition:transform .2s cubic-bezier(.23,1,.32,1),opacity .2s ease-out}
+.pultOverlay.on .dw{transform:scale(1);opacity:1}
+.dh .dhClose{margin-left:auto;background:#0F6B4F;border:none;border-radius:7px;color:#fff;font-family:inherit;font-weight:700;font-size:12px;padding:6px 12px;cursor:pointer;flex:none;transition:transform .16s cubic-bezier(.23,1,.32,1)}
+.dh .dhClose:active{transform:scale(.97)}
+/* тело модала: свой скролл; шапка и вердикт всегда над ним; две колонки «Расчёт | Договор и действия» */
+#w_body{overflow-y:auto;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start}
+#pane_calc{min-width:0;padding-right:22px}
+#w_colR{min-width:0;border-left:1px solid #eef1f4;padding-left:22px}
+#w_body>.wnote,#w_body>.toast{grid-column:1/-1}
+@media (max-width:919px){#w_body{grid-template-columns:1fr}#pane_calc{padding-right:0}#w_colR{border-left:none;padding-left:0}}
+@media (prefers-reduced-motion:reduce){.pultOverlay,.pultOverlay .dw{transition:opacity .2s ease}.pultOverlay .dw{transform:none}}
+
 /* ═══ наш виджет V2 ═══ */
 /* overflow НЕ hidden — иначе position:sticky внутри не работает; скругления руками на шапке */
 .dw{background:#fff;border:1px solid #cfe0d8;border-radius:10px;margin-bottom:8px;box-shadow:0 4px 14px -8px rgba(11,59,46,.35)}
@@ -60,7 +82,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw.hot{border:2px solid #C99A33;box-shadow:0 6px 18px -8px rgba(201,154,51,.5)}
 
 /* ── sticky-шапка: тогл продукта + бейдж + живой вердикт + выпадающая полная раскладка ── */
-.dws{position:sticky;top:-12px;z-index:6;background:#fff;padding:8px 12px;border-bottom:1px solid #eef1f4;box-shadow:0 6px 12px -10px rgba(11,59,46,.25)}
+.dws{position:static;background:#fff;padding:8px 12px;border-bottom:1px solid #eef1f4;box-shadow:0 6px 12px -10px rgba(11,59,46,.25)}
 .dwsr{display:flex;align-items:center;gap:6px}
 .dwsr .seg{flex:1}
 .dw .seg{display:flex;gap:3px;background:#eef1f4;border-radius:8px;padding:3px}
@@ -262,9 +284,22 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
   <div class="wcol">
     <div class="wg"><div class="wh">Платежи<span class="chev">▾</span></div></div>
 
-    <!-- ═══ НАШ ВИДЖЕТ V2 ═══ -->
+    <button type="button" class="dwPlate" onclick="openPult()">
+      <span class="lg">ДН</span><div><b>ОБНУЛЯТОР · Пульт сделки</b><small>экспресс · первый звонок</small></div><span class="chevP">▸</span>
+    </button>
+
+    <div class="wg"><div class="wh">Кнопки Salesbot<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">HyperScript<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">OkiDoki<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">Документы<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">Билайн<span class="chev">▾</span></div></div>
+    <div class="wg"><div class="wh">Передача в партнёры<span class="chev">▾</span></div></div>
+  </div>
+</div>
+
+<div class="pultOverlay" id="pultOverlay" onclick="if(event.target===this)closePult()">
     <div class="dw">
-      <div class="dh"><span class="lg">ДН</span><div><b>ОБНУЛЯТОР · Пульт сделки</b><small id="dh_small">экспресс · первый звонок</small></div></div>
+      <div class="dh"><span class="lg">ДН</span><div><b>ОБНУЛЯТОР · Пульт сделки</b><small id="dh_small">экспресс · первый звонок</small></div><button type="button" class="dhClose" onclick="closePult()">Закрыть</button></div>
 
       <!-- sticky-шапка: всегда видна в скролле колонки -->
       <div class="dws" id="w_sticky">
@@ -346,6 +381,9 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <!-- «Клиенту голосом» — строки Камрана: внизу формы, где менеджер оказывается после ввода (правка заказчика 15.07) -->
           <div class="voice" id="w_voice" style="display:none"></div>
 
+        </div><!-- /w_more -->
+        </div><!-- /pane_calc -->
+        <div id="w_colR"><!-- правая колонка модала: договор · рассрочка · действия -->
         <!-- ДАННЫЕ ДЛЯ ДОГОВОРА (запрос заказчика 20.07): обнулятор формирует договор — ФИО и дата рождения
              уходят в ссылку (?fio/?dob), префиллят экран «Оформление» и подставляются в текст договора.
              Поля необязательные: пусто = данные вносит эксперт на странице со слов клиента, дефолт-демо не меняется -->
@@ -411,25 +449,15 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <div class="sstat none" id="oc_stat" style="display:none"></div>
         </div>
 
-        </div><!-- /w_more -->
-        </div><!-- /pane_calc -->
+        </div><!-- /w_colR -->
 
         <div class="wnote" id="w_note" style="display:none"><span id="w_noteTxt"></span> <a id="w_present" target="_blank" style="display:none">Открыть презентацию ↗</a></div>
         <div class="toast" id="w_toast"></div>
       </div>
     </div>
-    <!-- ═══ /виджет ═══ -->
-
-    <div class="wg"><div class="wh">Кнопки Salesbot<span class="chev">▾</span></div></div>
-    <div class="wg"><div class="wh">HyperScript<span class="chev">▾</span></div></div>
-    <div class="wg"><div class="wh">OkiDoki<span class="chev">▾</span></div></div>
-    <div class="wg"><div class="wh">Документы<span class="chev">▾</span></div></div>
-    <div class="wg"><div class="wh">Билайн<span class="chev">▾</span></div></div>
-    <div class="wg"><div class="wh">Передача в партнёры<span class="chev">▾</span></div></div>
-  </div>
 </div>
 
-<p class="cap"><b>Прототип V2: виджет «ДОНУЛЯ · Калькулятор» в карточке сделки amoCRM.</b> Sticky-вердикт, чипы долгов, секции без «Далее», вкладки Расчёт/Действия. Расчёт живой. Демо: <b>?ki=1</b> — клиент прислал КИ по запросу в дожиме.</p>
+<p class="cap"><b>Прототип V2: виджет «ДОНУЛЯ · Калькулятор» в карточке сделки amoCRM.</b> Плашка в колонке виджетов открывает пульт МОДАЛОМ ПО ЦЕНТРУ (редизайн 21.07): слева расчёт, справа договор и действия; Esc/клик мимо — закрыть. Расчёт живой. Демо: <b>?ki=1</b> — клиент прислал КИ по запросу в дожиме.</p>
 
 <script src="./pm-regions.js?v=20260715"></script>
 <script src="./ki-parse.js?v=20260716b"></script>
@@ -614,7 +642,7 @@ let kiPayloadBase=null; /* база payload юрзаключения — href п
 /* нижняя часть виджета: открыта всегда (правка заказчика 16.07). openMore оставлен — на случай отката к сворачиванию.
    ВАЖНО: объявление до первого calc() — иначе TDZ валит инициализацию */
 let moreOpen=true;
-function openMore(){moreOpen=true;document.getElementById('w_more').style.display='';document.getElementById('w_moreTg').style.display='none';}
+function openMore(){moreOpen=true;document.getElementById('w_more').style.display='';document.getElementById('w_colR').style.display='';document.getElementById('w_moreTg').style.display='none';}
 /* склонение для бейджа: 1 договор / 2 договора / 22 договора / 11 договоров */
 const decl=n=>{const d=n%10,m=n%100;return m>=11&&m<=14?'договоров':d===1?'договор':d>=2&&d<=4?'договора':'договоров';};
 function calc(){
@@ -1315,6 +1343,14 @@ function copyClientLink(){
 }
 document.getElementById('w_ki').addEventListener('change',e=>{ const fs=[...e.target.files].slice(0,3); if(fs.length) parseKiFiles(fs); e.target.value=''; });
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js">
+</script>
+<script>
+/* ── модал пульта (редизайн заказчика 21.07): плашка в правой колонке амо открывает пульт по центру ── */
+function openPult(){const o=document.getElementById('pultOverlay');o.style.display='flex';void o.offsetHeight;o.classList.add('on');}
+function closePult(){const o=document.getElementById('pultOverlay');o.classList.remove('on');setTimeout(()=>{o.style.display='none';},180);}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('pultOverlay').style.display==='flex')closePult();});
+openPult(); /* прототип открывается сразу — в реальном амо менеджер открывает кликом по плашке */
+</script>
 </body>
 </html>
