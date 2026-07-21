@@ -848,9 +848,7 @@ function collapseDebts(c){
   document.getElementById('w_debtBody').style.display=c?'none':'';
   document.getElementById('w_debtSum').classList.toggle('show',c);
 }
-document.getElementById('pane_calc').addEventListener('focusin',e=>{
-  if(!e.target.closest('#sec_debts')&&last.debt>0&&document.getElementById('w_debtBody').style.display!=='none') collapseDebts(true);
-});
+/* автосворачивание долгов в summary отключено (заказчик 21.07 «не скрывать») — секция всегда развёрнута; collapseDebts(false) остаётся для КИ-пути */
 /* ── V2: advanced-экспандер (ставки/сроки типов + ПМ) ── */
 function toggleAdv(){
   const b=document.getElementById('w_body'), on=!b.classList.contains('adv');
