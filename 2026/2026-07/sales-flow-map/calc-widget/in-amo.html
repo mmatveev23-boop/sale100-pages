@@ -64,6 +64,14 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .pultOverlay.on .dw{transform:scale(1);opacity:1}
 .dh .dhClose{margin-left:auto;background:#0F6B4F;border:none;border-radius:7px;color:#fff;font-family:inherit;font-weight:700;font-size:12px;padding:6px 12px;cursor:pointer;flex:none;transition:transform .16s cubic-bezier(.23,1,.32,1)}
 .dh .dhClose:active{transform:scale(.97)}
+.dh .dhMin{margin-left:auto;background:rgba(255,255,255,.14)}
+.dh .dhMin+ .dhClose{margin-left:8px}
+/* мини-бар свёрнутого пульта: всё введённое живо, разворот одним кликом */
+.pultMini{position:fixed;right:18px;bottom:18px;z-index:55;display:none;align-items:center;gap:8px;background:#0B3B2E;color:#fff;border:none;border-radius:10px;padding:10px 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:0 10px 26px -10px rgba(11,59,46,.6);max-width:420px;transition:transform .16s cubic-bezier(.23,1,.32,1)}
+.pultMini .lg{width:22px;height:22px;border-radius:6px;background:#0F6B4F;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#F4C775;flex:none}
+.pultMini span.mv{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:rgba(255,255,255,.75);font-weight:600}
+.pultMini:active{transform:scale(.97)}
+@media (hover:hover) and (pointer:fine){.pultMini:hover{transform:translateY(-1px)}}
 /* тело модала: свой скролл; шапка и вердикт всегда над ним; две колонки «Расчёт | Договор и действия» */
 #w_body{overflow-y:auto;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start}
 #pane_calc{min-width:0;padding-right:26px}
@@ -82,7 +90,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw.hot{border:2px solid #C99A33;box-shadow:0 6px 18px -8px rgba(201,154,51,.5)}
 
 /* ── sticky-шапка: тогл продукта + бейдж + живой вердикт + выпадающая полная раскладка ── */
-.dws{position:static;background:#fff;padding:8px 12px;border-bottom:1px solid #eef1f4;box-shadow:0 6px 12px -10px rgba(11,59,46,.25)}
+.dws{position:relative;background:#fff;padding:8px 12px;border-bottom:1px solid #eef1f4;box-shadow:0 6px 12px -10px rgba(11,59,46,.25)}
 .dwsr{display:flex;align-items:center;gap:6px}
 .dwsr .seg{flex:1}
 .dw .seg{display:flex;gap:3px;background:#eef1f4;border-radius:8px;padding:3px}
@@ -308,7 +316,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 
 <div class="pultOverlay" id="pultOverlay" onclick="if(event.target===this)closePult()">
     <div class="dw">
-      <div class="dh"><span class="lg">ДН</span><div><b>ОБНУЛЯТОР · Пульт сделки</b><small id="dh_small">экспресс · первый звонок</small></div><button type="button" class="dhClose" onclick="closePult()">Закрыть</button></div>
+      <div class="dh"><span class="lg">ДН</span><div><b>ОБНУЛЯТОР · Пульт сделки</b><small id="dh_small">экспресс · первый звонок</small></div><button type="button" class="dhClose dhMin" onclick="minimizePult()" title="Свернуть — всё введённое сохранится">— Свернуть</button><button type="button" class="dhClose" onclick="closePult()">Закрыть</button></div>
 
       <!-- sticky-шапка: всегда видна в скролле колонки -->
       <div class="dws" id="w_sticky">
@@ -475,6 +483,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
       </div>
     </div>
 </div>
+
+<button type="button" class="pultMini" id="pultMini" onclick="openPult()" title="Развернуть пульт"><span class="lg">ДН</span>Пульт сделки<span class="mv" id="pultMiniV"></span><span style="opacity:.6">▴</span></button>
 
 <p class="cap"><b>Прототип V2: виджет «ДОНУЛЯ · Калькулятор» в карточке сделки amoCRM.</b> Плашка в колонке виджетов открывает пульт МОДАЛОМ ПО ЦЕНТРУ (редизайн 21.07): слева расчёт, справа договор и действия; Esc/клик мимо — закрыть. Расчёт живой. Демо: <b>?ki=1</b> — клиент прислал КИ по запросу в дожиме.</p>
 
@@ -1402,8 +1412,10 @@ document.getElementById('w_ki').addEventListener('change',e=>{ const fs=[...e.ta
 </script>
 <script>
 /* ── модал пульта (редизайн заказчика 21.07): плашка в правой колонке амо открывает пульт по центру ── */
-function openPult(){const o=document.getElementById('pultOverlay');o.style.display='flex';void o.offsetHeight;o.classList.add('on');try{if(!(last&&last.debt>0)){const a=document.querySelector('#w_credits .crt.en .c-am');if(a)a.focus({preventScroll:true});}}catch(e){}}
+function openPult(){const m=document.getElementById('pultMini');if(m)m.style.display='none';const o=document.getElementById('pultOverlay');o.style.display='flex';void o.offsetHeight;o.classList.add('on');try{if(!(last&&last.debt>0)){const a=document.querySelector('#w_credits .crt.en .c-am');if(a)a.focus({preventScroll:true});}}catch(e){}}
 function closePult(){const o=document.getElementById('pultOverlay');o.classList.remove('on');setTimeout(()=>{o.style.display='none';},180);}
+/* свернуть: данные остаются в DOM (в проде — в полях сделки), мини-бар возвращает одним кликом */
+function minimizePult(){closePult();const m=document.getElementById('pultMini');const v=document.getElementById('w_vshort').textContent.trim();document.getElementById('pultMiniV').textContent=v?('· '+v):'';m.style.display='flex';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('pultOverlay').style.display==='flex')closePult();});
 openPult(); /* прототип открывается сразу — в реальном амо менеджер открывает кликом по плашке */
 </script>
