@@ -64,6 +64,12 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .pultOverlay.on .dw{transform:scale(1);opacity:1}
 .dh .dhClose{margin-left:auto;background:#0F6B4F;border:none;border-radius:7px;color:#fff;font-family:inherit;font-weight:700;font-size:12px;padding:6px 12px;cursor:pointer;flex:none;transition:transform .16s cubic-bezier(.23,1,.32,1)}
 .dh .dhClose:active{transform:scale(.97)}
+/* футер модала: главная CTA всегда в окне (правка заказчика 21.07) */
+.dwFoot{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:10px 18px 9px;border-top:1px solid #eef1f4;background:#fff;box-shadow:0 -10px 18px -14px rgba(11,59,46,.3)}
+.dw .dwFoot .rlab{flex:none;font-size:12px;font-weight:600;color:#5c6874}
+.dw .dwFoot input{width:120px;flex:none}
+.dw .dwFoot .sbtn{flex:1;margin-top:0;min-width:260px;width:auto}
+.dw .dwFoot .sstat{width:100%;margin-top:0;text-align:center}
 .dh .dhMin{margin-left:auto;background:rgba(255,255,255,.14)}
 .dh .dhMin+ .dhClose{margin-left:8px}
 /* мини-бар свёрнутого пульта: всё введённое живо, разворот одним кликом */
@@ -426,9 +432,6 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <div class="actsep">Действия ⚡</div>
         <div id="pane_act">
           <!-- «одна сумма к оплате» (правка заказчика 16.07): частичку выторговывает менеджер голосом, страница показывает её как факт -->
-          <div class="rowf"><span class="rlab">К оплате сегодня, ₽ <span style="color:#98a1ab;font-weight:600">· пусто = первый платёж</span></span><input id="w_due" class="rin" type="number" placeholder="13 500"></div>
-          <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
-          <div class="sstat none" id="w_sstat">ещё не отправлено</div>
           <div class="lrow">
             <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
             <button class="lbtn" id="w_payLink" onclick="copyPayLink()">💳 Ссылка на оплату</button>
@@ -480,6 +483,11 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 
         <div class="wnote" id="w_note" style="display:none"><span id="w_noteTxt"></span> <a id="w_present" target="_blank" style="display:none">Открыть презентацию ↗</a></div>
         <div class="toast" id="w_toast"></div>
+      </div>
+      <div class="dwFoot">
+        <span class="rlab">К оплате сегодня, ₽ <span style="color:#98a1ab;font-weight:600">· пусто = первый платёж</span></span><input id="w_due" class="rin" type="number" placeholder="13 500">
+        <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
+        <div class="sstat none" id="w_sstat">ещё не отправлено</div>
       </div>
     </div>
 </div>
