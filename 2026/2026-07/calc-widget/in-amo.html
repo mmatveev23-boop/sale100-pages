@@ -420,9 +420,16 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <div class="actsep">Рассрочка · график на странице клиента</div>
         <!-- ТАРИФ (заказчик 21.07): день 1 = 199 000 · 15 платежей (14×13 500 + последний 10 000); скидка «прощаем последний платёж» −10 000 → 189 000 · 14 — козырь дожима дня 2 -->
         <div class="rowf"><span class="rlab">Тариф · скидка — козырь дня 2</span>
-          <div class="seg sm" id="w_tarif" style="flex:1"><button class="on" data-tf="full" onclick="setTarif(this)">199 000 · 15 мес</button><button data-tf="disc" onclick="setTarif(this)">−10 000 · 189 000</button></div>
+          <div class="seg sm" id="w_tarif" style="flex:1"><button class="on" data-tf="full" onclick="setTarif(this)">199 000 · 15 мес</button><button data-tf="disc" onclick="setTarif(this)">Скидка · на «дорого»</button></div>
         </div>
-        <div class="kinote" id="w_tarifNote">День 1 — полный тариф: 14 × 13 500 ₽ + последний платёж 10 000 ₽. Скидку «последний платёж прощаем» бережём для дожима дня 2.</div>
+        <div class="kinote" id="w_tarifNote">Полный тариф: 14 × 13 500 ₽ + последний платёж 10 000 ₽. Скидка — последний козырь на живое «дорого», не предложение по умолчанию: сначала пересчёт по КИ.</div>
+        <!-- ГЕЙТ СКИДКИ (заказчик 21.07 «скидку всем подряд не зашиваем, нужен контроль»): цитата обязательна (в проде пишется в сделку, AI-QA сверяет с записью звонка) + месячная норма -->
+        <div id="w_discGate" style="display:none">
+          <div class="rowf"><span class="rlab">Что клиент сказал про цену · <b style="color:#A8442E">дословно, обязательно</b></span></div>
+          <input id="w_discQuote" type="text" placeholder="«для меня это дорого, я столько не потяну»" style="margin-top:4px">
+          <button class="lbtn" id="w_discApply" style="width:100%;margin-top:6px" onclick="applyDisc()">Применить скидку −10 000 · последний платёж прощаем</button>
+          <div class="kinote" id="w_discNote">В проде: причина уходит в поле сделки, AI-QA сверяет цитату с записью звонка — «скидка без возражения» = комплаенс-нарушение (гейт ×0). Норма: <b><span id="w_discCnt">0</span> из 5</b> скидок в месяц, сверх — только согласование РОПа.</div>
+        </div>
         <div class="rowf"><span class="rlab">Дата 1-го платежа · пусто = ближайшее 25-е</span><input id="w_payDate" class="rin" type="date" style="width:150px" onchange="rassLine()"></div>
         <div class="rowf"><span class="rlab">День ежемес. платежа · до 25-го · пусто = как у первого</span><input id="w_payDay" class="rin" type="number" min="1" max="25" placeholder="25" onchange="if(this.value)this.value=Math.max(1,Math.min(25,Math.round(this.value)))"></div>
         <div class="rowf"><span class="rlab">Срок рассрочки, мес</span><input id="w_rassM" class="rin" type="number" min="2" max="24" value="14" oninput="rassLine()"></div>
@@ -462,7 +469,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <button class="lbtn" onclick="copyDz('think',this)">✉ Не подписал</button>
             <button class="lbtn" onclick="copyDz('sim',this)">✉ SIM-акция</button>
             <button class="lbtn" id="w_dzKi" onclick="copyDz('ki',this)">✉ По КИ</button>
-            <button class="lbtn" onclick="copyDz('disc',this)">✉ Скидка −10 000 · день 2</button>
+            <button class="lbtn" id="w_dzDisc" style="display:none" onclick="copyDz('disc',this)">✉ Подтвердить скидку в чат</button>
           </div>
 
           <!-- ИСХОД ЗВОНКА (решение заказчика 17.07: дата оплаты вбивается в пульте; лестница ТЗ §10.2, signed_date без даты не сохраняется) -->
@@ -973,19 +980,45 @@ function sendPresentation(){
 }
 /* ── рассрочка и допродукты (решение заказчика 20.07): дата/срок графика + адвокатский запрет 20 000/25 000 + сохранение 60 000/объект ── */
 const ADVOCATE_ONCE=20000, ADVOCATE_RASS=25000, ADVOCATE_RASS_FIRST=5000, KEEP_PER_OBJ=60000; /* рассрочка запрета = 5 000 первым платежом + 20 000 частями (заказчик 20.07) */
-let tarif='full'; /* full: 199 000 · 15 (день 1) | disc: скидка −10 000 → 189 000 · 14 (дожим дня 2) */
+let tarif='full'; /* full: 199 000 · 15 | disc: −10 000 → 189 000 · 14 — ТОЛЬКО через гейт applyDisc (цитата «дорого» + месячная норма) */
+const DISC_LIMIT=5; /* демо-норма скидок в месяц; в проде — регламент + согласование РОПа сверх нормы */
+function discMonth(){const ym=new Date().toISOString().slice(0,7);let d={};try{d=JSON.parse(localStorage.getItem('dn_disc')||'{}')}catch(e){}return d.ym===ym?d:{ym,n:0};}
 function setTarif(btn){
-  tarif=btn.dataset.tf;
-  document.querySelectorAll('#w_tarif button').forEach(x=>x.classList.toggle('on',x===btn));
-  const rmInp=document.getElementById('w_rassM');
-  if(tarif==='full'){rmInp.value=15;rmInp.disabled=true;}
-  else{rmInp.value=14;rmInp.disabled=false;}
-  document.getElementById('w_tarifNote').textContent=tarif==='full'
-    ?'День 1 — полный тариф: 14 × 13 500 ₽ + последний платёж 10 000 ₽. Скидку «последний платёж прощаем» бережём для дожима дня 2.'
-    :'Скидка дня 2 включена: «последний платёж прощаем» — минус 10 000 ₽, итог 189 000 ₽, 14 × 13 500. Говорить только на втором касании.';
+  const tf=btn.dataset.tf;
+  if(tf==='disc'&&tarif!=='disc'){ /* скидка не включается кликом — только через гейт с цитатой */
+    const g=document.getElementById('w_discGate');
+    g.style.display='';
+    const d=discMonth(); document.getElementById('w_discCnt').textContent=d.n;
+    const over=d.n>=DISC_LIMIT;
+    document.getElementById('w_discApply').disabled=over;
+    if(over) document.getElementById('w_discApply').textContent='Лимит месяца исчерпан — скидка только через РОПа';
+    document.getElementById('w_discQuote').focus({preventScroll:true});
+    return; /* сегмент остаётся на full до applyDisc */
+  }
+  if(tf==='full'){
+    tarif='full';
+    document.querySelectorAll('#w_tarif button').forEach(x=>x.classList.toggle('on',x.dataset.tf==='full'));
+    document.getElementById('w_discGate').style.display='none';
+    const rmInp=document.getElementById('w_rassM'); rmInp.value=15; rmInp.disabled=true;
+    document.getElementById('w_tarifNote').textContent='Полный тариф: 14 × 13 500 ₽ + последний платёж 10 000 ₽. Скидка — последний козырь на живое «дорого», не предложение по умолчанию: сначала пересчёт по КИ.';
+    rassLine(); updateSendUI();
+  }
+}
+function applyDisc(){
+  const q=document.getElementById('w_discQuote').value.trim();
+  if(q.length<8){document.getElementById('w_discQuote').focus();document.getElementById('w_discQuote').style.borderColor='#A8442E';return;}
+  document.getElementById('w_discQuote').style.borderColor='';
+  const d=discMonth(); if(d.n>=DISC_LIMIT) return;
+  if(!window._discUsedThisDeal){d.n++;window._discUsedThisDeal=true;try{localStorage.setItem('dn_disc',JSON.stringify(d))}catch(e){}}
+  document.getElementById('w_discCnt').textContent=d.n;
+  tarif='disc';
+  document.querySelectorAll('#w_tarif button').forEach(x=>x.classList.toggle('on',x.dataset.tf==='disc'));
+  const rmInp=document.getElementById('w_rassM'); rmInp.value=14; rmInp.disabled=false;
+  document.getElementById('w_tarifNote').innerHTML='✓ Скидка применена по возражению: <b>«'+q.slice(0,60)+(q.length>60?'…':'')+'»</b> — итог 189 000 ₽, 14 × 13 500. В проде причина уходит в сделку и сверяется AI-QA с записью звонка.';
   rassLine(); updateSendUI();
 }
 function rassLine(){
+  const dz=document.getElementById('w_dzDisc'); if(dz) dz.style.display=tarif==='disc'?'':'none';
   if(tarif==='full'){document.getElementById('w_rassLine').textContent='199 000 ₽ · 14 × 13 500 + последний 10 000';return;}
   const rm=Math.max(2,Math.min(24,Math.round(+document.getElementById('w_rassM').value||14)));
   const pay=Math.round(189000/rm);
@@ -1355,7 +1388,6 @@ function monthlyGrowth(){
   return Math.round(g);
 }
 function dzText(kind){
-  if(kind==='disc'&&tarif!=='disc'){setTarif(document.querySelector('#w_tarif button[data-tf="disc"]'));} /* скидка в сообщении = скидочная ссылка */
 
   const name=document.querySelector('.deal h1').textContent.trim();
   const abs=u=>u?new URL(u,location.href).href:'';
@@ -1365,7 +1397,7 @@ function dzText(kind){
   const grow=Math.round(intYearEff()/12); /* ручной факт переплаты (если введён) доходит и до дожим-сообщений */
   const plan=last.pay?fmt(last.pay):null;
   if(kind==='disc'){
-    return name+', новость от руководителя: нам одобрили для вас персональную скидку — последний платёж прощаем. Это минус 10 000 ₽: услуги 189 000 ₽ вместо 199 000 ₽, и рассрочка короче — 14 платежей по 13 500 ₽. Скидка действует только сегодня. Ваша страница уже пересчитана: '+pres;
+    return name+', как договорились: согласовал с руководителем — последний платёж прощаем. Услуги 189 000 ₽ вместо 199 000 ₽, рассрочка 14 платежей по 13 500 ₽. Ваша страница уже пересчитана: '+pres;
   }
   if(kind==='open'){
     return name+', добрый день! Это ДОНУЛЯ. Посчитали по вашим цифрам: платёж можно снизить до ~'+(plan||'—')+' ₽/мес вместо нынешних ~'+fmt(last.paynow||0)+' ₽. Всё уже готово на вашей персональной странице: '+pres+'\nОткройте — это 2 минуты. Если удобнее голосом — наберу.';
