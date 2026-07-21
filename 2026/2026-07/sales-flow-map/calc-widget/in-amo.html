@@ -358,7 +358,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
              сохранение имущества (только БФЛ-«сохранение», 60 000 ₽/объект, в рассрочку) -->
         <div class="actsep">Рассрочка · график на странице клиента</div>
         <div class="rowf"><span class="rlab">Дата 1-го платежа · пусто = ближайшее 25-е</span><input id="w_payDate" class="rin" type="date" style="width:126px" onchange="rassLine()"></div>
-        <div class="rowf"><span class="rlab">День ежемес. платежа · пусто = как у первого</span><input id="w_payDay" class="rin" type="number" min="1" max="31" placeholder="25"></div>
+        <div class="rowf"><span class="rlab">День ежемес. платежа · до 25-го · пусто = как у первого</span><input id="w_payDay" class="rin" type="number" min="1" max="25" placeholder="25" onchange="if(this.value)this.value=Math.max(1,Math.min(25,Math.round(this.value)))"></div>
         <div class="rowf"><span class="rlab">Срок рассрочки, мес</span><input id="w_rassM" class="rin" type="number" min="2" max="24" value="14" oninput="rassLine()"></div>
         <div class="rowf freeline"><span class="rlab">Итог услуг неизменен</span><b id="w_rassLine">189 000 ₽ · платёж 13 500 ₽/мес</b></div>
         <label style="margin-top:10px">Допродукты</label>
@@ -913,7 +913,7 @@ function advMode(){const b=document.querySelector('#w_advMode button.on');return
 function rassParams(){
   const p={};
   const pd=document.getElementById('w_payDate').value; if(pd) p.pd=pd;
-  const md=Math.round(+document.getElementById('w_payDay').value||0); if(md>=1&&md<=31) p.md=md;
+  const md=Math.round(+document.getElementById('w_payDay').value||0); if(md>=1) p.md=Math.min(25,md); /* 25 — последнее число (заказчик 21.07) */
   const rm=Math.max(2,Math.min(24,Math.round(+document.getElementById('w_rassM').value||14))); if(rm!==14) p.rm=rm;
   if(document.getElementById('w_adv').checked){p.adv=1;p.advm=advMode();}
   if(prod==='bfl'&&document.getElementById('w_keep').checked){p.keep=Math.max(1,Math.round(+document.getElementById('w_keepN').value||1));}
