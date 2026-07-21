@@ -432,6 +432,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         </div>
         <div class="rowf"><span class="rlab">Дата 1-го платежа · пусто = ближайшее 25-е</span><input id="w_payDate" class="rin" type="date" style="width:150px" onchange="rassLine()"></div>
         <div class="rowf"><span class="rlab">День ежемес. платежа · до 25-го · пусто = как у первого</span><input id="w_payDay" class="rin" type="number" min="1" max="25" placeholder="25" onchange="if(this.value)this.value=Math.max(1,Math.min(25,Math.round(this.value)))"></div>
+        <!-- «дата неизвестна» (заказчик 21.07): клиент не может назвать дату — рандомную не ставим; страница ЕДИНАЯ, флоу тот же до подписи и оплаты, график пишет «дата согласуется при подписании», договор — «определяется Сторонами» (п. 3.4) -->
+        <label class="ocki"><input type="checkbox" id="w_ndate" onchange="ndateUI()"> Дата неизвестна · клиент не может назвать</label>
         <div class="rowf"><span class="rlab">Срок рассрочки, мес</span><input id="w_rassM" class="rin" type="number" min="2" max="24" value="14" oninput="rassLine()"></div>
         <div class="rowf freeline"><span class="rlab">Итог услуг неизменен</span><b id="w_rassLine">189 000 ₽ · платёж 13 500 ₽/мес</b></div>
         <label style="margin-top:10px">Допродукты</label>
@@ -442,8 +444,6 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <div class="rowf" id="w_keepRow" style="display:none"><span class="rlab">Объектов (залог/ипотека)</span><input id="w_keepN" class="rin" type="number" min="1" value="1"></div>
 
         <div class="actsep">Действия ⚡</div>
-        <!-- «на изучение» (заказчик 21.07): клиент смотрит условия, но не готов подписывать — страница без Оформления/Подписи/Оплаты, финал = запрос КИ -->
-        <label class="ocki"><input type="checkbox" id="w_view" onchange="updateSendUI()"> На изучение · клиент не готов подписывать — без шагов подписи и оплаты</label>
         <div id="pane_act">
           <!-- «одна сумма к оплате» (правка заказчика 16.07): частичку выторговывает менеджер голосом, страница показывает её как факт -->
           <div class="lrow">
@@ -869,13 +869,12 @@ function presentUrl(){
   const dueV=parseFloat(document.getElementById('w_due').value)||0;
   const due=dueV>0?{due:Math.max(1000,Math.round(dueV))}:{}; /* частичка от менеджера: минимум 1 000 (канон) */
   const rp=rassParams(); /* дата 1-го платежа, срок, допродукты (решение заказчика 20.07) */
-  const vw=document.getElementById('w_view').checked?{view:1}:{}; /* «на изучение»: без подписи/оплаты, финал = запрос КИ */
   /* данные для договора (заказчик 20.07): ФИО и дата рождения — на экран «Оформление» и в текст договора */
   const fioV=(document.getElementById('w_fio').value||'').trim().slice(0,80);
   const dobV=document.getElementById('w_dob').value||'';
   const pers={...(fioV?{fio:fioV}:{}),...(dobV?{dob:dobV}:{})};
-  if(last.route==='РДГ') return '../presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,...due,term:last.eff,...(last.nous>0?{nous:last.nous}:{}),...rp,...vw,...pers}); /* РДГ идёт по телу плана (без ипотеки) */
-  if(last.route==='БФЛ') return '../presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,...due,...rp,...vw,...pers});
+  if(last.route==='РДГ') return '../presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,...due,term:last.eff,...(last.nous>0?{nous:last.nous}:{}),...rp,...pers}); /* РДГ идёт по телу плана (без ипотеки) */
+  if(last.route==='БФЛ') return '../presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,...due,...rp,...pers});
   return null;
 }
 /* строка данных + primary-кнопка + статус отправки — единый рендер состояния */
@@ -1022,10 +1021,17 @@ function advNote(){const on=document.getElementById('w_adv').checked&&advMode()=
 function keepUI(){document.getElementById('w_keepRow').style.display=(prod==='bfl'&&document.getElementById('w_keep').checked)?'':'none';}
 function setAdvMode(btn){document.querySelectorAll('#w_advMode button').forEach(x=>x.classList.toggle('on',x===btn));advNote();}
 function advMode(){const b=document.querySelector('#w_advMode button.on');return b?b.dataset.am:'once';}
+function ndateUI(){
+  const on=document.getElementById('w_ndate').checked;
+  document.getElementById('w_payDate').disabled=on; document.getElementById('w_payDay').disabled=on;
+  if(on){document.getElementById('w_payDate').value='';document.getElementById('w_payDay').value='';}
+  rassLine(); updateSendUI();
+}
 function rassParams(){
   const p={};
-  const pd=document.getElementById('w_payDate').value; if(pd) p.pd=pd;
-  const md=Math.round(+document.getElementById('w_payDay').value||0); if(md>=1) p.md=Math.min(25,md); /* 25 — последнее число (заказчик 21.07) */
+  if(document.getElementById('w_ndate').checked){p.nd=1;} /* дата неизвестна: pd/md не шлём, график страницы пишет «дата согласуется при подписании» */
+  const pd=document.getElementById('w_payDate').value; if(pd&&!p.nd) p.pd=pd;
+  const md=Math.round(+document.getElementById('w_payDay').value||0); if(md>=1&&!p.nd) p.md=Math.min(25,md); /* 25 — последнее число (заказчик 21.07) */
   if(tarif==='full'){p.full=1;} /* день 1: 199 000 · 15 платежей; без full страница показывает скидочный 189 000 · 14 */
   else{const rm=Math.max(2,Math.min(24,Math.round(+document.getElementById('w_rassM').value||14))); if(rm!==14) p.rm=rm;}
   if(document.getElementById('w_adv').checked){p.adv=1;p.advm=advMode();}

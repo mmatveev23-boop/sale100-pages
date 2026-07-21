@@ -923,7 +923,8 @@ const CLIENT={
   payNow:payParam>0?payParam:(KION?KI.payNow:(Q.has('debt')?0:61500))
 };
 const BFL_TOTAL_COST=239000; /* услуги 189 000 + госплатежи 50 000 */
-const FULL=Q.get('full')==='1'; /* тариф дня 1 (заказчик 21.07): 199 000 · 15 платежей (14×13 500 + последний 10 000); без full — скидочный 189 000 · 14 («последний платёж прощаем», дожим дня 2) */
+const FULL=Q.get('full')==='1';
+const NDATE=Q.get('nd')==='1'; /* «дата неизвестна» (заказчик 21.07): страница ЕДИНАЯ, флоу до подписи и оплаты; в графике «дата согласуется при подписании», договор пишет «определяется Сторонами» (pd не приходит) */ /* тариф дня 1 (заказчик 21.07): 199 000 · 15 платежей (14×13 500 + последний 10 000); без full — скидочный 189 000 · 14 («последний платёж прощаем», дожим дня 2) */
 const RASS_TOTAL=FULL?199000:189000, RASS_M=FULL?15:14, LAST_PAY=FULL?10000:0, VIP=169000, KD_PRICE=50000, KD_M=2, PAY_DAY=25;
 /* рассрочка от менеджера (решение заказчика 20.07): ?pd=YYYY-MM-DD — дата 1-го платежа, ?rm=N — срок (итог 189 000 неизменен).
    Допродукты: ?adv=1&advm=once|rass — адвокатский запрет (20 000 разом / 25 000 в рассрочку);
@@ -947,22 +948,6 @@ if(SIGNED||PART>0){ /* дожим: клиент уже подписал — по
   CTA=['Оплатить через СБП',''];
 }
 
-/* ── режим «на изучение» (заказчик 21.07: клиент готов смотреть условия, но не готов называть дату и подписывать):
-   шаги Оформление/Подпись/Оплата скрыты, финал = запрос КИ + «эксперт позвонит завтра»; ?view=1 из пульта ── */
-const VIEW=Q.get('view')==='1'&&!(SIGNED||PART>0);
-if(VIEW){
-  scrs=scrs.filter(s=>!/Оформление|Подпись|Оплата/.test(s.dataset.name));
-  const inner=scrs.filter(s=>/^Шаг /.test(s.dataset.name));
-  inner.forEach((s,i)=>{const t=s.dataset.name.split('· ')[1];s.dataset.name='Шаг '+(i+1)+' из '+inner.length+' · '+t;});
-  CTA=scrs.map((s,i)=>i===scrs.length-1?'':(/Подарок/.test(s.dataset.name)?'Забираю подарок':(/Договор/.test(s.dataset.name)?'Посмотрел — что дальше?':(i===0&&!/^Шаг/.test(s.dataset.name)?'Начали':'Понятно, дальше'))));
-  const fin=scrs[scrs.length-1];
-  const h1=fin.querySelector('h1'); if(h1&&h1.lastChild) h1.lastChild.textContent=', вот ваши условия — целиком';
-  const sub=fin.querySelector('.sub'); if(sub) sub.innerHTML='Ничего подписывать сейчас не нужно — страница остаётся у вас, все цифры и договор в ней. Чтобы расчёт стал точным, <b>запросите свою кредитную историю</b> — 5 минут, бесплатно. Эксперт позвонит завтра и пересчитает по реальным цифрам.';
-  const cls=fin.querySelectorAll('.sec .cl div');
-  const steps=['Запросите кредитную историю через Госуслуги — инструкция по кнопке ниже','Эксперт позвонит завтра с точным расчётом по вашей КИ','Условия и подарок закреплены за вами — страница не пропадёт'];
-  cls.forEach((d,i)=>{if(steps[i]) d.textContent=steps[i];});
-  const sec=fin.querySelector('.sec'); if(sec) sec.insertAdjacentHTML('afterend','<a class="linkbtn" style="display:block;text-align:center;text-decoration:none;margin-top:10px" href="../../ki-guide/" target="_blank" rel="noopener">Как запросить КИ за 5 минут →</a>');
-}
 
 /* ============ НАВИГАЦИЯ ============ */
 function show(i){
@@ -971,7 +956,7 @@ function show(i){
   document.getElementById('bar').style.transform='scaleX('+(step/(scrs.length-1))+')';
   document.getElementById('stepName').textContent=scrs[step].dataset.name;
   const cta=document.getElementById('ctaBtn'), back=document.getElementById('backBtn'), cap=document.getElementById('ctaCap');
-  if(step===scrs.length-1){cta.style.display='none';back.style.display='none';cap.textContent=VIEW?'Эксперт позвонит завтра с точным расчётом':'Хорошего дня — дальше вас ведёт сопровождение';}
+  if(step===scrs.length-1){cta.style.display='none';back.style.display='none';cap.textContent='Хорошего дня — дальше вас ведёт сопровождение';}
   else{cta.style.display='';const lbl=(scrs[step].dataset.name.includes('Подарок')&&!sim)?'Дальше':CTA[step];if(lbl==='Оплатить через СБП'){cta.innerHTML='<span class="sbp-chip"><img src="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzQ2IDM5OSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiByb2xlPSJpbWciIGFyaWEtbGFiZWw9ItCh0JHQnyI+CjxwYXRoIGZpbGw9IiM4RjQ3OTQiIGQ9Ik0xMDAuMywxOTkuNGwtNTIsMzBMMCwzMTMuMWwxOTYuOS0xMTMuN0wxMDAuMywxOTkuNHoiLz4KPHBhdGggZmlsbD0iI0U0MDY0NiIgZD0iTTI0OC45LDExMy43bC01MiwzMGwtNDguMyw4My43bDE5Ni45LTExMy43TDI0OC45LDExMy43eiIvPgo8cG9seWdvbiBmaWxsPSIjRjlCNDI5IiBwb2ludHM9IjE5Ni45LDgzLjcgMTQ4LjYsMCAxNDguNiwxNzEuNSAxNDguNiwyMjcuNCAxNDguNiwzOTguOSAxOTYuOSwzMTUuMiIvPgo8cG9seWdvbiBmaWxsPSIjRUY4MDE5IiBwb2ludHM9IjE0OC42LDAgMTk2LjksODMuNyAyNDguOSwxMTMuNyAzNDUuNSwxMTMuNyIvPgo8cG9seWdvbiBmaWxsPSIjNzhCNzJBIiBwb2ludHM9IjE0OC42LDE3MS41IDE0OC42LDM5OC45IDE5Ni45LDMxNS4yIDE5Ni45LDI1NS4yIi8+CjxwYXRoIGZpbGw9IiMwMDg1M0YiIGQ9Ik0yNDguOSwyODUuMmwtNTIsMzBsLTQ4LjMsODMuN2wxOTYuOS0xMTMuN0wyNDguOSwyODUuMnoiLz4KPHBvbHlnb24gZmlsbD0iIzVCNTdBMiIgcG9pbnRzPSIwLDg1LjggMCwzMTMuMSA0OC4zLDIyOS41IDQ4LjMsMTY5LjQiLz4KPHBvbHlnb24gZmlsbD0iIzA2OThENiIgcG9pbnRzPSIxNDguNiwxNzEuNSAxNDguNywxNzEuNiAwLDg1LjggNDguMywxNjkuNCAyNDguOSwyODUuMiAzNDUuNSwyODUuMiIvPgo8L3N2Zz4K" alt=""></span>Оплатить через СБП';}else{cta.textContent=lbl;}back.style.display=step>0?'':'none';cap.textContent=scrs[step].dataset.name.includes('Оплата')?'Платёж защищён договором: гарантия возврата — п. 6':(step===0?'Обсудили экран — жмите кнопку и идите дальше':'');}
   window.scrollTo({top:0});
 }
@@ -988,7 +973,7 @@ function months(n){const out=[];
     for(let i=0;i<n;i++){const m=new Date(d.getFullYear(),d.getMonth()+i,SCHED_DAY);out.push(m.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}));}}
   return out;}
 function renderSched(el,n,first,rest){
-  el.innerHTML=months(n).map((m,i)=>`<div class="sr"><span>${i+1} · ${m}</span><b class="num">${fmt(i===0?first:(LAST_PAY&&i===n-1?LAST_PAY:rest))} ₽</b></div>`).join('');
+  el.innerHTML=months(n).map((m,i)=>`<div class="sr"><span>${i+1} · ${NDATE&&i===0?'дата согласуется при подписании':m}</span><b class="num">${fmt(i===0?first:(LAST_PAY&&i===n-1?LAST_PAY:rest))} ₽</b></div>`).join('');
 }
 function recalc(){
   const kdOn=kd, vip=tariff==='vip';
@@ -1015,7 +1000,8 @@ function recalc(){
     if(typeof KEEP_N!=='undefined'&&KEEP_N>0)parts.push('сохранение имущества');
     if(parts.length>1){document.getElementById('schIncl').style.display='';document.getElementById('schInclV').textContent=parts.join(' + ');}
     else{document.getElementById('schIncl').style.display='none';}})();
-  if(PD){document.getElementById('schFirstLab').textContent='Первый платёж · '+months(1)[0].replace(' г.','');}
+  if(NDATE){document.getElementById('schFirstLab').textContent='Первый платёж · дата согласуется при подписании';}
+  else if(PD){document.getElementById('schFirstLab').textContent='Первый платёж · '+months(1)[0].replace(' г.','');}
   /* допродукты (решение заказчика 20.07) */
   if(ADV){
     document.getElementById('advBlock').style.display='';
@@ -1042,7 +1028,7 @@ function recalc(){
   document.getElementById('payAmount').innerHTML=`${fmt(first)} <small>₽</small>`;
   document.getElementById('payExact').textContent=fmt(first);
   document.getElementById('payNext').style.display=vip?'none':'';
-  document.getElementById('payNext').textContent='Следующий платёж — '+months(2)[1].replace(' г.','')+'. Напомним заранее в чате.';
+  document.getElementById('payNext').textContent=NDATE?'Даты платежей согласуем при подписании — напомним в чате.':'Следующий платёж — '+months(2)[1].replace(' г.','')+'. Напомним заранее в чате.';
   document.getElementById('payNote').textContent=(vip?'оплата по договору':'первый платёж по графику')+' · договор № ДН-2607-1418';
   if(DUE>=1000&&!vip&&DUE<first&&PART<=0){ /* частичка от менеджера: зачёт в первый платёж */
     document.getElementById('docFirst').textContent=fmt(DUE)+' ₽ · частичка';
