@@ -138,6 +138,11 @@ h1 .hl{color:var(--green)}
 .whatwedo .wf span{color:var(--muted);flex-shrink:0}
 .whatwedo .wf b{font-weight:600;text-align:right;color:var(--ink)}
 .whatwedo .wd-note{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.5}
+/* бенто-тезисы «что делаем» (дизайн РДГ): выгоды словами, ни одной новой цифры */
+.wd-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wdc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.wdc b{display:block;font-size:14px;font-weight:800;letter-spacing:-.01em;color:var(--green-ink);line-height:1.25}
+.wdc small{display:block;margin-top:3px;font-size:11.5px;color:var(--muted);line-height:1.4}
 .cmp{background:var(--card);border:1px solid var(--line);border-radius:var(--r-box);overflow:hidden;margin-top:12px}
 .cmp .ch{padding:11px 15px;background:#FDFBF7;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted)}
 .cmp .ch b{color:var(--ink)}
@@ -189,6 +194,68 @@ h1 .hl{color:var(--green)}
 .sim .tagline{position:absolute;left:18px;bottom:16px;max-width:52%;font-size:10px;line-height:1.35;letter-spacing:.05em;text-transform:uppercase;color:rgba(255,255,255,.65)}
 .sim .msisdn{position:absolute;right:18px;bottom:16px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.85)}
 
+/* ── дизайн финального макета (перенос с РДГ): карты графики, панель выгоды, золотая карточка ── */
+.svhead{font-size:18px;font-weight:800;letter-spacing:-.01em;margin-bottom:12px}
+.cardh{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.cardh .svhead{margin-bottom:8px}
+.tagchip{font-size:12px;font-weight:700;color:var(--green-ink);background:var(--green-soft);border:1px solid rgba(15,107,79,.2);border-radius:999px;padding:5px 12px;white-space:nowrap;margin-bottom:8px}
+.case{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-box,16px);padding:15px 17px;box-shadow:0 8px 22px -14px rgba(11,59,46,.4)}
+.pm2{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-top:6px}
+.pmchart{position:relative;padding-left:64px;display:flex;flex-direction:column;justify-content:flex-end}
+.paxis{position:absolute;left:0;right:0;bottom:0;height:150px;pointer-events:none}
+.paxis .tick{position:absolute;left:0;right:0;border-top:1px dashed var(--line)}
+.paxis .tick span{position:absolute;left:0;top:-7px;font-size:10.5px;color:var(--faint);background:var(--card);padding-right:4px}
+.pplot{position:relative;display:flex;gap:14px;justify-content:space-around}
+.pcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+.pcol>span{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#D6362B}
+.pcol>span.usl{color:var(--green-ink)}
+.pcol b{font-size:17px;font-weight:800;letter-spacing:-.01em;color:#D6362B;white-space:nowrap}
+.pcol b.us{color:var(--green-ink)}
+.pwell{height:150px;display:flex;align-items:flex-end;justify-content:center;width:100%}
+.pwell i{display:block;width:58px;border-radius:10px 10px 3px 3px;position:relative;z-index:1}
+.vnow{height:100%;background:linear-gradient(180deg,#E05248 0%,#C3352B 100%)}
+.vus{background:var(--green)}
+.parrow{position:absolute;left:50%;top:56px;transform:translateX(-50%);width:32px;height:32px;color:var(--green-ink);background:var(--card);border-radius:50%;padding:2px;z-index:2}
+.pmside{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 15px}
+.ps-l{font-size:13.5px;font-weight:700;color:var(--ink)}
+.ps-v{margin-top:2px;font-size:30px;font-weight:800;letter-spacing:-.02em;color:var(--green-ink);white-space:nowrap}
+.ps-m{font-size:13px;color:var(--muted)}
+.ps-sep{margin:10px 0;border-top:1px solid var(--line)}
+.ps-note{font-size:12px;color:var(--muted);line-height:1.45;margin-top:6px}
+.ps-note b{color:var(--ink)}
+@media (max-width:679px){.pm2{grid-template-columns:1fr}.pmchart{padding-left:56px}}
+.cs2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:2px}
+.c2col{display:flex;flex-direction:column}
+.c2col>span{display:block;font-size:13.5px;color:var(--muted)}
+.c2col b{display:block;margin-top:auto;padding-top:2px;font-size:19px;font-weight:800;letter-spacing:-.01em;color:#D6362B;white-space:nowrap}
+.c2col b.us{color:var(--green-ink)}
+.c2track{margin-top:7px}
+.c2track i{display:block;height:14px;border-radius:7px}
+.c2track .hnow{background:linear-gradient(90deg,#E05248 0%,#C3352B 100%);width:100%}
+.c2track .hus{background:var(--green)}
+.c2track.dash{border:1px dashed rgba(28,26,22,.22);border-radius:9px;padding:2px}
+.c2track.dash i{height:12px;border-radius:6px}
+.hnote{display:block;margin-top:6px;font-size:11.5px;color:var(--faint);line-height:1.4}
+.cs3{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin-top:2px}
+.ecoCard{background:linear-gradient(165deg,#FBF3DC 0%,#F2DFAE 100%);border:1px solid rgba(201,154,51,.4);border-radius:12px;padding:12px 16px;text-align:center}
+.ecoCard span{display:block;font-size:12.5px;font-weight:700;color:var(--gold-ink)}
+.ecoCard b{display:block;margin-top:2px;font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--gold-ink);white-space:nowrap}
+.csfoot{margin-top:10px}
+@media (max-width:679px){.cs3{grid-template-columns:1fr}.ecoCard{padding:10px 14px}}
+@media (max-width:480px){.c2col b{font-size:15.5px}}
+/* анимации графиков (канон emil-design-eng, как в РДГ) */
+@media (prefers-reduced-motion:no-preference){
+  .scr.on .pwell i{transform-origin:bottom;animation:barUp .65s var(--ease) both;animation-delay:.1s}
+  .scr.on .pwell .vus{animation-delay:.28s}
+  .scr.on .parrow{opacity:0;animation:pfade .35s var(--ease) forwards;animation-delay:.72s}
+  .scr.on .pmside{opacity:0;animation:rise .45s var(--ease) forwards;animation-delay:.4s}
+  .scr.on .tagchip{opacity:0;animation:pfade .35s var(--ease) forwards;animation-delay:.55s}
+  .scr.on .c2track i{transform-origin:left;animation:barAcross .6s var(--ease) both;animation-delay:.15s}
+  .scr.on .ecoCard{opacity:0;animation:rise .45s var(--ease) forwards;animation-delay:.5s}
+}
+@keyframes barUp{from{transform:scaleY(.06)}to{transform:scaleY(1)}}
+@keyframes barAcross{from{transform:scaleX(.06)}to{transform:scaleX(1)}}
+@keyframes pfade{to{opacity:1}}
 /* SIM-экран в стиле физического буклета (фото заказчика 20.07): красная обложка, белая карта, красный лого */
 .simhero{margin-top:6px;background:radial-gradient(120% 130% at 85% -15%,#D6362B 0%,transparent 55%),linear-gradient(168deg,#B02A20 0%,#8C1B14 55%,#6E120C 100%);border-radius:var(--r-box,16px);padding:18px 16px 16px;box-shadow:0 16px 36px -18px rgba(110,18,12,.6)}
 .simhero .sh-t{font-size:23px;line-height:1.2;font-weight:800;color:#fff;letter-spacing:-.02em}
@@ -430,16 +497,27 @@ h1 .hl{color:var(--green)}
         <div class="kibadge stg" id="kiBadge" style="display:none">✓ Рассчитано по вашей кредитной истории · <b id="kiCount">22</b>&nbsp;<span id="kiCountW">договора</span></div>
         <div class="kibadge words stg" id="wordsBadge">🎤 Предварительный расчёт со слов — уточним по кредитной истории</div>
 
-        <div class="save-hero stg">
-          <div class="sl">Ваша выгода с нами</div>
-          <div class="sv num" id="bflSave">—</div>
-          <div class="ss num">долг <b id="bflDebt">—</b> спишется целиком — платите только за процедуру</div>
-        </div>
-
+        <!-- дизайн финального макета заказчика (перенос с РДГ, 20.07 ночь): график с осью + панель «Вы экономите» -->
         <div class="bars stg" id="barsWrap">
-          <div class="bar now"><div class="bl"><span>Платите сейчас</span><b class="num" id="barNow">—</b></div><i style="width:100%"></i></div>
-          <div class="bar us"><div class="bl"><span>Будете платить с нами</span><b class="num" id="barUs">13 500 ₽/мес</b></div><i id="barUsFill" style="width:22%"></i></div>
-          <div class="bnote">Платёж только за процедуру, <span id="barTerm">14</span> платежей — дальше долгов нет. Коллекторам и банкам звонить вам запрещено по 127-ФЗ.</div>
+          <div class="cardh"><div class="svhead" id="svHead">Платёж снизится на ~78%</div><span class="tagchip">✓ платите меньше каждый месяц</span></div>
+          <div class="pm2">
+            <div class="pmchart">
+              <div class="paxis" id="pmAxis" aria-hidden="true"></div>
+              <div class="pplot">
+                <div class="pcol"><span>сейчас</span><b class="num" id="barNow">—</b><div class="pwell"><i class="vnow"></i></div></div>
+                <div class="pcol"><span class="usl">с нами</span><b class="num us" id="barUs">13 500 ₽/мес</b><div class="pwell"><i class="vus" id="barUsFill" style="height:22%"></i></div></div>
+                <svg class="parrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5c7 0 11 4 13 11"/><path d="M11 16h6v-6"/></svg>
+              </div>
+            </div>
+            <aside class="pmside">
+              <div class="ps-l">Вы экономите</div>
+              <div class="ps-v num" id="mSave">—</div>
+              <div class="ps-m">каждый месяц</div>
+              <div class="ps-sep"></div>
+              <div class="ps-note">Платёж «с нами» — это услуги ДОНУЛЯ: <b>13 500 ₽/мес, <span id="barTerm">14</span> платежей</b> — дальше долгов нет.</div>
+              <div class="ps-note">Проценты не растут, коллекторам и банкам звонить вам запрещено по 127-ФЗ.</div>
+            </aside>
+          </div>
         </div>
 
         <div class="creditors stg" id="crBlock" style="display:none">
@@ -448,22 +526,27 @@ h1 .hl{color:var(--green)}
           <div class="crnote" id="crNote"><!-- текст собирается из объекта KI при ?ki=1 --></div>
         </div>
 
-        <button class="linkbtn stg" id="calcBtn" onclick="toggleCalc()">Как посчитана выгода</button>
-        <div id="calcDetail" style="display:none">
-          <div class="cmp">
-            <div class="ch">По вашим цифрам: долг <b class="num" id="cmpDebt">—</b> списывается судом целиком</div>
-            <div class="cr"><span>Услуги ДОНУЛЯ<small>рассрочка на 14 месяцев без банка и процентов</small></span><b class="num">189 000 ₽</b></div>
-            <div class="cr"><span>Госплатежи<small>напрямую государству: депозит суда, публикации, почтовые</small></span><b class="num">50 000 ₽</b></div>
-            <div class="cf"><div><div class="t">Ваша выгода</div><div style="font-size:11.5px;color:var(--green-ink)">долг − 239 000 ₽</div></div><div class="v num" id="cdSave">—</div></div>
+        <div class="case stg" id="totalCard">
+          <div class="svhead">Сколько вы отдадите всего</div>
+          <div class="cs3">
+            <div class="cs2">
+              <div class="c2col"><span>Если ничего не менять</span><b class="num" id="csNoUs">—</b><div class="c2track dash"><i class="hnow"></i></div></div>
+              <div class="c2col"><span>С нами · услуги и госплатежи</span><b class="num us">239 000 ₽</b><div class="c2track dash"><i class="hus" id="csPlanBar" style="width:19%"></i></div></div>
+            </div>
+            <div class="ecoCard"><span>Ваша выгода</span><b class="num" id="cdSave">—</b></div>
           </div>
-          <p class="sub" style="margin-top:8px">Выгода посчитана без переплаты по процентам, которую вы бы отдали, продолжая платить, — по факту она больше. Расчёт предварительный, итог фиксирует суд.</p>
+          <small class="hnote csfoot">ⓘ «если ничего не менять» — минимум: сам долг, без переплаты по процентам (по факту она больше) · с нами долг списывается судом целиком: услуги 189 000 ₽ + госплатежи 50 000 ₽</small>
         </div>
 
         <div class="whatwedo stg">
           <div class="wd-h">Что делаем и сроки</div>
-          <div class="wd-t"><b>Списание долга по 127-ФЗ.</b> Как только начинаем работу, платежи банкам прекращаются (ст. 213.4): вы платите только нам, а старые просрочки гасить не нужно. Суд освобождает вас от всех долгов, включая МФО — коллекторам звонить запрещено.</div>
+          <div class="wd-cards">
+            <div class="wdc"><b>Долг спишется целиком</b><small>суд освобождает от всех долгов, включая МФО</small></div>
+            <div class="wdc"><b>Платежи банкам — стоп</b><small>с начала работы · ст. 213.4 · платите только нам</small></div>
+            <div class="wdc"><b>Старые просрочки гасить не нужно</b><small>их закрывает процедура</small></div>
+            <div class="wdc"><b>Коллекторам звонить запрещено</b><small>по 127-ФЗ · звонки переводите на нас</small></div>
+          </div>
           <div class="wd-facts">
-            <div class="wf"><span>Выгода</span><b>сразу — платежи банкам прекращаются</b></div>
             <div class="wf"><span>Подготовка и подача в суд</span><b>2–3 месяца</b></div>
             <div class="wf"><span>Первое заседание</span><b>примерно через 3 месяца</b></div>
             <div class="wf"><span>Процедура</span><b>стандартно ~6 мес (простое дело — от ~5)</b></div>
@@ -704,9 +787,13 @@ h1 .hl{color:var(--green)}
         </div>
         <div class="whatwedo stg" id="whatWeDo" style="display:none">
           <div class="wd-h">Что делаем и сроки</div>
-          <div class="wd-t"><b>Списание долга по 127-ФЗ.</b> Как только начинаем работу, платежи банкам прекращаются (ст. 213.4): вы платите только нам, а старые просрочки гасить не нужно. Суд освобождает вас от всех долгов, включая МФО — коллекторам звонить запрещено.</div>
+          <div class="wd-cards">
+            <div class="wdc"><b>Долг спишется целиком</b><small>суд освобождает от всех долгов, включая МФО</small></div>
+            <div class="wdc"><b>Платежи банкам — стоп</b><small>с начала работы · ст. 213.4 · платите только нам</small></div>
+            <div class="wdc"><b>Старые просрочки гасить не нужно</b><small>их закрывает процедура</small></div>
+            <div class="wdc"><b>Коллекторам звонить запрещено</b><small>по 127-ФЗ · звонки переводите на нас</small></div>
+          </div>
           <div class="wd-facts">
-            <div class="wf"><span>Выгода</span><b>сразу — платежи банкам прекращаются</b></div>
             <div class="wf"><span>Подготовка и подача в суд</span><b>2–3 месяца</b></div>
             <div class="wf"><span>Первое заседание</span><b>примерно через 3 месяца</b></div>
             <div class="wf"><span>Процедура</span><b>стандартно ~6 мес (простое дело — от ~5)</b></div>
@@ -915,19 +1002,26 @@ function recalc(){
   }
   /* бары хиро: «с нами» = рассрочка услуг 13 500/мес; скрыты при VIP (разовая оплата) и без известного платежа клиента */
   const barsEl=document.getElementById('barsWrap');
-  if(barsEl) barsEl.style.display=(CLIENT.payNow>0 && !vip)?'':'none';
+  if(barsEl) barsEl.style.display=(CLIENT.payNow>13500 && !vip)?'':'none'; /* показываем, только когда снижение честное */
   renderKdDelta();
 }
 /* хиро выгоды БФЛ (канон виджета: выгода = долг − услуги 189 000 − госплатежи 50 000) */
 function renderHero(){
   const save=Math.max(0,CLIENT.debt-BFL_TOTAL_COST);
-  document.getElementById('bflSave').textContent='~'+fmt(save)+' ₽';
-  document.getElementById('bflDebt').textContent=fmt(CLIENT.debt)+' ₽';
-  document.getElementById('cmpDebt').textContent=fmt(CLIENT.debt)+' ₽';
+  /* карта «Сколько вы отдадите всего»: долг (минимум, без процентов) vs 239 000 → выгода */
+  document.getElementById('csNoUs').textContent=fmt(CLIENT.debt)+' ₽';
+  document.getElementById('csPlanBar').style.width=Math.max(8,Math.min(100,Math.round(BFL_TOTAL_COST/CLIENT.debt*100)))+'%';
   document.getElementById('cdSave').textContent='~'+fmt(save)+' ₽';
+  /* карта «Платёж в месяц»: сейчас → 13 500 за процедуру; ось по платежу клиента */
   if(CLIENT.payNow>0){
     document.getElementById('barNow').textContent='~'+fmt(CLIENT.payNow)+' ₽/мес';
-    document.getElementById('barUsFill').style.width=Math.min(100,Math.round(13500/CLIENT.payNow*100))+'%';
+    document.getElementById('barUsFill').style.height=Math.max(10,Math.min(100,Math.round(13500/CLIENT.payNow*100)))+'%';
+    document.getElementById('svHead').textContent='Платёж снизится на ~'+Math.max(1,Math.round((1-13500/CLIENT.payNow)*100))+'%';
+    document.getElementById('mSave').textContent='~'+fmt(Math.max(0,CLIENT.payNow-13500))+' ₽';
+    const ax=document.getElementById('pmAxis');const steps=[5000,10000,20000,25000,50000,100000,200000];
+    const st=steps.find(x=>CLIENT.payNow/x<=3.5)||200000;let th='';
+    for(let v=0;v<=CLIENT.payNow;v+=st)th+='<div class="tick" style="bottom:'+(v/CLIENT.payNow*100)+'%"><span class="num">'+fmt(v)+'</span></div>';
+    ax.innerHTML=th;
   }
 }
 function toggleCalc(){
