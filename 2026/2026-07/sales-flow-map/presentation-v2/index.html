@@ -1194,12 +1194,17 @@ function buildContract(){
     ['{{Payer|Дата ожидания}}',vip?(pd1||'при заключении договора'):(pd1?'с '+pd1+', ':'')+'каждое '+SCHED_DAY+'-е число'],
     ['стоимость услуг 189 000 ₽, рассрочка 14 месяцев','стоимость услуг '+fmt(svcTotal)+' ₽'+(vip?', оплата одним платежом':', рассрочка '+term+' месяцев')]
   ];
-  if(FIO||DOB){
+  /* мерж клиента: из ссылки пульта (?fio/?dob) ИЛИ из полей экрана «Оформление» — иначе договор остаётся демо-образцом (фикс заказчика 21.07 «не подтянулось имя») */
+  const anyLive=live('fio')||live('dob')||live('pass')||live('issued')||live('phone');
+  if(FIO||DOB||anyLive){
     const fio=live('fio')||FIO, dob=live('dob')||DOB, pass=live('pass'), issued=live('issued'), phone=live('phone');
-    const shrt=(p=>p.length>1?p[0]+' '+p.slice(1).map(x=>x[0].toUpperCase()+'.').join(' '):p[0]||'')(esc(fio).split(/\s+/).filter(Boolean));
+    const parts=esc(fio).split(/\s+/).filter(Boolean);
+    const shrt=(p=>p.length>1?p[0]+' '+p.slice(1).map(x=>x[0].toUpperCase()+'.').join(' '):p[0]||'')(parts);
+    const io=parts.length>1?parts.slice(1).join(' '):parts[0]||''; /* имя-отчество: обложка и приветствия шаблона */
     rep.push(
       ['Ковалёва Виктория Юрьевна',fio?esc(fio):gap],
       ['Ковалёва В. Ю.',shrt||gap],
+      ['Виктория Юрьевна',io||gap],
       ['40 17 № 682 394',pass?esc(pass):gap],
       ['Дата рождения: {{Сделка|Дата рождения|722309}}','Дата рождения: '+(dob?esc(dob):gap)],
       ['Выдан: {{Сделка|дата выдачи паспорта (д)|699917}} {{Сделка|кем выдан паспорт (д)|699915}}','Выдан: '+(issued?esc(issued):gap)],
