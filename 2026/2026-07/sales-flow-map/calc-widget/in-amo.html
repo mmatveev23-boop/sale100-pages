@@ -442,6 +442,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <div class="rowf" id="w_keepRow" style="display:none"><span class="rlab">Объектов (залог/ипотека)</span><input id="w_keepN" class="rin" type="number" min="1" value="1"></div>
 
         <div class="actsep">Действия ⚡</div>
+        <!-- «на изучение» (заказчик 21.07): клиент смотрит условия, но не готов подписывать — страница без Оформления/Подписи/Оплаты, финал = запрос КИ -->
+        <label class="ocki"><input type="checkbox" id="w_view" onchange="updateSendUI()"> На изучение · клиент не готов подписывать — без шагов подписи и оплаты</label>
         <div id="pane_act">
           <!-- «одна сумма к оплате» (правка заказчика 16.07): частичку выторговывает менеджер голосом, страница показывает её как факт -->
           <div class="lrow">
@@ -867,12 +869,13 @@ function presentUrl(){
   const dueV=parseFloat(document.getElementById('w_due').value)||0;
   const due=dueV>0?{due:Math.max(1000,Math.round(dueV))}:{}; /* частичка от менеджера: минимум 1 000 (канон) */
   const rp=rassParams(); /* дата 1-го платежа, срок, допродукты (решение заказчика 20.07) */
+  const vw=document.getElementById('w_view').checked?{view:1}:{}; /* «на изучение»: без подписи/оплаты, финал = запрос КИ */
   /* данные для договора (заказчик 20.07): ФИО и дата рождения — на экран «Оформление» и в текст договора */
   const fioV=(document.getElementById('w_fio').value||'').trim().slice(0,80);
   const dobV=document.getElementById('w_dob').value||'';
   const pers={...(fioV?{fio:fioV}:{}),...(dobV?{dob:dobV}:{})};
-  if(last.route==='РДГ') return '../presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,...due,term:last.eff,...(last.nous>0?{nous:last.nous}:{}),...rp,...pers}); /* РДГ идёт по телу плана (без ипотеки) */
-  if(last.route==='БФЛ') return '../presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,...due,...rp,...pers});
+  if(last.route==='РДГ') return '../presentation-rdg/index.html?'+new URLSearchParams({name,debt:Math.round(last.body||last.debt),...pay,...ki,...due,term:last.eff,...(last.nous>0?{nous:last.nous}:{}),...rp,...vw,...pers}); /* РДГ идёт по телу плана (без ипотеки) */
+  if(last.route==='БФЛ') return '../presentation-v2/index.html?'+new URLSearchParams({name,debt:last.debt,...pay,...ki,...due,...rp,...vw,...pers});
   return null;
 }
 /* строка данных + primary-кнопка + статус отправки — единый рендер состояния */
