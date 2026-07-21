@@ -446,7 +446,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <!-- «одна сумма к оплате» (правка заказчика 16.07): частичку выторговывает менеджер голосом, страница показывает её как факт -->
           <div class="lrow">
             <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
-            <button class="lbtn" id="w_payLink" onclick="copyPayLink()">💳 Ссылка на оплату</button>
+            <!-- «Ссылка на оплату» убрана (заказчик 21.07): оплата возможна только после подписания договора — флоу страницы сам ведёт подпись → оплата; copyPayLink() сохранена как шаблон для движка -->
           </div>
         <!-- КРЕДИТНАЯ ИСТОРИЯ — отдельный раздел (правка заказчика 21.07: «файлы-результат хранятся здесь»); в проде файлы = вложения сделки амо -->
         <div class="actsep">Кредитная история</div>
@@ -898,7 +898,7 @@ function updateSendUI(){
     badge.className='dbadge load'; badge.textContent='⏳ читаю отчёт…';
     btn.className='sbtn dis'; btn.disabled=true; btn.textContent='✈ Отправить презентацию клиенту';
     st.className='sstat none'; st.textContent='дождитесь расчёта…';
-    copy.disabled=true; document.getElementById('w_payLink').disabled=true; up.classList.remove('hi');
+    copy.disabled=true; up.classList.remove('hi');
     updateTabDot(false);
     return;
   }
@@ -909,7 +909,7 @@ function updateSendUI(){
   if(!u){ /* «мимо процедур» или пустой долг — презентации нет, отправлять нечего */
     btn.className='sbtn dis'; btn.disabled=true; btn.textContent='✈ Отправить презентацию клиенту';
     st.className='sstat warn'; st.textContent=last.debt>0?'«мимо процедур» — презентации нет':'введите долг';
-    copy.disabled=true; document.getElementById('w_payLink').disabled=true; up.classList.remove('hi');
+    copy.disabled=true; up.classList.remove('hi');
     if(pv) pv.style.display='none';
     updateTabDot(false);
     return;
@@ -918,7 +918,7 @@ function updateSendUI(){
   btn.textContent=sentAt?'✈ Отправить снова':(kiError?'✈ Отправить со слов':'✈ Отправить презентацию клиенту');
   if(sentAt){ st.className='sstat sent'; st.textContent='✓ отправлено '+sentAt; }
   else{ st.className='sstat none'; st.textContent='ещё не отправлено'; }
-  copy.disabled=false; document.getElementById('w_payLink').disabled=false;
+  copy.disabled=false;
   /* отправлено со слов → подсветить догрузку КИ: та же ссылка станет точной */
   up.classList.toggle('hi', !!sentAt&&!kiLoaded&&!kiError);
   if(pv&&pv.style.display!=='none') pv.href=u;
