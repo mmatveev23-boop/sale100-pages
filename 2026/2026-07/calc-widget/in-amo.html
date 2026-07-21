@@ -985,14 +985,24 @@ const DISC_LIMIT=5; /* демо-норма скидок в месяц; в про
 function discMonth(){const ym=new Date().toISOString().slice(0,7);let d={};try{d=JSON.parse(localStorage.getItem('dn_disc')||'{}')}catch(e){}return d.ym===ym?d:{ym,n:0};}
 function setTarif(btn){
   const tf=btn.dataset.tf;
-  if(tf==='disc'&&tarif!=='disc'){ /* скидка не включается кликом — только через гейт с цитатой */
+  if(tf==='disc'&&tarif!=='disc'){ /* скидка не включается кликом — гейт: сначала ЖЁСТКИЙ замок по КИ (правило заказчика 21.07 «точно знать, когда предложить»), затем цитата */
     const g=document.getElementById('w_discGate');
     g.style.display='';
-    const d=discMonth(); document.getElementById('w_discCnt').textContent=d.n;
+    const q=document.getElementById('w_discQuote'), a=document.getElementById('w_discApply');
+    if(!kiLoaded){ /* до пересчёта по КИ козыря НЕ СУЩЕСТВУЕТ — первый звонок продаёт запрос КИ */
+      q.style.display='none'; a.disabled=true;
+      a.textContent='🔒 Откроется после пересчёта по КИ';
+      document.getElementById('w_discNote').innerHTML='Правило: козырь открывается системой, а не по ощущению. <b>Шаг 1</b> — клиент запрашивает КИ (это и есть ответ на первое «дорого»: «посчитаем точно — часто выгоднее»). <b>Шаг 2</b> — расчёт по КИ загружен, клиент видел точные цифры и снова говорит про цену → скидка доступна. В проде замок открывает движок по полям сделки.';
+      return;
+    }
+    q.style.display=''; 
+    const d=discMonth(); {const c=document.getElementById('w_discCnt'); if(c) c.textContent=d.n;}
     const over=d.n>=DISC_LIMIT;
-    document.getElementById('w_discApply').disabled=over;
-    if(over) document.getElementById('w_discApply').textContent='Лимит месяца исчерпан — скидка только через РОПа';
-    document.getElementById('w_discQuote').focus({preventScroll:true});
+    a.disabled=over;
+    a.textContent=over?'Лимит месяца исчерпан — скидка только через РОПа':'Применить скидку −10 000 · последний платёж прощаем';
+    document.getElementById('w_discNote').innerHTML='✓ КИ загружена — козырь открыт. Применяется только на живое «дорого» (цитата обязательна: в проде уходит в сделку, AI-QA сверяет с записью звонка). Норма: <b><span id="w_discCnt2"></span> из '+DISC_LIMIT+'</b> в месяц, сверх — через РОПа.';
+    const c2=document.getElementById('w_discCnt2'); if(c2) c2.textContent=d.n;
+    q.focus({preventScroll:true});
     return; /* сегмент остаётся на full до applyDisc */
   }
   if(tf==='full'){
@@ -1005,12 +1015,14 @@ function setTarif(btn){
   }
 }
 function applyDisc(){
+  if(!kiLoaded) return; /* замок: без КИ-пересчёта скидки нет */
   const q=document.getElementById('w_discQuote').value.trim();
   if(q.length<8){document.getElementById('w_discQuote').focus();document.getElementById('w_discQuote').style.borderColor='#A8442E';return;}
   document.getElementById('w_discQuote').style.borderColor='';
   const d=discMonth(); if(d.n>=DISC_LIMIT) return;
   if(!window._discUsedThisDeal){d.n++;window._discUsedThisDeal=true;try{localStorage.setItem('dn_disc',JSON.stringify(d))}catch(e){}}
-  document.getElementById('w_discCnt').textContent=d.n;
+  {const c=document.getElementById('w_discCnt'); if(c) c.textContent=d.n;}
+  {const c2=document.getElementById('w_discCnt2'); if(c2) c2.textContent=d.n;}
   tarif='disc';
   document.querySelectorAll('#w_tarif button').forEach(x=>x.classList.toggle('on',x.dataset.tf==='disc'));
   const rmInp=document.getElementById('w_rassM'); rmInp.value=14; rmInp.disabled=false;
@@ -1320,6 +1332,7 @@ function applyKiTypes(sb,demo){
       :(sb.itogo?', а «Итого» в отчёте '+fmt(sb.itogo)+' ₽ — не сходится, сверьте с PDF и добейте долг вручную.':' — «Итого» в отчёте не найдено, сверьте с PDF глазами.')))
     +(sb.types.mortgage.amount>0?' Ипотека '+fmt(sb.types.mortgage.amount)+' ₽ — вне плана (298-ФЗ).':'')+' В проде PDF прикрепляется к сделке.';
   renderKiList();
+  if(tarif==='full'){const tn=document.getElementById('w_tarifNote'); if(tn) tn.innerHTML='Полный тариф: 14 × 13 500 ₽ + последний платёж 10 000 ₽. <b style="color:#0B5540">✓ КИ загружена — козырь скидки открыт:</b> если снова прозвучит «дорого» — прощайте последний платёж (кнопка «Скидка · на „дорого“»).';}
   const kf=document.getElementById('w_kiFile');
   if(sb.rows&&sb.rows.length){
     /* заключение считает платёж и ПДН само — база хранится, href пересобирает calc() (срок/доход/ипотека живые) */
