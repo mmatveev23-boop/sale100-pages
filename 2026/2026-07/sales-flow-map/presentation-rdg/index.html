@@ -137,7 +137,7 @@ h1 .hl{color:var(--green)}
 /* SIM-карта мокап */
 .sim{position:relative;margin:14px auto 0;width:100%;max-width:330px;aspect-ratio:1.586;border-radius:18px;background:
   radial-gradient(130% 110% at 90% -10%, #14604A 0%, transparent 60%),
-  linear-gradient(150deg,#0E4838, #082A21);color:#fff;padding:18px;box-shadow:0 20px 40px -22px rgba(8,42,33,.6);overflow:hidden}
+  linear-gradient(150deg,#0E4838, #082A21);color:#fff;padding:18px;box-shadow:0 20px 40px -22px rgba(8,42,33,.6);overflow:hidden;transition:transform .35s var(--ease),box-shadow .35s var(--ease);will-change:transform}
 .sim .logo svg{width:96px!important;height:auto!important;opacity:.95;display:block}
 .sim .simcut{position:absolute;left:16px;top:52%;transform:translateY(-46%);width:98px}
 .sim .freeYear{position:absolute;right:18px;top:49%;transform:translateY(-50%);text-align:right}
@@ -163,6 +163,10 @@ h1 .hl{color:var(--green)}
 .simhero .cl{color:rgba(255,255,255,.92)}
 .simhero .cl b{color:#fff}
 .simhero .cl svg{color:#7A2018;background:#F2A93B;border-radius:50%;padding:3px;width:19px;height:19px;margin-top:0;box-sizing:border-box}
+/* лёгкий hover SIM-карты (заказчик 20.07 ночь; канон скилла: transform+shadow, интерруптибельный transition, только точный указатель) */
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  .simhero .sim:hover{transform:perspective(900px) translateY(-6px) rotateX(2.5deg) rotateY(-3.5deg) scale(1.015);box-shadow:0 28px 48px -18px rgba(60,8,4,.6)}
+}
 .timer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;background:var(--gold-soft);border:1px solid rgba(201,154,51,.35);border-radius:var(--r-btn);padding:11px 14px;font-size:13px;color:var(--gold-ink)}
 .timer b{font-size:17px;font-weight:800}
 
