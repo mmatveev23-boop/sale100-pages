@@ -280,6 +280,20 @@ h1 .hl{color:var(--green)}
 .c2track.dash{border:1px dashed rgba(28,26,22,.22);border-radius:9px;padding:2px}
 .c2track.dash i{height:12px;border-radius:6px}
 .ecoCard{background:linear-gradient(165deg,#FBF3DC 0%,#F2DFAE 100%);border:1px solid rgba(201,154,51,.4);border-radius:12px;padding:12px 16px;text-align:center}
+
+/* ── прививка от конкурентов + закрепление условий (правка Виктории 21.07) ── */
+.rivals .rv-h{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--green-ink)}
+.rivals .rv-sub{font-size:12.5px;color:var(--muted);margin:3px 0 6px;line-height:1.45}
+.rivals .rv{padding:8px 0;border-top:1px solid rgba(28,26,22,.08)}
+.rivals .rv b{display:block;font-size:13px;font-weight:700;color:var(--ink);line-height:1.4}
+.rivals .rv span{display:block;font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:2px}
+.rivals .rv span b{display:inline;font-size:12.5px;color:var(--green-ink);font-weight:700}
+.holdplate{background:linear-gradient(165deg,#FBF3DC 0%,#F2DFAE 100%);border:1px solid rgba(201,154,51,.4);border-radius:var(--r-box);padding:13px 15px;margin-top:12px}
+.holdplate .hp-t{font-size:13.5px;font-weight:700;color:#5C4715}
+.holdplate .hp-t b{white-space:nowrap}
+.holdplate .hp-s{font-size:12.5px;color:#6B5A2A;line-height:1.5;margin-top:4px}
+.holdplate .hp-btn{display:inline-block;margin-top:8px;padding:8px 14px;background:#fff;border:1px solid rgba(201,154,51,.55);border-radius:10px;font-size:12.5px;font-weight:700;color:#5C4715;text-decoration:none;transition:transform .16s cubic-bezier(.23,1,.32,1)}
+.holdplate .hp-btn:active{transform:scale(.97)}
 .ecoCard span{display:block;font-size:12.5px;font-weight:700;color:var(--gold-ink)}
 .ecoCard b{display:block;margin-top:2px;font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--gold-ink);white-space:nowrap}
 .csfoot{margin-top:10px}
@@ -628,6 +642,17 @@ h1 .hl{color:var(--green)}
           <div class="wd-note">Расчёт — по вашим цифрам, итог зафиксирует суд. Сроки процедурные — не зависят от того, считаем со слов или по КИ.</div>
         </div>
 
+        <!-- прививка от конкурентов (правка Виктории 21.07): страница остаётся у клиента в чате — вооружаем против обзвона конкурентов -->
+        <div class="case stg rivals">
+          <div class="rv-h">Вам будут звонить другие юристы</div>
+          <div class="rv-sub">Задайте каждому эти 5 вопросов — и сравните с тем, что уже есть у вас на этой странице:</div>
+          <div class="rv"><b>1. Гарантия возврата прописана в договоре?</b><span><b>У нас</b> — п. 6.2: суд не утвердит план — вернём 100% оплаченного, возврат за 7 рабочих дней (п. 6.6).</span></div>
+          <div class="rv"><b>2. Цена фиксированная — или «менеджер уточнит»?</b><span><b>У нас</b> — 189 000 ₽ при любом размере долга, в договоре (п. 3.1); поднять цену нельзя (п. 6.8).</span></div>
+          <div class="rv"><b>3. Расчёт по реальной кредитной истории — или «примерно»?</b><span><b>У нас</b> — пересчёт по вашему отчёту КИ: точные цифры до подписания.</span></div>
+          <div class="rv"><b>4. Полный договор показывают до оплаты?</b><span><b>У нас</b> — весь текст с графиком и печатью прямо на этой странице.</span></div>
+          <div class="rv"><b>5. Защитят от коллекторов уже сегодня?</b><span><b>У нас</b> — SIM-карта с ИИ-блокировкой звонков коллекторов в подарок при заключении.</span></div>
+        </div>
+
         <div class="paysplit stg" style="grid-template-columns:1fr">
           <div class="price svc">
             <div class="pl">Услуги ДОНУЛЯ · нам</div>
@@ -648,6 +673,13 @@ h1 .hl{color:var(--green)}
         </div>
         <button class="linkbtn stg" id="schedBtn" onclick="toggleSched()">Показать график по месяцам</button>
         <div class="sched" id="schedFull" style="display:none;margin-top:8px"><div class="schedlist" id="schedList"></div></div>
+
+        <!-- закрепление условий + КИ-задача (правка Виктории 21.07): сначала дать (расчёт закреплён) — потом просить (КИ); дедлайн честный: ?until= из пульта или фиксация первого открытия -->
+        <div class="holdplate stg" id="holdPlate" style="display:none">
+          <div class="hp-t">Расчёт и условия закреплены за вами · до <b class="num" id="holdUntil">—</b></div>
+          <div class="hp-s" id="holdKiRow">Пока условия закреплены, запросите свою кредитную историю — 5 минут, бесплатно. Пересчитаем точно: обычно выгода выходит больше.</div>
+          <a class="hp-btn" id="holdKiBtn" href="../../ki-guide/" target="_blank" rel="noopener">Как запросить КИ за 5 минут →</a>
+        </div>
 
         <div class="sched stg" id="gosBlock" style="margin-top:12px">
           <div class="sr hero"><span>Госплатежи · отдельно от услуг</span><b class="num">50 000 ₽</b></div>
@@ -1197,6 +1229,34 @@ let openScr=0;
 if(Q.get('paid')==='1'||paidAll) openScr=scrs.length-1; /* оплатил (или ?part покрыл платёж) → Готово */
 else if(SIGNED||PART>0) openScr=0;
 else if(Q.get('go')==='pay') openScr=Math.max(0,scrs.findIndex(s=>/Подпись/.test(s.dataset.name||''))); /* прямая «ссылка на оплату» из пульта: подпись обязательна перед деньгами, дальше флоу сам ведёт к оплате; у подписавших дожим-режим и так открывает оплату */                    /* дожим → мини заключение (оплата) — первый из двух экранов */
+
+/* ── сигнал возврата + закрепление условий (правка Виктории 21.07) ── */
+(function(){
+  /* повторное открытие = горячий сигнал дожима; URL вебхука движка приходит в ?hook= (в проде), без него — no-op */
+  try{
+    const vk='dn_visits:'+location.pathname, n=(+localStorage.getItem(vk)||0)+1;
+    localStorage.setItem(vk,String(n));
+    const hook=Q.get('hook');
+    if(n>1&&hook&&/^https:\/\//.test(hook)&&navigator.sendBeacon)
+      navigator.sendBeacon(hook,JSON.stringify({event:'page_revisit',visit:n,page:location.pathname,ts:Date.now()}));
+  }catch(e){}
+  /* плашка дедлайна: только незакрытым; при расчёте по КИ задача КИ не показывается */
+  const el=document.getElementById('holdPlate');
+  if(!el||SIGNED||PART>0||Q.get('paid')==='1') return;
+  let until=Q.get('until')||'';
+  try{
+    const hk='dn_hold_until:'+location.pathname;
+    if(!until) until=localStorage.getItem(hk)||'';
+    if(!until){const d0=new Date();d0.setDate(d0.getDate()+1);d0.setHours(18,0,0,0);until=d0.toISOString();}
+    localStorage.setItem(hk,until);
+  }catch(e){}
+  const d=until?new Date(until):null;
+  if(!d||isNaN(+d)) return;
+  document.getElementById('holdUntil').textContent=d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+', '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  if(KION){document.getElementById('holdKiRow').style.display='none';document.getElementById('holdKiBtn').style.display='none';}
+  el.style.display='';
+})();
+
 show(openScr);
 
 /* ============ ДОГОВОР-PDF (вшит base64 — страница самодостаточна; в проде файл придёт из CRM) ============ */
@@ -1239,6 +1299,28 @@ function buildContract(){
     ['{{Payer|Дата ожидания}}',vip?(pd1||'при заключении договора'):(pd1?'с '+pd1+', ':'')+'каждое '+SCHED_DAY+'-е число'],
     ['стоимость услуг 189 000 ₽, рассрочка 14 месяцев','стоимость услуг '+fmt(svcTotal)+' ₽'+(vip?', оплата одним платежом':', рассрочка '+RM+' месяцев')]
   ];
+  /* обложка печатной формы — числа сделки, не демо (правка Виктории 21.07): экономия, платежи, долг, платёж/тариф */
+  (function(){
+    const planM=Math.round(planTotal(CLIENT.debt,RDG_TERM)/RDG_TERM), mB=Math.round(RASS_TOTAL/RM);
+    if(CLIENT_PAY>0){
+      rep.push(
+        ['~433 150 ₽', (CLIENT_PAY-planM)*RDG_TERM>0?'~'+fmt((CLIENT_PAY-planM)*RDG_TERM)+' ₽':'рассчитаем точно по вашей КИ'],
+        ['~61 500 ₽/мес','~'+fmt(CLIENT_PAY)+' ₽/мес'],
+        ['~49 468 ₽/мес','~'+fmt(planM)+' ₽/мес']);
+    }else{
+      /* платёж клиента неизвестен: честная строка без чужих платежей + КИ как следующий шаг */
+      rep.push(
+        ['~433 150 ₽','рассчитаем точно по вашей КИ'],
+        ['Платили <b class="mrg" data-mrg="Сделка|Платёж сейчас">~61 500 ₽/мес</b> — будете платить <b class="mrg" data-mrg="Сделка|Платёж с нами">~49 468 ₽/мес</b>: посильный план, который утвердит суд, плюс наши услуги. Проценты и пени остановлены — долг больше не растёт.',
+         'Долг <b>'+fmt(CLIENT.debt)+' ₽</b> — рост остановлен: посильный план утверждает суд (тело долга + 7% управляющего), проценты и пени заморожены.']);
+    }
+    rep.push(
+      ['1 240 000 ₽', fmt(CLIENT.debt)+' ₽'],
+      ['13 500 ₽ / месяц', vip?fmt(VIP)+' ₽ разом':fmt(mB)+' ₽ / месяц'],
+      ['рассрочка на 14 месяцев без банка и процентов · услуги целиком 189 000 ₽ · график — Приложение № 1',
+        vip?'оплата одним платежом · Тариф «Выгодный» · экономия 20 000 ₽ · госплатежи 50 000 ₽ отдельно'
+           :'рассрочка на '+RM+' месяцев без банка и процентов · услуги целиком '+fmt(RASS_TOTAL)+' ₽ · график — Приложение № 1']);
+  })();
   /* мерж клиента: из ссылки пульта (?fio/?dob) ИЛИ из полей экрана «Оформление» — иначе договор остаётся демо-образцом (фикс заказчика 21.07 «не подтянулось имя») */
   const anyLive=live('fio')||live('dob')||live('pass')||live('issued')||live('phone');
   if(FIO||DOB||anyLive){

@@ -404,7 +404,9 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <div id="oc_date" class="rowf" style="display:none"><span class="rlab">Дата оплаты · <b style="color:#A8442E">обязательно</b></span><input id="oc_d" class="rin" type="date" style="width:118px"><input id="oc_t" class="rin" type="time" style="width:72px" title="время — если клиент назвал"></div>
           <div id="oc_amt" class="rowf" style="display:none"><span class="rlab">Сумма частички, ₽ · от 1 000</span><input id="oc_a" class="rin" type="number" min="1000" placeholder="1 000"></div>
           <div id="oc_q" style="display:none"><input id="oc_quote" type="text" placeholder="дословная цитата отказа — «не звоните больше»" style="margin-top:6px"></div>
-          <label class="ocki" id="oc_kiwrap" style="display:none"><input type="checkbox" id="oc_ki" checked> КИ запрошена голосом</label>
+          <label class="ocki" id="oc_kiwrap" style="display:none"><input type="checkbox" id="oc_ki" checked onchange="document.getElementById('oc_kinext').style.display=this.checked?'':'none'"> КИ запрошена голосом</label>
+          <!-- следующее касание при запрошенной КИ (правка Виктории 21.07): повод завтрашнего звонка не должен держаться на памяти менеджера -->
+          <div class="kinote" id="oc_kinext" style="display:none;margin-top:4px">Следующее касание: <b>завтра до 12:00</b> — звонок с пересчётом по КИ (в проде движок ставит задачу автоматически)</div>
           <button class="sbtn" id="oc_fix" style="display:none" onclick="fixOutcome()">Зафиксировать исход</button>
           <div class="sstat none" id="oc_stat" style="display:none"></div>
         </div>
@@ -934,6 +936,7 @@ function pickOutcome(btn){
   /* «КИ запрошена голосом» — для всех недожатых исходов (канон «не купил → запрос КИ обязателен») */
   const ki=!(ocSel==='full_payment'||ocSel==='refusal');
   document.getElementById('oc_kiwrap').style.display=ki?'flex':'none';
+  document.getElementById('oc_kinext').style.display=(ki&&document.getElementById('oc_ki').checked)?'':'none'; /* памятка касания синхронна чекбоксу */
   if(ki) document.getElementById('oc_ki').checked=true;
   ocShow('oc_fix',true);
   document.getElementById('oc_stat').style.display='none';
@@ -968,7 +971,7 @@ function fixOutcome(){
   st.style.display='';
   const t2=document.getElementById('w_toast');
   t2.style.display='block';
-  t2.innerHTML='Исход зафиксирован. В проде движок запишет поля сделки'+(ocSel==='signed_date'?' («Дата след. шага» уже в карточке слева)':'')+(ki?', поставит «КИ запрошена»':'')+' и запустит автокасания Д0.';
+  t2.innerHTML='Исход зафиксирован. В проде движок запишет поля сделки'+(ocSel==='signed_date'?' («Дата след. шага» уже в карточке слева)':'')+(ki?', поставит «КИ запрошена» и задачу «завтра до 12:00 — пересчёт по КИ»':'')+' и запустит автокасания Д0.';
   setTimeout(()=>{t2.style.display='none';},6000);
 }
 /* пометить данные как «по КИ» (старый ОКБ-путь: одно точное число долга вместо конструктора) */
