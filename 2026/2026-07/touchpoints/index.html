@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>ОБНУЛЯТОР · Ссылки и касания — справочник</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:#FAF7F2;color:#1C1A16;line-height:1.55;font-size:14px}
+.wrap{max-width:860px;margin:0 auto;padding:28px 18px 60px}
+h1{font-size:24px;font-weight:800;color:#0B3B2E}
+.sub{color:#68625A;margin:6px 0 4px}
+.note{font-size:12.5px;color:#9B948A;margin-bottom:22px}
+h2{font-size:15px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#0B5540;margin:30px 0 10px}
+.card{background:#fff;border:1px solid rgba(28,26,22,.11);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.card h3{font-size:14.5px;font-weight:700;margin-bottom:2px}
+.card .when{font-size:12px;color:#8A6212;font-weight:700;margin-bottom:8px}
+.card a{color:#0B5540;font-weight:600;text-decoration:none;word-break:break-all}
+.card a:hover{text-decoration:underline}
+.msg{background:#F4F7F5;border:1px solid rgba(15,107,79,.18);border-radius:10px;padding:10px 12px;font-size:13px;white-space:pre-wrap;margin-top:6px}
+.msg b{color:#0B5540}
+.tag{display:inline-block;background:#eef1f4;border-radius:5px;padding:1px 7px;font-size:11.5px;color:#5c6874;margin:2px 3px 2px 0;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 8px;border-bottom:1px solid rgba(28,26,22,.08);text-align:left;vertical-align:top}
+th{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:#9B948A}
+.ok{color:#0B5540;font-weight:700}
+.warn{background:#FFFCF3;border:1px solid rgba(217,151,32,.5);border-radius:10px;padding:10px 12px;font-size:12.5px;color:#6B5A2A;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Ссылки и касания · система ОБНУЛЯТОР</h1>
+<p class="sub">Страница-память: все страницы системы и тексты касаний в одном месте — для настройки авторассылки воронки и контроля, что ничего не потерялось при упрощении пульта (21.07).</p>
+<p class="note">Канонический источник текстов — функция dzText() в пульте (site/calc-widget/in-amo.html): тексты там подставляют живые цифры клиента. Здесь — дословные шаблоны с плейсхолдерами.</p>
+
+<h2>Клиентские страницы</h2>
+<div class="card"><h3><a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-rdg/">Презентация РДГ</a> · <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/client-presentation-v2/">Презентация БФЛ</a></h3>
+<div>Единая страница: экономия → подарок → условия → договор → подпись → оплата. Режимы-параметры (в бою — поля сделки, не URL):</div>
+<div style="margin-top:6px">
+<span class="tag">?ki=1 — расчёт по КИ</span><span class="tag">?full=1 — тариф дня 1 (199 000 · 15)</span><span class="tag">?nd=1 — дата неизвестна</span><span class="tag">?signed=1 / ?part=N — дожим подписавшего</span><span class="tag">go=pay — сразу к подписи/оплате</span><span class="tag">?hook=URL — вебхук возврата</span><span class="tag">?due=N — к оплате сегодня</span></div></div>
+<div class="card"><h3><a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/dozhim-sim/">Дожим-страница SIM-акции</a></h3><div>«Акция продлена»: буклет SIM (связь 3 месяца) + CTA на персональную презентацию с go=pay. Принимает параметры презентации + route=rdg|bfl.</div></div>
+<div class="card"><h3><a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/ki-guide/">Инструкция «КИ за 5 минут»</a></h3><div>Как клиенту скачать отчёт кредитной истории через Госуслуги (Скоринг Бюро). Безопасна для отправки: без цен.</div></div>
+<div class="card"><h3><a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/calc-widget/ki.html">Юридическое заключение (пример-витрина)</a></h3><div>Образец заключения по КИ — «вот что вы получите». Персональное заключение клиента строит пульт (кнопка «⚖ Юр. заключение (PDF)» в разделе «Кредитная история»).</div></div>
+
+<h2>Менеджерские страницы</h2>
+<div class="card">
+<div><a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/calc-widget/in-amo.html">Пульт сделки (прототип в мокапе амо)</a> · <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/widget-states/">Инструкция по пульту (states)</a> · <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/manager-system/">Система работы менеджера</a> · <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/sales-flow-map/">Карта связки</a> · <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/manager-situations/">Ситуации</a> · <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/lead-map/">Карта сценариев лида</a> · <a href="https://mmatveev23-boop.github.io/sale100-pages/2026/2026-07/rdg-calc-method/">Тренажёр расчёта</a></div></div>
+
+<h2>Касания — тексты для авторассылки (шлёт воронка по этапу)</h2>
+
+<div class="card"><h3>Д0 · «Не открыл презентацию»</h3><div class="when">Когда: презентация отправлена, клиент не открыл страницу N часов</div>
+<div class="msg">[Имя], добрый день! Это ДОНУЛЯ. Посчитали по вашим цифрам: платёж можно снизить до ~<b>[платёж по плану]</b> ₽/мес вместо нынешних ~<b>[платёж сейчас]</b> ₽. Всё уже готово на вашей персональной странице: <b>[ссылка на презентацию]</b>
+Откройте — это 2 минуты. Если удобнее голосом — наберу.</div></div>
+
+<div class="card"><h3>Д1 · «Не подписал / думает»</h3><div class="when">Когда: открыл, но не подписал — вечер того же дня или утро следующего</div>
+<div class="msg">[Имя], пока решение откладывается — долг растёт: ~+<b>[рост ₽/мес]</b> ₽ процентов в месяц (+<b>[рост ₽/год]</b> ₽ за год).
+Посмотрите, что вы получите: вот пример юридического заключения, которое юрист готовит по кредитному отчёту — все договоры с вердиктами, точный платёж, что с имуществом: <b>[ссылка на пример заключения]</b>
+Сделаем такое же по вам — бесплатно и ни к чему не обязывает. Нужен только ваш отчёт: скачивается за 5 минут, инструкция: <b>[ссылка на инструкцию КИ]</b> Пришлёте PDF сюда — юрист возьмёт в работу.
+Завтра он как раз посмотрит ваш случай — наберу вам на пару минут. Ваш расчёт: <b>[ссылка на презентацию]</b></div></div>
+
+<div class="card"><h3>SIM-акция · «продлили акцию»</h3><div class="when">Когда: недожатый клиент, день 2–3 — повод-подарок</div>
+<div class="msg">[Имя], хорошие новости: мы продлили для вас акцию по SIM-карте — новый номер, которого нет у коллекторов, и связь на 3 месяца бесплатно. Условие простое: подписать договор и внести любую сумму сегодня. Всё уже готово на вашей странице: <b>[ссылка на дожим-страницу SIM с параметрами клиента]</b></div></div>
+
+<div class="card"><h3>По КИ · «заключение готово»</h3><div class="when">Когда: клиент прислал отчёт КИ, пересчёт готов — главное касание дня 2</div>
+<div class="msg">[Имя], юрист разобрал вашу кредитную историю: <b>[N]</b> договоров на <b>[долг]</b> ₽. Юридическое заключение готово: <b>[ссылка на заключение]</b>
+[РДГ: Главное: единый платёж ~<b>[платёж]</b> ₽/мес по плану, утверждённому судом, ипотека сохраняется · БФЛ: Главное: долг списывается целиком, платёж только за процедуру — 13 500 ₽/мес]. Договор и оплата — на вашей странице: <b>[ссылка на презентацию]</b>
+Каждый месяц ожидания — ещё ~+<b>[рост ₽/мес]</b> ₽ процентов.</div></div>
+
+<div class="card"><h3>Скидка · подтверждение в чат</h3><div class="when">Когда: ТОЛЬКО после применения скидки в пульте (КИ-замок + цитата «дорого» + лимит) — не рассылка!</div>
+<div class="msg">[Имя], как договорились: согласовал с руководителем — последний платёж прощаем. Услуги 189 000 ₽ вместо 199 000 ₽, рассрочка 14 платежей по 13 500 ₽. Ваша страница уже пересчитана: <b>[ссылка на презентацию]</b></div></div>
+
+<div class="card"><h3>Ссылка на оплату (подписавшим)</h3><div class="when">Когда: подписал, не оплатил — шлёт движок (не менеджер)</div>
+<div>Та же персональная страница с <span class="tag">go=pay</span> — открывается сразу на оплате; сумма — из «К оплате сегодня» пульта. Шаблон в коде: copyPayLink().</div></div>
+
+<h2>Исходы — ставит система, не менеджер</h2>
+<div class="card"><table>
+<tr><th>Событие</th><th>Исход в сделке</th><th>Гейт качества</th></tr>
+<tr><td>Оплата через эквайринг (полная)</td><td class="ok">Оплатил</td><td>—</td></tr>
+<tr><td>Оплата частичная</td><td class="ok">Частичка</td><td>сумма ≥ 1 000 ₽</td></tr>
+<tr><td>Подпись СМС-кодом</td><td class="ok">Подписал</td><td>дата след. шага обязательна</td></tr>
+<tr><td>Подписал, платёж не пришёл</td><td class="ok">Подписал, не оплатил</td><td>→ автодожим go=pay</td></tr>
+<tr><td>Отказ (этап воронки)</td><td class="ok">Отказ</td><td>только с дословной цитатой</td></tr>
+</table>
+<div class="warn">Единственная ручная отметка менеджера — <b>«КИ запрошена голосом»</b> (раздел «Кредитная история» пульта): факт договорённости голосом система не видит. Чек → автозадача «завтра до 12:00 — звонок с пересчётом по КИ».</div></div>
+
+<p class="note" style="margin-top:26px">Обновлено 21.07.2026 · при изменении текстов в пульте (dzText) обновить и эту страницу</p>
+</div>
+</body>
+</html>
