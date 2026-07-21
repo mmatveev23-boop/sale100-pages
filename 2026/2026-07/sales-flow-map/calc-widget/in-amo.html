@@ -460,29 +460,15 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <!-- черновик со слов (спека дожим-v2): виден до КИ, после КИ уступает полному -->
             <a class="lbtn" id="w_draftFile" target="_blank" style="display:none">⚖ Предварительное закл. · со слов</a>
           </div>
+          <!-- факт «договорились о запросе КИ» система не видит — единственная ручная отметка; запускает задачу завтрашнего пересчёта -->
+          <label class="ocki" id="oc_kiwrap" style="margin-top:8px"><input type="checkbox" id="oc_ki" onchange="document.getElementById('oc_kinext').style.display=this.checked?'':'none'"> КИ запрошена голосом · клиент делает запрос</label>
+          <div class="kinote" id="oc_kinext" style="display:none;margin-top:4px">Следующее касание: <b>завтра до 12:00</b> — звонок с пересчётом по КИ (в проде движок ставит задачу автоматически)</div>
           <div class="kinote"><b>Скоринг Бюро · НБКИ · Кредистория (ОКБ)</b> — повтор бюро заменяет его отчёт, договоры-дубли объединяются по УИД.</div>
         </div>
 
           <!-- дожим-кнопки убраны (заказчик 21.07): касания шлёт авторассылка воронки по этапу сделки; тексты сообщений сохранены в dzText() как шаблоны для настройки Salebot/движка -->
 
-          <!-- ИСХОД ЗВОНКА (решение заказчика 17.07: дата оплаты вбивается в пульте; лестница ТЗ §10.2, signed_date без даты не сохраняется) -->
-          <label style="margin-top:12px">Исход звонка — фиксируется в конце разговора</label>
-          <div class="olrow">
-            <button class="obtn" data-oc="full_payment" onclick="pickOutcome(this)">💰 Оплатил</button>
-            <button class="obtn" data-oc="partial" onclick="pickOutcome(this)">💵 Частичка</button>
-            <button class="obtn" data-oc="signed_date" onclick="pickOutcome(this)">📝 Подписал · дата</button>
-            <button class="obtn" data-oc="not_signed" onclick="pickOutcome(this)">Не подписал</button>
-            <button class="obtn" data-oc="signed_not_paid" onclick="pickOutcome(this)">Подписал, не оплатил</button>
-            <button class="obtn" data-oc="refusal" onclick="pickOutcome(this)">🚫 Отказ</button>
-          </div>
-          <div id="oc_date" class="rowf" style="display:none"><span class="rlab">Дата оплаты · <b style="color:#A8442E">обязательно</b></span><input id="oc_d" class="rin" type="date" style="width:140px"><input id="oc_t" class="rin" type="time" style="width:84px" title="время — если клиент назвал"></div>
-          <div id="oc_amt" class="rowf" style="display:none"><span class="rlab">Сумма частички, ₽ · от 1 000</span><input id="oc_a" class="rin" type="number" min="1000" placeholder="1 000"></div>
-          <div id="oc_q" style="display:none"><input id="oc_quote" type="text" placeholder="дословная цитата отказа — «не звоните больше»" style="margin-top:6px"></div>
-          <label class="ocki" id="oc_kiwrap" style="display:none"><input type="checkbox" id="oc_ki" checked onchange="document.getElementById('oc_kinext').style.display=this.checked?'':'none'"> КИ запрошена голосом</label>
-          <!-- следующее касание при запрошенной КИ (правка Виктории 21.07): повод завтрашнего звонка не должен держаться на памяти менеджера -->
-          <div class="kinote" id="oc_kinext" style="display:none;margin-top:4px">Следующее касание: <b>завтра до 12:00</b> — звонок с пересчётом по КИ (в проде движок ставит задачу автоматически)</div>
-          <button class="sbtn" id="oc_fix" style="display:none" onclick="fixOutcome()">Зафиксировать исход</button>
-          <div class="sstat none" id="oc_stat" style="display:none"></div>
+          <!-- ИСХОД ЗВОНКА УБРАН из пульта (заказчик 21.07 «фиксирует не менеджер, а система»): движок ставит исход по событиям — оплата (эквайринг), подпись (СМС-код), этап воронки; гейты контракта ТЗ §10.2 (signed_date без даты / частичка <1000 / отказ без цитаты не сохраняются) переезжают в движок; pickOutcome/fixOutcome сохранены в JS как контракт-шаблон для прогера -->
         </div>
 
         </div><!-- /w_colR -->
@@ -1050,6 +1036,7 @@ let ocSel=null;
 const OC_LABEL={full_payment:'полная оплата',partial:'частичка',signed_date:'подписал + дата оплаты',not_signed:'не подписал',signed_not_paid:'подписал, не оплатил',refusal:'отказ'};
 function ocShow(id,v){document.getElementById(id).style.display=v?'':'none';}
 function pickOutcome(btn){
+  if(!document.getElementById('oc_fix')) return; /* блок исходов убран из UI — функции сохранены как контракт движка */
   ocSel=btn.dataset.oc;
   document.querySelectorAll('.obtn').forEach(b=>b.classList.toggle('on',b===btn));
   ocShow('oc_date',ocSel==='signed_date');
@@ -1065,6 +1052,7 @@ function pickOutcome(btn){
   if(ocSel==='signed_date') document.getElementById('oc_d').focus();
 }
 function fixOutcome(){
+  if(!document.getElementById('oc_fix')) return;
   if(!ocSel) return;
   const st=document.getElementById('oc_stat');
   const bad=m=>{st.className='sstat warn';st.textContent=m;st.style.display='';};
@@ -1227,6 +1215,7 @@ function renderKiList(){
   const b=document.getElementById('w_kiBtn');
   const n=kiReports.length;
   if(b) b.childNodes[0].nodeValue=n===0?'⭱ Загрузить отчёты КИ · до 3 бюро':(n<3?'⭱ Догрузить отчёт другого бюро · '+n+'/3':'⭱ Заменить отчёт · 3/3');
+  {const kw=document.getElementById('oc_kiwrap'); if(kw) kw.style.display=kiLoaded?'none':'';}
   if(!n){box.style.display='none';box.innerHTML='';return;}
   const stale=!kiLoaded; /* числа правились вручную — расчёт со слов, файлы остаются */
   box.style.display='';
