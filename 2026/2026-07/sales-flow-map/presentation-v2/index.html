@@ -535,11 +535,11 @@ h1 .hl{color:var(--green)}
           <div class="cs3">
             <div class="cs2">
               <div class="c2col"><span>Если ничего не менять</span><b class="num" id="csNoUs">—</b><div class="c2track dash"><i class="hnow"></i></div></div>
-              <div class="c2col"><span>С нами · услуги и госплатежи</span><b class="num us">239 000 ₽</b><div class="c2track dash"><i class="hus" id="csPlanBar" style="width:19%"></i></div></div>
+              <div class="c2col"><span>С нами · услуги и госплатежи</span><b class="num us" id="cdTotal">239 000 ₽</b><div class="c2track dash"><i class="hus" id="csPlanBar" style="width:19%"></i></div></div>
             </div>
             <div class="ecoCard"><span>Ваша выгода</span><b class="num" id="cdSave">—</b></div>
           </div>
-          <small class="hnote csfoot">ⓘ «если ничего не менять» — минимум: сам долг, без переплаты по процентам (по факту она больше) · с нами долг списывается судом целиком: услуги 189 000 ₽ + госплатежи 50 000 ₽</small>
+          <small class="hnote csfoot">ⓘ «если ничего не менять» — минимум: сам долг, без переплаты по процентам (по факту она больше) · с нами долг списывается судом целиком: услуги <span class="num" id="csSvcNote">189 000 ₽</span> + госплатежи 50 000 ₽</small>
         </div>
 
         <div class="whatwedo stg">
@@ -1007,15 +1007,21 @@ function recalc(){
   /* бары хиро: «с нами» = рассрочка услуг 13 500/мес; скрыты при VIP (разовая оплата) и без известного платежа клиента */
   const barsEl=document.getElementById('barsWrap');
   if(barsEl) barsEl.style.display=(CLIENT.payNow>13500 && !vip)?'':'none'; /* показываем, только когда снижение честное */
+  renderHero(); /* «Сколько вы отдадите всего» зависит от тарифа (VIP 169 000) */
   renderKdDelta();
 }
-/* хиро выгоды БФЛ (канон виджета: выгода = долг − услуги 189 000 − госплатежи 50 000) */
+/* хиро выгоды БФЛ (канон виджета: выгода = долг − услуги − госплатежи 50 000;
+   услуги по выбранному тарифу: рассрочка 189 000 / VIP 169 000 — пересчёт на setTariff, правка заказчика 21.07) */
 function renderHero(){
-  const save=Math.max(0,CLIENT.debt-BFL_TOTAL_COST);
-  /* карта «Сколько вы отдадите всего»: долг (минимум, без процентов) vs 239 000 → выгода */
+  const vip=tariff==='vip';
+  const cost=(vip?VIP:RASS_TOTAL)+50000;
+  const save=Math.max(0,CLIENT.debt-cost);
+  /* карта «Сколько вы отдадите всего»: долг (минимум, без процентов) vs услуги+госплатежи → выгода */
   document.getElementById('csNoUs').textContent=fmt(CLIENT.debt)+' ₽';
-  document.getElementById('csPlanBar').style.width=Math.max(8,Math.min(100,Math.round(BFL_TOTAL_COST/CLIENT.debt*100)))+'%';
+  document.getElementById('cdTotal').textContent=fmt(cost)+' ₽';
+  document.getElementById('csPlanBar').style.width=Math.max(8,Math.min(100,Math.round(cost/CLIENT.debt*100)))+'%';
   document.getElementById('cdSave').textContent='~'+fmt(save)+' ₽';
+  document.getElementById('csSvcNote').textContent=vip?fmt(VIP)+' ₽ (оплата сразу · VIP)':fmt(RASS_TOTAL)+' ₽';
   /* карта «Платёж в месяц»: сейчас → 13 500 за процедуру; ось по платежу клиента */
   if(CLIENT.payNow>0){
     document.getElementById('barNow').textContent='~'+fmt(CLIENT.payNow)+' ₽/мес';

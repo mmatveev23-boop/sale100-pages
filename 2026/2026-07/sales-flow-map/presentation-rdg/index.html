@@ -995,6 +995,10 @@ function recalc(){
   document.getElementById('heroSub').innerHTML=vip
     ?`оплата одним платежом · <b>экономия 20 000 ₽</b> · госплатежи 50 000 ₽ отдельно`
     :`${RM} платежей · услуги целиком ${fmt(RASS_TOTAL)} ₽ · <b>VIP при оплате сразу ${fmt(VIP)} ₽ (выгода 20 000 ₽)</b>`;
+  /* упоминания услуг наверху (панель «Вы экономите» + разворот экономии) — по выбранному тарифу (правка заказчика 21.07) */
+  const svc=vip?fmt(VIP)+' ₽ разом · VIP':null;
+  const s1=document.getElementById('svcLine1'); if(s1) s1.textContent=svc||fmt(m)+' ₽/мес, '+RM+' платежей';
+  const s2=document.getElementById('svcLine2'); if(s2) s2.textContent=svc||fmt(m)+' ₽ × '+RM+' платежей';
   document.getElementById('schedShort').style.display=vip?'none':'';
   document.getElementById('schedBtn').style.display=vip?'none':'';
   document.getElementById('schFirst').textContent=fmt(firstAll)+' ₽';
@@ -1118,9 +1122,6 @@ document.querySelectorAll('.otp input').forEach((inp,i,all)=>{
     document.getElementById('csPlanBar').style.width=Math.max(8,Math.min(100,Math.round(planAll/base*100)))+'%'; /* полоса плана: доля от «без нас» */
   }
 
-  const svcM=Math.round(RASS_TOTAL/RM);
-  const s1=document.getElementById('svcLine1'); if(s1) s1.textContent=fmt(svcM)+' \u20bd/\u043c\u0435\u0441, '+RM+' \u043f\u043b\u0430\u0442\u0435\u0436\u0435\u0439';
-  const s2=document.getElementById('svcLine2'); if(s2) s2.textContent=fmt(svcM)+' \u20bd \u00d7 '+RM+' \u043f\u043b\u0430\u0442\u0435\u0436\u0435\u0439';
 })();
 function toggleCalc(){const d=document.getElementById('calcDetail'),b=document.getElementById('calcBtn');const open=d.style.display==='none';d.style.display=open?'':'none';b.textContent=open?'Скрыть расчёт':'Как посчитана экономия';}
 
