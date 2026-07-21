@@ -66,8 +66,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dh .dhClose:active{transform:scale(.97)}
 /* тело модала: свой скролл; шапка и вердикт всегда над ним; две колонки «Расчёт | Договор и действия» */
 #w_body{overflow-y:auto;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start}
-#pane_calc{min-width:0;padding-right:22px}
-#w_colR{min-width:0;border-left:1px solid #eef1f4;padding-left:22px}
+#pane_calc{min-width:0;padding-right:26px}
+#w_colR{min-width:0;border-left:1px solid #eef1f4;padding-left:26px}
 #w_body>.wnote,#w_body>.toast{grid-column:1/-1}
 @media (max-width:919px){#w_body{grid-template-columns:1fr}#pane_calc{padding-right:0}#w_colR{border-left:none;padding-left:0}}
 @media (prefers-reduced-motion:reduce){.pultOverlay,.pultOverlay .dw{transition:opacity .2s ease}.pultOverlay .dw{transform:none}}
@@ -89,15 +89,15 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw .seg button{flex:1;border:none;background:none;border-radius:6px;padding:5px;font-family:inherit;font-weight:700;font-size:12px;color:#7c8894;cursor:pointer;transition:background .15s ease-out,color .15s ease-out}
 .dw .seg button.on{background:#fff;color:#0B3B2E;box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .dw .seg button:active{transform:scale(.97)}
-.dw .seg.sm button{padding:4px 6px;font-size:11px}
+.dw .seg.sm button{padding:4px 6px;font-size:12px}
 /* бейдж источника данных: со слов / по КИ / парсинг / ошибка */
-.dw .dbadge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:999px;white-space:nowrap;flex:none;transition:background .2s ease-out,color .2s ease-out}
+.dw .dbadge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:4px 8px;border-radius:999px;white-space:nowrap;flex:none;transition:background .2s ease-out,color .2s ease-out}
 .dw .dbadge.words{background:#eef1f4;color:#7c8894}
 .dw .dbadge.ki{background:#FBF3DC;color:#8A6212}
 .dw .dbadge.load{background:#E4F0FA;color:#2f6fb0}
 .dw .dbadge.err{background:#FAEDE8;color:#A8442E}
 /* живой вердикт — одна строка, тап раскрывает полную раскладку */
-.vline{display:flex;align-items:center;gap:5px;width:100%;margin-top:7px;border:1px solid #e4e9ed;border-radius:8px;background:#f7f9f8;padding:7px 5px 7px 7px;font-family:inherit;font-size:12px;font-weight:700;color:#2e3640;cursor:pointer;text-align:left;transition:background .15s ease-out,border-color .15s ease-out}
+.vline{display:flex;align-items:center;gap:5px;width:100%;margin-top:7px;border:1px solid #e4e9ed;border-radius:8px;background:#f7f9f8;padding:7px 5px 7px 7px;font-family:inherit;font-size:13px;font-weight:700;color:#2e3640;cursor:pointer;text-align:left;transition:background .15s ease-out,border-color .15s ease-out}
 .vline:hover{background:#f0f4f2}
 .vline:active{transform:scale(.97)}
 .dotc{width:8px;height:8px;border-radius:50%;flex:none;background:#b6bfc7;transition:background .2s ease-out}
@@ -116,8 +116,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .vpanel{display:none;position:absolute;left:8px;right:8px;top:100%;margin-top:-1px;background:#fff;border:1px solid #e4e9ed;border-top:none;border-radius:0 0 10px 10px;box-shadow:0 16px 28px -14px rgba(11,59,46,.45);padding:6px 12px 12px;max-height:55vh;overflow-y:auto}
 .vpanel.open{display:block;animation:pin .18s ease-out}
 @keyframes pin{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-.dw .verdict{margin-top:6px;border-radius:8px;padding:9px 11px;font-size:12px;line-height:1.4}
-.dw .verdict b{display:block;font-size:13px}
+.dw .verdict{margin-top:6px;border-radius:8px;padding:9px 11px;font-size:13px;line-height:1.4}
+.dw .verdict b{display:block;font-size:15px}
 .dw .verdict.rdg{background:#0B3B2E;color:#fff}
 .dw .verdict.bfl{background:#E9F3EE;color:#0B5540}
 .dw .verdict.self{background:#FAEDE8;color:#A8442E}
@@ -126,19 +126,20 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw .kv b{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
 
 /* ── тело: секции ввода ── */
-.dw .body{padding:10px 12px 12px}
-.dw label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#94a0ab;margin:10px 0 4px}
-.dw input,.dw select{width:100%;border:1px solid #d8dee3;border-radius:7px;padding:6px 8px;font-family:inherit;font-size:12.5px;color:#2e3640;transition:border-color .15s ease-out}
+.dw .body{padding:12px 18px 16px}
+.dw label.q1{font-size:13.5px;font-weight:700;color:#0B3B2E;text-transform:none;letter-spacing:0}
+.dw label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#94a0ab;margin:14px 0 6px}
+.dw input,.dw select{width:100%;border:1px solid #d8dee3;border-radius:7px;padding:8px 10px;font-family:inherit;font-size:13.5px;color:#2e3640;transition:border-color .15s ease-out}
 .dw input:focus,.dw select:focus{outline:none;border-color:#0F6B4F}
 .dw input.ki{border-color:#C99A33;background:#FBF3DC;color:#8A6212;font-weight:700}
 /* компактные строки: label слева, поле справа */
-.rowf{display:flex;align-items:center;gap:8px;margin-top:8px;min-height:30px;scroll-margin-top:110px}
+.rowf{display:flex;align-items:center;gap:8px;margin-top:10px;min-height:36px;scroll-margin-top:110px}
 .rowf.freeline{min-height:0;margin-top:5px}
 .rowf.freeline .rlab{color:#98a1ab;font-weight:600}
 .rowf.freeline b{font-size:12px;color:#0B5540;white-space:nowrap}
-.dw .rowf .rlab{flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#5c6874;text-transform:none;letter-spacing:0;margin:0;line-height:1.3}
-.dw .rowf input.rin{width:126px;flex:none}
-.dw .rowf select.rin{width:170px;flex:none}
+.dw .rowf .rlab{flex:1;min-width:0;font-size:12.5px;font-weight:600;color:#5c6874;text-transform:none;letter-spacing:0;margin:0;line-height:1.3}
+.dw .rowf input.rin{width:150px;flex:none}
+.dw .rowf select.rin{width:190px;flex:none}
 .dw .rowf .seg{flex:none}
 /* степпер детей — без клавиатуры */
 .stpr{display:flex;align-items:center;border:1px solid #d8dee3;border-radius:7px;overflow:hidden;flex:none}
@@ -151,7 +152,15 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .sec{scroll-margin-top:110px}
 .chips{display:flex;flex-wrap:wrap;gap:5px;transition:background .3s ease-out;border-radius:8px}
 .chips.urge{background:#FBF3DC}
-.kinote{margin-top:7px;font-size:10.5px;color:#8b96a3;line-height:1.5}
+/* раздел «Кредитная история» (исследование 21.07): файлы-отчёты хранятся в пульте; в проде — вложения сделки амо */
+.kirep{display:flex;align-items:center;gap:8px;margin-top:6px;border:1px solid #d8dee3;border-radius:8px;background:#fff;padding:8px 10px}
+.kirep .kirepTxt{flex:1;min-width:0}
+.kirep .kirepTxt b{font-size:12.5px}
+.kirep .kirepTxt small{display:block;font-size:11px;color:#8b96a3;line-height:1.4;margin-top:1px}
+.kirep a.kirepOpen{color:#0B5540;font-weight:700;text-decoration:none;font-size:14px;padding:2px 4px}
+.kirep .kirepDel{border:none;background:none;color:#b6bfc7;font-size:12px;cursor:pointer;padding:2px 4px;transition:color .15s ease-out}
+.kirep .kirepDel:hover{color:#A8442E}
+.kinote{margin-top:7px;font-size:11.5px;color:#8b96a3;line-height:1.5}
 .kinote b{color:#5c6874}
 .kinote a{color:#0B5540;font-weight:700}
 .trlink{display:inline-block;margin-top:9px;background:#fff;color:#0B5540;font-weight:700;border-radius:8px;padding:7px 12px;text-decoration:none;font-size:13px;transition:transform 160ms ease-out}
@@ -162,7 +171,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .voice .vr:first-of-type{border-top:none}
 .voice .vr span{color:#7A6220;line-height:1.35}
 .voice .vr b{color:#16231D;white-space:nowrap;font-size:12.5px}
-.chip{border:1px solid #d8dee3;border-radius:999px;background:#fff;padding:5px 10px;font-family:inherit;font-size:11.5px;font-weight:600;color:#5c6874;cursor:pointer;transition:background .15s ease-out,color .15s ease-out,border-color .15s ease-out}
+.chip{border:1px solid #d8dee3;border-radius:999px;background:#fff;padding:7px 14px;font-family:inherit;font-size:12.5px;font-weight:600;color:#5c6874;cursor:pointer;transition:background .15s ease-out,color .15s ease-out,border-color .15s ease-out}
 .chip:hover{border-color:#0F6B4F;color:#0B5540}
 .chip:active{transform:scale(.97)}
 .chip.on{background:#0F6B4F;border-color:#0F6B4F;color:#fff}
@@ -170,16 +179,16 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .crt{display:none;margin-top:6px;border:1px solid #e4e9ed;border-radius:8px;padding:6px 8px}
 .crt.en{display:block;animation:pin .15s ease-out}
 .crt.on{border-color:#cfe0d8;background:#fbfdfc}
-.crmain{display:grid;grid-template-columns:84px 1fr 46px;gap:6px;align-items:center}
-.crlab b{display:block;font-size:11px;color:#2e3640;line-height:1.2}
-.crlab span{display:block;font-size:9.5px;color:#94a0ab;font-variant-numeric:tabular-nums;line-height:1.2}
+.crmain{display:grid;grid-template-columns:96px 1fr 54px;gap:8px;align-items:center}
+.crlab b{display:block;font-size:12px;color:#2e3640;line-height:1.2}
+.crlab span{display:block;font-size:10.5px;color:#94a0ab;font-variant-numeric:tabular-nums;line-height:1.2}
 .crt.on .crlab span{color:#0B5540;font-weight:700}
-.dw .crmain input{padding:5px 6px;font-size:12px;border-radius:6px}
+.dw .crmain input{padding:7px 8px;font-size:13px;border-radius:6px}
 /* advanced: ставка/срок каждого типа + ПМ — под общим экспандером «⚙ Уточнить…» */
 .cradv{display:none;grid-template-columns:1fr 1fr;gap:6px;margin-top:5px}
 .body.adv .cradv{display:grid}
-.dw .cradv label{margin:0 0 2px;font-size:8.5px;letter-spacing:.02em}
-.dw .cradv input{padding:4px 6px;font-size:11.5px;border-radius:6px}
+.dw .cradv label{margin:0 0 2px;font-size:9.5px;letter-spacing:.02em}
+.dw .cradv input{padding:4px 6px;font-size:12.5px;border-radius:6px}
 .cravnote{grid-column:1/-1;font-size:9.5px;color:#94a0ab;line-height:1.4}
 .advtg{display:block;width:100%;margin-top:10px;border:1px dashed #d8dee3;border-radius:8px;background:none;padding:6px;font-family:inherit;font-size:11px;font-weight:600;color:#7c8894;cursor:pointer;transition:color .15s ease-out,border-color .15s ease-out}
 .advtg:hover{color:#0B5540;border-color:#0F6B4F}
@@ -188,7 +197,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .body.adv .advpm{display:grid}
 .dw .advpm label{margin:0 0 3px}
 /* свёрнутая секция долгов — строка-summary */
-.ssum{display:none;align-items:center;gap:6px;width:100%;border:1px solid #cfe0d8;background:#f2f8f5;border-radius:8px;padding:8px 10px;font-family:inherit;font-size:12px;font-weight:600;color:#0B5540;cursor:pointer;text-align:left;transition:background .15s ease-out}
+.ssum{display:none;align-items:center;gap:6px;width:100%;border:1px solid #cfe0d8;background:#f2f8f5;border-radius:8px;padding:8px 10px;font-family:inherit;font-size:13px;font-weight:600;color:#0B5540;cursor:pointer;text-align:left;transition:background .15s ease-out}
 .ssum.show{display:flex;animation:pin .15s ease-out}
 .ssum:hover{background:#E9F3EE}
 .ssum:active{transform:scale(.97)}
@@ -197,7 +206,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
 /* ── вкладки Расчёт / Действия ── */
-.actsep{margin-top:14px;padding-top:11px;border-top:1px dashed #d8dee3;font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#7c8894}
+.actsep{margin-top:20px;padding-top:11px;border-top:1px dashed #d8dee3;font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#7c8894}
 /* бейдж-пульс на «Действия»: вердикт готов, не отправлено — одна мягкая opacity-анимация, без автопереключения */
 .tdot{position:absolute;top:5px;right:8px;width:7px;height:7px;border-radius:50%;background:#C99A33;opacity:0;transition:opacity .2s ease-out}
 .tdot.show{opacity:1}
@@ -205,7 +214,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 @keyframes tp{50%{opacity:.15}}
 
 /* ── вкладка «Действия» ── */
-.dw .sbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:10px;border:none;border-radius:8px;background:#0F6B4F;color:#fff;padding:11px;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;transition:background .15s ease-out}
+.dw .sbtn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:10px;border:none;border-radius:8px;background:#0F6B4F;color:#fff;padding:13px;font-family:inherit;font-size:14.5px;font-weight:800;cursor:pointer;transition:background .15s ease-out}
 .dw .sbtn:hover{background:#0B5540}
 .dw .sbtn:active{transform:scale(.97)}
 .dw .sbtn.dis,.dw .sbtn:disabled{background:#c3ccd4;color:#fff;cursor:default}
@@ -214,21 +223,21 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dw .sstat.sent{color:#0F6B4F}
 .dw .sstat.warn{color:#A8442E}
 .dw .lrow{display:flex;gap:6px;margin-top:8px}
-.dw .lbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid #d8dee3;border-radius:8px;background:#fff;color:#0B5540;padding:8px;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:background .15s ease-out,border-color .15s ease-out}
+.dw .lbtn{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid #d8dee3;border-radius:8px;background:#fff;color:#0B5540;padding:10px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;transition:background .15s ease-out,border-color .15s ease-out}
 .dw .lbtn:active{transform:scale(.97)}
 .dw .lbtn.hi{border-color:#0F6B4F;background:#E9F3EE}
 .dw .lbtn.mut,.dw .lbtn:disabled{color:#7c8894;cursor:default}
 /* исход звонка (правка заказчика 17.07: дата оплаты вбивается в пульте; контракт ТЗ §10.2) */
 .olrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
-.obtn{border:1px solid #d8dee3;border-radius:8px;background:#fff;color:#5c6874;padding:8px 4px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:background .15s ease-out,border-color .15s ease-out,color .15s ease-out}
+.obtn{border:1px solid #d8dee3;border-radius:8px;background:#fff;color:#5c6874;padding:10px 6px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s ease-out,border-color .15s ease-out,color .15s ease-out}
 .obtn:active{transform:scale(.97)}
 .obtn.on{border-color:#0F6B4F;background:#E9F3EE;color:#0B5540}
 .dw label.ocki{display:flex;align-items:center;gap:7px;margin:9px 0 0;font-size:11.5px;font-weight:600;color:#5c6874;text-transform:none;letter-spacing:0;cursor:pointer}
 .ocki input{width:auto;accent-color:#0F6B4F}
-.dw .wnote{margin-top:9px;font-size:11px;color:#94a0ab;line-height:1.5}
+.dw .wnote{margin-top:9px;font-size:12px;color:#94a0ab;line-height:1.5}
 .dw .wnote b{color:#5c6874;font-weight:700}
 .dw .wnote a{color:#0B5540;font-weight:700}
-.dw .toast{display:none;margin-top:8px;background:#E9F3EE;color:#0B5540;border-radius:8px;padding:8px 10px;font-size:11.5px;line-height:1.45}
+.dw .toast{display:none;margin-top:8px;background:#E9F3EE;color:#0B5540;border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.45}
 
 .cap{max-width:1180px;margin:0 auto;padding:10px 18px;font-size:12px;color:#7c8894}
 .cap b{color:#2e3640}
@@ -326,7 +335,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
               <span>Долги</span><b><span id="w_nTotal">0</span> дог · <span id="w_debtTotal">—</span></b><i>▸</i>
             </button>
             <div id="w_debtBody">
-              <label style="margin-top:0">Долги клиента — что есть?</label>
+              <label class="q1" style="margin-top:0">Долги клиента — что есть?</label>
               <div class="chips" id="w_chips"></div>
               <div id="w_credits"></div>
               <div id="w_debtWrap" style="display:none"><label id="w_debtLabel">Долг по кредитной истории, ₽</label><input id="w_debt" type="number"></div>
@@ -365,14 +374,14 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 
           <!-- ПРОСРОЧКИ (только сценарии юр. заключения — payload overdue; опущены вниз и ужаты, правка заказчика 15.07) -->
           <div class="rowf"><span class="rlab">Просрочки <span style="color:#98a1ab;font-weight:600">· для заключения</span></span>
-            <div class="seg sm" id="w_ovd" style="width:158px"><button class="on" data-o="1">есть</button><button data-o="0">платит исправно</button></div>
+            <div class="seg sm" id="w_ovd" style="width:178px"><button class="on" data-o="1">есть</button><button data-o="0">платит исправно</button></div>
           </div>
 
           <!-- е) СРОК ПЛАНА РДГ (только при prod=rdg) -->
           <div id="w_rdgFields">
             <!-- ипотека в плане (правка Виктории 15.07): дефолт — вне плана (298-ФЗ, жильё сохраняется); включение — решение клиента -->
             <div class="rowf" id="w_mortRow" style="display:none"><span class="rlab">Ипотека</span>
-              <div class="seg sm" id="w_mortSeg" style="width:232px"><button class="on" data-m="0">вне плана · 298-ФЗ</button><button data-m="1">в план РДГ</button></div>
+              <div class="seg sm" id="w_mortSeg" style="width:252px"><button class="on" data-m="0">вне плана · 298-ФЗ</button><button data-m="1">в план РДГ</button></div>
             </div>
             <label>Срок плана РДГ</label>
             <div class="seg" id="w_term"><button class="on" data-t="60">60 мес · одобряют кредиторы</button><button data-t="36">36 мес · суд без одобрения</button></div>
@@ -389,13 +398,13 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
              Поля необязательные: пусто = данные вносит эксперт на странице со слов клиента, дефолт-демо не меняется -->
         <div class="actsep">Клиент · в договор</div>
         <div class="rowf"><span class="rlab">ФИО полностью · как в паспорте</span><input id="w_fio" class="rin" type="text" placeholder="Фамилия Имя Отчество" autocomplete="off" oninput="updateSendUI()"></div>
-        <div class="rowf"><span class="rlab">Дата рождения</span><input id="w_dob" class="rin" type="date" style="width:126px" onchange="updateSendUI()"></div>
+        <div class="rowf"><span class="rlab">Дата рождения</span><input id="w_dob" class="rin" type="date" style="width:150px" onchange="updateSendUI()"></div>
 
         <!-- РАССРОЧКА И ДОПРОДУКТЫ (решение заказчика 20.07): дата 1-го платежа и срок задаются ДО отправки —
              страница клиента открывается с готовым графиком; допы: адвокатский запрет (оба продукта, 20 000 разом / 25 000 рассрочка),
              сохранение имущества (только БФЛ-«сохранение», 60 000 ₽/объект, в рассрочку) -->
         <div class="actsep">Рассрочка · график на странице клиента</div>
-        <div class="rowf"><span class="rlab">Дата 1-го платежа · пусто = ближайшее 25-е</span><input id="w_payDate" class="rin" type="date" style="width:126px" onchange="rassLine()"></div>
+        <div class="rowf"><span class="rlab">Дата 1-го платежа · пусто = ближайшее 25-е</span><input id="w_payDate" class="rin" type="date" style="width:150px" onchange="rassLine()"></div>
         <div class="rowf"><span class="rlab">День ежемес. платежа · до 25-го · пусто = как у первого</span><input id="w_payDay" class="rin" type="number" min="1" max="25" placeholder="25" onchange="if(this.value)this.value=Math.max(1,Math.min(25,Math.round(this.value)))"></div>
         <div class="rowf"><span class="rlab">Срок рассрочки, мес</span><input id="w_rassM" class="rin" type="number" min="2" max="24" value="14" oninput="rassLine()"></div>
         <div class="rowf freeline"><span class="rlab">Итог услуг неизменен</span><b id="w_rassLine">189 000 ₽ · платёж 13 500 ₽/мес</b></div>
@@ -406,6 +415,21 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <label class="ocki" id="w_keepWrap" style="display:none"><input type="checkbox" id="w_keep" onchange="keepUI()"> Сохранение имущества · 60 000 ₽/объект · в рассрочку</label>
         <div class="rowf" id="w_keepRow" style="display:none"><span class="rlab">Объектов (залог/ипотека)</span><input id="w_keepN" class="rin" type="number" min="1" value="1"></div>
 
+        <!-- КРЕДИТНАЯ ИСТОРИЯ — отдельный раздел (правка заказчика 21.07: «файлы-результат хранятся здесь»); в проде файлы = вложения сделки амо -->
+        <div class="actsep">Кредитная история</div>
+        <div id="sec_ki">
+          <div class="lrow" style="margin-top:6px">
+            <label class="lbtn" id="w_kiBtn" style="cursor:pointer">⭱ Загрузить отчёты КИ · до 3 бюро<input type="file" id="w_ki" accept="application/pdf" multiple style="display:none"></label>
+          </div>
+          <div id="w_kiList" style="display:none"></div>
+          <div class="lrow">
+            <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">⚖ Юр. заключение (PDF)</a>
+            <!-- черновик со слов (спека дожим-v2): виден до КИ, после КИ уступает полному -->
+            <a class="lbtn" id="w_draftFile" target="_blank" style="display:none">⚖ Предварительное закл. · со слов</a>
+          </div>
+          <div class="kinote"><b>Скоринг Бюро · НБКИ · Кредистория (ОКБ)</b> — повтор бюро заменяет его отчёт, договоры-дубли объединяются по УИД.</div>
+        </div>
+
         <div class="actsep">Действия ⚡</div>
         <div id="pane_act">
           <!-- «одна сумма к оплате» (правка заказчика 16.07): частичку выторговывает менеджер голосом, страница показывает её как факт -->
@@ -413,14 +437,9 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
           <div class="sstat none" id="w_sstat">ещё не отправлено</div>
           <div class="lrow">
-            <label class="lbtn" id="w_kiBtn" style="cursor:pointer">⭱ Загрузить КИ · до 3 отчётов<input type="file" id="w_ki" accept="application/pdf" multiple style="display:none"></label>
             <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
             <button class="lbtn" id="w_payLink" onclick="copyPayLink()">💳 Ссылка на оплату</button>
-            <a class="lbtn" id="w_kiFile" target="_blank" style="display:none">⚖ Юр. заключение (PDF)</a>
-            <!-- черновик со слов (спека дожим-v2): виден до КИ, для звонка дня 2 «юрист посмотрел ваш случай»; после КИ уступает полному -->
-            <a class="lbtn" id="w_draftFile" target="_blank" style="display:none">⚖ Предварительное закл. · со слов</a>
           </div>
-          <div class="kinote">Читаем отчёты трёх бюро: <b>Скоринг Бюро · НБКИ · Кредистория (ОКБ)</b> — можно 1–3 файла, договоры-дубли объединяются по УИД сделки.</div>
           <label style="margin-top:10px">Дожим-сообщения — копируются с цифрами клиента</label>
           <div class="lrow" style="margin-top:4px">
             <button class="lbtn" onclick="copyDz('open',this)">✉ Не открыл</button>
@@ -439,7 +458,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <button class="obtn" data-oc="signed_not_paid" onclick="pickOutcome(this)">Подписал, не оплатил</button>
             <button class="obtn" data-oc="refusal" onclick="pickOutcome(this)">🚫 Отказ</button>
           </div>
-          <div id="oc_date" class="rowf" style="display:none"><span class="rlab">Дата оплаты · <b style="color:#A8442E">обязательно</b></span><input id="oc_d" class="rin" type="date" style="width:118px"><input id="oc_t" class="rin" type="time" style="width:72px" title="время — если клиент назвал"></div>
+          <div id="oc_date" class="rowf" style="display:none"><span class="rlab">Дата оплаты · <b style="color:#A8442E">обязательно</b></span><input id="oc_d" class="rin" type="date" style="width:140px"><input id="oc_t" class="rin" type="time" style="width:84px" title="время — если клиент назвал"></div>
           <div id="oc_amt" class="rowf" style="display:none"><span class="rlab">Сумма частички, ₽ · от 1 000</span><input id="oc_a" class="rin" type="number" min="1000" placeholder="1 000"></div>
           <div id="oc_q" style="display:none"><input id="oc_quote" type="text" placeholder="дословная цитата отказа — «не звоните больше»" style="margin-top:6px"></div>
           <label class="ocki" id="oc_kiwrap" style="display:none"><input type="checkbox" id="oc_ki" checked onchange="document.getElementById('oc_kinext').style.display=this.checked?'':'none'"> КИ запрошена голосом</label>
@@ -595,6 +614,8 @@ function creditsTotals(){
       row.classList.remove('on');
       s.textContent='—';
     }
+    const ch=document.querySelector('#w_chips .chip[data-t="'+k+'"]');
+    if(ch) ch.textContent=amount>0?CHIP_LABEL[k]+' · '+fmt(amount):CHIP_LABEL[k]; /* чип показывает введённую сумму */
   });
   return {debt,n,monthly,noRdg,mortAmount,mortPay,mortTotal};
 }
@@ -1017,7 +1038,8 @@ function markKi(count){
 }
 /* ручная правка после КИ → честно возвращаемся на «со слов», ссылка перестаёт слать ki=1 */
 function dropKi(){
-  kiLoaded=false; kiTypes=false; kiOk=true; kiCount=null; kiReports=[]; kiPayloadBase=null; payFromKi=false;
+  kiLoaded=false; kiTypes=false; kiOk=true; kiCount=null; kiPayloadBase=null; payFromKi=false; /* kiReports НЕ чистим: файлы остаются в разделе КИ, вернуть данные можно кнопкой ↺ */
+  renderKiList();
   document.getElementById('w_paynow').value=''; /* платёж из отчёта недействителен после правки данных — назад к расчёту по кредитам */
   document.getElementById('w_chips').style.display='';
   document.getElementById('w_credits').style.display='';
@@ -1056,12 +1078,16 @@ document.getElementById('w_debt').addEventListener('input',()=>{ if(kiLoaded) dr
 ['w_debt','w_paynow','w_income','w_kids','w_pmSelf','w_pmChild','w_ovrInt','w_due'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 document.getElementById('w_region').addEventListener('change',()=>{applyRegionPM();calc();});
 renderCreditRows();
+/* первый вопрос скрипта открыт сразу (исследование 21.07): частые типы предоткрыты — менеджер печатает сумму без клика; редкие остаются за чипами */
+['loan','card','mfo'].forEach(k=>toggleChip(k));
+{const a=document.querySelector('#w_credits .crt[data-t="loan"] .c-am'); if(a)a.focus({preventScroll:true});}
 fillRegionSelect();
 calc();
 
 /* демо состояния 4 «КИ пришла в дожиме»: ?ki=1 — канонный набор из реального обезличенного отчёта «Скоринг Бюро» 10.07.2026
    (13 договоров · 3 029 036 ₽: потреб 947 387/2, карты 418 185/5, МФО 122 000/4, ипотека 1 541 464/2; среднемес. платёж 119 718) */
 if(new URLSearchParams(location.search).get('ki')==='1'){
+  kiReports=[{bureau:'Скоринг Бюро',date:'10 июля 2026',count:13,total:3029036,ok:true,fileName:'ki_scoring_demo.pdf',demo:true}];
   applyKiTypes({
     bureau:'Скоринг Бюро', date:'10 июля 2026', count:13, total:3029036, ok:true, avgMonthly:119718,
     types:{loan:{amount:947387,n:2},card:{amount:418185,n:5},mfo:{amount:122000,n:4},secured:{amount:0,n:0},mortgage:{amount:1541464,n:2}},
@@ -1121,6 +1147,30 @@ function setOvd(v){document.querySelectorAll('#w_ovd button').forEach(b=>b.class
 
 /* мульти-КИ (заказчик 2026-07-15): 1–2 отчёта разных бюро, склейка с дедупом по УИД (mergeKiReports).
    Повторная загрузка того же бюро заменяет его отчёт; третий отчёт вытесняет самый старый. */
+/* ── раздел «Кредитная история»: список загруженных отчётов-файлов (правка заказчика 21.07) ── */
+function renderKiList(){
+  const box=document.getElementById('w_kiList'); if(!box) return;
+  const b=document.getElementById('w_kiBtn');
+  const n=kiReports.length;
+  if(b) b.childNodes[0].nodeValue=n===0?'⭱ Загрузить отчёты КИ · до 3 бюро':(n<3?'⭱ Догрузить отчёт другого бюро · '+n+'/3':'⭱ Заменить отчёт · 3/3');
+  if(!n){box.style.display='none';box.innerHTML='';return;}
+  const stale=!kiLoaded; /* числа правились вручную — расчёт со слов, файлы остаются */
+  box.style.display='';
+  box.innerHTML=(stale?'<div class="kinote" style="margin:6px 0 0">⚠ Числа правились вручную — расчёт сейчас со слов. <a href="#" onclick="event.preventDefault();applyKiTypes(kiReports.length>1?mergeKiReports(kiReports):kiReports[0])" style="color:#0B5540;font-weight:700">↺ Вернуть данные из отчётов</a></div>':'')
+    +kiReports.map(r=>
+    '<div class="kirep"><span>📄</span><div class="kirepTxt"><b>'+(r.bureau||'Отчёт')+'</b>'+(r.date?' · отчёт от '+r.date:'')+
+    '<small>'+(r.fileName||'файл в сделке амо')+(r.count?' · '+r.count+' '+decl(r.count):'')+(r.total?' · '+fmt(r.total)+' ₽':'')+(r.ok===false?' · ⚠ не сходится с «Итого»':' · ✓ разобран')+'</small></div>'+
+    (r.blobUrl?'<a class="kirepOpen" href="'+r.blobUrl+'" target="_blank" title="Открыть PDF">↗</a>':'')+
+    '<button type="button" class="kirepDel" title="Убрать отчёт" onclick="removeKiReport(this.dataset.b)" data-b="'+String(r.bureau||'').replace(/"/g,'')+'">✕</button></div>').join('');
+}
+function removeKiReport(bureau){
+  const rem=kiReports.find(r=>r.bureau===bureau);
+  if(rem&&rem.blobUrl)URL.revokeObjectURL(rem.blobUrl);
+  kiReports=kiReports.filter(r=>r.bureau!==bureau);
+  if(kiReports.length){applyKiTypes(kiReports.length>1?mergeKiReports(kiReports):kiReports[0]);}
+  else{dropKi();document.getElementById('dh_small').textContent='экспресс · первый звонок';}
+  renderKiList();
+}
 async function parseKiFiles(files){
   const t=document.getElementById('w_toast');
   t.style.display='block'; t.innerHTML='Читаю '+files.map(f=>f.name).join(' + ')+'…';
@@ -1130,18 +1180,20 @@ async function parseKiFiles(files){
       const text=await extractPdfText(f);
       const rep=(typeof parseAnyKi==='function')?parseAnyKi(text):null;
       if(!rep){
-        if(files.length===1&&kiReports.length===0){ parseOkbLegacy(text); return; } /* старый ОКБ-формат без сводной таблицы */
+        if(files.length===1&&kiReports.length===0){ parseOkbLegacy(text,f); return; } /* старый ОКБ-формат без сводной таблицы */
         throw new Error('«'+f.name+'»: формат не распознан (поддерживаются Скоринг Бюро, НБКИ, Кредистория/ОКБ)');
       }
+      rep.fileName=f.name; rep.loadedAt=new Date().toLocaleDateString('ru-RU'); rep.blobUrl=URL.createObjectURL(f); /* файл хранится в разделе КИ */
+      const oldRep=kiReports.find(r=>r.bureau===rep.bureau); if(oldRep&&oldRep.blobUrl)URL.revokeObjectURL(oldRep.blobUrl);
       kiReports=kiReports.filter(r=>r.bureau!==rep.bureau).concat([rep]);
     }
-    if(kiReports.length>3) kiReports=kiReports.slice(-3);
+    if(kiReports.length>3){kiReports.slice(0,kiReports.length-3).forEach(r=>{if(r.blobUrl)URL.revokeObjectURL(r.blobUrl);});kiReports=kiReports.slice(-3);}
     const merged=kiReports.length>1?mergeKiReports(kiReports):kiReports[0];
     setOvd(merged.hasOverdue?1:0); /* просрочки видны из отчёта — тогл ставится сам */
     applyKiTypes(merged);
   }catch(e){ kiBusy=false; kiError=true; updateSendUI(); t.innerHTML='Не удалось разобрать файл: '+e.message; }
 }
-function parseOkbLegacy(text){
+function parseOkbLegacy(text,f){
   const t=document.getElementById('w_toast');
   try{
     const parsed=parseOkb(text);
@@ -1165,6 +1217,8 @@ function parseOkbLegacy(text){
     const kf=document.getElementById('w_kiFile');
     kf.href='./ki.html#d='+b64url(JSON.stringify(payload))+'&print=1'; kf.style.display='';
     trainerKiMsg(kf.getAttribute('href'));
+    kiReports=[{bureau:'ОКБ (старый формат)',date:parsed.date,count:parsed.credits.length,total:total,ok:ok,fileName:f?f.name:'',blobUrl:f?URL.createObjectURL(f):null}];
+    renderKiList();
   }catch(e){ kiBusy=false; kiError=true; updateSendUI(); t.innerHTML='Не удалось разобрать файл: '+e.message; }
 }
 /* «Скоринг Бюро» / НБКИ / Кредистория (и склейка): раскладываем точные тела по типам прямо в конструктор — ставки/сроки остаются средними, ипотека уйдёт «вне плана» сама.
@@ -1195,6 +1249,7 @@ function applyKiTypes(sb,demo){
     :(sb.ok?'✓ КИ разобрана: ':'⚠ КИ разобрана не полностью: ')+sb.count+' '+decl(sb.count)+', долг '+fmt(sb.total)+' ₽'+(sb.ok?' — сходится с «Итого» отчёта.'
       :(sb.itogo?', а «Итого» в отчёте '+fmt(sb.itogo)+' ₽ — не сходится, сверьте с PDF и добейте долг вручную.':' — «Итого» в отчёте не найдено, сверьте с PDF глазами.')))
     +(sb.types.mortgage.amount>0?' Ипотека '+fmt(sb.types.mortgage.amount)+' ₽ — вне плана (298-ФЗ).':'')+' В проде PDF прикрепляется к сделке.';
+  renderKiList();
   const kf=document.getElementById('w_kiFile');
   if(sb.rows&&sb.rows.length){
     /* заключение считает платёж и ПДН само — база хранится, href пересобирает calc() (срок/доход/ипотека живые) */
@@ -1347,7 +1402,7 @@ document.getElementById('w_ki').addEventListener('change',e=>{ const fs=[...e.ta
 </script>
 <script>
 /* ── модал пульта (редизайн заказчика 21.07): плашка в правой колонке амо открывает пульт по центру ── */
-function openPult(){const o=document.getElementById('pultOverlay');o.style.display='flex';void o.offsetHeight;o.classList.add('on');}
+function openPult(){const o=document.getElementById('pultOverlay');o.style.display='flex';void o.offsetHeight;o.classList.add('on');try{if(!(last&&last.debt>0)){const a=document.querySelector('#w_credits .crt.en .c-am');if(a)a.focus({preventScroll:true});}}catch(e){}}
 function closePult(){const o=document.getElementById('pultOverlay');o.classList.remove('on');setTimeout(()=>{o.style.display='none';},180);}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('pultOverlay').style.display==='flex')closePult();});
 openPult(); /* прототип открывается сразу — в реальном амо менеджер открывает кликом по плашке */
