@@ -240,7 +240,10 @@ h1 .hl{color:var(--green)}
 .ecoCard{background:linear-gradient(165deg,#FBF3DC 0%,#F2DFAE 100%);border:1px solid rgba(201,154,51,.4);border-radius:12px;padding:12px 16px;text-align:center}
 
 /* ── прививка от конкурентов + закрепление условий (правка Виктории 21.07) ── */
-.rivals .rv-h{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--green-ink)}
+.rivals{background:#FFFCF3;border-color:rgba(217,151,32,.5)}
+.rivals .rv-head{display:flex;align-items:center;gap:9px}
+.rivals .rv-ico{width:22px;height:22px;flex-shrink:0}
+.rivals .rv-h{font-size:14px;font-weight:800;color:var(--ink);line-height:1.3}
 .rivals .rv-sub{font-size:12.5px;color:var(--muted);margin:3px 0 6px;line-height:1.45}
 .rivals .rv{padding:8px 0;border-top:1px solid rgba(28,26,22,.08)}
 .rivals .rv b{display:block;font-size:13px;font-weight:700;color:var(--ink);line-height:1.4}
@@ -575,7 +578,7 @@ h1 .hl{color:var(--green)}
 
         <!-- прививка от конкурентов v2 (Виктория 21.07: не «сравните нас с ними», а «чужой звонок после заявки у нас = ворованный номер, не разговаривайте») -->
         <div class="case stg rivals">
-          <div class="rv-h">Если вам звонят другие «юристы» — не отвечайте</div>
+          <div class="rv-head"><svg class="rv-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10.6 4.2 2.9 17.6c-.6 1.1.2 2.4 1.4 2.4h15.4c1.2 0 2-1.3 1.4-2.4L13.4 4.2c-.6-1.1-2.2-1.1-2.8 0Z" fill="#F7C948" stroke="#D9930D" stroke-width="1.4" stroke-linejoin="round"/><rect x="11.05" y="9" width="1.9" height="5.4" rx=".95" fill="#5C4715"/><circle cx="12" cy="16.9" r="1.15" fill="#5C4715"/></svg><div class="rv-h">Если вам звонят другие «юристы» — не отвечайте</div></div>
           <div class="rv-sub">Вы оставляли заявку только у нас. Если после этого звонят «юристы по долгам» — это не совпадение: базы заявок воруют и перепродают, и ваш номер к ним попал именно так. Компании, которая начинает знакомство с ворованной базы, нельзя доверять ни деньги, ни документы.</div>
           <div class="rv"><b>Не берите трубку — или сразу кладите</b><span>наш номер один: +7 932 499-00-00. Звонит только ваш эксперт, все условия — на этой странице.</span></div>
           <div class="rv"><b>Никому не диктуйте коды из СМС</b><span>код из СМС — это ваша подпись. Мы никогда не просим продиктовать код по телефону.</span></div>
