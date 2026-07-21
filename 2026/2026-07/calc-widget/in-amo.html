@@ -423,6 +423,16 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
         <label class="ocki" id="w_keepWrap" style="display:none"><input type="checkbox" id="w_keep" onchange="keepUI()"> Сохранение имущества · 60 000 ₽/объект · в рассрочку</label>
         <div class="rowf" id="w_keepRow" style="display:none"><span class="rlab">Объектов (залог/ипотека)</span><input id="w_keepN" class="rin" type="number" min="1" value="1"></div>
 
+        <div class="actsep">Действия ⚡</div>
+        <div id="pane_act">
+          <!-- «одна сумма к оплате» (правка заказчика 16.07): частичку выторговывает менеджер голосом, страница показывает её как факт -->
+          <div class="rowf"><span class="rlab">К оплате сегодня, ₽ <span style="color:#98a1ab;font-weight:600">· пусто = первый платёж</span></span><input id="w_due" class="rin" type="number" placeholder="13 500"></div>
+          <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
+          <div class="sstat none" id="w_sstat">ещё не отправлено</div>
+          <div class="lrow">
+            <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
+            <button class="lbtn" id="w_payLink" onclick="copyPayLink()">💳 Ссылка на оплату</button>
+          </div>
         <!-- КРЕДИТНАЯ ИСТОРИЯ — отдельный раздел (правка заказчика 21.07: «файлы-результат хранятся здесь»); в проде файлы = вложения сделки амо -->
         <div class="actsep">Кредитная история</div>
         <div id="sec_ki">
@@ -438,16 +448,6 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <div class="kinote"><b>Скоринг Бюро · НБКИ · Кредистория (ОКБ)</b> — повтор бюро заменяет его отчёт, договоры-дубли объединяются по УИД.</div>
         </div>
 
-        <div class="actsep">Действия ⚡</div>
-        <div id="pane_act">
-          <!-- «одна сумма к оплате» (правка заказчика 16.07): частичку выторговывает менеджер голосом, страница показывает её как факт -->
-          <div class="rowf"><span class="rlab">К оплате сегодня, ₽ <span style="color:#98a1ab;font-weight:600">· пусто = первый платёж</span></span><input id="w_due" class="rin" type="number" placeholder="13 500"></div>
-          <button class="sbtn" id="w_send" onclick="sendPresentation()">✈ Отправить презентацию клиенту</button>
-          <div class="sstat none" id="w_sstat">ещё не отправлено</div>
-          <div class="lrow">
-            <button class="lbtn" id="w_copy" onclick="copyClientLink()">⧉ Скопировать</button>
-            <button class="lbtn" id="w_payLink" onclick="copyPayLink()">💳 Ссылка на оплату</button>
-          </div>
           <label style="margin-top:10px">Дожим-сообщения — копируются с цифрами клиента</label>
           <div class="lrow" style="margin-top:4px">
             <button class="lbtn" onclick="copyDz('open',this)">✉ Не открыл</button>
