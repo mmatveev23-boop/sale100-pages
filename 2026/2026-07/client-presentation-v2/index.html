@@ -579,7 +579,7 @@ h1 .hl{color:var(--green)}
 
         <div class="tariffs stg">
           <button class="trf sel" id="trfR" onclick="setTariff('rassrochka')"><div><div class="tn" id="trfRTitle">Рассрочка на 14 месяцев</div><small class="num" id="trfRSub">13 500 ₽/мес · без банка и процентов</small></div><span class="rad"></span></button>
-          <button class="trf" id="trfV" onclick="setTariff('vip')"><div><div class="tn">Оплата сразу · VIP</div><small class="num">169 000 ₽ · экономия 20 000 ₽</small></div><span class="rad"></span></button>
+          <button class="trf" id="trfV" onclick="setTariff('vip')"><div><div class="tn">Оплата сразу · VIP</div><small class="num" id="trfVSub">169 000 ₽ · экономия 20 000 ₽</small></div><span class="rad"></span></button>
         </div>
 
         <div class="sched stg" id="schedShort">
@@ -923,12 +923,14 @@ const CLIENT={
   payNow:payParam>0?payParam:(KION?KI.payNow:(Q.has('debt')?0:61500))
 };
 const BFL_TOTAL_COST=239000; /* услуги 189 000 + госплатежи 50 000 */
-const RASS_TOTAL=189000, RASS_M=14, VIP=169000, KD_PRICE=50000, KD_M=2, PAY_DAY=25;
+const FULL=Q.get('full')==='1'; /* тариф дня 1 (заказчик 21.07): 199 000 · 15 платежей (14×13 500 + последний 10 000); без full — скидочный 189 000 · 14 («последний платёж прощаем», дожим дня 2) */
+const RASS_TOTAL=FULL?199000:189000, RASS_M=FULL?15:14, LAST_PAY=FULL?10000:0, VIP=169000, KD_PRICE=50000, KD_M=2, PAY_DAY=25;
 /* рассрочка от менеджера (решение заказчика 20.07): ?pd=YYYY-MM-DD — дата 1-го платежа, ?rm=N — срок (итог 189 000 неизменен).
    Допродукты: ?adv=1&advm=once|rass — адвокатский запрет (20 000 разом / 25 000 в рассрочку);
    ?keep=N — сохранение имущества, 60 000 ₽ за объект, в рассрочку (только БФЛ-«сохранение»). В проде всё отдаёт движок. */
 const PD=(m=>m?new Date(m[0]+'T12:00'):null)((Q.get('pd')||'').match(/^\d{4}-\d{2}-\d{2}$/));
-const RM=Math.max(2,Math.min(24,Math.round(+Q.get('rm')||RASS_M)));
+const RM=FULL?15:Math.max(2,Math.min(24,Math.round(+Q.get('rm')||RASS_M)));
+const BASE_PAY=FULL?13500:BASE_PAY; /* базовый платёж; при FULL последний платёж отдельный (LAST_PAY) */
 const ADV=Q.get('adv')==='1', ADV_RASS=Q.get('advm')==='rass', ADV_PRICE=ADV_RASS?25000:20000;
 const KEEP_N=Math.max(0,Math.min(9,Math.round(+Q.get('keep')||0))), KEEP_SUM=KEEP_N*60000;
 const MD=(v=>v>=1&&v<=31?v:0)(Math.round(+Q.get('md')||0));
@@ -969,7 +971,7 @@ function months(n){const out=[];
     for(let i=0;i<n;i++){const m=new Date(d.getFullYear(),d.getMonth()+i,SCHED_DAY);out.push(m.toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}));}}
   return out;}
 function renderSched(el,n,first,rest){
-  el.innerHTML=months(n).map((m,i)=>`<div class="sr"><span>${i+1} · ${m}</span><b class="num">${fmt(i===0?first:rest)} ₽</b></div>`).join('');
+  el.innerHTML=months(n).map((m,i)=>`<div class="sr"><span>${i+1} · ${m}</span><b class="num">${fmt(i===0?first:(LAST_PAY&&i===n-1?LAST_PAY:rest))} ₽</b></div>`).join('');
 }
 function recalc(){
   const kdOn=kd, vip=tariff==='vip';
@@ -979,17 +981,17 @@ function recalc(){
   const addTotal=((ADV&&ADV_RASS)?20000:0)+KEEP_SUM;
   const addF=ADV?(ADV_RASS?5000:20000):0;
   const addBase=Math.round(addTotal/RM), addKd=Math.round(addTotal/term);
-  const mB=Math.round(RASS_TOTAL/RM);
+  const mB=BASE_PAY;
   const mBAll=mB+addBase, firstBAll=mBAll+addF;
   /* герой на шаге 1 всегда показывает базу без доктора (канон) */
-  document.getElementById('heroPay').innerHTML=vip?`${fmt(VIP)} <small>₽ разом</small>`:`${fmt(Math.round(RASS_TOTAL/RM))} <small>₽ / месяц</small>`;
+  document.getElementById('heroPay').innerHTML=vip?`${fmt(VIP)} <small>₽ разом</small>`:`${fmt(BASE_PAY)} <small>₽ / месяц</small>`;
   document.getElementById('heroSub').innerHTML=vip
-    ?`оплата одним платежом · <b>экономия 20 000 ₽</b> · госплатежи 50 000 ₽ отдельно`
-    :`${RM} платежей · услуги целиком ${fmt(RASS_TOTAL)} ₽ · <b>VIP при оплате сразу ${fmt(VIP)} ₽ (выгода 20 000 ₽)</b>`;
+    ?`оплата одним платежом · <b>экономия ${fmt(RASS_TOTAL-VIP)} ₽</b> · госплатежи 50 000 ₽ отдельно`
+    :`${RM} платежей · услуги целиком ${fmt(RASS_TOTAL)} ₽ · <b>VIP при оплате сразу ${fmt(VIP)} ₽ (выгода ${fmt(RASS_TOTAL-VIP)} ₽)</b>`;
   document.getElementById('schedShort').style.display=vip?'none':'';
   document.getElementById('schedBtn').style.display=vip?'none':'';
   document.getElementById('schFirst').textContent=fmt(firstBAll)+' ₽';
-  document.getElementById('schRest').textContent=(RM-1)+' × '+fmt(mBAll)+' ₽ · каждое '+SCHED_DAY+'-е число';
+  document.getElementById('schRest').textContent=(LAST_PAY?((RM-2)+' × '+fmt(mBAll)+' ₽ + последний '+fmt(LAST_PAY)+' ₽'):((RM-1)+' × '+fmt(mBAll)+' ₽'))+' · каждое '+SCHED_DAY+'-е число';
   renderSched(document.getElementById('schedList'),RM,firstBAll,mBAll);
   (function(){const parts=['услуги'];
     if(ADV&&ADV_RASS)parts.push('адвокатский запрет');
@@ -1067,14 +1069,16 @@ function toggleCalc(){
   d.style.display=open?'':'none';
   b.textContent=open?'Скрыть расчёт':'Как посчитана выгода';
 }
-(function(){const m=Math.round(RASS_TOTAL/RM);
+(function(){const m=BASE_PAY;
   document.getElementById('trfRTitle').textContent='\u0420\u0430\u0441\u0441\u0440\u043e\u0447\u043a\u0430 \u043d\u0430 '+RM+' \u043c\u0435\u0441\u044f\u0446\u0435\u0432';
   const sub=document.getElementById('trfRSub');
-  sub.textContent=sub.textContent.replace(/^[\d\s\u00a0\u202f]+\u20bd/, fmt(m)+' \u20bd');})();
+  sub.textContent=sub.textContent.replace(/^[\d\s\u00a0\u202f]+\u20bd/, fmt(m)+' \u20bd');
+  if(FULL) sub.textContent='14 × 13 500 ₽ + последний 10 000 ₽ · без банка';
+  const vs=document.getElementById('trfVSub'); if(vs) vs.textContent='169 000 ₽ · экономия '+fmt(RASS_TOTAL-VIP)+' ₽';})();
 function setTariff(t){tariff=t;document.getElementById('trfR').classList.toggle('sel',t==='rassrochka');document.getElementById('trfV').classList.toggle('sel',t==='vip');recalc();}
 function setKd(v){kd=v;document.getElementById('kdY').classList.toggle('sel',v);document.getElementById('kdN').classList.toggle('sel',!v);recalc();}
 function renderKdDelta(){
-  const mBase=Math.round(RASS_TOTAL/RM), mKd=Math.round((RASS_TOTAL+KD_PRICE)/(RM+KD_M));
+  const mBase=BASE_PAY, mKd=Math.round((RASS_TOTAL+KD_PRICE)/(RM+KD_M));
   if(kd){
     document.getElementById('kdDelta').textContent='+'+fmt(mKd-mBase)+' ₽';
     document.getElementById('kdDeltaCap').textContent='в месяц';
@@ -1232,19 +1236,19 @@ function buildContract(){
     ['{{Сделка|Рассрочка (ежемес. платеж)|719979}} руб.',vip?'—':fmt(mAll)+' руб.'],
     ['Ежемесячно не позднее {{Сделка|Дата платежа (число)|660257}} числа каждого месяца',vip?'Оплата одним платежом при заключении договора':'Ежемесячно не позднее '+SCHED_DAY+'-го числа каждого месяца'],
     ['{{Payer|Номер по порядку}}',vip?'1':'1–'+term],
-    ['{{Payer|Сумма}}',vip?fmt(firstPay)+' ₽':'первый '+fmt(firstPay)+' ₽, далее '+fmt(mAll)+' ₽'],
+    ['{{Payer|Сумма}}',vip?fmt(firstPay)+' ₽':'первый '+fmt(firstPay)+' ₽, далее '+fmt(mAll)+' ₽'+(LAST_PAY?', последний '+fmt(LAST_PAY)+' ₽':'')],
     ['{{Payer|Дата ожидания}}',vip?(pd1||'при заключении договора'):(pd1?'с '+pd1+', ':'')+'каждое '+SCHED_DAY+'-е число'],
     ['стоимость услуг 189 000 ₽, рассрочка 14 месяцев','стоимость услуг '+fmt(svcTotal)+' ₽'+(vip?', оплата одним платежом':', рассрочка '+term+' месяцев')]
   ];
   /* обложка печатной формы — числа сделки, не демо (правка Виктории 21.07): выгода, долг, платёж/тариф */
   (function(){
-    const coverSave=CLIENT.debt-((vip?VIP:RASS_TOTAL)+50000), mB=Math.round(RASS_TOTAL/RM);
+    const coverSave=CLIENT.debt-((vip?VIP:RASS_TOTAL)+50000), mB=BASE_PAY;
     rep.push(
       ['~1 001 000 ₽', coverSave>0?'~'+fmt(coverSave)+' ₽':'рассчитаем точно по вашей КИ'],
       ['1 240 000 ₽', fmt(CLIENT.debt)+' ₽'],
       ['13 500 ₽ / месяц', vip?fmt(VIP)+' ₽ разом':fmt(mB)+' ₽ / месяц'],
       ['рассрочка на 14 месяцев без банка и процентов · услуги целиком 189 000 ₽ · график — Приложение № 1',
-        vip?'оплата одним платежом · Тариф «Выгодный» · экономия 20 000 ₽ · госплатежи 50 000 ₽ отдельно'
+        vip?('оплата одним платежом · Тариф «Выгодный» · экономия '+fmt(RASS_TOTAL-VIP)+' ₽ · госплатежи 50 000 ₽ отдельно')
            :'рассрочка на '+RM+' месяцев без банка и процентов · услуги целиком '+fmt(RASS_TOTAL)+' ₽ · график — Приложение № 1']);
     if(vip) rep.push(['услуги <b>189 000 ₽</b> в рассрочку','услуги <b>'+fmt(VIP)+' ₽</b> одним платежом']);
   })();

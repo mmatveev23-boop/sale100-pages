@@ -418,6 +418,11 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
              страница клиента открывается с готовым графиком; допы: адвокатский запрет (оба продукта, 20 000 разом / 25 000 рассрочка),
              сохранение имущества (только БФЛ-«сохранение», 60 000 ₽/объект, в рассрочку) -->
         <div class="actsep">Рассрочка · график на странице клиента</div>
+        <!-- ТАРИФ (заказчик 21.07): день 1 = 199 000 · 15 платежей (14×13 500 + последний 10 000); скидка «прощаем последний платёж» −10 000 → 189 000 · 14 — козырь дожима дня 2 -->
+        <div class="rowf"><span class="rlab">Тариф · скидка — козырь дня 2</span>
+          <div class="seg sm" id="w_tarif" style="flex:1"><button class="on" data-tf="full" onclick="setTarif(this)">199 000 · 15 мес</button><button data-tf="disc" onclick="setTarif(this)">−10 000 · 189 000</button></div>
+        </div>
+        <div class="kinote" id="w_tarifNote">День 1 — полный тариф: 14 × 13 500 ₽ + последний платёж 10 000 ₽. Скидку «последний платёж прощаем» бережём для дожима дня 2.</div>
         <div class="rowf"><span class="rlab">Дата 1-го платежа · пусто = ближайшее 25-е</span><input id="w_payDate" class="rin" type="date" style="width:150px" onchange="rassLine()"></div>
         <div class="rowf"><span class="rlab">День ежемес. платежа · до 25-го · пусто = как у первого</span><input id="w_payDay" class="rin" type="number" min="1" max="25" placeholder="25" onchange="if(this.value)this.value=Math.max(1,Math.min(25,Math.round(this.value)))"></div>
         <div class="rowf"><span class="rlab">Срок рассрочки, мес</span><input id="w_rassM" class="rin" type="number" min="2" max="24" value="14" oninput="rassLine()"></div>
@@ -457,6 +462,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
             <button class="lbtn" onclick="copyDz('think',this)">✉ Не подписал</button>
             <button class="lbtn" onclick="copyDz('sim',this)">✉ SIM-акция</button>
             <button class="lbtn" id="w_dzKi" onclick="copyDz('ki',this)">✉ По КИ</button>
+            <button class="lbtn" onclick="copyDz('disc',this)">✉ Скидка −10 000 · день 2</button>
           </div>
 
           <!-- ИСХОД ЗВОНКА (решение заказчика 17.07: дата оплаты вбивается в пульте; лестница ТЗ §10.2, signed_date без даты не сохраняется) -->
@@ -967,7 +973,20 @@ function sendPresentation(){
 }
 /* ── рассрочка и допродукты (решение заказчика 20.07): дата/срок графика + адвокатский запрет 20 000/25 000 + сохранение 60 000/объект ── */
 const ADVOCATE_ONCE=20000, ADVOCATE_RASS=25000, ADVOCATE_RASS_FIRST=5000, KEEP_PER_OBJ=60000; /* рассрочка запрета = 5 000 первым платежом + 20 000 частями (заказчик 20.07) */
+let tarif='full'; /* full: 199 000 · 15 (день 1) | disc: скидка −10 000 → 189 000 · 14 (дожим дня 2) */
+function setTarif(btn){
+  tarif=btn.dataset.tf;
+  document.querySelectorAll('#w_tarif button').forEach(x=>x.classList.toggle('on',x===btn));
+  const rmInp=document.getElementById('w_rassM');
+  if(tarif==='full'){rmInp.value=15;rmInp.disabled=true;}
+  else{rmInp.value=14;rmInp.disabled=false;}
+  document.getElementById('w_tarifNote').textContent=tarif==='full'
+    ?'День 1 — полный тариф: 14 × 13 500 ₽ + последний платёж 10 000 ₽. Скидку «последний платёж прощаем» бережём для дожима дня 2.'
+    :'Скидка дня 2 включена: «последний платёж прощаем» — минус 10 000 ₽, итог 189 000 ₽, 14 × 13 500. Говорить только на втором касании.';
+  rassLine(); updateSendUI();
+}
 function rassLine(){
+  if(tarif==='full'){document.getElementById('w_rassLine').textContent='199 000 ₽ · 14 × 13 500 + последний 10 000';return;}
   const rm=Math.max(2,Math.min(24,Math.round(+document.getElementById('w_rassM').value||14)));
   const pay=Math.round(189000/rm);
   document.getElementById('w_rassLine').textContent='189 000 ₽ · платёж '+(rm===14?'':'~')+fmt(pay)+' ₽/мес'+(rm===14?'':' · '+rm+' мес');
@@ -981,7 +1000,8 @@ function rassParams(){
   const p={};
   const pd=document.getElementById('w_payDate').value; if(pd) p.pd=pd;
   const md=Math.round(+document.getElementById('w_payDay').value||0); if(md>=1) p.md=Math.min(25,md); /* 25 — последнее число (заказчик 21.07) */
-  const rm=Math.max(2,Math.min(24,Math.round(+document.getElementById('w_rassM').value||14))); if(rm!==14) p.rm=rm;
+  if(tarif==='full'){p.full=1;} /* день 1: 199 000 · 15 платежей; без full страница показывает скидочный 189 000 · 14 */
+  else{const rm=Math.max(2,Math.min(24,Math.round(+document.getElementById('w_rassM').value||14))); if(rm!==14) p.rm=rm;}
   if(document.getElementById('w_adv').checked){p.adv=1;p.advm=advMode();}
   if(prod==='bfl'&&document.getElementById('w_keep').checked){p.keep=Math.max(1,Math.round(+document.getElementById('w_keepN').value||1));}
   return p;
@@ -1094,6 +1114,7 @@ document.getElementById('w_debt').addEventListener('input',()=>{ if(kiLoaded) dr
 ['w_debt','w_paynow','w_income','w_kids','w_pmSelf','w_pmChild','w_ovrInt','w_due'].forEach(id=>document.getElementById(id).addEventListener('input',calc));
 document.getElementById('w_region').addEventListener('change',()=>{applyRegionPM();calc();});
 renderCreditRows();
+{const r=document.getElementById('w_rassM');r.value=15;r.disabled=true;rassLine();} /* тариф дня 1 по умолчанию */
 /* первый вопрос скрипта открыт сразу (исследование 21.07): частые типы предоткрыты — менеджер печатает сумму без клика; редкие остаются за чипами */
 ['loan','card','mfo'].forEach(k=>toggleChip(k));
 {const a=document.querySelector('#w_credits .crt[data-t="loan"] .c-am'); if(a)a.focus({preventScroll:true});}
@@ -1334,6 +1355,8 @@ function monthlyGrowth(){
   return Math.round(g);
 }
 function dzText(kind){
+  if(kind==='disc'&&tarif!=='disc'){setTarif(document.querySelector('#w_tarif button[data-tf="disc"]'));} /* скидка в сообщении = скидочная ссылка */
+
   const name=document.querySelector('.deal h1').textContent.trim();
   const abs=u=>u?new URL(u,location.href).href:'';
   const pres=abs(presentUrl());
@@ -1341,6 +1364,9 @@ function dzText(kind){
   const sample=abs('./ki.html');
   const grow=Math.round(intYearEff()/12); /* ручной факт переплаты (если введён) доходит и до дожим-сообщений */
   const plan=last.pay?fmt(last.pay):null;
+  if(kind==='disc'){
+    return name+', новость от руководителя: нам одобрили для вас персональную скидку — последний платёж прощаем. Это минус 10 000 ₽: услуги 189 000 ₽ вместо 199 000 ₽, и рассрочка короче — 14 платежей по 13 500 ₽. Скидка действует только сегодня. Ваша страница уже пересчитана: '+pres;
+  }
   if(kind==='open'){
     return name+', добрый день! Это ДОНУЛЯ. Посчитали по вашим цифрам: платёж можно снизить до ~'+(plan||'—')+' ₽/мес вместо нынешних ~'+fmt(last.paynow||0)+' ₽. Всё уже готово на вашей персональной странице: '+pres+'\nОткройте — это 2 минуты. Если удобнее голосом — наберу.';
   }
