@@ -60,7 +60,8 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dwPlate:active{transform:scale(.97)}
 .pultOverlay{position:fixed;inset:0;z-index:60;background:rgba(17,24,21,.46);backdrop-filter:blur(2px);display:none;align-items:flex-start;justify-content:center;padding:3.5vh 18px;opacity:0;transition:opacity .2s ease-out}
 .pultOverlay.on{opacity:1}
-.pultOverlay .dw{width:min(880px,96vw);max-height:93vh;display:flex;flex-direction:column;margin:0;border-radius:12px;overflow:hidden;transform:scale(.97);opacity:0;transition:transform .2s cubic-bezier(.23,1,.32,1),opacity .2s ease-out}
+/* 1120px (было 880): рейка «Скрипт звонка» добавила третью колонку (заказчик 22.07 «пульт ведёт звонок») */
+.pultOverlay .dw{width:min(1120px,97vw);max-height:93vh;display:flex;flex-direction:column;margin:0;border-radius:12px;overflow:hidden;transform:scale(.97);opacity:0;transition:transform .2s cubic-bezier(.23,1,.32,1),opacity .2s ease-out}
 .pultOverlay.on .dw{transform:scale(1);opacity:1}
 .dh .dhClose{margin-left:auto;background:#0F6B4F;border:none;border-radius:7px;color:#fff;font-family:inherit;font-weight:700;font-size:12px;padding:6px 12px;cursor:pointer;flex:none;transition:transform .16s cubic-bezier(.23,1,.32,1)}
 .dh .dhClose:active{transform:scale(.97)}
@@ -79,11 +80,16 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .pultMini:active{transform:scale(.97)}
 @media (hover:hover) and (pointer:fine){.pultMini:hover{transform:translateY(-1px)}}
 /* тело модала: свой скролл; шапка и вердикт всегда над ним; две колонки «Расчёт | Договор и действия» */
-#w_body{overflow-y:auto;flex:1;display:grid;grid-template-columns:1fr 1fr;gap:0;align-content:start}
-#pane_calc{min-width:0;padding-right:26px}
+/* три колонки: рейка скрипта | расчёт | договор+действия; .noscript — рейка свёрнута, прежние две */
+#w_body{overflow-y:auto;flex:1;display:grid;grid-template-columns:238px 1fr 1fr;gap:0;align-content:start}
+#w_body.noscript{grid-template-columns:1fr 1fr}
+#w_body.noscript #pane_script{display:none}
+#w_body.noscript #pane_calc{padding-left:0}
+#pane_script{min-width:0;border-right:1px solid #eef1f4;padding-right:16px}
+#pane_calc{min-width:0;padding-right:26px;padding-left:22px}
 #w_colR{min-width:0;border-left:1px solid #eef1f4;padding-left:26px}
 #w_body>.wnote,#w_body>.toast{grid-column:1/-1}
-@media (max-width:919px){#w_body{grid-template-columns:1fr}#pane_calc{padding-right:0}#w_colR{border-left:none;padding-left:0}}
+@media (max-width:919px){#w_body,#w_body.noscript{grid-template-columns:1fr}#pane_calc{padding-right:0;padding-left:0}#w_colR{border-left:none;padding-left:0}#pane_script{border-right:none;padding-right:0}}
 @media (prefers-reduced-motion:reduce){.pultOverlay,.pultOverlay .dw{transition:opacity .2s ease}.pultOverlay .dw{transform:none}}
 
 /* ═══ наш виджет V2 ═══ */
@@ -126,6 +132,45 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
 .dlrow{display:flex;gap:8px;align-items:baseline;padding:7px 0;border-bottom:1px dashed #eef1f4;font-size:12.5px}
 .dlrow .dltxt{flex:1;min-width:0}
 .dlrow .dlat{flex:none;font-variant-numeric:tabular-nums;color:#94a0ab;font-weight:600;font-size:11.5px;white-space:nowrap}
+/* ── рейка «Скрипт звонка» (заказчик 22.07 «пульт ведёт звонок — как Balto, но без распознавания речи»):
+   16 пунктов гейта в порядке скрипта + карточки возражений; отметки частые — переходы минимальные (канон анимаций) ── */
+.srhead{display:flex;align-items:center;gap:6px;margin-top:2px}
+.srhead b{font-size:12.5px;color:#0B3B2E}
+.srprog{margin-left:auto;font-size:11px;font-weight:800;color:#0F6B4F;font-variant-numeric:tabular-nums;white-space:nowrap}
+.srhide{border:none;background:none;color:#94a0ab;font-size:11px;font-weight:600;cursor:pointer;padding:2px 4px;font-family:inherit;transition:color .15s ease-out}
+.srhide:hover{color:#0B5540}
+.srail-ai{margin-top:4px;font-size:10.5px;color:#8b96a3;line-height:1.45}
+.sgrp{margin:12px 0 3px;font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#94a0ab}
+.sit{display:flex;gap:7px;padding:5px 6px;margin:1px -6px 0;border-radius:7px;cursor:pointer;align-items:flex-start;transition:background .15s ease-out}
+.sit:hover{background:#f4f6f7}
+.sit:active{transform:scale(.99)}
+.sq{width:15px;height:15px;border:1.5px solid #c3ccd4;border-radius:4px;flex:none;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;background:#fff;transition:background .15s ease-out,border-color .15s ease-out}
+.sit.on .sq{background:#0F6B4F;border-color:#0F6B4F}
+.sit.na .sq{background:#c3ccd4;border-color:#c3ccd4}
+.sq.hintq{border-style:dashed;border-color:#C99A33} /* «поле тронуто — отметь, если спросил»: подсказка, не отметка */
+.stx{flex:1;min-width:0;font-size:12px;font-weight:600;color:#2e3640;line-height:1.3}
+.stx .amark{font-size:9.5px;font-weight:700;color:#0F9F63;margin-left:4px}
+.sask{display:none;font-size:11px;font-weight:500;color:#7c8894;line-height:1.35;margin-top:2px}
+.sit.cur{background:#FBF3DC}
+.sit.cur:hover{background:#F6E9C8}
+.sit.cur .sask{display:block}
+.sit.warn .sq{border-color:#A8442E}
+.sit.warn .stx{color:#A8442E}
+/* п.16 «следующий шаг с датой» — мини-форма-замок */
+.snext{margin:6px 0 0;padding:8px;border:1px solid #e4e9ed;border-radius:9px;background:#fbfdfc}
+.snext select,.snext input{width:100%;border:1px solid #d8dee3;border-radius:7px;padding:6px 8px;font-family:inherit;font-size:12px;color:#2e3640;margin-top:5px}
+.snext .snrow{display:flex;gap:5px}
+.snok{margin-top:5px;font-size:11px;font-weight:700;color:#0F6B4F;line-height:1.4}
+/* карточки возражений */
+.bchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.bchip{border:1px solid #d8dee3;border-radius:999px;background:#fff;padding:4px 9px;font-family:inherit;font-size:11px;font-weight:700;color:#5c6874;cursor:pointer;transition:background .15s ease-out,color .15s ease-out,border-color .15s ease-out}
+.bchip:hover{border-color:#0F6B4F;color:#0B5540}
+.bchip:active{transform:scale(.97)}
+.bchip.on{background:#0B3B2E;border-color:#0B3B2E;color:#fff}
+.bcard{margin-top:7px;border:1px solid #e4e9ed;border-radius:9px;background:#fff;padding:9px 10px;animation:pin .15s ease-out}
+.bcard .bsaid{font-size:11px;font-weight:700;color:#A8442E;line-height:1.35}
+.bcard .bans{margin-top:5px;font-size:12px;line-height:1.45;color:#2e3640}
+.bcard .bstop{margin-top:6px;font-size:10.5px;font-weight:600;color:#8A6212;background:#FBF3DC;border-radius:6px;padding:4px 7px;line-height:1.4}
 /* панель «КИ»: одна колонка по центру вместо двухколоночного расчёта; тост и wnote живут вне панелей — видны с любой вкладки.
    Прячется inline-стилем (идиома пульта): showKiPane снимает style.display, CSS-display:none он бы не перебил */
 #pane_ki{grid-column:1/-1;width:100%;max-width:620px;margin:0 auto;padding-bottom:6px}
@@ -349,6 +394,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <div class="seg sm" id="w_prod"><button class="on" data-p="rdg">РДГ</button><button data-p="bfl">БФЛ</button></div>
           <div class="dbadge words" id="w_badge">🎤 со слов · предварительно</div>
           <span class="ksep"></span>
+          <button type="button" class="ktab" id="w_scriptTab" style="display:none" onclick="toggleScriptRail(true)" title="Вернуть рейку скрипта звонка">📞 Скрипт</button>
           <button type="button" class="ktab" id="w_kiTab" onclick="toggleKiPane()" title="Документы сделки: КИ, заключения, презентация, история">📄 Документы</button>
         </div>
         <button type="button" class="vline" id="w_vline" style="display:none" onclick="togglePanel()">
@@ -362,6 +408,23 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
       </div>
 
       <div class="body" id="w_body">
+        <!-- РЕЙКА «СКРИПТ ЗВОНКА» (заказчик 22.07 «сделаем как Balto, но дёшево — пульт ведёт звонок»):
+             16 пунктов гейта «консультация состоялась» В ПОРЯДКЕ СКРИПТА (канон: docs/ai-qa-consultation-prompt.md
+             v1.1.15, нумерация сквозная с чек-листом /script/) + карточки возражений (эталоны /script/ «Отработка
+             возражений»; в проде тексты возражений = серверный конфиг, один источник со скрипт-страницей).
+             КОНТРАКТ ПРОГЕРУ (ИИ на страже): каждый клик = событие ленты — script_item_checked {n, auto, ts} /
+             script_item_unchecked {n} / objection_card_opened {id, ts} / next_step_set {type, date, time};
+             AI-QA (фаза 3) сверяет с транскриптом: в записи пункт прозвучал, отметки нет → «недобери» задачей;
+             отметка стоит, в записи пункта нет → фейк-отметка, флаг РОПу. Авто-отметки из полей расчёта шлют auto=1. -->
+        <div id="pane_script">
+          <div class="srhead"><b>📞 Скрипт звонка</b><span class="srprog" id="sr_prog">0/16</span><button type="button" class="srhide" onclick="toggleScriptRail(false)" title="Свернуть рейку — вернуть кнопкой «Скрипт» в шапке">⟨ скрыть</button></div>
+          <div class="srail-ai">⛨ Отметки сверяет ИИ с записью звонка: фейк-отметка = флаг РОПу, недобор = задача «добери диагностику».</div>
+          <div id="sr_items"></div>
+          <div class="sgrp">Возражения · эталоны</div>
+          <div class="bchips" id="sr_chips"></div>
+          <div id="sr_card"></div>
+          <a href="../script/index.html" target="_blank" style="display:block;margin-top:8px;font-size:11px;font-weight:700;color:#0B5540;text-decoration:none">Полный скрипт и все 14 возражений ↗</a>
+        </div><!-- /pane_script -->
         <div id="pane_calc">
 
           <!-- а) ДОЛГИ: чипы типов, поля только включённых; заполнил и ушёл дальше → схлопывается в summary -->
@@ -451,7 +514,7 @@ body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1f4;colo
           <button class="lbtn" id="w_discApply" style="width:100%;margin-top:6px" onclick="applyDisc()">Применить скидку −10 000 · последний платёж прощаем</button>
           <div class="kinote" id="w_discNote">В проде: причина уходит в поле сделки, AI-QA сверяет цитату с записью звонка — «скидка без возражения» = комплаенс-нарушение (гейт ×0). Норма: <b><span id="w_discCnt">0</span> из 5</b> скидок в месяц, сверх — только согласование РОПа.</div>
         </div>
-        <div class="rowf"><span class="rlab">Дата 1-го платежа · пусто = ближайшее 25-е</span><input id="w_payDate" class="rin" type="date" style="width:150px" onchange="rassLine()"></div>
+        <div class="rowf"><span class="rlab">Дата 1-го платежа · пусто = ближайшее 25-е</span><input id="w_payDate" class="rin" type="date" style="width:150px" onchange="rassLine();nextStepUI()"></div><!-- дата платежа закрывает п.16 рейки сама (канон «повтора не требуй») -->
         <div class="rowf"><span class="rlab">День ежемес. платежа · до 25-го · пусто = как у первого</span><input id="w_payDay" class="rin" type="number" min="1" max="25" placeholder="25" onchange="if(this.value)this.value=Math.max(1,Math.min(25,Math.round(this.value)))"></div>
         <!-- «дата неизвестна» (заказчик 21.07): клиент не может назвать дату — рандомную не ставим; страница ЕДИНАЯ, флоу тот же до подписи и оплаты, график пишет «дата согласуется при подписании», договор — «определяется Сторонами» (п. 3.4) -->
         <label class="ocki"><input type="checkbox" id="w_ndate" onchange="ndateUI()"> Дата неизвестна · клиент не может назвать</label>
@@ -854,6 +917,7 @@ function calc(){
   updateSendUI();
   rebuildKiHref(); /* срок/доход/ипотека-галочка меняются после загрузки КИ — юрзаключение не должно протухать */
   rebuildDraftHref(); /* черновик со слов живёт до КИ и обновляется с каждым вводом */
+  updateScriptRail(); /* авто-отметки рейки скрипта читают поля расчёта */
 }
 /* ── V2: sticky-шапка — живой вердикт одной строкой; до готовности данных пусто (хинт убран заказчиком) ── */
 function updateHeader(){
@@ -893,6 +957,7 @@ function showKiPane(on){
   kiPaneOn=on;
   document.getElementById('pane_calc').style.display=on?'none':'';
   document.getElementById('w_colR').style.display=on?'none':'';
+  {const ps=document.getElementById('pane_script'); if(ps) ps.style.display=on?'none':(scriptRailOn?'':'none');} /* рейка уступает вкладке, возвращается по своему состоянию */
   document.getElementById('pane_ki').style.display=on?'':'none';
   document.getElementById('w_kiTab').classList.toggle('on',on);
   document.getElementById('w_body').scrollTop=0; /* панели разной высоты — старый скролл дезориентирует */
@@ -932,6 +997,146 @@ function renderDocLog(){
   const p=docLog.find(d=>d.type==='pres');
   const st=document.getElementById('w_docPresStat'); if(st) st.textContent=p?'✓ '+p.label+' · '+p.at:'ещё не отправлялась — кнопка «Отправить» в футере';
 }
+/* ── РЕЖИМ ЗВОНКА: рейка скрипта (заказчик 22.07). Канон пунктов — ai-qa-consultation-prompt.md v1.1.15
+   («в гейте нет вещей, которые можно не проговорить»: все 16 или N/A); вопросы дословно — /script/
+   «Диагностический чек-лист»; эталоны возражений — /script/ «Отработка возражений» (тут 8 частых, там все 14).
+   Авто-отметки читают поля расчёта — клик по авто-пункту ведёт к полю; ручные пункты чекаются кликом. ── */
+const SCRIPT_STEPS=[
+ {n:1, g:'Шаг 1 · Приветствие', t:'Причина и боль', ask:'«Что за история с кредитами, почему решили обратиться?» — слушать, не перебивая'},
+ {n:2, g:'Шаг 2 · Диагностика', t:'Общий долг', ask:'«Какая общая сумма долга сейчас?»', auto:()=>last.debt>0, field:'sec_debts'},
+ {n:3, t:'Продукты долга', ask:'«Что за долги — потребкредит, займ МФО, карта, расписка?»', auto:()=>!!document.querySelector('#w_credits .crt.on'), field:'sec_debts'}, /* .crt.on = тип с введённой суммой; чипы предоткрыты программно и авто-чеком не считаются */
+ {n:4, t:'Просрочка', ask:'«Просрочки есть? Как давно?» — главная развилка анкеты', field:'w_ovd'},
+ {n:5, t:'Платёж в месяц', ask:'«Сколько платите в месяц по всем обязательствам?»', auto:()=>(parseFloat(document.getElementById('w_paynow').value)||0)>0, field:'w_paynow'},
+ {n:6, t:'Доход и занятость', ask:'«Какой официальный доход? Как справляетесь?»', auto:()=>(parseFloat(document.getElementById('w_income').value)||0)>0, field:'row_income'},
+ {n:7, t:'Семья и иждивенцы', ask:'«Официальный брак? Несовершеннолетние дети?»', field:'w_kids'},
+ {n:8, t:'ИП / ООО', ask:'«ИП сейчас или раньше? Гендиректор, учредитель, доли?» — юр-мина уровня сделок'},
+ {n:9, t:'Имущество и залоги ⚠', ask:'«Что оформлено на вас и на супруга — включая оружие, лодки, технику? Ипотека — на ком?» — критично для суда'},
+ {n:10, t:'Сделки за 3 года ⚠', ask:'«Продавали, дарили имущество за 3 года? Кому, за сколько?» — критично для суда'},
+ {n:11, t:'Супруг/близкие в курсе', ask:'«Супруга знает, что рассматриваете процедуру? Как относится?»', na:1},
+ {n:12, g:'Шаг 3 · Развилка продукта', t:'Желаемый исход', ask:'«Вам списать полностью или платить комфортно?» — клиент сам называет продукт', field:'w_prod'},
+ {n:13, t:'Конкуренты', ask:'«Уже слышали о процедуре? Где-то консультировались? Почему не заключили?»'},
+ {n:14, g:'Шаг 4 · Процесс', t:'Деньги на жизнь', ask:'БФЛ: ПМ по закону + дети/лекарства/аренда · РДГ: на руки 50 000 ₽/мес, сверху копится и вернётся при утверждении плана'},
+ {n:15, g:'Шаг 6 · Цена', t:'Госплатежи — отдельно', ask:'«50 000 ₽ сверх услуги: суд 25 000 + оповещение 15 000 + почта 10 000»'},
+];
+const BATTLE=[
+ {id:'dorogo', t:'Дорого', said:'«Дорого, где я такую сумму возьму»', ans:['[Имя], прекрасно понимаю — любая сумма в текущей ситуации выглядит болезненно. Но мы думаем не об этом.','Сейчас вы отдаёте [40 000] в месяц, и большая часть — проценты. Наша услуга — 13 500 в месяц, и платежи банкам вы уже не вносите. Потянете 13 500?'], stop:'Скидку НЕ предлагать: козырь открывается только после пересчёта по КИ (замок тарифа). Первое «дорого» = продать запрос КИ.'},
+ {id:'nomoney', t:'Нет денег сегодня', said:'«Сегодня не смогу, зарплата 10-го»', ans:['Хорошо, фиксирую платёж на 10-е. Но начнём работать уже сегодня: внесите от 1 000 ₽ — всё идёт в зачёт по договору. И завтра жду кредитную историю — покажу на цифрах вашу реальную переплату.'], stop:'Квал-тест: «1 000 найдёт любой». Займ «чтобы оплатить нас» — НЕ предлагаем: вредит делу клиента.'},
+ {id:'think', t:'Подумаю', said:'«Дайте посоветоваться с женой, наберу завтра»', ans:['Конечно. Прямо сейчас отправлю в чат: расчёт по вашим цифрам, образец договора PDF и примеры завершённых дел. А завтра в 18:00 набираю — пройдём договор вместе, и если всё устроит, подпишете кодом из СМС.','И сразу уточню: если жена скажет «нет» — вы всё равно будете решать вопрос с долгами, или на этом закрываем? Мне важно, ждать ли вас.'], stop:'Три обязательных действия: домашнее задание + жёсткая дата + квал намерения. Без них звонок = пустой дожим.'},
+ {id:'mfc', t:'МФЦ бесплатно', said:'«Можно же бесплатно через МФЦ»', ans:['Верно, но он для узких случаев: долг в лимите, закрытые исполнительные, нет дохода и имущества. У вас [причина] — МФЦ заявление просто вернёт, потеряете месяцы. Ваш рабочий путь — Арбитражный суд, и там всё делаем мы.']},
+ {id:'trust', t:'Не верю', said:'«Не верится, что можно не платить»', ans:['Загуглите «банкротство физических лиц, 127-ФЗ» — увидите ровно ту же информацию, закон работает с 2015 года.','И прежде чем платить — вместе пройдём договор на экране презентации, посмотрите реквизиты. Сначала договор — потом деньги.']},
+ {id:'property', t:'Имущество?', said:'«При банкротстве же всё заберут?»', ans:['Единственное жильё по закону защищено. По автомобилю наша главная задача — его сохранить: юрист после анализа подберёт самый безопасный вариант защиты. Решение за судом, но наша работа — чтобы лишних вопросов у судьи не возникло.'], stop:'Без «100% сохраним» — за суд не обещаем.'},
+ {id:'guarantee', t:'Гарантия?', said:'«Гарантируете, что спишете?»', ans:['Да — даю 100%. Мы не берём дела, которые не пройдут: юристы проверяют все риски до договора. И это пункт договора: долги не списаны — возвращаем деньги. Что думаете?']},
+ {id:'live', t:'На что жить?', said:'«А на что я жить буду в процедуре?»', ans:['По закону вам положен прожиточный минимум, плюс дети, лекарства, обучение, при отсутствии жилья — аренда. Что реально защитить в вашем случае — разберёт юрист, легально. Лучше чуть потерпеть полгода, чем ещё годы отдавать всю зарплату банкам.'], stop:'НЕ говорим «перейдите на полставки / получайте неофициально»: сокрытие дохода = суд не спишет долг.'},
+];
+let scriptRailOn=true, scriptRendered=false, scriptChk={}, scriptNA={}, scriptHint={}, battleOpen=null;
+/* scriptHint — «поле тронуто, отметь если спросил»: локальная подсказка UI, СОБЫТИЙ НЕ ШЛЁТ и в прогресс
+   не считается. Событие script_item_checked уходит только от клика менеджера по рейке (auto=0) или
+   честного авто из данных (auto=1) — иначе AI-QA флаговал бы менеджера за отметку, которую поставил пульт */
+function renderScriptRail(){
+  const box=document.getElementById('sr_items'); if(!box) return;
+  let html='';
+  SCRIPT_STEPS.forEach(s=>{
+    if(s.g) html+='<div class="sgrp">'+s.g+'</div>';
+    html+='<div class="sit" id="sit_'+s.n+'" onclick="scriptTap('+s.n+')"><span class="sq" id="sq_'+s.n+'"></span><div class="stx">'+s.n+' · '+s.t+'<span class="amark" id="sam_'+s.n+'"></span>'
+      +(s.na?' <button type="button" class="srhide" style="padding:0 3px" onclick="event.stopPropagation();scriptSetNA('+s.n+')" title="Неприменимо: одинокий, близкие в разговоре не звучат">н/п</button>':'')
+      +'<div class="sask">'+s.ask+'</div></div></div>';
+  });
+  html+='<div class="sgrp">Финал</div>'
+    +'<div class="sit" id="sit_16" style="cursor:default"><span class="sq" id="sq_16"></span><div class="stx">16 · Следующий шаг с датой<div class="sask" style="display:block">«Созвонимся на днях» — незачёт: только конкретный шаг с датой (и временем для звонка).</div></div></div>'
+    +'<div class="snext"><select id="sr_nsType" onchange="nextStepUI()">'
+    +'<option value="">— чем закончился звонок?</option>'
+    +'<option value="pay_today">Подпись + оплата сегодня</option>'
+    +'<option value="signed_date">Подписал · оплата [дата]</option>'
+    +'<option value="part_today">Частичка сегодня · добор [дата]</option>'
+    +'<option value="ki_recalc">Пересчёт по КИ · завтра до 12:00</option>'
+    +'<option value="present_call">Звонок-презентация [дата · время]</option>'
+    +'<option value="call">Созвон [дата · время]</option>'
+    +'<option value="refusal">Отказ · закрыть с цитатой (исход ставит движок)</option></select>'
+    +'<div class="snrow"><input type="date" id="sr_nsDate" style="display:none" onchange="nextStepUI()"><input type="time" id="sr_nsTime" style="display:none" onchange="nextStepUI()"></div>'
+    +'<div class="snok" id="sr_nsOk" style="display:none"></div></div>';
+  box.innerHTML=html;
+  document.getElementById('sr_chips').innerHTML=BATTLE.map(b=>'<button type="button" class="bchip" id="bch_'+b.id+'" onclick="battleTap(\''+b.id+'\')">'+b.t+'</button>').join('');
+}
+function scriptTap(n){
+  const s=SCRIPT_STEPS.find(x=>x.n===n);
+  if(s.auto&&s.auto()){ jumpToField(s.field); return; } /* авто-пункт закрыт данными — клик ведёт к полю-источнику */
+  if(scriptNA[n]) delete scriptNA[n];
+  else { scriptChk[n]=!scriptChk[n]; if(scriptChk[n]){delete scriptHint[n]; if(s.field) jumpToField(s.field);} }
+  updateScriptRail();
+}
+function scriptSetNA(n){ if(scriptNA[n]){delete scriptNA[n];} else {scriptNA[n]=1; delete scriptChk[n];} updateScriptRail(); }
+function jumpToField(id){
+  if(!id) return; const el=document.getElementById(id); if(!el) return;
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  const inp=el.matches&&el.matches('input,select')?el:el.querySelector('input:not([type=hidden]),select');
+  if(inp) try{inp.focus({preventScroll:true});}catch(e){}
+}
+/* канон п.16 (промт v1.1.15): «зачёт = дата платежа/добора, В Т.Ч. УЖЕ НАЗВАННАЯ В БЛОКЕ ЦЕНЫ — отдельного
+   повтора не требуй» → заполненная «Дата 1-го платежа» (w_payDate, без галочки nd) закрывает шаг сама (auto) */
+function nextStepInfo(){
+  const t=(document.getElementById('sr_nsType')||{}).value||'';
+  const d=(document.getElementById('sr_nsDate')||{}).value, tm=(document.getElementById('sr_nsTime')||{}).value;
+  const dd=d?new Date(d+'T12:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'}):'';
+  if(t==='pay_today') return {ok:true,label:'подпись + оплата сегодня'};
+  if(t==='ki_recalc') return {ok:true,label:'завтра до 12:00 · пересчёт по КИ'};
+  if(t==='refusal')   return {ok:true,label:'отказ · DNC (закрывает движок, цитата обязательна)'};
+  if(t==='signed_date') return {ok:!!d,label:'подписал · оплата '+dd};
+  if(t==='part_today')  return {ok:!!d,label:'частичка сегодня · добор '+dd};
+  if(t==='present_call') return {ok:!!d&&!!tm,label:'звонок-презентация '+dd+' '+tm};
+  if(t==='call')         return {ok:!!d&&!!tm,label:'созвон '+dd+' '+tm};
+  /* select пуст: авто-зачёт от даты 1-го платежа из блока «Рассрочка» */
+  const pd=(document.getElementById('w_payDate')||{}).value, nd=(document.getElementById('w_ndate')||{}).checked;
+  if(pd&&!nd) return {ok:true,auto:true,label:'оплата '+new Date(pd+'T12:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+' · из блока цены'};
+  return {ok:false,label:''};
+}
+function nextStepDone(){return nextStepInfo().ok;}
+function nextStepUI(){
+  const t=document.getElementById('sr_nsType').value;
+  document.getElementById('sr_nsDate').style.display=(t==='signed_date'||t==='part_today'||t==='present_call'||t==='call')?'':'none';
+  document.getElementById('sr_nsTime').style.display=(t==='present_call'||t==='call')?'':'none';
+  /* «Пересчёт по КИ» и галочка «КИ запрошена голосом» — ОДИН факт (канон §2.2): выбор шага ставит отметку сам */
+  if(t==='ki_recalc'){const c=document.getElementById('oc_ki'); if(c&&!c.checked){c.checked=true;c.dispatchEvent(new Event('change'));}}
+  const i=nextStepInfo(), okEl=document.getElementById('sr_nsOk');
+  if(i.ok){ okEl.style.display=''; okEl.textContent='✓ '+i.label+(i.auto?' — повтора не требуется':' — уйдёт в «Дата след. шага» сделки'); document.getElementById('f_next').textContent=i.label; }
+  else { okEl.style.display='none'; document.getElementById('f_next').textContent='—'; } /* разжали шаг — карточка не держит протухшую дату (ревью 22.07) */
+  updateScriptRail(); updateSendUI();
+}
+function updateScriptRail(){
+  if(!document.getElementById('sr_items')) return;
+  if(!scriptRendered){ renderScriptRail(); scriptRendered=true; }
+  let done=0, curSet=false;
+  SCRIPT_STEPS.forEach(s=>{
+    const el=document.getElementById('sit_'+s.n), sq=document.getElementById('sq_'+s.n), am=document.getElementById('sam_'+s.n);
+    const auto=!!(s.auto&&s.auto()), na=!!scriptNA[s.n], on=auto||na||!!scriptChk[s.n];
+    el.classList.toggle('on',on&&!na); el.classList.toggle('na',na);
+    sq.textContent=on?(na?'—':'✓'):'';
+    sq.classList.toggle('hintq',!on&&!!scriptHint[s.n]); /* поле тронуто — пунктирная подсказка «отметь, если спросил» */
+    sq.title=(!on&&scriptHint[s.n])?'Поле тронуто — отметьте, если вопрос прозвучал':'';
+    if(am) am.textContent=auto?'· авто':'';
+    el.classList.remove('cur');
+    if(on) done++;
+    else if(!curSet){ el.classList.add('cur'); curSet=true; } /* первый незакрытый = текущий: дословный вопрос виден */
+  });
+  const ns=nextStepDone(); if(ns) done++;
+  const s16=document.getElementById('sit_16'), q16=document.getElementById('sq_16');
+  if(s16){ s16.classList.toggle('on',ns); q16.textContent=ns?'✓':''; s16.classList.toggle('warn',!ns&&!!sentAt); } /* презентация ушла, шага нет — замок краснеет */
+  const pr=document.getElementById('sr_prog'); if(pr){ pr.textContent=done+'/16'; pr.style.color=done===16?'#0F9F63':'#0F6B4F'; }
+}
+function toggleScriptRail(on){
+  scriptRailOn=on;
+  if(on&&kiPaneOn) showKiPane(false); /* «вернуть скрипт» из «Документов» = вернуться к расчёту с рейкой (ревью 22.07: иначе клик без видимого эффекта) */
+  document.getElementById('w_body').classList.toggle('noscript',!on);
+  document.getElementById('w_scriptTab').style.display=on?'none':'';
+  if(on&&!kiPaneOn) document.getElementById('pane_script').style.display='';
+  if(on) updateScriptRail();
+}
+function battleTap(id){
+  const b=BATTLE.find(x=>x.id===id);
+  battleOpen=battleOpen===id?null:id; /* в проде клик = событие objection_card_opened → AI-QA сверит с транскриптом */
+  document.querySelectorAll('.bchip').forEach(c=>c.classList.toggle('on',c.id==='bch_'+(battleOpen||'')));
+  const box=document.getElementById('sr_card');
+  box.innerHTML=battleOpen?'<div class="bcard"><div class="bsaid">Клиент: '+b.said+'</div>'+b.ans.map(a=>'<div class="bans">'+a+'</div>').join('')+(b.stop?'<div class="bstop">⚠ '+b.stop+'</div>':'')+'</div>':'';
+}
 /* хинт-кнопки: плавный скролл к полю + фокус */
 /* ── V2: секция «Долги» схлопывается в summary, когда заполнена и фокус ушёл дальше ── */
 function collapseDebts(c){
@@ -949,6 +1154,7 @@ function toggleAdv(){
 function kidStep(d){
   const i=document.getElementById('w_kids');
   i.value=Math.max(0,(parseFloat(i.value)||0)+d);
+  scriptHint[7]=1; /* степпер тронут → подсказка у п.7, отметку ставит менеджер кликом по рейке (ревью 22.07) */
   calc();
 }
 /* вкладки убраны (правка заказчика 15.07 «лишний клик»): «Действия» всегда развёрнуты под расчётом */
@@ -1003,7 +1209,7 @@ function updateSendUI(){
   }
   btn.className='sbtn'; btn.disabled=false;
   btn.textContent=sentAt?'✈ Отправить снова':(kiError?'✈ Отправить со слов':'✈ Отправить презентацию клиенту');
-  if(sentAt){ st.className='sstat sent'; st.textContent='✓ отправлено '+sentAt; }
+  if(sentAt){ st.className='sstat sent'; st.textContent='✓ отправлено '+sentAt+(nextStepDone()?'':' · ⚠ звонок не закрыт: нет шага с датой (п.16 рейки)'); } /* замок Марченко: презентация ушла, а «что дальше + когда» не зафиксировано */
   else{ st.className='sstat none'; st.textContent='ещё не отправлено'; }
   copy.disabled=false;
   /* отправлено со слов → подсветить догрузку КИ: та же ссылка станет точной */
@@ -1062,6 +1268,7 @@ function sendPresentation(){
   const kiAsk=!kiLoaded&&!document.getElementById('oc_ki').checked;
   t.innerHTML='✈ Презентация ('+last.route+') отправлена клиенту'+(kiLoaded?' — точные числа по КИ.':' — числа со слов, уточним по КИ.'+(kiAsk?' Договорились о запросе? <a href="#" onclick="event.preventDefault();showKiPane(true)" style="color:#0B5540;font-weight:700">Отметьте в «Документах»</a>.':''));
   setTimeout(()=>{t.style.display='none';},kiAsk?10000:6000);
+  updateScriptRail(); /* замок п.16 краснеет сразу после отправки, не дожидаясь следующего ввода */
 }
 /* ── рассрочка и допродукты (решение заказчика 20.07): дата/срок графика + адвокатский запрет 20 000/25 000 + сохранение 60 000/объект ── */
 const ADVOCATE_ONCE=20000, ADVOCATE_RASS=25000, ADVOCATE_RASS_FIRST=5000, KEEP_PER_OBJ=60000; /* рассрочка запрета = 5 000 первым платежом + 20 000 частями (заказчик 20.07) */
@@ -1129,7 +1336,7 @@ function ndateUI(){
   const on=document.getElementById('w_ndate').checked;
   document.getElementById('w_payDate').disabled=on; document.getElementById('w_payDay').disabled=on;
   if(on){document.getElementById('w_payDate').value='';document.getElementById('w_payDay').value='';}
-  rassLine(); updateSendUI();
+  rassLine(); nextStepUI(); /* nd чистит дату платежа → авто-зачёт п.16 снимается честно */
 }
 function rassParams(){
   const p={};
@@ -1237,6 +1444,7 @@ document.querySelectorAll('#w_prod button').forEach(b=>b.addEventListener('click
   document.querySelectorAll('#w_prod button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on'); prod=b.dataset.p;
   if(kiPaneOn) showKiPane(false); /* выбор продукта = работа с расчётом: вкладка «КИ» уступает место */
+  scriptHint[12]=1; /* поле тронуто → ПОДСКАЗКА у п.12 (не отметка: клик по сегменту бывает и для сравнения расчёта — фабриковать отметку нельзя, ревью 22.07) */
   calc();
 }));
 /* просрочки: влияет только на сценарии п.5 юр. заключения (payload overdue), не на расчёт */
@@ -1250,6 +1458,7 @@ document.getElementById('w_paynow').addEventListener('input',()=>{payFromKi=fals
 document.querySelectorAll('#w_ovd button').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('#w_ovd button').forEach(x=>x.classList.remove('on'));
   b.classList.add('on');
+  scriptHint[4]=1; updateScriptRail(); /* тогл тронут → подсказка у п.4, отметку ставит менеджер кликом по рейке (ревью 22.07) */
 }));
 document.getElementById('w_debt').addEventListener('input',()=>{ if(kiLoaded) dropKi(); }); /* до calc — чтобы бейдж обновился сразу */
 ['w_debt','w_paynow','w_income','w_kids','w_pmSelf','w_pmChild','w_ovrInt','w_due'].forEach(id=>document.getElementById(id).addEventListener('input',calc));

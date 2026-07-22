@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Единый скрипт продаж — SALE 100.0</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Единый скрипт продаж ДоНуля: официальные скрипты МПП (БФЛ+РДГ) + метод лучшего менеджера + воронка v2 + презентация по страницам. Полную сумму не называем — «13 500 потянете?».">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2E9; --card:#FFFFFF; --ink:#191713; --muted:#615B50;
+    --green:#0E5C46; --green-deep:#0A3D2E; --amber:#C2790F; --red:#9A2D22;
+    --grey:#7C756A; --gold:#C99A33;
+    --line:rgba(25,23,19,.12);
+    --say-bg:#FBF8F0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:"Golos Text",sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+  h1,h2,h3,.num,.kicker,.tag{font-family:"Unbounded",sans-serif}
+  a{color:inherit}
+
+  header{padding:60px 0 22px}
+  .kicker{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);font-weight:700}
+  h1{font-size:clamp(34px,6.5vw,60px);line-height:1;font-weight:800;letter-spacing:-.02em;margin:14px 0 0}
+  h1 .hl{color:var(--green)}
+  .lead{font-size:clamp(16px,2.3vw,20px);color:var(--muted);max-width:780px;margin:18px 0 0;font-weight:500}
+  .promise{margin:24px 0 0;padding:20px 24px;background:var(--green-deep);color:#F6F2E9;border-radius:16px;font-size:clamp(15px,2.2vw,19px);font-weight:500;line-height:1.45}
+  .promise b{color:#F4C775;font-weight:600}
+
+  .idx{display:flex;flex-wrap:wrap;gap:7px;margin:24px 0 6px}
+  .idx a{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:6px 11px;font-size:12.5px;font-weight:500;text-decoration:none;color:var(--muted);transition:.15s}
+  .idx a:hover{border-color:var(--green);color:var(--green)}
+  .idx a b{font-family:"Unbounded";font-weight:700;color:var(--ink)}
+
+  h2.sec{font-size:clamp(22px,3.4vw,30px);font-weight:800;letter-spacing:-.01em;margin:52px 0 4px}
+  .sub{color:var(--muted);font-size:15.5px;margin-bottom:18px;max-width:780px}
+
+  .step{position:relative;display:grid;grid-template-columns:48px 1fr;gap:16px;padding:12px 0}
+  .step::before{content:"";position:absolute;left:23px;top:52px;bottom:-12px;width:2px;background:var(--line)}
+  .step:last-child::before{display:none}
+  .sdot{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-family:"Unbounded";font-weight:800;font-size:18px;color:#fff;z-index:1}
+  .d-neu{background:var(--grey)} .d-amber{background:var(--amber)} .d-green{background:var(--green)} .d-win{background:var(--green-deep)}
+  .sbody{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:16px 18px}
+  .sbody .st{font-family:"Unbounded";font-weight:700;font-size:17px;line-height:1.2}
+  .sbody .goal{color:var(--muted);font-size:14px;margin-top:3px}
+  .say{margin-top:11px;background:var(--say-bg);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:0 11px 11px 0;padding:11px 14px}
+  .say .lbl{font-family:"Unbounded";font-weight:700;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--green)}
+  .say p{font-size:15px;margin-top:5px;color:var(--ink)}
+  .say p + p{margin-top:8px}
+  .say p::before{content:"«"} .say p::after{content:"»"}
+  .why{font-size:13.5px;color:var(--muted);margin-top:10px}
+  .why b{color:var(--ink);font-weight:600}
+
+  .flag{margin-top:11px;border-radius:11px;padding:11px 14px;background:#FBEDEB;border:1px solid rgba(154,45,34,.25);font-size:13.5px}
+  .flag .ft{font-family:"Unbounded";font-weight:700;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:7px}
+  .badge{display:inline-block;font-family:"Unbounded";font-weight:700;font-size:10.5px;letter-spacing:.04em;padding:2px 7px;border-radius:6px;color:#fff;vertical-align:middle}
+  .b-no{background:var(--red)} .b-yes{background:var(--green)}
+  .flag .ln{margin-top:7px;line-height:1.5}
+  .flag .ln b{color:var(--ink)}
+
+  /* ветвление */
+  .branch{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:11px}
+  @media (max-width:720px){.branch{grid-template-columns:1fr}}
+  .br{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .br b{font-family:"Unbounded";font-weight:700;font-size:12px;color:var(--amber);display:block;margin-bottom:6px}
+  .br p{font-size:13px;color:var(--muted)}
+  .br p i{font-style:normal;color:var(--ink)}
+
+  /* презентация — таблица страниц */
+  .pres{margin-top:12px;background:var(--card);border:2px solid var(--gold);border-radius:16px;padding:17px 19px}
+  .pres .pt{font-family:"Unbounded";font-weight:700;font-size:14px;color:#7a5b12}
+  .prow{display:grid;grid-template-columns:30px 150px 1fr;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px;align-items:start}
+  .prow:first-of-type{border-top:none;margin-top:8px}
+  .prow .pn{width:26px;height:26px;border-radius:8px;background:var(--gold);color:#3a2a06;display:flex;align-items:center;justify-content:center;font-family:"Unbounded";font-weight:800;font-size:12px}
+  .prow .pg{font-weight:700}
+  .prow .ps{color:var(--muted)}
+  .prow .ps i{font-style:normal;color:var(--ink)}
+  @media (max-width:640px){.prow{grid-template-columns:26px 1fr}.prow .ps{grid-column:2}}
+
+  /* diagnostic checklist */
+  .checkgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+  @media (max-width:720px){.checkgrid{grid-template-columns:1fr}}
+  .cgroup{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .cgroup h4{font-family:"Unbounded";font-weight:700;font-size:14px;color:var(--green);margin-bottom:9px}
+  .citem{display:flex;gap:9px;align-items:flex-start;padding:5px 0;font-size:14px;cursor:pointer;user-select:none}
+  .citem input{margin-top:3px;width:16px;height:16px;accent-color:var(--green);flex:none}
+  .citem.done span{color:var(--grey);text-decoration:line-through}
+  .ccount{font-size:13px;color:var(--muted);margin-top:10px}
+  .ccount b{font-family:"Unbounded";color:var(--green)}
+  .citem .gwhy{display:block;color:var(--muted);font-size:12.5px;font-weight:400;margin-top:2px}
+
+  /* objections accordion */
+  .obj{background:var(--card);border:1px solid var(--line);border-radius:13px;margin-top:10px;overflow:hidden}
+  .obj > button{width:100%;text-align:left;background:none;border:none;cursor:pointer;padding:15px 18px;display:flex;align-items:center;gap:12px;font-family:inherit;color:inherit}
+  .obj .onum{font-family:"Unbounded";font-weight:800;font-size:14px;color:var(--amber);flex:none;width:26px}
+  .obj .otitle{font-weight:600;font-size:15.5px;flex:1}
+  .obj .chev{transition:.2s;color:var(--muted);flex:none}
+  .obj.open .chev{transform:rotate(90deg)}
+  .obj .panel{display:none;padding:0 18px 16px 56px}
+  .obj.open .panel{display:block}
+  .obj .said{font-size:14px;color:var(--muted);font-style:italic;margin-bottom:10px}
+  .obj .ans{background:var(--say-bg);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:0 10px 10px 0;padding:10px 13px;font-size:14.5px;margin-bottom:7px}
+  .obj .ans::before{content:"«"} .obj .ans::after{content:"»"}
+  .obj .ow{font-size:13px;color:var(--muted);margin-top:8px}
+  .obj .ow b{color:var(--ink)}
+  .obj .stop{margin-top:9px;font-size:13px;color:var(--red)}
+
+  .stopbox{background:#FBEDEB;border:1px solid rgba(154,45,34,.28);border-radius:16px;padding:20px 22px;margin-top:8px}
+  .stopbox h3{font-family:"Unbounded";font-weight:700;font-size:16px;color:var(--red);margin-bottom:4px}
+  .stopbox .si{display:grid;grid-template-columns:1fr 1fr;gap:9px 18px;margin-top:14px}
+  @media (max-width:720px){.stopbox .si{grid-template-columns:1fr}}
+  .stopbox .sr{font-size:13.5px;border-top:1px solid rgba(154,45,34,.18);padding-top:8px}
+  .stopbox .sr .no{color:var(--red);font-weight:600}
+  .stopbox .sr .yes{color:var(--green);font-weight:600;display:block;margin-top:3px}
+
+  footer{margin:64px 0 50px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:13.5px}
+  footer b{font-family:"Unbounded";color:var(--ink);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">Единый скрипт продаж · канон v2</div>
+    <h1>Один скрипт — <span class="hl">от «алло» до денег</span></h1>
+    <p class="lead">Собран из трёх источников: официальные скрипты МПП (БФЛ + РДГ), метод лучшего менеджера (251 звонок) и наша воронка с презентацией. Красные линии старых скриптов заменены честными формулировками — они продают не слабее.</p>
+    <div class="promise">Три правила денег: <b>полную сумму не называем</b> — считаем от долга клиента и спрашиваем «13 500 — потянете?» · <b>договор и первый платёж — сегодня</b> («внесите сколько есть — 1 000, 3 000 — пойдёт в зачёт») · <b>все страницы презентации проговариваем голосом</b>, клиент не листает сам.</div>
+
+    <div class="idx">
+      <a href="#howto"><b>◈</b> Как работать</a>
+      <a href="#ai"><b>⚖</b> Оценка ИИ</a>
+      <a href="#checklist"><b>✓</b> Чек-лист гейта</a>
+      <a href="#s1"><b>1</b> Приветствие</a>
+      <a href="#s2"><b>2</b> Диагностика</a>
+      <a href="#s3"><b>3</b> Развилка</a>
+      <a href="#s4"><b>4</b> Процесс</a>
+      <a href="#s5"><b>5</b> Компания</a>
+      <a href="#s6"><b>6</b> Цена</a>
+      <a href="#s7"><b>7</b> Презентация</a>
+      <a href="#s8"><b>8</b> Подпись + SIM</a>
+      <a href="#s9"><b>9</b> Онбординг</a>
+      <a href="#s10"><b>10</b> Удержание</a>
+    </div>
+  </header>
+
+  <h2 class="sec" id="howto">Как работать со скриптом</h2>
+  <p class="sub">Структура всегда единая, подача — под клиента. Три вещи держим в голове: время, пять сообщений и механику доверия.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:6px" class="howto-grid">
+    <div class="cgroup">
+      <h4>⏱ Хронометраж · ~30 минут</h4>
+      <div style="font-size:13.5px;line-height:1.75">
+        Приветствие + история — <b>3–4 мин</b> (он говорит, ты слушаешь)<br>
+        Диагностика — <b>8–10</b> (гейт: пункты 2–11 быстрее не собрать)<br>
+        Оцифровка + развилка — <b>~3</b><br>
+        Процесс + компания — <b>5–6</b><br>
+        Цена + лестница — <b>4–5</b><br>
+        Презентация + подпись — <b>5–8</b><br>
+        Закрытие + онбординг — <b>2–3</b>
+      </div>
+      <div style="margin-top:9px;font-size:12.5px;color:var(--red);line-height:1.5"><b>Флаги:</b> короче 15 мин — диагностика не пройдена (гейт не набран); дольше 50 — ушёл в юрконсультацию. Дольше ≠ лучше: у оплативших медиана 6,5 касаний, у незакрытых — 9.</div>
+      <div style="margin-top:7px;font-size:12.5px;color:var(--muted)"><b>Речь:</b> говоришь ты ≤45% времени · монолог ≤1:30 · вопросов за разговор 11–14. Дожимной звонок — отдельный жанр: 5–10 мин, одна цель.</div>
+    </div>
+    <div class="cgroup">
+      <h4>🎯 Пять сообщений — остальное обвес</h4>
+      <div style="font-size:13.5px;line-height:1.65">
+        <b>1.</b> «Ты не виноват и ты не один» — снятие вины первым делом, до цифр.<br>
+        <b>2.</b> Оцифрованная боль: «платите 41 000, из них 35 500 — проценты» — не «большая переплата».<br>
+        <b>3.</b> Выход законный и понятный: этапы по-простому + первая победа («суд принял дело — банки не звонят»).<br>
+        <b>4.</b> Шаг посильный: не 189 000, а «13 500 — потянете?» и «начнём сегодня с 1 000 в зачёт».<br>
+        <b>5.</b> Мы уверены и честны: даём 100% — берём только проходные дела, возврат закреплён в договоре; риски и платежи говорим прямо.
+      </div>
+    </div>
+    <div class="cgroup">
+      <h4>🤝 Механика доверия</h4>
+      <div style="font-size:13.5px;line-height:1.65">
+        <b>Первые 3 минуты решают:</b> по имени-отчеству, «моя задача — дать решение», «хорошо?» — и молчать: клиент, рассказывая, сам продаёт себе решение.<br>
+        <b>Человеческие вопросы</b> среди анкеты: «а как справлялись-то? кто помогает?» — их ИИ засчитывает в эмпатию.<br>
+        <b>Резюме его словами</b> перед презентацией — эффект «меня услышали» сильнее аргументов; ИИ засчитывает в эмпатию.<br>
+        <b>Присоединяйся, не спорь:</b> «понимаю вас… и смотрите на цифры».<br>
+        <b>Честность о неудобном</b> — последствия, госплатежи и деньги на жизнь говорим прямо: наш «100%» подкреплён отбором дел и договором, а не воздухом.<br>
+        <b>Цепочка маленьких «да»:</b> каждый блок кончается вопросом — к цене клиент уже десяток раз сказал «да».<br>
+        <b>Мостик-переход:</b> новый блок открывается вопросом-разрешением — «тогда давайте расскажу, как пройдёт процедура и сколько стоит, договорились?».<br>
+        <b>Инициатива не отдаётся:</b> любой ответ клиента заканчивается твоим вопросом или шагом с датой.
+      </div>
+    </div>
+  </div>
+  <style>@media (max-width:860px){.howto-grid{grid-template-columns:1fr !important}}</style>
+
+  <h2 class="sec" id="ai">Как ИИ оценивает звонок — правила игры</h2>
+  <p class="sub">ИИ слушает запись каждого разговора и выдаёт два независимых вердикта: «состоялась ли консультация» (гейт) и «как ты продавал» (балл 0–100). Понимаешь эти правила — понимаешь, за что тебе платят. Полная спецификация оценки (для менеджера и разработчика) — на <b style="color:var(--green)">отдельной странице</b> (внутренний документ).</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px" class="ai-grid">
+    <div class="cgroup">
+      <h4>① Гейт: узнал ли ты клиента</h4>
+      <div style="font-size:13.5px;line-height:1.65">
+        16 пунктов — всё, что нельзя не проговорить (<b>чек-лист ниже, у каждого написано, зачем</b>). Проговорил <b>все 16</b> → консультация состоялась: лид закреплён за тобой, занимает слот, идут окна ответственности. Пропустил хотя бы один → задача «добери диагностику»; без денег и договора лид НЕ твой (взял частичку или подписал договор — лид твой в любом случае: деньги сильнее гейта, см. исходы ниже). Недобранный лид висит в «В работе» на окнах статуса — не добрал → общий пул, без штрафа (спрос за качество звонка). В «Принимает решение» переводит только полный гейт — это делает система по записи, руками статус не ставится.<br>
+        <span style="color:var(--muted)">«Супруг в курсе?» у одинокого клиента — авто-зачёт, обрыв связи гейт не фейлит. ⚠ П.9 «имущество клиента и супруга» и п.10 «сделки за 3 года» — критичные для суда: ИИ требует их первыми.</span>
+      </div>
+    </div>
+    <div class="cgroup">
+      <h4>② Оценка: как ты продавал — 0–100</h4>
+      <div style="font-size:13.5px;line-height:1.65">
+        <b>Эмпатия 20</b> — как со своим близким · <b>возражения 25</b> — не сдался с первого «нет» · <b>лестница денег 40</b> — оцифровал боль → «13 500, потянете?» → дата + минималка от 1 000 → закрыл на действие · <b>шаг с датой 15</b>.<br>
+        <span style="color:var(--muted)"><b>65+</b> — без штрафа, даже если клиент не купил · <b>ниже 65</b> — слабый звонок, рейтинг вниз · <b>90+</b> — идеал. <b>Плохой звонок = гейт не собран или балл ниже 90 — сжигает одну из <b>5 жизней</b> ❤️; кончились жизни → стоп новых лидов + экзамен у РОПа</b> (сдал — жизни снова 5, кран открыт; активных лидов ведёшь как обычно). Хороший звонок — гейт ✓ и 90+ — <b>возвращает одну жизнь</b> (не все пять): один хороший звонок всё не прощает, работай ровно. <b>Жёсткий отказ клиента («не звоните больше») — не твоя вина: жизнь не сгорает</b>, ИИ подтверждает отказ цитатой, окно даст закрыть лид с причиной; но дожим после отказа — флаг РОПу. <b>Консультация в несколько звонков — нормально</b>: клиент занят → договорись о продолжении с датой и временем; куски вердикт не получают (окно покажет «что добрать»), оценка и жизнь — одна, по итогу всей консультации. <b>Но копить недобранных нельзя</b>: одновременно ≤10 (при 10/10 новые не падают), а через 3 дня недобранный сам уйдёт другому со всем собранным — и финальный вердикт по консультации догонит тебя. Комплаенс — поверх всего: 9 запретных фраз (стоп-лист внизу), сейчас режим «фиксируем и учим», дата включения ×0 будет объявлена заранее.</span>
+      </div>
+    </div>
+  </div>
+  <style>@media (max-width:860px){.ai-grid{grid-template-columns:1fr !important}}</style>
+
+  <div class="pres" style="margin-top:12px;border-color:var(--green)">
+    <div class="pt" style="color:var(--green-deep)">ЧЕТЫРЕ ИСХОДА ЗВОНКА — ЧТО БУДЕТ В КАЖДОМ</div>
+    <div class="prow"><span class="pn" style="background:var(--green)">✓</span><span class="pg">Диагностика собрана + продал</span><span class="ps">Идеал: лид твой, балл высокий, анкета полная → передача в сопровождение сегодня (шаг 9). «Поздравляю с началом процедуры» — только после прихода денег.</span></div>
+    <div class="prow"><span class="pn" style="background:var(--green)">→</span><span class="pg">Собрана, но не продал</span><span class="ps">Нормальный исход: лид закреплён за тобой, <i>65+ идёт без штрафа даже без продажи</i> — дожимаешь по карте касаний — следующий шаг движок ставит задачей в «Задачи сегодня».</span></div>
+    <div class="prow"><span class="pn" style="background:var(--grey)">✕</span><span class="pg">Не собрана и не продал</span><span class="ps">Консультация НЕ состоялась: лид не закрепляется, балл низкий — без диагностики лестница денег не набирается (нечем оцифровать боль). Задача: доведи диагностику повторным звонком, пока лид не ушёл.</span></div>
+    <div class="prow"><span class="pn" style="background:var(--amber)">⚠</span><span class="pg">Не собрана, но продал</span><span class="ps">Деньги засчитаны, лид твой — продажу никто не отменяет. Но: <i>«нет анкеты — нет передачи»</i> — amo механически не пропустит передачу юристам без полной анкеты, диагностику доделываешь следующим звонком. Несобранные риски (сделки, залоги, 159) — мина: всплывут у юриста → расторжение, а это минус твой процент расторжений и вторая половина выплаты (она приходит со 2-го платежа клиента).</span></div>
+  </div>
+
+  <!-- DIAGNOSTIC CHECKLIST -->
+  <h2 class="sec">Диагностический чек-лист</h2>
+  <p class="sub">Все 16 пунктов гейта — в порядке звонка, у каждого написано, зачем он. Гейт пройден, когда проговорены все 16 (неприменимое — авто-зачёт, обрыв связи не фейлит). ⚠ 9 и 10 — критичные для суда: не спрошены — ИИ требует их первыми. Реплики и порядок — в шагах ниже.</p>
+  <div class="checkgrid" id="checklist">
+    <div class="cgroup">
+      <h4>История, деньги, имущество · 1–9</h4>
+      <label class="citem"><input type="checkbox"><span><b>1 · Причина и боль.</b> «Что за история с кредитами, почему решили обратиться?»<span class="gwhy">Шаг 1. Боль и мотивация — на них строятся резюме, картинка будущего и вся презентация.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>2 · Общий долг.</b> «Какая общая сумма долга сейчас?»<span class="gwhy">Размер задачи: подходит ли процедура и какая — списание или реструктуризация.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>3 · Продукты долга.</b> «Что именно за долги — потребкредит, займ МФО, кредитная карта, расписка?»<span class="gwhy">Не важно, какие банки, — важен тип продукта: займы МФО и карты с вечными процентами — сильнейший довод за списание; расписка физлицу тоже входит в процедуру. Имена кредиторов юрист возьмёт из КИ.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>4 · Просрочка.</b> «Просрочки есть? Как давно?»<span class="gwhy">Главная развилка анкеты: нет / 1–3 мес / 3+ — от неё зависят и вопросы, и оффер (у «чистого» болит платёж, у просроченного — приставы).</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>5 · Платёж в месяц.</b> «Сколько платите в месяц по всем обязательствам?»<span class="gwhy">Сырьё оцифровки боли: «платите 41 000, из них 35 500 — проценты» — без этой цифры лестница денег не начинается.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>6 · Доход и занятость.</b> «Какой официальный доход? Как справляетесь?»<span class="gwhy">Квалификация + выбор продукта (стабильный доход — аргумент РДГ) + расчёт защищённых денег.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>7 · Семья и иждивенцы.</b> «Официальный брак? Несовершеннолетние дети?»<span class="gwhy">Дети увеличивают защищённый минимум; брак тянет имущество супруга в анализ дела.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>8 · ИП и ООО.</b> «ИП сейчас или раньше? Гендиректор, учредитель ООО, доли?»<span class="gwhy">Юр-мина уровня сделок: действующее ИП прекращается при банкротстве, доля в ООО попадает в конкурсную массу. Узнать до денег; поле обязательно в анкете передачи.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>9 · Имущество и залоги — клиента и супруга ⚠</b> «Что оформлено на вас и на супруга — включая оружие, лодки, технику? Ипотека — на ком?»<span class="gwhy">Критично для суда: что попадает в конкурсную массу и что защищаем — включая совместно нажитое. Пропустил — юрист найдёт позже, клиент испугается → расторжение.</span></span></label>
+    </div>
+    <div class="cgroup">
+      <h4>Риски, условия и сделка · 10–16</h4>
+      <label class="citem"><input type="checkbox"><span><b>10 · Сделки за 3 года ⚠</b> «Продавали, дарили имущество за последние 3 года? Кому, за сколько?»<span class="gwhy">Критично для суда: оспоримые сделки — главный юридический сюрприз и мина расторжения.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>11 · Супруг и близкие в курсе.</b> «Супруга знает, что рассматриваете процедуру? Как относится?»<span class="gwhy">Карта ЛПР: кто может сказать «нет» за спиной — подключить к разговору. Клиент одинокий — авто-зачёт.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>12 · Желаемый исход.</b> «Вам списать полностью или платить комфортно?»<span class="gwhy">Клиент сам называет продукт — оффер шага 3 звучит его словами, и на него уже сказано «да».</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>13 · Конкуренты.</b> «Уже слышали о процедуре? Где-то консультировались? Почему не заключили?»<span class="gwhy">Шаг 3. Карта настоящего барьера и чужого оффера — отстройка сейчас, а не вслепую на дожиме.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>14 · Деньги на жизнь в процедуре.</b> БФЛ: прожиточный минимум по закону (+ дети, лекарства, аренда). РДГ: на руки 50 000 ₽/мес, всё сверху копится и возвращается при утверждении плана.<span class="gwhy">Шаг 4. Страх «останусь без денег» — тихий убийца сделки: не проговорил — клиент передумает после звонка.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>15 · Госплатежи — отдельно.</b> «50 000 ₽ пошлин сверх услуги: 25 000 суд + 15 000 оповещение + 10 000 почта».<span class="gwhy">Шаг 6, «листком»; клиент видит их и на странице презентации. Не проговорил — «вы мне не говорили» = расторжение.</span></span></label>
+      <label class="citem"><input type="checkbox"><span><b>16 · Чем закончился звонок — конкретика «что дальше + когда».</b> Отдельно проговаривать не надо, если дата уже прозвучала: дата платежа/добора из шага 6 («фиксирую на 10-е») — уже зачёт.<span class="gwhy">Анти-слив: у любого исхода звонка есть якорь будущего. Зачёт: дата платежа или добора · «звонок-презентация, [дата] в [время]» (если не смог открыть) · созвон после «подумаю» с датой и временем. Незачёт: «созвонимся на днях», «наберу как-нибудь». Он же даёт +15 к оценке.</span></span></label>
+    </div>
+  </div>
+  <div class="ccount" id="ccount">Отмечено <b>0</b> из <span id="ctotal">0</span></div>
+
+  <h2 class="sec">Звонок по шагам</h2>
+  <p class="sub">10 шагов. ИИ слышит каждый разговор: гейт «консультация состоялась» = все 16 пунктов чек-листа (выше); оценку делают эмпатия (20) · возражения (25) · лестница денег (40) · шаг с датой (15).</p>
+
+  <!-- 1 -->
+  <div class="step" id="s1">
+    <div class="sdot d-neu">1</div>
+    <div class="sbody">
+      <div class="st">Приветствие — тёплая передача + разрешение на вопросы <span style="font-family:'Golos Text';font-size:11px;font-weight:700;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:2px 8px;vertical-align:2px;white-space:nowrap">⏱ 3–4 мин</span></div>
+      <div class="goal">Цель: клиент понимает, откуда звонок, дважды говорит «да» до первого вопроса — и сам рассказывает свою боль. Говори как со своим близким — это первое, что оценивает ИИ.</div>
+      <div class="say"><div class="lbl">Говорим — три реплики, после каждой пауза под «да»</div>
+        <p>Добрый день, Иван Иванович?</p>
+        <p>Меня зовут [Имя Отчество], финансовый эксперт компании ДоНуля. Мой коллега [Имя] передал мне вашу заявку — разобраться с кредитной нагрузкой: списать долги полностью или снизить платёж. Верно?</p>
+        <p>Тогда задам несколько вопросов, полностью проанализирую вашу проблему и дам пошаговое решение. И не переживайте: мы каждый день сталкиваемся с подобными случаями, вашей вины тут нет — зарплаты не растут, кредиты дорогие. Хорошо?</p>
+        <p>Расскажите, что у вас за история с кредитами, почему решили обратиться? Как вообще получилось, что такая ситуация сложилась?</p>
+      </div>
+      <div class="say"><div class="lbl">Клиент закрыт, отвечает односложно — помогаем раскрыть боль</div>
+        <p>Иван Иванович, наверное, что-то случилось, раз стало тяжело оплачивать кредиты? …Вам сейчас в целом тяжело платить — или пока справляетесь? …А сами уже пытались как-то решить этот вопрос?</p>
+      </div>
+      <div class="why"><b>Почему работает:</b> «коллега передал вашу заявку» убирает «кто вы и откуда мой номер» — это тёплая передача, а не холодный обзвон. «Верно?» и «Хорошо?» задают темп и берут разрешение на вопросы: клиент уже дважды сказал «да» и готов отвечать, а не обороняться. Дальше слушаем не перебивая: клиент, рассказывая историю, сам продаёт себе решение.</div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="step" id="s2">
+    <div class="sdot d-neu">2</div>
+    <div class="sbody">
+      <div class="st">Диагностика — анкета с ветвлением по просрочке <span style="font-family:'Golos Text';font-size:11px;font-weight:700;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:2px 8px;vertical-align:2px;white-space:nowrap">⏱ 8–10 мин</span></div>
+      <div class="goal">Цель: пункты гейта 2–11 (полный чек-лист — в <a href="#checklist" style="color:var(--green)">«Правилах игры»</a> выше). Ключевая развилка — просрочка: от неё зависят и вопросы, и оффер.</div>
+      <div class="say"><div class="lbl">База</div>
+        <p>Какая общая сумма долга на текущий момент? Что именно за долги — потребкредиты, займы МФО, кредитные карты, может, расписки? Как давно взяты? Есть ли просрочки — и как давно начались?</p>
+      </div>
+      <div class="branch">
+        <div class="br"><b>ПРОСРОЧЕК НЕТ</b><p>«Когда ближайший платёж? Какой <i>ежемесячный платёж по всем обязательствам</i>?»</p></div>
+        <div class="br"><b>ПРОСРОЧКА 1–3 МЕС</b><p>«Сколько банки требуют, чтобы вернуться в график?» → «то есть нужно заплатить <i>[сумма]</i>, просто чтобы платить дальше?» · «Коллекторы беспокоят?»</p></div>
+        <div class="br"><b>ПРОСРОЧКА 3+ МЕС</b><p>«Приставы уже арестовали зарплатную карту? Имущество приходили описывать?»</p></div>
+      </div>
+      <div class="say"><div class="lbl">Оцифровка боли — прямо в анкете (калькулятор)</div>
+        <p>Иван Иванович, получается: исходя из вашего платежа и срока, вернуть кредиторам придётся минимум [платёж × месяцы] со всеми процентами — а не те [долг], что вы занимали. Это же целое состояние — можно квартиру или машину купить! И кредиторы требуют это с вас. Вы бы хотели оставить эти деньги себе?</p>
+      </div>
+      <div class="say"><div class="lbl">Дальше по чек-листу</div>
+        <p>Официальный брак? Несовершеннолетние дети? ИП, ООО открывали? Какой официальный доход? …А как справляетесь-то? Кто-то помогает? Сделки с имуществом за последние 3 года были? Что на вас оформлено — включая оружие, лодки, технику? Имущество супруги, приобретённое в браке? Ипотека?</p>
+      </div>
+      <div class="say"><div class="lbl">Супруг и близкие — прямо в диагностике</div>
+        <p>Подскажите, а супруга знает, что вы рассматриваете вариант — пройти процедуру? Как относится к этому решению?</p>
+      </div>
+      <div class="say"><div class="lbl">Резюме + картинка будущего</div>
+        <p>Иван Иванович, ситуацию понял: у вас [резюме — давим на боли]. Вы же понимаете: если сейчас вопрос не решать, то [картинка: аресты, проценты растут, из ямы не выбраться]. Хотите решить?</p>
+      </div>
+      <div class="why"><b>Почему работает:</b> ветвление по просрочке попадает в реальную боль (у «чистого» клиента болит платёж, у просроченного — приставы); оцифровка «целое состояние» делает переплату осязаемой; «как справляетесь-то?» — человеческий вопрос, эмпатия в зачёт. Вопрос про супруга — в диагностике, а не в конце: ЛПР вскрывается сразу, и «надо посоветоваться» не станет сюрпризом (то же, если звучит «мама/папа/родственники помогают»).</div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="step" id="s3">
+    <div class="sdot d-amber">3</div>
+    <div class="sbody">
+      <div class="st">Развилка продукта: списание (БФЛ) или реструктуризация (РДГ) <span style="font-family:'Golos Text';font-size:11px;font-weight:700;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:2px 8px;vertical-align:2px;white-space:nowrap">⏱ ~3 мин с оцифровкой</span></div>
+      <div class="goal">Цель: по итогам диагностики выбрать продукт и дать оффер-вопрос, на который клиент отвечает «да».</div>
+      <div class="branch" style="grid-template-columns:1fr 1fr">
+        <div class="br"><b>БФЛ — СПИСАНИЕ (базовый)</b><p>Платить нечем / долг непосилен / доход низкий. <i>«Вас устроит вариант: уже сегодня вы свободны от всех платежей по кредитам на законных основаниях, а через 10–12 месяцев долги списываются полностью?»</i> При просрочке 3+: «…и в ближайшие месяцы снимаем аресты — приставы не смогут с вами взаимодействовать».</p></div>
+        <div class="br"><b>РДГ — РЕСТРУКТУРИЗАЦИЯ</b><p>Есть стабильный доход и имущество, которым рисковать нельзя, или клиенту важно «не банкрот». <i>«Вас устроит: объединяем все кредиты в один, убираем проценты — платите только сам долг, комфортным платежом, без статуса банкрота?»</i> Плюс передышка: <i>«до утверждения плана — как правило, около полугода — по старому графику вы уже не платите: деньги остаются на жизнь и процедуру»</i>.</p></div>
+      </div>
+      <div class="say"><div class="lbl">Обязательно, до перехода к процедуре, — конкуренты</div>
+        <p>А вы уже что-то слышали о процедуре? Может, где-то уже консультировались?</p>
+        <p>А что не понравилось? Почему не заключили договор?</p>
+      </div>
+      <div class="say"><div class="lbl">Если спросят про МФЦ (бесплатное банкротство)</div>
+        <p>Есть два варианта списания: через МФЦ и через Арбитражный суд. В вашей ситуации МФЦ не подойдёт, потому что [долг выше лимита / есть доход / есть имущество / приставы не закрыли производство] — упрощённая процедура для других случаев. Ваш путь — стандартная процедура через суд.</p>
+      </div>
+      <div class="why"><b>Почему работает:</b> оффер задан вопросом — клиент говорит «да» до цены. Продукт подбирается под клиента, а не наоборот (приём Марченко: «банкротство вам не подойдёт — у вас имущество»). «Почему не заключили договор?» — карта настоящего барьера: возражение и чужой оффер вскрываются сейчас, а не всплывают на дожиме.</div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="step" id="s4">
+    <div class="sdot d-amber">4</div>
+    <div class="sbody">
+      <div class="st">Процесс — карта, «первая победа», честные последствия <span style="font-family:'Golos Text';font-size:11px;font-weight:700;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:2px 8px;vertical-align:2px;white-space:nowrap">⏱ 5–6 мин с компанией</span></div>
+      <div class="goal">Цель: снять страх неизвестности. Длинную процедуру разбить на понятные шаги, встроить раннюю победу.</div>
+      <div class="say"><div class="lbl">Говорим (костяк для обоих продуктов)</div>
+        <p>Иван Иванович, тогда давайте расскажу, как пройдёт процедура и сколько это будет стоить. Договорились?</p>
+        <p>Если сегодня входите в процедуру — сразу освобождаетесь от платежей по кредитам на законных основаниях, по статье 213.4. Согласитесь, станет легче, когда деньги, которые уходили банкам, останутся у вас?</p>
+        <p>Расскажу по-простому. Сначала собираем документы — нужно около 40–50, основную часть юрист заказывает сам через Госуслуги, чтобы вы не стояли в очередях. От вас — часть документов, что есть дома: сфотографировать и отправить, на всё будет понятная инструкция.</p>
+        <p>Дальше готовим заявление в Арбитражный суд. Суд заводит дело и даёт номер — и вот тут уже можно выдохнуть: это первая победа! С этого момента банки, коллекторы и кредиторы не имеют права вам звонить и угрожать — они знают, что вы в процедуре. Пени и штрафы приостанавливаются.</p>
+        <p>На судах присутствовать не нужно — интересы представляем мы. Весь процесс займёт примерно 10–12 месяцев.</p>
+      </div>
+      <div class="say"><div class="lbl">Прожиточный минимум (БФЛ) — честно</div>
+        <p>На время процедуры вам по закону положен прожиточный минимум — в среднем около 20 000, по регионам отличается. Плюс учитываются несовершеннолетние дети, лекарства, обучение; при отсутствии своего жилья можно сохранить средства на аренду. Мы со своей стороны постараемся сохранить вам максимум дохода — в рамках закона. Какие суммы реально защитить в вашем случае — разберёт юрист, легально.</p>
+      </div>
+      <div class="say"><div class="lbl">Деньги на жизнь (РДГ) — 50 000 на руки</div>
+        <p>При реструктуризации на руки вам выделяется 50 000 ₽ в месяц. И всё, что сверху, не сгорает — эти деньги копятся и возвращаются вам, когда суд утверждает план.</p>
+      </div>
+      <div class="say"><div class="lbl">Честно о последствиях</div>
+        <p>Теперь честно о последствиях, их немного: руководящие должности нельзя занимать 3 года — это критично для вас? Списать долги повторно можно только через 5 лет — но большинству и одного раза хватает, чтобы начать новую жизнь. Кредиты после процедуры брать можно, кредитная история постепенно восстанавливается. За границу выезжать можно, работать можно.</p>
+      </div>
+      <div class="flag"><div class="ft"><span class="badge b-no">не говорим / говорим</span></div>
+        <div class="ln"><span style="color:var(--red)">✕ Из старых скриптов вычищено: «у нас свои проверенные управляющие — долги точно спишут» (аффилированность ФУ) · «перейдите на полставки / получайте доход неофициально» (совет прятать доход = суд не спишет) · «через 3 месяца аресты сняты, через полгода одобрят ипотеку» (обещание сроков).</span><br>
+        <span style="color:var(--green)">✓ «Финансовый управляющий назначается судом; мы готовим дело так, чтобы прошло без сюрпризов» · «что реально защитить из дохода — разберёт юрист, легально» · «обычно/как правило/примерно» вместо гарантий сроков.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="step" id="s5">
+    <div class="sdot d-green">5</div>
+    <div class="sbody">
+      <div class="st">О компании — доверие проверяемыми фактами</div>
+      <div class="goal">Цель: снять «а вы кто такие» до цены.</div>
+      <div class="say"><div class="lbl">Говорим</div>
+        <p>Пару слов о нас. Компания ДоНуля работает с 2015 года, на счету тысячи завершённых дел — отзывы можете посмотреть на Яндексе и 2ГИС. Товарный знак зарегистрирован в Роспатенте. Есть открытый телеграм-канал на 3 000 клиентов — прямые эфиры юристов и видеоотзывы с номерами дел, которые можно проверить на сайте суда.</p>
+        <p>Прямо сейчас отправлю вам ссылку на канал — подпишитесь, пока мы на связи: там прямые эфиры юристов, разборы дел и видеоотзывы. Подписались? Отлично — всё, что я рассказываю, сможете проверить сами.</p>
+        <p>Для вас будет создан личный кабинет — как на Госуслугах: в реальном времени следите за ходом дела и связываетесь с юристом сопровождения.</p>
+        <p>И главное — гарантия: мы даём 100%, потому что не берём дела, которые не пройдут, — перед договором юристы проверяют все риски. И это не слова, а пункт договора: если долги не списаны — возвращаем деньги.</p>
+      </div>
+      <div class="flag"><div class="ft"><span class="badge b-no">не говорим / говорим</span></div>
+        <div class="ln"><span style="color:var(--red)">✕ «Официально аккредитованы государством» · обещания возврата, которых нет в договоре («вернём в двойном объёме»).</span><br>
+        <span style="color:var(--green)">✓ Проверяемое: год основания, отзывы, Роспатент (товарный знак), номера дел на сайте суда. «100%» — всегда со ссылкой на договор: «не спишем — вернём деньги».</span></div>
+      </div>
+      <div class="why"><b>Подписка на канал (Telegram / MAX) — жёсткий прогрев:</b> даже если звонок не закроется, клиент остаётся в нашем контенте — и каждое следующее касание падает на подогретого. Подписываем каждого, прямо в звонке. Но не превращай в барьер: начал листать канал вместо разговора — мягко верни («посмотрите после звонка, сейчас — про вас»).</div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="step" id="s6">
+    <div class="sdot d-win">6</div>
+    <div class="sbody">
+      <div class="st">Цена — «13 500 потянете?» Полную сумму не называем <span style="font-family:'Golos Text';font-size:11px;font-weight:700;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:2px 8px;vertical-align:2px;white-space:nowrap">⏱ 4–5 мин</span></div>
+      <div class="goal">Цель: клиент соглашается на посильный месячный платёж, а не пугается общей суммы. Это лестница денег — 40% оценки ИИ.</div>
+      <div class="say"><div class="lbl">Сначала госплатежи — «листком», с нормализацией</div>
+        <p>Возьмите бумагу и ручку, сориентирую по цене. Есть государственные платежи и наши услуги. Вы когда-нибудь платили государству пошлины — за паспорт, права, вступление в брак? Тут такие же пошлины: 25 000 — чтобы суд принял заявление, 15 000 — оповещение кредиторов через специальный портал, и 10 000 — почтовые расходы. Оплачиваются не сразу — до трёх месяцев, но чем быстрее, тем быстрее подаём в суд, поэтому важно начать откладывать эти 50 000 с начала процедуры.</p>
+      </div>
+      <div class="say"><div class="lbl">Услуга — от долга клиента, через калькулятор</div>
+        <p>Теперь наши услуги. Смотрите: вы сейчас платите [40 000] в месяц — и [35 000] из них проценты, так из долга не выбраться. Наша услуга — 13 500 в месяц. Потянете?</p>
+      </div>
+      <div class="say"><div class="lbl">«Потяну, но деньги с зарплаты»</div>
+        <p>Хорошо, фиксирую платёж на [10-е]. Но давайте уже начнём работать: договор подпишем сейчас, и внесите сколько есть — достаточно от 1 000 ₽, всё идёт в зачёт по договору. А завтра жду от вас кредитную историю — сформирую документ по рискам, разберём его вместе.</p>
+      </div>
+      <div class="say"><div class="lbl">Полную сумму — только если клиент сам спросил</div>
+        <p>Всего это 14 платежей по 13 500. И есть вариант выгоднее: если оплачиваете разово — 169 000 вместо 189 000, скидка 20 000.</p>
+      </div>
+      <div class="why"><b>Правило:</b> первым числом всегда звучит «13 500 в месяц — потянете?», не 189 000. Полная сумма и VIP 169 000 — только на прямой вопрос клиента или его готовность платить разом. Расчёт боли — в <b style="color:var(--green)">калькуляторе пульта</b>. Дополнительно по ситуации: «Сохранение имущества» 60 000 ₽ ЗА КАЖДЫЙ ОБЪЕКТ (ипотека/авто; несколько объектов — суммируется) — предлагается, когда в диагностике есть залог/ипотека. Продаёшь РДГ — честно проговори заранее: <i>«когда суд утвердит план, по желанию остаётесь с нами на сопровождении — 5 000 в месяц»</i> (опция клиента, в 189 000 не входит; само предложение прозвучит после утверждения плана: «если вы остаётесь с нами — продолжим вас вести за 5 000 в месяц»).</div>
+      <div class="flag"><div class="ft"><span class="badge b-no">внимание</span></div>
+        <div class="ln"><b>Цена — канон, единый для всех:</b> 13 500/мес · 189 000 · VIP 169 000 · госплатежи 50 000 отдельно · допуслуги: Кредитный доктор +1 438/мес · Сохранение имущества 60 000/объект · сопровождение РДГ 5 000/мес (после утверждения плана) · реферальная скидка 10 000 (приведённый заключил договор — в зачёт любого платежа). Другие цифры в звонке = флаг ИИ «не канон» → расхождение «устно ≠ договор» = расторжение.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 ПРЕЗЕНТАЦИЯ -->
+  <div class="step" id="s7">
+    <div class="sdot d-win">7</div>
+    <div class="sbody">
+      <div class="st">Презентация — ведёшь по страницам, не отпуская с линии <span style="font-family:'Golos Text';font-size:11px;font-weight:700;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:2px 8px;vertical-align:2px;white-space:nowrap">⏱ 5–8 мин с подписью</span></div>
+      <div class="goal">Цель: клиент видит условия глазами и подписывает. Отправил ссылку → остаёшься на линии → проговариваешь КАЖДУЮ страницу. Клиент не листает сам.</div>
+      <div class="say"><div class="lbl">Переход</div>
+        <p>Иван Иванович, сейчас направлю вам ссылку — откройте, не вешая трубку. Я проведу вас по каждому экрану: посмотрим условия, договор, и оформим. Открыли?</p>
+      </div>
+      <div class="pres">
+        <div class="pt">СТРАНИЦЫ ПРЕЗЕНТАЦИИ — ПРОГОВАРИВАЕМ ВСЕ, ПО ПОРЯДКУ</div>
+        <div class="prow"><span class="pn">0</span><span class="pg">Стартовый экран</span><span class="ps">«Видите надпись „дождитесь менеджера"? Это я — идём вместе, ничего не листайте сами.»</span></div>
+        <div class="prow"><span class="pn">1</span><span class="pg">Выжимка условий</span><span class="ps">7 блоков — проговорить каждый: что списываем, срок, что сохраняем, как идёт процедура. <i>«Здесь всё, о чём мы говорили, — проверьте глазами».</i></span></div>
+        <div class="prow"><span class="pn">2</span><span class="pg">Кредитный доктор</span><span class="ps">Допродукт +1 438 ₽/мес: <i>«Восстановление кредитной истории после процедуры — многие берут, чтобы быстрее вернуться к нормальным кредитам. Добавляем?»</i></span></div>
+        <div class="prow"><span class="pn">3</span><span class="pg">SIM-карта — бонус за «сегодня»</span><span class="ps"><i>«Мы компания официальная — у нас даже свои SIM-карты есть, посмотрите отзывы на Озоне. Если подписываем договор и вносите любой платёж сегодня — хоть 1 000 — акция фиксируется за вами: защищённая SIM, новый номер, которого нет у коллекторов, ИИ-фильтр звонков, связь оплачена на 12 месяцев. Получаете её с первым полным платежом 13 500: заказываем SIM на Озоне — и начинаем работать».</i> Проговариваем ТОЛЬКО если деньги реально сегодня — это ускоритель, не раздача. Любой платёж сегодня = акция зафиксирована; ВЫДАЧА SIM — после полной оплаты 13 500 (заказ на Ozon) = рычаг дожима до полной суммы.</span></div>
+        <div class="prow"><span class="pn">4</span><span class="pg">Оформление</span><span class="ps">Выбор: «по СМС без паспорта» или «с паспортом». <i>«Большинство оформляется по СМС — быстрее и ничего сканировать не нужно».</i></span></div>
+        <div class="prow"><span class="pn">5</span><span class="pg">Договор</span><span class="ps">Читаем вместе ключевые пункты: предмет, гарантия, стоимость, конфиденциальность. <i>«Сначала договор — он вас защищает. Платить будете только после».</i></span></div>
+        <div class="prow"><span class="pn">6</span><span class="pg">Подпись по СМС</span><span class="ps"><i>«Вам придёт код — продиктуйте или введите: это и есть подпись, юридически значимая».</i></span></div>
+        <div class="prow"><span class="pn">7</span><span class="pg">Оплата СБП</span><span class="ps"><i>«Кнопка „Оплатить через СБП" — деньги идут напрямую на счёт компании в Сбербанке, моментально и без комиссии».</i> Сумма = что договорились сегодня: 13 500 / 1 000–3 000 в зачёт.</span></div>
+      </div>
+      <div class="why"><b>Почему работает:</b> это статус «Договор на подписи» из воронки — горячий час. Прервался/не открывается → перезвони сразу и продолжай с того же места. Не может открыть в этом звонке (говорит с того же телефона) → назначь звонок-презентацию с датой И временем — это твой шаг с датой (п.16). Страховка продукта: счёт/оплата выставляются только с последнего экрана презентации — без неё денег не бывает. Работал, но не созрел → назад в «Принимает решение» без штрафа.</div>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="step" id="s8">
+    <div class="sdot d-win">8</div>
+    <div class="sbody">
+      <div class="st">Деньги сегодня — лестница до конца <span style="font-family:'Golos Text';font-size:11px;font-weight:700;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:2px 8px;vertical-align:2px;white-space:nowrap">⏱ 2–3 мин с онбордингом</span></div>
+      <div class="goal">Цель: любой исход звонка = деньги или шаг с датой. Ноль «созвонимся на днях».</div>
+      <div class="branch" style="grid-template-columns:1fr 1fr 1fr">
+        <div class="br"><b>13 500 СЕГОДНЯ</b><p><i>«Поздравляю — процедура запущена!»</i> (только ПОСЛЕ прихода денег) → SIM в подарок — сразу заказываем на Озоне → онбординг (шаг 9).</p></div>
+        <div class="br"><b>ЧАСТЬ СЕГОДНЯ</b><p>1 000–3 000 в зачёт + дата остатка на ЗП: <i>«Фиксирую доплату на [10-е] — и я уже начинаю работу по вам»</i>. SIM-акция зафиксирована — платёж сегодня был; сама SIM — с полным платежом: <i>«внесёте 13 500 — заказываем вашу SIM на Озоне и начинаем работать»</i>.</p></div>
+        <div class="br"><b>0 СЕГОДНЯ</b><p>Договор всё равно подписываем сейчас + жёсткая дата платежа + <i>вопрос намерения: «если посоветуетесь и будет „нет" — всё равно решаете вопрос или закрываем?»</i></p></div>
+      </div>
+      <div class="why"><b>Почему работает:</b> микро-платёж психологически «заводит» клиента в работу (метод Светы: «внесите 1 000 — и я уже начну»); SIM — легальный ускоритель «сегодня» и рычаг дожима (акция фиксируется любым платежом, выдача — при 13 500); вопрос намерения отделяет живую паузу от слива.</div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="step" id="s9">
+    <div class="sdot d-green">9</div>
+    <div class="sbody">
+      <div class="st">Онбординг — продать специалиста и передать без возвратов</div>
+      <div class="goal">Цель: клиент чувствует «мной занялись», ожидания запрограммированы, передача в сопровождение — без возвратов. Следующего специалиста продаём так же, как продавали себя.</div>
+      <div class="say"><div class="lbl">Рамка звонка — после прихода денег</div>
+        <p>Иван Иванович, видел вашу оплату — поздравляю вас с началом процедуры! Спасибо за доверие. Сейчас подготовлю вас к передаче в отдел сопровождения: обговорим важные детали — и я со спокойной душой передам вас в руки профессионала, хорошо?</p>
+      </div>
+      <div class="say"><div class="lbl">Продажа специалиста</div>
+        <p>Вас принимает юрист сопровождения — ваш личный юрист по делу и главный куратор: ведёт весь процесс, от сбора документов до результата. Ваша задача — быть его правой рукой: вовремя давать справки и быть на связи. Все детали он расскажет при знакомстве, договорились?</p>
+        <p>Коллега свяжется с вами в течение 24 часов. Вам придёт СМС с его номером — запишите в телефонную книгу и обязательно будьте на связи, хорошо?</p>
+      </div>
+      <div class="say"><div class="lbl">Программирование ожиданий</div>
+        <p>Сразу по графику: сопровождение работает по будням с 9:00 до 18:00 по Москве — как и суды. Если в выходной не ответили — не паникуйте, ответят в рабочий день. Ежемесячные платежи у нас с вами на [10-е] число: просрочку допускать нельзя, иначе работа приостанавливается — система блокирует доступ к делу. Сможете оплачивать по графику? Есть вопросы?</p>
+      </div>
+      <div class="say"><div class="lbl">Закрытие и передача</div>
+        <p>Ещё раз спасибо за доверие! Ваше дело переходит в отдел сопровождения — специалист свяжется с вами и проведёт знакомство. А пока ждёте его звонка, придёт памятка по процедуре — изучите спокойно. До связи!</p>
+      </div>
+      <div class="flag"><div class="ft"><span class="badge b-no">гейт передачи</span></div>
+        <div class="ln"><b>Не заполнена анкета — нет передачи.</b> Перед передачей проверь все риски по анкете: сделки за 3 года, имущество (вкл. супруга), ИП/ООО, судимость/159, исполнительные производства. Задача МПП — чисто и спокойно довести до передачи, а не «просто закрыть оплату». Ты остаёшься на связи до 2-го платежа (шаг 10): вопросы по делу — куратор, по деньгам и договору — ты.</div>
+      </div>
+      <div class="why"><b>Почему работает:</b> «продать специалиста» = клиент ждёт куратора, а не чувствует, что его бросили после оплаты; программирование ожиданий (будни 9–18, платёж по графику) снимает панику и возвраты; фиксация даты закрепляет 2-й платёж — на нём твои вторые 50%.</div>
+    </div>
+  </div>
+
+  <!-- 10 -->
+  <div class="step" id="s10">
+    <div class="sdot d-green">10</div>
+    <div class="sbody">
+      <div class="st">Удержание до 2-го платежа</div>
+      <div class="goal">Цель: клиент доходит до 2-го платежа — главный рычаг против расторжений.</div>
+      <div class="say"><div class="lbl">Метод</div>
+        <p>Ежедневный ритм ведут бот и сопровождение: первая победа, портал, статусы дела. Ты выходишь по сигналу — клиент засомневался или заговорил о расторжении — в тот же день.</p>
+      </div>
+      <div class="why"><b>Почему работает:</b> «чем больше клиент уже внёс, тем меньше риск, что уйдёт» — но ежедневное нянченье не твоя задача, твоя — эскалация в день сигнала.</div>
+    </div>
+  </div>
+
+  <!-- OBJECTIONS -->
+  <h2 class="sec">Отработка возражений</h2>
+  <p class="sub">14 ситуаций из реальных звонков. Нажми — раскроется эталон. ИИ проверяет: на возражение не сдался с первого «нет».</p>
+
+  <div class="obj"><button><span class="onum">1</span><span class="otitle">«Дорого / где взять деньги»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Дорого, где я такую сумму возьму.»</div>
+      <div class="ans">[Имя], прекрасно понимаю вас — любая сумма в текущей ситуации выглядит болезненно. Но мы с вами думаем не об этом.</div>
+      <div class="ow" style="margin:-2px 0 9px"><b>↑ дословный ответ Светы:</b> приняла эмоцию и сразу увела на цифры — сколько теряет сейчас vs что получит.</div>
+      <div class="ans">Смотрите: сейчас вы отдаёте [40 000] в месяц и большая часть — проценты. Наша услуга — 13 500 в месяц, и платежи по кредитам вы уже не вносите. Вам с первого месяца станет легче. Потянете 13 500?</div>
+      <div class="ow"><b>Почему работает:</b> не спорит с ценой — переключает с «сколько платить» на «сколько теряю без процедуры». Сумма всегда месячная, не полная.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">2</span><span class="otitle">«Нет денег сегодня, зарплата позже»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Сегодня не смогу, зарплата только 10-го.»</div>
+      <div class="ans">Хорошо, фиксирую платёж на 10-е. Но давайте уже начнём работать: внесите сколько есть — достаточно от 1 000 ₽, всё идёт в зачёт по договору. И завтра жду от вас кредитную историю — сформирую документ по рискам, покажу на цифрах вашу реальную переплату.</div>
+      <div class="ow"><b>Почему работает:</b> дата зафиксирована И микрошаг всё равно сегодня — клиент «зашёл» в работу психологически.</div>
+      <div class="stop"><span class="badge b-no">квал-тест</span> «1 000 найдёт любой. Не может даже 1 000 — причина не в деньгах»: сигнал неквал. Займ «чтобы оплатить нас» — НЕ предлагаем: на банкротстве новый кредит перед подачей вредит делу клиента.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">3</span><span class="otitle">«А можно бесплатно через МФЦ?»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Слышал, банкротство можно бесплатно через МФЦ оформить.»</div>
+      <div class="ans">Верно, такой вариант есть — но он для узких случаев: долг в пределах лимита, закрытые исполнительные производства, нет дохода и имущества. У вас [причина: долг выше / есть доход / есть имущество / приставы активны] — МФЦ заявление просто вернёт, потеряете месяцы. Ваш рабочий путь — через Арбитражный суд, и там как раз мы всё делаем за вас.</div>
+      <div class="ow"><b>Почему работает:</b> не обесценивает МФЦ («развод!»), а показывает границы применимости — честно и экспертно.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">4</span><span class="otitle">«Не верится, какая-то сказка / развод»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Не верится, что можно не платить.»</div>
+      <div class="ans">Можете сами загуглить «банкротство физических лиц, 127-ФЗ» — увидите ровно ту же информацию. Закон работает с 2015 года.</div>
+      <div class="ans">И прежде чем платить — мы вместе пройдём договор на экране презентации, посмотрите реквизиты компании. Сначала договор — потом деньги.</div>
+      <div class="ow"><b>Почему работает:</b> «проверьте сами» = нечего скрывать; «сначала договор» снимает страх отдать деньги в пустоту.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">5</span><span class="otitle">«Страшно: коллекторы, приставы»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Они же звонить будут, угрожают уже.»</div>
+      <div class="ans">Каждому, кто входит в процедуру, поначалу страшно — это нормально. Но это закон, ему подчиняются все банки. Как только суд заводит дело — звонить и угрожать вам не имеют права: все знают, что вы в процедуре. Плюс поставим переадресацию и сделаем отзыв персональных данных.</div>
+      <div class="ow"><b>Почему работает:</b> нормализация страха + опора на закон + конкретные механизмы защиты.</div>
+      <div class="stop"><span class="badge b-no">осторожно</span> Без «звонки прекратятся полностью через N дней» — обещание сроков не даём.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">6</span><span class="otitle">«Сделайте сами, я не разберусь»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Я в документах ничего не понимаю.»</div>
+      <div class="ans">Не будет такого, что мы дали задание, а вы сами ищете. Основную часть документов юрист заказывает сам через Госуслуги; от вас — сфотографировать то, что дома, по понятной инструкции. Ваша задача — быть на связи, как правой рукой. Всё остальное делаем мы — вы за это и платите.</div>
+      <div class="ow"><b>Почему работает:</b> метафора «правая рука» + конкретика делят ответственность, а не перекладывают.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">7</span><span class="otitle">«А машину / квартиру не заберут?»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«При банкротстве же всё заберут?»</div>
+      <div class="ans">Единственное жильё по закону защищено. По автомобилю: наша главная задача — его сохранить; юрист после анализа подберёт самый безопасный вариант защиты. Мы используем весь опыт и правовые инструменты — важно понимать, что итоговое решение за судом, но именно наша работа в том, чтобы у судьи не возникло лишних вопросов.</div>
+      <div class="ow"><b>Почему работает:</b> формулировка из официального скрипта — честная: задача + практика, без «100% сохраним».</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">8</span><span class="otitle">«Может, взять займ на оплату?»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Возьму займ и оплачу вам.»</div>
+      <div class="ans">Не нужно — новые займы перед процедурой только вредят делу: суд смотрит на добросовестность. Внесите из своих сколько есть сегодня, остальное — с зарплаты. Найдём комфортный график из реальных средств.</div>
+      <div class="ow"><b>Почему работает:</b> защищает дело клиента = доверие; дробление закрывает деньги без токсичного займа.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">9</span><span class="otitle">«Надо подумать / посоветоваться»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Дайте посоветоваться с женой, наберу завтра.»</div>
+      <div class="ans">Конечно. Тогда прямо сейчас отправлю вам в чат три вещи: расчёт по вашим цифрам — что списываем, какой платёж, какая экономия; образец договора в PDF — спокойно изучите вместе с женой; и примеры завершённых дел с номерами — убедитесь, что мы существуем. А завтра в 18:00 набираю: открою экран с условиями, пройдём договор вместе — и, если всё устроит, подпишете кодом из СМС.</div>
+      <div class="ans">И сразу уточню, чтобы я понимал: если посоветуетесь и жена скажет «нет» — вы всё равно будете решать вопрос с долгами или на этом закрываем? Мне важно, ждать ли вас.</div>
+      <div class="ow"><b>Почему работает:</b> домашнее задание + жёсткая дата + <b>квал намерения</b> — три обязательных действия на каждом «подумаю». Без них звонок = пустой дожим.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">10</span><span class="otitle">«А есть гарантия?»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Гарантируете, что спишете?»</div>
+      <div class="ans">Да — даю 100%. Мы не берём дела, которые не пройдут: перед договором юристы проверяют все риски, поэтому в результате уверены. И это не слова, а пункт договора: если долги не списаны — возвращаем деньги. Что думаете?</div>
+      <div class="ans">Если спросят конкретику — по договору: <b>списание</b> — если по итогам процедуры вы не освобождены от долгов, возврат 100% фактически оплаченного в течение 7 рабочих дней; <b>реструктуризация</b> — если план не утверждён судом по вине компании, уплаченное возвращается. Гарантия работает, пока вы честно даёте информацию и документы и платите по графику — это тоже говорим прямо.</div>
+      <div class="ow"><b>Почему работает:</b> наш «100%» подкреплён отбором дел и договором — в отличие от голых обещаний конкурентов. Точные условия возврата (из договора) закрывают вопрос сильнее общих слов.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">11</span><span class="otitle">«Что у меня останется на жизнь?»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«А на что я жить буду в процедуре?»</div>
+      <div class="ans">По закону вам положен прожиточный минимум — около 20 000, по регионам отличается. Плюс учитываются дети, лекарства, обучение, при отсутствии жилья — аренда. Что реально защитить в вашем случае — разберёт юрист, легально. Согласитесь: лучше чуть потерпеть полгода, чем ещё годы отдавать всю зарплату банкам?</div>
+      <div class="ow"><b>Почему работает:</b> честный расчёт + сравнение с альтернативой.</div>
+      <div class="stop"><span class="badge b-no">не говорим</span> «Перейдите на полставки / получайте неофициально» — этот совет из старого скрипта вычищен: сокрытие дохода = суд не спишет долг.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">12</span><span class="otitle">«Последствия пугают»</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Банкротом буду, клеймо на всю жизнь…»</div>
+      <div class="ans">Последствий немного, и они конечны: руководящие должности — 3 года, повторное списание — через 5 лет. Кредиты брать можно, за границу можно, работать можно. А если статус принципиален — есть реструктуризация: без статуса банкрота, платите только тело долга. Что вам ближе?</div>
+      <div class="ow"><b>Почему работает:</b> честные последствия + развилка продуктов как выход.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">13</span><span class="otitle">Срыв / отчаяние (клиент плачет)</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Я настолько в яме…»</div>
+      <div class="ans">Я понимаю, не переживайте — проблемы скидываем на нас, мы точно сможем помочь. В вашей вине того, что так сложилось, нет: зарплаты не растут, кредиты дорогие. Вы уже делаете правильный шаг — решаете вопрос по закону.</div>
+      <div class="ow"><b>Почему работает:</b> дословный приём Светы — раппорт + снятие вины переводят из паралича в доверие.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">14</span><span class="otitle">«Передумал / хочу расторгнуть» (после оплаты)</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">«Я передумал, верните деньги.»</div>
+      <div class="ans">Иван Иванович, расскажите, пожалуйста, почему приняли такое решение? <i>(слушаем, не перебивая и не давя)</i> Давайте будем думать не как расторгнуть, а что нам нужно сделать, чтобы такого желания не было. Вы же пришли, чтобы [его боль — из карточки]. Она решена? Возможно, вас что-то напугало по дороге — или родственники предложили другой вариант?</div>
+      <div class="ow"><b>Почему работает:</b> клиент в защите — спор укрепляет решение, вопрос «почему» его размягчает; возврат к первоначальной боли напоминает, зачем он приходил. Перед звонком открой историю и прошлые звонки — говори про ЕГО ситуацию, не общими словами.</div>
+      <div class="stop"><span class="badge b-no">граница</span> Твёрдое взвешенное «расторгаю» после честного разбора — принимаем корректно, без дожима: это канон (жёсткий отказ ≠ поле для давления).</div>
+    </div>
+  </div>
+
+  <!-- КАСАНИЯ ПОСЛЕ КОНСУЛЬТАЦИИ -->
+  <h2 class="sec">После консультации — касания и дожим</h2>
+  <p class="sub">Касание — не «как дела?», а конкретное движение к оплате: у каждого есть цель и действие. Чек-лист заполняется только по факту (договор «отправлен» = реально отправлен). Ниже — карта из проверенного учебника, согласована с воронкой: попытка = звонок, статусные окна из свода.</p>
+
+  <div class="pres" style="margin-bottom:14px">
+    <div class="pt">ЧТО ОТПРАВЛЯЕМ ДУМАЮЩЕМУ — И ЧТО НЕТ</div>
+    <div class="prow"><span class="pn">✓</span><span class="pg">Юр. заключение «со слов» + калькулятор</span><span class="ps">Красивая страница с ЕГО цифрами: долг → что платит сейчас в месяц → наша услуга 13 500/мес → <i>наглядная экономия каждый месяц</i> + ссылка на оплату. <i>Бот шлёт сам в «Принимает решение»</i> — это главный дожим-документ. Оплатил частичку (от 1 000) → даём задание заказать РЕАЛЬНУЮ КИ через Госуслуги → назавтра точное юр. заключение по рискам (документы + КИ + ФССП) вместо оценки со слов.</span></div>
+    <div class="prow"><span class="pn">✓</span><span class="pg">Договор PDF</span><span class="ps">Образец договора для спокойного изучения — «покажите жене, почитайте вечером». Персональный договор готовим после паспорта. <i>Подписание — всегда в живом звонке</i>, кодом из СМС.</span></div>
+    <div class="prow"><span class="pn">✓</span><span class="pg">Кейсы и отзывы</span><span class="ps">Дела с номерами (проверяемы на сайте суда), видеоотзывы, канал компании — под его страх, не общей пачкой.</span></div>
+    <div class="prow"><span class="pn">✕</span><span class="pg">Презентация условий</span><span class="ps"><i>«Просто посмотреть» НЕ отправляем.</i> Экран с условиями открывается только в живом звонке (на нём гейт «дождитесь менеджера»): цена и договор без твоего голоса рядом = «ой, дорого» и слив. Прервался — перезванивай и продолжай с того же места.</span></div>
+  </div>
+
+  <div class="obj"><button><span class="onum">К1</span><span class="otitle">Карта 7 касаний — «обещал оплатить» / «внёс частичку»</span><span class="chev">▸</span></button>
+    <div class="panel">
+      <div class="ow" style="font-size:14px;color:var(--ink);line-height:1.7"><b>Норма — договор подписан В САМОМ ЗВОНКЕ</b> (шаги 7–8: презентация → договор вместе → код из СМС). Карта ниже — если подпись в звонке сорвалась или деньги обещаны позже.<br><br>
+      <b>0. Ещё в звонке:</b> клиент пришёл уже с КИ на руках → разбираем её прямо на консультации, касание 2 не нужно.<br>
+      <b>1. Сразу после звонка (в течение часа):</b> дожать подпись — паспорт → персональный договор → подписать кодом СМС прямо сейчас («договор фиксирует условия и защищает вас — платить сегодня не обязывает») · <b>внёс деньги сегодня → задание: заказать РЕАЛЬНУЮ КИ через Госуслуги</b> (инструкция; завтра разберём) · <b>денег нет → бот шлёт юр. заключение «со слов» с калькулятором экономии — это твой дожим</b> · сразу запросить первые документы (первичный пакет для сопровождения) · образец договора уже в чате.<br>
+      <b>2. Завтра:</b> получили КИ → <b>юр. заключение по рискам</b> (на основании документов, КИ и открытых источников — ФССП): «Иван Иванович, сделали заключение по вашей ситуации» → презентуем голосом, показываем реальную переплату на цифрах → закрываем на оплату · рекомендация: «приведёте человека, он заключит договор — вам скидка 10 000 ₽, хоть на первый платёж» · запросить СНИЛС/ИНН.<br>
+      <b>3. Через 24 ч:</b> нет возможности оплатить после заключения → запросить следующую часть документов и вести клиента (у тебя всегда есть повод быть на связи до оплаты) · проверить полученное, напомнить недостающее.<br>
+      <b>4. Через 48 ч:</b> лёгкое касание — кейс из его региона + «вспомнил о вас» · подтвердить дату оплаты.<br>
+      <b>5. Через 48 ч:</b> подтвердить договорённости: дата, сумма, способ · спросить, нет ли препятствий.<br>
+      <b>6. Через 48 ч:</b> похожий отзыв под его ситуацию · «анкета уже готова к передаче юристу» · финально подтвердить оплату.<br>
+      <b>7. Дальше:</b> задача с конкретной датой по календарю (двигаем по воронке, не бросаем).</div>
+      <div class="ow"><b>Правило:</b> последовательность не начинается заново при смене статуса — продолжается с того касания, где остановились. Каждое касание = документ, платёж или подтверждённая дата, не пустой пинг (пустой дожим ИИ не засчитывает). КИ заказываем в день звонка — чтобы уже завтра разбирать её голосом, а не «ждать неделю».</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">К2</span><span class="otitle">«Думает» — сначала барьер, потом заход под барьер</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">Клиент ушёл «подумать» — не дожимаем вслепую, выясняем ЧТО именно думает.</div>
+      <div class="ans"><b>Первое касание:</b> «Вы вчера сказали, что хотите подумать. Чтобы это не повисло, давайте честно разберём, что именно смущает: деньги, доверие, сроки, семья или сама процедура? От этого зависит, что я вам покажу: расчёт выгоды, похожий кейс, договор или подключу того, с кем советуетесь».</div>
+      <div class="ans"><b>Деньги:</b> «Оплата — это не ещё один кредит, а способ выйти из нагрузки. Какую сумму комфортно внести сейчас частично, чтобы зафиксировать условия и начать?» <b>Семья/ЛПР:</b> «Давайте подключим супруга на звонок — я коротко объясню этапы, риски и цифры, чтобы человек не делал выводы по слухам. Во сколько удобно втроём?» <b>Доверие:</b> «Осторожность — это нормально. Отправлю договор, кейсы и отзывы — и вернёмся к вопросу: какой шаг комфортно сделать сегодня?» <b>Сравнивает:</b> «Сравнивайте не цену, а что входит в договор, кто ведёт дело и какая гарантия. Что для вас важнее всего при выборе?»</div>
+      <div class="ow"><b>Почему работает:</b> заход строится под настоящий барьер, а не «ну что, надумали?». Это и есть мини-рубрика дожима: попытка закрытия + отработка + шаг с датой.</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">К3</span><span class="otitle">Финал 72 часов + «я сам перезвоню»</span><span class="chev">▸</span></button>
+    <div class="panel">
+      <div class="ans"><b>Финальное касание:</b> «Давайте честно зафиксируем: договор, надёжность и похожие дела мы разобрали — вопрос уже не в информации, а в решении. Три нормальных варианта: стартуем оплатой, фиксируемся минимальным платежом или ставим точную дату. Если не готовы ни к одному — переведу вас в режим ожидания, чтобы не давить».</div>
+      <div class="ans"><b>«Я сам перезвоню»:</b> «Мы заканчиваем разговор, но ваша проблема не решена — я переживаю, что вы снова останетесь один на один с кредитами. Давайте зафиксируем: когда я набираю и что к этому моменту вы решаете?»</div>
+      <div class="ow"><b>Правило:</b> исход каждого дожима — деньги, дата или честное закрытие. «Режим ожидания» = пул/окно касаний по воронке, не вечное «думает».</div>
+    </div>
+  </div>
+
+  <div class="obj"><button><span class="onum">К4</span><span class="otitle">После оплаты — держим до 2-го платежа</span><span class="chev">▸</span></button>
+    <div class="panel"><div class="said">Клиент купил на эмоциях — потом возвращаются страх перемен и «привычный» комфорт долгов. Ему нужна не сухая передача, а ощущение «мной занимаются».</div>
+      <div class="ans"><b>Звонок-отчёт (структура):</b> человеческий контакт («как настроение, как прошли дни?») → «у меня хорошие новости: уже сделали [что], дальше планируем [что]» → «пока не сделали [что], потому что [почему], сделаем к [дата]» → «есть вопросы или переживания?»</div>
+      <div class="ans"><b>Негатив:</b> слушать не перебивая → признать («то, что произошло, — неприятно, я понимаю вас») → план («сделаю [что] и вернусь к вам [когда] с результатом»). Не «не переживайте», не спорить, не зеркалить агрессию.</div>
+      <div class="ow"><b>Почему работает:</b> клиент пришёл за защитой от давления — менеджер не должен становиться новым источником давления. Просьба об оплате звучит после отчёта о работе, а не вместо него.</div>
+    </div>
+  </div>
+
+  <!-- STOP LIST -->
+  <h2 class="sec">Комплаенс-стоп — никогда не говорим</h2>
+  <p class="sub">Эти фразы были в старых скриптах и звонках — теперь они под запретом: рушат дело клиента в суде и подставляют компанию. ИИ слышит каждую (сейчас — фиксирует и учит; дата включения ×0 будет объявлена заранее). Рядом — честная замена.</p>
+  <div class="stopbox">
+    <h3>9 классов под запретом</h3>
+    <div class="si">
+      <div class="sr"><span class="no">✕ Обещания возврата, которых НЕТ в договоре: «вернём в двойном объёме», «вернём с процентами»</span><span class="yes">✓ «Даём 100% — берём только проходные дела; не спишем — вернём деньги, это в договоре»</span></div>
+      <div class="sr"><span class="no">✕ «Центробанк / государство возмещает проценты»</span><span class="yes">✓ «Начисление процентов и штрафов приостанавливается по закону»</span></div>
+      <div class="sr"><span class="no">✕ «Мы аккредитованы государством / госпрограмма»</span><span class="yes">✓ «Работаем по федеральному закону; товарный знак в Роспатенте; дела проверяемы на сайте суда»</span></div>
+      <div class="sr"><span class="no">✕ «Возьмите займ / докредитуйтесь, чтобы оплатить нас»</span><span class="yes">✓ «Вносим частями из реальных средств»</span></div>
+      <div class="sr"><span class="no">✕ Фиктивные чеки самозанятости «как будто»</span><span class="yes">✓ «Нужен реальный подтверждаемый доход — легальные пути разберёт юрист»</span></div>
+      <div class="sr"><span class="no">✕ «Перейдите на неофициалку / перепишите имущество / спрячьте деньги»</span><span class="yes">✓ «Доход и имущество в процедуре прозрачны; что защищено законом — используем полностью»</span></div>
+      <div class="sr"><span class="no">✕ «В кредитной истории не видно — скроем от банков»</span><span class="yes">✓ «Процедура отражается в КИ; рейтинг временно ниже, потом восстанавливается»</span></div>
+      <div class="sr"><span class="no">✕ Пугать 159 УК, чтобы закрыть сегодня</span><span class="yes">✓ «Чем раньше начать, тем спокойнее пройдёт процедура»</span></div>
+      <div class="sr"><span class="no">✕ «Процедура запущена / с началом процедуры» до оплаты — процедуры ещё нет</span><span class="yes">✓ До оплаты поздравляем с РЕШЕНИЕМ и первым шагом (приём поддержки); «процедура запущена» — только после денег</span></div>
+    </div>
+  </div>
+
+  <footer>
+    <b>SALE 100.0</b> · Единый скрипт продаж, канон v2 (июль 2026). Источники: официальные скрипты МПП БФЛ/РДГ + разбор 251 звонка лучшего менеджера + воронка v2 + клиентская презентация + учебник клоузеров (карта касаний, гарантия, удержание) + скрипт МПП передачи клиента из ОП в ОС.<br>
+    Цена — канон: 13 500 ₽/мес × 14 = 189 000 ₽ · VIP разово 169 000 ₽ (скидка 20 000) · госплатежи 50 000 ₽ отдельно · «Сохранение имущества» 60 000 ₽ за объект по ситуации · сопровождение РДГ 5 000 ₽/мес после утверждения плана (по желанию клиента) · реферальная скидка 10 000 ₽ за приведённого с договором. Полную сумму первым числом не называем.
+  </footer>
+
+</div>
+
+<script>
+  document.querySelectorAll('.obj > button').forEach(function(b){
+    b.addEventListener('click',function(){ b.parentElement.classList.toggle('open'); });
+  });
+  var boxes=document.querySelectorAll('#checklist input[type=checkbox]');
+  var cc=document.querySelector('#ccount b');
+  document.getElementById('ctotal').textContent=boxes.length;
+  function upd(){
+    var n=0;
+    boxes.forEach(function(c){ c.parentElement.classList.toggle('done',c.checked); if(c.checked)n++; });
+    cc.textContent=n;
+  }
+  boxes.forEach(function(c){ c.addEventListener('change',upd); });
+  upd();
+</script>
+</body>
+</html>
