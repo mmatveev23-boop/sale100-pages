@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Схема сделки · вся логика от лида до 2-го платежа — ДОНУЛЯ</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ СХЕМА СДЕЛКИ (заказчик 22.07 «нарисуй сам всю схему с переходами и своими дополнениями, отдельной страницей»).
+   Источники: каноническая таблица окон §0 (sales-system-rules v2.11), схема Виктории «Провели консу» (разбор 22.07,
+   решения §6 дельты), сверка сценариев docs/funnel-scenario-coverage-2026-07.md (926a7e8).
+   ⊕-узлы (золотой пунктир) = МОИ ДОПОЛНЕНИЯ — дыры из сверки, закрытые предложением; ждут утверждения владельца.
+   Визуальный движок узлов/рёбер — по образцу site/lead-map (тот же язык страниц). ═══ */
+:root{
+  --paper:#F6F2E9;--paper2:#EFE9DC;--card:#FFFFFF;--card2:#FBF8F1;--line:#E3DCCB;
+  --ink:#16231D;--muted:#5C6660;--faint:#8B948E;
+  --pine:#0B3B2E;--pine2:#0F4A39;--green:#0F6B4F;--green-ink:#0B5540;--green-soft:#E4EFE7;
+  --gold:#C99A33;--gold-bright:#F4C775;--gold-soft:#F7EDD6;--gold-ink:#8A6212;
+  --brick:#A8442E;--brick-soft:#F6E3DC;
+  --shadow:0 18px 44px -18px rgba(11,59,46,.28);--shadow-sm:0 6px 18px -10px rgba(22,35,29,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),var(--paper);color:var(--ink);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:24px 18px 60px}
+
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:26px 26px;box-shadow:var(--shadow)}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:14px}
+.hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
+.hdr .brand b{font-size:15px}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:26px;line-height:1.16;letter-spacing:-.02em;font-weight:800}
+.hdr p{margin-top:10px;font-size:14.5px;color:rgba(255,255,255,.8);max-width:86ch}
+.hdr p b{color:#fff}
+.legend{margin-top:14px;display:flex;flex-wrap:wrap;gap:6px;font-size:11.5px;font-weight:700}
+.legend span{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:5px 11px;color:#fff;white-space:nowrap}
+.legend i{width:11px;height:11px;border-radius:4px;flex:none}
+.legend .l-m i{background:#fff}
+.legend .l-s i{background:transparent;border:2px solid #7FD4B5}
+.legend .l-g i{background:var(--gold-bright)}
+.legend .l-p i{background:transparent;border:2px dashed var(--gold-bright)}
+.legend .l-f i{background:#E98C74}
+
+/* ── карта ── */
+.mapscroll{margin-top:18px;overflow-x:auto;overflow-y:hidden;border:1px solid var(--line);border-radius:20px;background:linear-gradient(180deg,#FDFBF6 0%,var(--card2) 100%)}
+.mapinner{position:relative;min-width:2510px;display:flex;gap:46px;align-items:stretch;padding:16px 70px 34px 24px}
+.mapinner svg{position:absolute;inset:0;pointer-events:none}
+.col{display:flex;flex-direction:column;justify-content:flex-start;gap:16px;position:relative;width:250px;flex:none}
+.lanehead{background:var(--pine);color:#fff;border-radius:12px;padding:9px 12px;margin-bottom:4px;position:sticky;top:0}
+.lanehead b{display:block;font-size:12.5px;letter-spacing:.02em}
+.lanehead small{display:block;font-size:10.5px;color:rgba(255,255,255,.65);line-height:1.4;margin-top:2px}
+.spacer{flex:1 0 6px}
+
+.node{width:250px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 13px;box-shadow:var(--shadow-sm);position:relative}
+.node .chip{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;border-radius:999px;padding:2px 8px;background:var(--green-soft);color:var(--green-ink);margin-bottom:6px}
+.node h3{font-size:13.5px;letter-spacing:-.01em;line-height:1.25}
+.node .nd{margin-top:4px;font-size:11px;color:var(--muted);line-height:1.45}
+.node .nd b{color:var(--ink);font-weight:700}
+.node .go{margin-top:7px;border-top:1px dashed var(--line);padding-top:6px;font-size:10.5px;line-height:1.5;color:var(--muted)}
+.node .go em{font-style:normal;color:var(--green-ink);font-weight:700}
+.node .go i{font-style:normal;color:var(--brick);font-weight:700}
+/* типы узлов */
+.node.sys{border-color:rgba(15,107,79,.5);border-width:1.5px;background:linear-gradient(180deg,#FBFDFC, #F3F9F5)}
+.node.sys .chip{background:var(--pine);color:#fff}
+.node.money{background:var(--gold-soft);border-color:rgba(201,154,51,.5)}
+.node.money .chip{background:var(--gold);color:#3d2f07}
+.node.plus{border:1.5px dashed var(--gold);background:#FFFDF6}
+.node.plus .chip{background:var(--gold-bright);color:#3d2f07}
+.node.plus h3::before{content:"⊕ ";color:var(--gold-ink)}
+.node.f-good{background:var(--green-soft);border-color:rgba(15,107,79,.35)}
+.node.f-good .chip{background:var(--pine);color:#fff}
+.node.f-mid{background:var(--card2)}
+.node.f-mid .chip{background:var(--paper2);color:var(--muted)}
+.node.f-bad{background:var(--brick-soft);border-color:rgba(168,68,46,.3)}
+.node.f-bad .chip{background:var(--brick);color:#fff}
+
+path.edge{fill:none;stroke:#C9BFA9;stroke-width:1.7;opacity:.85}
+path.edge.g{stroke:var(--green);stroke-width:2.2}
+path.edge.p{stroke:var(--gold);stroke-width:2;stroke-dasharray:6 4}
+path.edge.b{stroke:#D9A08E;stroke-dasharray:3 4}
+
+/* ── блок дополнений ── */
+.adds{margin-top:22px;background:var(--card);border:1.5px dashed var(--gold);border-radius:20px;padding:20px 22px}
+.adds h2{font-size:17px;color:var(--green-ink)}
+.adds p.sub{font-size:12.5px;color:var(--muted);margin-top:3px}
+.adds ol{margin:12px 0 0 18px;display:grid;gap:7px;font-size:13px;line-height:1.5}
+.adds li b{color:var(--gold-ink)}
+.src{margin-top:16px;font-size:11.5px;color:var(--faint)}
+.src a{color:var(--green-ink);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hdr">
+    <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · СХЕМА СДЕЛКИ</b><small>ВСЯ ЛОГИКА: ОТ НОВОГО ЛИДА ДО 2-ГО ПЛАТЕЖА</small></div></div>
+    <h1>У каждого состояния клиента есть предписанный следующий шаг</h1>
+    <p>Полная карта: канонические окна <b>§0</b>, схема дожима Виктории (с решениями 22.07: скидка-ускоритель, реферальная, ki_refused, частичка от 990) и <b>⊕ дополнения</b> — дыры из сверки сценариев, закрытые предложением. Статусы двигает <b>только система</b> (подпись СМС, эквайринг, гейт ИИ) — менеджер руками не переводит ничего.</p>
+    <div class="legend">
+      <span class="l-m"><i></i>менеджер</span>
+      <span class="l-s"><i></i>система / движок</span>
+      <span class="l-g"><i></i>деньги</span>
+      <span class="l-p"><i></i>⊕ дополнение — на утверждение</span>
+      <span class="l-f"><i></i>закрытие</span>
+      <span>пунктирная стрелка = ⊕ / возвратный путь</span>
+    </div>
+  </header>
+
+  <div class="mapscroll" id="mapscroll">
+    <div class="mapinner" id="mapinner">
+      <svg id="edges" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#C9BFA9"/></marker>
+          <marker id="arrg" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#0F6B4F"/></marker>
+          <marker id="arrp" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#C99A33"/></marker>
+        </defs>
+        <g id="eg"></g>
+      </svg>
+      <!-- колонки собирает JS -->
+    </div>
+  </div>
+
+  <section class="adds">
+    <h2>⊕ Что дополнено против схемы Виктории и текущих доков</h2>
+    <p class="sub">Каждый пункт закрывает дыру из сверки сценариев (карта состояний, 22.07). Это предложения — вносим в канон по утверждению.</p>
+    <ol>
+      <li><b>Мост дожима до фазы 2:</b> пока авторассылки нет, касания Д0 выдаёт Sensei-задачей с готовым нередактируемым текстом — иначе дожим первички не шлёт никто (P0).</li>
+      <li><b>Недозвон на назначенный звонок дожима</b> (Д1, «да-нет», разбор по КИ): попытка + замещающее сообщение + сдвиг дня цепочки. Сейчас не описан нигде.</li>
+      <li><b>Ведение ст.5 после первых суток:</b> касания через день с контентом (гарантия п.6 → бронь юриста → «что мешает» + перенос на 25-е), а не пустые пинги; лимит переносов «оплачу завтра» = 2, дальше разбор РОПа.</li>
+      <li><b>Откат скидки-ускорителя:</b> не оплатил до 23:59 → событие discount_expired, страница пересчитывается обратно, одно касание «дедлайн прошёл — условия обычные». Без этого «только сегодня» = фикция.</li>
+      <li><b>Передумал после подписи (до денег):</b> разбор «почему» по карточке возражения №14 → вернули к оплате или расторжение с цитатой. Ветки в доках не было.</li>
+      <li><b>КИ хуже слов:</b> дельта &gt;15% → холд авторассылки + задача «звонок-разбор» до любого автосообщения с новым планом.</li>
+      <li><b>Парсер КИ не справился:</b> путь «по словам» + файл юристу, НЕ закрытие клиента (false-negative ≠ отказник).</li>
+      <li><b>После оплаты №1:</b> вечная ссылка становится milestone-страницей, welcome-звонок ≤24 ч, pre-dunning за 3 дня до 2-го платежа, пропуск → каскад Д1-Д3-Д7 + эскалация клоузеру в день сигнала (его вторые 50% висят именно тут).</li>
+      <li><b>Расторжение/возврат:</b> события contract_terminated / refund в движке; страница перестаёт показывать «Готово»; разбор — по возражению №14, твёрдое «расторгаю» — принимаем без дожима.</li>
+      <li><b>Горячий сигнал (открыл страницу / КИ / чат):</b> в рабочие часы — звонок владельца ≤30 мин; владелец офлайн → горячая очередь. Раньше правило было только для хвоста.</li>
+      <li><b>Возврат закрытых (недозвон / «не наш») через 30–90 дней:</b> владелец рецикла — движок: пакетом в общий пул с тегом «возврат», холодная каденция, НЕ прежнему менеджеру.</li>
+    </ol>
+    <p class="src">Источники: каноническая таблица окон §0 (<b>свод правил v2.11</b>) · разбор схемы Виктории и решения §6 дельты (22.07) · сверка сценариев <b>docs/funnel-scenario-coverage-2026-07.md</b> (коммит 926a7e8). Расхождения доков (72 ч vs «потолка нет», 4 версии окна частички, §1.2 vs §6.1) на этой схеме уже сведены к канону §0 + §6 — но в самих доках ещё требуют чистки.</p>
+  </section>
+
+</div>
+
+<script>
+'use strict';
+/* ── узлы ── */
+var N={
+/* C0 ВХОД */
+newlead:{c:'ст.1 · менеджер',t:'Новый лид',d:'Набор <b>≤5 мин</b> (горячее от бота ≤1 мин). Не взял — лид другому.',go:'<em>дозвон</em> → консультация · <i>3 недозвона</i> → дозвонщики'},
+dial:{c:'система',t:'Дозвонщики (бот)',cls:'sys',d:'<b>5 попыток / 3 дня</b>, автодозвон + сообщения бота.',go:'<em>контакт</em> → назад менеджеру · <i>впустую</i> → Закрытые (недозвон)'},
+closed_nc:{c:'закрытие',t:'Закрытые · недозвон',cls:'f-mid',d:'<b>Возврат через 30–90 дней</b>: движок пакетом в общий пул с тегом «возврат», холодная каденция (⊕ владелец рецикла — движок, не прежний менеджер).'},
+/* C1 КОНСУЛЬТАЦИЯ */
+consult:{c:'ст.2 · менеджер',t:'Консультация (сессия)',d:'Скрипт 10 шагов; гейт = <b>16 пунктов</b> (сессия звонков, мердж). Окно 48 ч/попытка, сквозной потолок ст.2+3 = <b>3 дня</b>.',go:'исходы: <em>готов+дата</em> · <em>преза без даты</em> · <em>КИ-путь</em> · <i>отказ с цитатой</i>'},
+gatefail:{c:'система',t:'Гейт не собран (пустой лид)',cls:'sys',d:'Задача «добери диагностику», очередь добора ≤10. Деньги сильнее гейта.',go:'<em>добрал</em> → ст.3 (ставит движок) · <i>потолок 3 дня</i> → пул тёплым с мерджем'},
+pool:{c:'сквозное',t:'Общий пул',cls:'f-mid',d:'Тёплые — ротацией по тёплой конверсии (не прежнему), холодные — FIFO. Тёплый не разобран 2 ч → круг шире.'},
+/* C2 ИСХОДЫ КОНСЫ */
+v_sign:{c:'ветка · высший приоритет',t:'Готов подписать, дата названа',d:'Сразу на подпись, не отпуская: страница открыта, ведём по экранам.',go:'<em>→ ст.4 горячий час</em>'},
+v_presa:{c:'ветка · средний',t:'Готов на презу, даты нет',d:'Проводим презентацию ещё раз → закрываем на дату и оплату.',go:'<em>закрылся</em> → ст.4 · <i>нет</i> → КИ-путь + ст.3'},
+v_ki:{c:'ветка · низший',t:'Не хочет презу (не отказ)',d:'Просим КИ; «договор на то, что пришлёт сегодня». Подпись всё равно только через страницу.',go:'<em>→ КИ-контур</em>'},
+think:{c:'ст.3 · менеджер',t:'Принимает решение',d:'48 ч на <b>двусторонний</b> шаг; потолок сквозной 3 дня, АБСОЛЮТНЫЙ. Парковка по дате клиента: 1–2 переноса, автовозврат.',go:'<em>созрел</em> → ст.4 · <i>потолок</i> → пул · <i>отказ</i> → DNC'},
+refusal:{c:'закрытие',t:'Отказ с цитатой · DNC',cls:'f-bad',d:'Только «прекратите контакт» дословно. Без возврата 30–90, набор по DNC = флаг. Замок: нормального лида без цитаты закрыть нельзя — вернётся другому.'},
+/* C3 КИ-КОНТУР */
+ki_req:{c:'КИ · менеджер',t:'КИ запрошена голосом',d:'Единственная ручная отметка. Задача «завтра до 12:00 — пересчёт». Гайд не открыл за 3 ч → авто-пинг; вечером PDF нет → пинг.',go:'<em>PDF пришёл</em> → всё бросаем · <i>тянет</i> → по словам · <i>отказался</i> → ребром'},
+ki_in:{c:'система + менеджер',t:'КИ пришла = всё бросаем',cls:'sys',d:'Вебхук вложения → файл к сделке → пересчёт ≤30 мин → <b>звонок-разбор</b> (заключение только в звонке). Самый сильный звонок воронки.',go:'<em>подписал</em> → ст.5 · <i>КИ хуже слов</i> → ⊕ холд'},
+ki_words:{c:'менеджер',t:'Заключение по словам',d:'Не прислал к сроку → звоним, презентуем черновик по словам (только в звонке), закрываем на договор.',go:'<em>подписал</em> → ст.4/5 · <i>нет</i> → ребром'},
+ki_worse:{c:'⊕ дополнение',t:'КИ хуже слов',cls:'plus',d:'Дельта &gt;15% → <b>холд авторассылки</b> + задача «звонок-разбор» ДО любого автосообщения с новым планом.'},
+ki_ref:{c:'квал-фильтр · §6.3',t:'Отказался прислать КИ',d:'«Лень/не буду» = не готов сотрудничать: вопрос ребром.',go:'<em>одумался</em> → КИ-путь · <i>не готов</i> → закрытие с цитатой; флаг ki_refused глушит рассылку про КИ'},
+/* C4 ПОДПИСЬ */
+signing:{c:'ст.4 · горячий час',t:'Договор на подписи',d:'Задача через 30 мин «помогаем подписать»; ведём по страницам, не отпуская. <b>2 ч ноль попыток → пул</b>.',go:'<em>подписал (СМС)</em> → ст.5 · <i>не согласился</i> → «не подписал»: КИ-дожим + ст.3'},
+presa_call:{c:'менеджер',t:'Звонок-презентация (назначенный)',d:'Клиент не мог открыть в первом звонке — назначен звонок с датой И временем (это и есть шаг с датой).',go:'<em>прошли страницы</em> → подпись · <i>недозвон</i> → ⊕ правило недозвона'},
+nocall_d:{c:'⊕ дополнение',t:'Недозвон на дожим-звонок',cls:'plus',d:'Попытка (набор) + замещающее сообщение + <b>сдвиг дня цепочки</b>. Сейчас не описан ни в одном доке.'},
+/* C5 ДЕНЬГИ */
+signed:{c:'ст.5 · деньги',t:'Подписан · не оплачен',cls:'money',d:'Попытка <b>каждый день ×3</b> (день ноля → лид другому), дальше 48 ч. Потолка нет. «Застрявшие деньги» у РОПа с 1-го дня. Д0-цепочка: СБП 15 сек / частичка ≥990 / дата вслух + КИ.',go:'<em>оплатил</em> → ст.7 · <em>частичка ≥990</em> → ст.6 · <i>передумал</i> → ⊕ разбор'},
+booster:{c:'скидка §6.1 · система',t:'Скидка-ускоритель',cls:'sys',d:'Триггер: подписал + дата оплаты дальше. Предложение до <b>23:59</b> (замок движка): оплатил сегодня → <b>последний платёж прощён</b> (189 000·14).',go:'<i>не оплатил</i> → ⊕ discount_expired: страница обратно + касание «дедлайн прошёл» · повтор — только РОП'},
+part:{c:'ст.6 · деньги',t:'Частичка ≥990 · добор',cls:'money',d:'Горячий час добора сразу. Попытка <b>раз в сутки ×5</b> (день ноля → пул), дальше 48 ч. Потолка нет; &gt;14 дней без добора → <b>разбор у РОПа</b> (не автоотбор). Переносы даты — лимит 2 (⊕).',go:'<em>добор</em> → ст.7 · <i>тишина</i> → ритм 48 ч'},
+resign:{c:'⊕ дополнение',t:'Передумал после подписи',cls:'plus',d:'Разбор «почему» (карточка возражения №14) → <em>вернули к оплате</em> или <b>расторжение с цитатой до денег</b> (принимаем без дожима).'},
+referral:{c:'реферальная §6.2',t:'Друг оплатил по договору',cls:'sys',d:'Событие referral_credited → <b>первый платёж рекомендателя 3 500</b> (10 000 в зачёт). За обещание — ничего.'},
+/* C6 ОПЛАТА */
+paid:{c:'ст.7 · финал ✓',t:'Полная оплата',cls:'f-good',d:'«Поздравляю — процедура запущена» (только ПОСЛЕ денег). Анкета = обязательные поля амо (иначе передача не пройдёт) → передача в ОС ≤24 ч. Менеджеру — первые 50%.'},
+onboard:{c:'шаг 9 · менеджер',t:'Онбординг',d:'Продать специалиста («личный юрист, свяжется в 24 ч»), запрограммировать ожидания (будни 9–18, платёж по графику).',go:'<em>передан</em> → сопровождение · менеджер на связи до 2-го платежа'},
+/* C7 ПОСЛЕ ОПЛАТЫ */
+after:{c:'⊕ дополнение',t:'Страница после оплаты',cls:'plus',d:'Та же вечная ссылка → <b>milestone-лента</b> («договор ✓ → дело собрано → подача → суд»), живой график платежей. Welcome-звонок ≤24 ч (не продающий).'},
+pay2:{c:'деньги · до 2-го платежа',t:'Защита 2-го платежа',cls:'money',d:'Ежедневный ритм — бот/сопровождение; клоузер — по эскалации в день сигнала. ⊕ pre-dunning за 3 дня; пропуск → каскад Д1-Д3-Д7.',go:'<em>2-й платёж</em> → вторые 50% менеджеру · <i>сигнал расторжения</i> → эскалация сегодня'},
+term:{c:'⊕ дополнение',t:'Расторжение / возврат',cls:'plus',d:'События contract_terminated / refund (сейчас их нет — клиент навсегда «оплатил»). Разбор по возражению №14; твёрдое «расторгаю» — без дожима. Страница гасит «Готово».'},
+/* СКВОЗНЫЕ (нижний ряд) */
+hot:{c:'сквозное · система',t:'Горячая очередь',cls:'sys',d:'Открыл страницу / прислал КИ / покупательский ответ в чате → <b>звонок ≤1 мин</b> из очереди. ⊕ в раб. часы — владельцу (≤30 мин), офлайн → очередь.'},
+tail:{c:'сквозное · бот',t:'Хвост Д4–30',cls:'sys',d:'День 4: ответственный → «Робот». Бот 1–2 касания/нед (эфиры, разборы, КИ-повод). ~Д30 — QC-звонок (⊕ исполнитель: дозвонщик по скрипту QC).',go:'<em>ожил</em> → горячая очередь → менеджер по ротации'},
+}
+/* колонки: [заголовок этапа, подпись-окно, [узлы]] */
+var COLS=[
+ ['ВХОД','ст.1 · набор ≤5 мин · 3 недозвона → бот',['newlead','dial','closed_nc']],
+ ['КОНСУЛЬТАЦИЯ','ст.2 · 48 ч/попытка · потолок ст.2+3 = 3 дня',['consult','gatefail','pool']],
+ ['ИСХОД КОНСЫ','4 ветки Виктории + ст.3',['v_sign','v_presa','v_ki','think','refusal']],
+ ['КИ-КОНТУР','сквозной · «не купил → запроси КИ»',['ki_req','ki_in','ki_words','ki_worse','ki_ref']],
+ ['ПОДПИСЬ','ст.4 · горячий час · 2 ч ноль попыток → пул',['signing','presa_call','nocall_d']],
+ ['ДЕНЬГИ','ст.5 день×3 → 48 ч · ст.6 сутки×5 → 48 ч · потолка нет',['signed','booster','part','resign','referral']],
+ ['ОПЛАТА','ст.7 · анкета → передача ≤24 ч',['paid','onboard']],
+ ['ПОСЛЕ ОПЛАТЫ','до 2-го платежа · вторые 50% менеджера',['after','pay2','term']],
+ ['СКВОЗНЫЕ','работают на любом этапе',['hot','tail']],
+];
+/* рёбра: [from,to,класс] — g=деньги/главный путь, p=⊕/пунктир, b=возврат */
+var EDGES=[
+ ['newlead','consult','g'],['newlead','dial'],['dial','consult'],['dial','closed_nc'],['closed_nc','pool','b'],
+ ['consult','v_sign','g'],['consult','v_presa'],['consult','v_ki'],['consult','refusal'],['consult','think'],
+ ['gatefail','think'],['gatefail','pool'],['consult','gatefail'],
+ ['v_sign','signing','g'],['v_presa','signing'],['v_presa','ki_req'],['v_ki','ki_req'],
+ ['think','signing'],['think','pool','b'],['think','refusal'],
+ ['ki_req','ki_in','g'],['ki_req','ki_words'],['ki_req','ki_ref'],
+ ['ki_in','ki_worse','p'],['ki_in','signing','g'],['ki_words','signing'],['ki_words','ki_ref'],['ki_ref','refusal'],
+ ['signing','signed','g'],['signing','presa_call'],['presa_call','nocall_d','p'],['presa_call','signing','b'],
+ ['signing','ki_req','b'],
+ ['signed','paid','g'],['signed','part','g'],['signed','booster'],['signed','resign','p'],
+ ['booster','paid','g'],['part','paid','g'],['referral','part'],['resign','refusal'],
+ ['paid','onboard','g'],['onboard','after','p'],['onboard','pay2','g'],
+ ['after','pay2'],['pay2','term','p'],
+ ['hot','consult','b'],['tail','hot'],['pool','tail','b'],
+];
+
+/* ── сборка DOM ── */
+var inner=document.getElementById('mapinner');
+COLS.forEach(function(cdef){
+  var col=document.createElement('div');col.className='col';
+  var lh=document.createElement('div');lh.className='lanehead';
+  lh.innerHTML='<b>'+cdef[0]+'</b><small>'+cdef[1]+'</small>';
+  col.appendChild(lh);
+  cdef[2].forEach(function(id){
+    var n=N[id];
+    var d=document.createElement('div');
+    d.className='node'+(n.cls?' '+n.cls:'');
+    d.id='n_'+id;
+    d.innerHTML='<span class="chip">'+n.c+'</span><h3>'+n.t+'</h3><div class="nd">'+n.d+'</div>'+(n.go?'<div class="go">'+n.go+'</div>':'');
+    col.appendChild(d);
+  });
+  inner.appendChild(col);
+});
+
+/* ── рёбра SVG ── */
+var eg=document.getElementById('eg'), svg=document.getElementById('edges');
+function rectOf(id){
+  var r=document.getElementById('n_'+id).getBoundingClientRect();
+  var c=inner.getBoundingClientRect();
+  return {l:r.left-c.left,r:r.right-c.left,cy:r.top-c.top+r.height/2,cx:r.left-c.left+r.width/2,t:r.top-c.top,b:r.bottom-c.top};
+}
+function draw(){
+  eg.innerHTML='';
+  svg.setAttribute('width',inner.scrollWidth);svg.setAttribute('height',inner.scrollHeight);
+  EDGES.forEach(function(e){
+    var a=rectOf(e[0]),b=rectOf(e[1]),cls=e[2]||'';
+    var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    var d;
+    if(b.l>a.r){ /* вперёд: справа-налево */
+      var dx=(b.l-a.r)*0.5;
+      d='M'+a.r+' '+a.cy+' C'+(a.r+dx)+' '+a.cy+' '+(b.l-dx)+' '+b.cy+' '+(b.l-2)+' '+b.cy;
+    }else if(a.l>b.r){ /* назад */
+      var dx2=(a.l-b.r)*0.4;
+      d='M'+a.l+' '+a.cy+' C'+(a.l-dx2)+' '+(a.cy+26)+' '+(b.r+dx2)+' '+(b.cy+26)+' '+(b.r+2)+' '+b.cy;
+      if(!cls)cls='b';
+    }else{ /* та же колонка: дуга справа */
+      var x=Math.max(a.r,b.r)+26;
+      d='M'+a.r+' '+a.cy+' C'+x+' '+a.cy+' '+x+' '+b.cy+' '+(b.r+2)+' '+b.cy;
+    }
+    p.setAttribute('d',d);
+    p.setAttribute('class','edge'+(cls?' '+cls:''));
+    p.setAttribute('marker-end','url(#'+(cls==='g'?'arrg':cls==='p'?'arrp':'arr')+')');
+    eg.appendChild(p);
+  });
+}
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(draw);}
+draw();window.addEventListener('resize',draw);
+</script>
+</body>
+</html>
