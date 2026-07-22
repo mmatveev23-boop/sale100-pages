@@ -1169,7 +1169,7 @@ function presentUrl(){
   const pay=last.paynow>0?{pay:last.paynow}:{}; /* платёж не спросили — параметр не шлём, страница скроет сравнение, а не выдумает цифру */
   const ki=kiLoaded?{ki:1}:{}; /* КИ загружена → презентация показывает точные числа + блок кредиторов */
   const dueV=parseFloat(document.getElementById('w_due').value)||0;
-  const due=dueV>0?{due:Math.max(1000,Math.round(dueV))}:{}; /* частичка от менеджера: минимум 1 000 (канон) */
+  const due=dueV>0?{due:Math.max(990,Math.round(dueV))}:{}; /* частичка: системный минимум 990 ₽ (решение директора 22.07; голосом озвучиваем «от 1 000») */
   const rp=rassParams(); /* дата 1-го платежа, срок, допродукты (решение заказчика 20.07) */
   /* данные для договора (заказчик 20.07): ФИО и дата рождения — на экран «Оформление» и в текст договора */
   const fioV=(document.getElementById('w_fio').value||'').trim().slice(0,80);
@@ -1351,7 +1351,7 @@ function rassParams(){
 }
 
 /* ── исход звонка (решение заказчика 17.07: дата оплаты вбивается в пульте; контракт ТЗ §10.2 —
-   signed_date без даты / частичка <1000 / отказ без цитаты не сохраняются; «КИ запрошена» — флаг, не исход) ── */
+   signed_date без даты / частичка <990 (порог 22.07, было 1000) / отказ без цитаты не сохраняются; «КИ запрошена» — флаг, не исход) ── */
 let ocSel=null;
 const OC_LABEL={full_payment:'полная оплата',partial:'частичка',signed_date:'подписал + дата оплаты',not_signed:'не подписал',signed_not_paid:'подписал, не оплатил',refusal:'отказ'};
 function ocShow(id,v){document.getElementById(id).style.display=v?'':'none';}
@@ -1387,7 +1387,7 @@ function fixOutcome(){
   }
   if(ocSel==='partial'){
     const a=+document.getElementById('oc_a').value||0;
-    if(a<1000){bad('Частичка — от 1 000 ₽');return;}
+    if(a<990){bad('Частичка — от 990 ₽');return;} /* системный минимум 990 (решение 22.07) */
     extra=fmt(a)+' ₽';
   }
   if(ocSel==='refusal'){

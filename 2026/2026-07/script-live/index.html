@@ -538,9 +538,9 @@ s8_part(){
   return '<div class="goal"><span class="stepno">шаг 8 · частичка</span>МИКРОПЛАТЁЖ «ЗАВОДИТ» КЛИЕНТА В РАБОТУ</div>'
   +'<div class="say">«Внесите сколько есть — достаточно от 1 000 ₽, всё идёт в зачёт по договору. Фиксирую доплату на [дату зарплаты] — и я уже начинаю работу по вам».</div>'
   +'<div class="say">«SIM-акция за вами — платёж сегодня был. Внесёте 13 500 — заказываем вашу SIM на Озоне и начинаем работать».</div>'
-  +'<div class="frow"><label>Частичка сегодня, ₽ (от 1 000)</label><input type="number" id="in_part" value="'+(S.D.part||'')+'" placeholder="1 000"></div>'
+  +'<div class="frow"><label>Частичка сегодня, ₽ (от 990)</label><input type="number" id="in_part" value="'+(S.D.part||'')+'" placeholder="1 000"></div>'
   +'<div class="frow"><label>Дата добора</label><input type="date" id="in_payd" value="'+(S.D.payDate||'')+'"></div>'
-  +A([{t:'Зафиксировал →',cls:'main',fn:"const p=+$('in_part').value||0;const d=$('in_payd').value;if(p<1000){alert('Частичка — от 1 000 ₽ (канон)')}else if(!d){alert('Добор без даты — незачёт')}else{S.D.part=p;S.D.payDate=d;ev('money','part='+p);markDone('s8');go('s9')}"}]);
+  +A([{t:'Зафиксировал →',cls:'main',fn:"const p=+$('in_part').value||0;const d=$('in_payd').value;if(p<990){alert('Частичка — от 990 ₽ (системный минимум; голосом предлагаем «от тысячи»)')}else if(!d){alert('Добор без даты — незачёт')}else{S.D.part=p;S.D.payDate=d;ev('money','part='+p);markDone('s8');go('s9')}"}]);
 },
 s8_zero(){
   return '<div class="goal"><span class="stepno">шаг 8 · ноль сегодня</span>ДОГОВОР ВСЁ РАВНО СЕЙЧАС + ЖЁСТКАЯ ДАТА + КВАЛ НАМЕРЕНИЯ</div>'
