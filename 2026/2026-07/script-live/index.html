@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Скрипт-пилот · рабочее место звонка — прототип</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ СКРИПТ-ПИЛОТ (заказчик 22.07: «нужен отдельный СЕРВИС, чтобы менеджер работал со скриптом —
+   пришёл новый человек и всё понятно»; тестовая страница, ОБНУЛЯТОР НЕ ТРОНУТ).
+   Модель по ресёрчу US-сервисов (wf_1fcf1cfe): Zingtree-визард (экран = реплика + кнопки «что ответил
+   клиент») + ReadyMode-поля в теле шага + Balto-гейт, закрывающийся сам + Five9-замок исхода.
+   Канон контента: /script/ (10 шагов, реплики дословно), гейт 16 = ai-qa-consultation-prompt.md v1.1.15. ═══ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#16231D;--green:#0B3B2E;--em:#0F6B4F;--live:#0F9F63;--gold:#C99A33;--goldbg:#FBF3DC;--golddk:#8A6212;--red:#A8442E;--redbg:#FAEDE8;--muted:#7c8894;--line:#e4e9ed;--paper:#f7f8f6}
+body{font-family:"Golos Text","PT Sans",Arial,sans-serif;background:#eef1ef;color:var(--ink);font-size:14px;line-height:1.5}
+b,strong{font-weight:700}
+
+/* шапка */
+.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;background:var(--green);color:#fff;padding:10px 18px;box-shadow:0 4px 14px -8px rgba(11,59,46,.5)}
+.top .lg{width:30px;height:30px;border-radius:8px;background:var(--em);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#F4C775;flex:none}
+.top .who b{display:block;font-size:14px;line-height:1.2}
+.top .who small{font-size:11px;color:rgba(255,255,255,.65)}
+.pbadge{display:none;background:#F4C775;color:#5c4708;font-weight:800;font-size:11.5px;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.pbadge.show{display:inline-block}
+.timer{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700;font-size:14px;color:rgba(255,255,255,.9)}
+.gmini{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:rgba(255,255,255,.85);white-space:nowrap}
+.gbar{width:120px;height:6px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden}
+.gbar i{display:block;height:100%;width:100%;background:#F4C775;border-radius:3px;transform:scaleX(0);transform-origin:left;transition:transform .25s cubic-bezier(.23,1,.32,1)}
+.objbtn{border:none;border-radius:9px;background:var(--gold);color:#3d2f07;font-family:inherit;font-weight:800;font-size:13px;padding:9px 14px;cursor:pointer;transition:transform .16s cubic-bezier(.23,1,.32,1),background .15s ease-out;white-space:nowrap}
+.objbtn:hover{background:#d9ab45}
+.objbtn:active{transform:scale(.97)}
+.objbtn small{display:block;font-size:9px;font-weight:700;opacity:.7;letter-spacing:.04em}
+
+/* каркас */
+.wrap{display:grid;grid-template-columns:1fr 312px;gap:20px;max-width:1100px;margin:20px auto 60px;padding:0 18px;align-items:start}
+@media (max-width:960px){.wrap{grid-template-columns:1fr}}
+
+/* сцена */
+.stage{background:#fff;border:1px solid #cfe0d8;border-radius:14px;box-shadow:0 6px 22px -14px rgba(11,59,46,.4);padding:26px 30px 24px;min-height:420px}
+.goal{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:8px}
+.goal .stepno{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:2px 7px;color:var(--em);letter-spacing:0}
+/* три стиля текста: дословно / своими словами / действие */
+.say{margin-top:14px;font-size:19px;line-height:1.55;color:var(--green);font-weight:600}
+.say+.say{margin-top:10px}
+.say .var{background:var(--goldbg);border-radius:6px;padding:0 5px;color:var(--golddk);font-variant-numeric:tabular-nums;white-space:nowrap}
+.own{margin-top:12px;font-size:14px;color:#4a5560;font-style:italic}
+.own::before{content:"своими словами · ";font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.act{margin-top:14px;background:var(--goldbg);border:1px solid rgba(201,154,51,.4);border-radius:10px;padding:10px 13px;font-size:13.5px;font-weight:600;color:var(--golddk)}
+.act::before{content:"⚙ действие · не произносится: ";font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.warnbox{margin-top:14px;background:var(--redbg);border-radius:10px;padding:10px 13px;font-size:13px;font-weight:600;color:var(--red);line-height:1.5}
+.hintbox{margin-top:14px;background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:10px 13px;font-size:13px;color:#4a5560;line-height:1.5}
+
+/* поля в шаге */
+.frow{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.frow label{font-size:12.5px;font-weight:700;color:#4a5560;min-width:150px}
+.stage input[type=text],.stage input[type=number],.stage input[type=date],.stage input[type=time]{border:1.5px solid #d8dee3;border-radius:9px;padding:10px 12px;font-family:inherit;font-size:16px;color:var(--ink);width:220px;transition:border-color .15s ease-out}
+.stage input:focus{outline:none;border-color:var(--em)}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.chip{border:1.5px solid #d8dee3;border-radius:999px;background:#fff;padding:9px 16px;font-family:inherit;font-size:14px;font-weight:600;color:#4a5560;cursor:pointer;transition:background .15s ease-out,border-color .15s ease-out,color .15s ease-out}
+.chip:hover{border-color:var(--em);color:var(--em)}
+.chip:active{transform:scale(.97)}
+.chip.on{background:var(--em);border-color:var(--em);color:#fff}
+.stp{display:inline-flex;align-items:center;border:1.5px solid #d8dee3;border-radius:9px;overflow:hidden;vertical-align:middle}
+.stp button{width:36px;height:38px;border:none;background:var(--paper);color:var(--em);font-size:17px;font-weight:700;cursor:pointer;font-family:inherit}
+.stp button:active{transform:scale(.95)}
+.stp input{width:46px;border:none!important;text-align:center;font-weight:700;font-size:16px;padding:8px 2px}
+.stp input:focus{outline:none}
+
+/* кнопки-ответы клиента */
+.answers{margin-top:22px;display:flex;flex-direction:column;gap:8px}
+.answers .alab{font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.abtn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1.5px solid #d8dee3;border-radius:11px;background:#fff;padding:13px 16px;font-family:inherit;font-size:15.5px;font-weight:700;color:var(--ink);cursor:pointer;transition:border-color .15s ease-out,background .15s ease-out,transform .16s cubic-bezier(.23,1,.32,1)}
+.abtn:hover{border-color:var(--em);background:#f7faf8}
+.abtn:active{transform:scale(.985)}
+.abtn .key{flex:none;width:24px;height:24px;border-radius:6px;background:var(--paper);border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.abtn.main{border-color:var(--em);background:var(--em);color:#fff}
+.abtn.main .key{background:rgba(255,255,255,.15);border-color:transparent;color:rgba(255,255,255,.8)}
+.abtn.main:hover{background:#0B5540}
+.abtn.ghost{border-style:dashed;color:var(--muted);font-weight:600;font-size:13.5px;padding:9px 16px}
+.abtn.ghost:hover{color:var(--em)}
+.abtn small{display:block;font-size:11.5px;font-weight:600;color:inherit;opacity:.65;margin-top:1px}
+.abtn.warn{border-color:rgba(201,154,51,.55);background:var(--goldbg);color:var(--golddk)}
+
+/* правая колонка: карта звонка */
+.side{position:sticky;top:76px}
+.map{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:0 4px 16px -12px rgba(11,59,46,.35)}
+.map h3{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.mrow{display:flex;align-items:center;gap:9px;padding:6px 6px;margin:0 -6px;border-radius:8px;font-size:13px;font-weight:600;color:#9aa5ae;cursor:default}
+.mrow .md{width:20px;height:20px;border-radius:50%;border:2px solid #d8dee3;flex:none;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#b6bfc7;background:#fff;transition:background .2s ease-out,border-color .2s ease-out}
+.mrow.done{color:var(--ink);cursor:pointer}
+.mrow.done:hover{background:var(--paper)}
+.mrow.done .md{background:var(--live);border-color:var(--live);color:#fff}
+.mrow.cur{color:var(--green);font-weight:800}
+.mrow.cur .md{border-color:var(--gold);background:var(--goldbg);color:var(--golddk);animation:pulse 2s ease-out infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(201,154,51,.4)}70%{box-shadow:0 0 0 7px rgba(201,154,51,0)}100%{box-shadow:0 0 0 0 rgba(201,154,51,0)}}
+.gate{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px}
+.gate .gh{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--em);cursor:pointer;user-select:none}
+.gate .gh .chev{margin-left:auto;color:var(--muted);font-size:10px;transition:transform .15s ease-out}
+.gate.open .gh .chev{transform:rotate(180deg)}
+.glist{display:none;margin-top:8px}
+.gate.open .glist{display:block}
+.gi{display:flex;gap:7px;align-items:baseline;padding:3px 0;font-size:12px;color:#4a5560}
+.gi .gq{flex:none;width:13px;height:13px;border:1.5px solid #c3ccd4;border-radius:4px;position:relative;top:2px}
+.gi.on{color:var(--ink)}
+.gi.on .gq{background:var(--live);border-color:var(--live)}
+.gi.on .gq::after{content:"✓";position:absolute;inset:0;color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.gi .am{font-size:9.5px;font-weight:700;color:var(--live)}
+.gi.miss{color:var(--red);cursor:pointer}
+.gi.miss .gq{border-color:var(--red);border-style:dashed}
+
+/* лоток возражений */
+.otray{display:none;position:fixed;inset:0;z-index:50;background:rgba(17,24,21,.45);backdrop-filter:blur(2px)}
+.otray.on{display:flex;align-items:flex-start;justify-content:center;padding:6vh 18px}
+.opanel{width:min(760px,94vw);max-height:86vh;overflow-y:auto;background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 24px 60px -20px rgba(0,0,0,.45);animation:up .18s cubic-bezier(.23,1,.32,1)}
+@keyframes up{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.opanel h2{font-size:16px;color:var(--green)}
+.opanel .osub{font-size:12px;color:var(--muted);margin-top:2px}
+.ogrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+@media (max-width:640px){.ogrid{grid-template-columns:1fr}}
+.ocard{border:1.5px solid var(--line);border-radius:11px;background:#fff;padding:11px 13px;font-family:inherit;text-align:left;cursor:pointer;transition:border-color .15s ease-out,background .15s ease-out}
+.ocard:hover{border-color:var(--em);background:#f7faf8}
+.ocard:active{transform:scale(.98)}
+.ocard b{display:block;font-size:13.5px;color:var(--ink)}
+.ocard small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.oview .osaid{margin-top:14px;font-size:13px;font-weight:700;color:var(--red)}
+.oview .oans{margin-top:10px;font-size:17px;line-height:1.55;color:var(--green);font-weight:600}
+.oview .ostop{margin-top:12px;background:var(--goldbg);border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;color:var(--golddk)}
+.oview .owhy{margin-top:10px;font-size:12.5px;color:#4a5560}
+.obk{display:inline-flex;align-items:center;gap:6px;margin-top:16px;border:none;border-radius:10px;background:var(--em);color:#fff;font-family:inherit;font-weight:800;font-size:14px;padding:11px 18px;cursor:pointer;transition:background .15s ease-out}
+.obk:hover{background:#0B5540}
+.obk:active{transform:scale(.97)}
+.olink{background:none;border:none;color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;margin-top:16px;margin-left:10px}
+.olink:hover{color:var(--em)}
+
+/* стартовый и финальный экраны */
+.big{font-size:24px;font-weight:800;color:var(--green);line-height:1.3}
+.startlogo{width:56px;height:56px;border-radius:14px;background:var(--green);color:#F4C775;font-weight:800;font-size:18px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.sumrow{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.sumrow span{color:var(--muted)}
+.sumrow b{text-align:right}
+.evlist{margin-top:8px;font-size:12px;color:#4a5560;max-height:180px;overflow-y:auto;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-variant-numeric:tabular-nums}
+.evlist div{padding:2px 0;border-bottom:1px dashed #f0f2f4}
+.cap{max-width:1100px;margin:0 auto;padding:0 18px 40px;font-size:12px;color:var(--muted)}
+.cap b{color:var(--ink)}
+kbd{background:var(--paper);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;font-family:inherit;font-size:11px;font-weight:700;color:#4a5560}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span class="lg">ДН</span>
+  <div class="who"><b id="t_name">Скрипт-пилот</b><small id="t_sub">первый звонок · консультация</small></div>
+  <span class="pbadge" id="t_prod"></span>
+  <span class="timer" id="t_timer">00:00</span>
+  <div class="gmini"><span>Гейт <span id="t_gate">0/16</span></span><span class="gbar"><i id="t_gbar"></i></span></div>
+  <button class="objbtn" onclick="openTray()" title="Клавиша O — возражение клиента">⚡ Возражение<small>клавиша O</small></button>
+</div>
+
+<div class="wrap">
+  <div class="stage" id="stage"></div>
+
+  <div class="side">
+    <div class="map">
+      <h3>Карта звонка</h3>
+      <div id="maprows"></div>
+      <div class="gate" id="gatebox">
+        <div class="gh" onclick="this.parentNode.classList.toggle('open')">Гейт «консультация состоялась» · <span id="g_cnt">0/16</span><span class="chev">▾</span></div>
+        <div class="glist" id="glist"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="otray" id="otray" onclick="if(event.target===this)closeTray()">
+  <div class="opanel" id="opanel"></div>
+</div>
+
+<p class="cap"><b>Прототип «Скрипт-пилот» — тестовая страница, Обнулятор не тронут.</b> Модель по US-сервисам (Zingtree/VanillaSoft — дерево с кнопками ответов клиента; ReadyMode/HubSpot — поля прямо в скрипте пишут сделку; Balto — гейт закрывается сам; Five9 — замок исхода). Контент дословно: /script/ + рубрика AI-QA v1.1.15. Хоткеи: <kbd>1</kbd>–<kbd>9</kbd> ответы клиента · <kbd>O</kbd> возражение · <kbd>Esc</kbd> закрыть лоток. В проде ответы пишут поля сделки амо и события движка (пакет виден на финальном экране); AI-QA сверяет с записью звонка.</p>
+
+<script>
+'use strict';
+const fmt=n=>Math.round(n).toLocaleString('ru-RU');
+const $=id=>document.getElementById(id);
+
+/* ── 14 возражений — дословно с /script/ «Отработка возражений» ── */
+const OBJ=[
+{id:1,t:'«Дорого / где взять деньги»',c:'Дорого, где я такую сумму возьму',ans:['[Имя], прекрасно понимаю вас — любая сумма в текущей ситуации выглядит болезненно. Но мы с вами думаем не об этом.','Смотрите: сейчас вы отдаёте [40 000] в месяц и большая часть — проценты. Наша услуга — 13 500 в месяц, и платежи по кредитам вы уже не вносите. Вам с первого месяца станет легче. Потянете 13 500?'],why:'Не спорит с ценой — переключает с «сколько платить» на «сколько теряю без процедуры». Сумма всегда месячная, не полная.',stop:'Скидку НЕ предлагать: козырь открывается только после пересчёта по КИ. Первое «дорого» = продать запрос КИ.'},
+{id:2,t:'«Нет денег сегодня, зарплата позже»',c:'Сегодня не смогу, зарплата только 10-го',ans:['Хорошо, фиксирую платёж на 10-е. Но давайте уже начнём работать: внесите сколько есть — достаточно от 1 000 ₽, всё идёт в зачёт по договору. И завтра жду от вас кредитную историю — сформирую документ по рискам, покажу на цифрах вашу реальную переплату.'],why:'Дата зафиксирована И микрошаг всё равно сегодня — клиент «зашёл» в работу психологически.',stop:'Квал-тест: «1 000 найдёт любой». Займ «чтобы оплатить нас» — НЕ предлагаем: вредит делу клиента.'},
+{id:3,t:'«А можно бесплатно через МФЦ?»',c:'Слышал, банкротство можно бесплатно через МФЦ',ans:['Верно, такой вариант есть — но он для узких случаев: долг в пределах лимита, закрытые исполнительные производства, нет дохода и имущества. У вас [причина] — МФЦ заявление просто вернёт, потеряете месяцы. Ваш рабочий путь — через Арбитражный суд, и там как раз мы всё делаем за вас.'],why:'Не обесценивает МФЦ («развод!»), а показывает границы применимости — честно и экспертно.'},
+{id:4,t:'«Не верится, сказка / развод»',c:'Не верится, что можно не платить',ans:['Можете сами загуглить «банкротство физических лиц, 127-ФЗ» — увидите ровно ту же информацию. Закон работает с 2015 года.','И прежде чем платить — мы вместе пройдём договор на экране презентации, посмотрите реквизиты компании. Сначала договор — потом деньги.'],why:'«Проверьте сами» = нечего скрывать; «сначала договор» снимает страх отдать деньги в пустоту.'},
+{id:5,t:'«Страшно: коллекторы, приставы»',c:'Они же звонить будут, угрожают уже',ans:['Каждому, кто входит в процедуру, поначалу страшно — это нормально. Но это закон, ему подчиняются все банки. Как только суд заводит дело — звонить и угрожать вам не имеют права: все знают, что вы в процедуре. Плюс поставим переадресацию и сделаем отзыв персональных данных.'],why:'Нормализация страха + опора на закон + конкретные механизмы защиты.',stop:'Без «звонки прекратятся полностью через N дней» — обещание сроков не даём.'},
+{id:6,t:'«Сделайте сами, я не разберусь»',c:'Я в документах ничего не понимаю',ans:['Не будет такого, что мы дали задание, а вы сами ищете. Основную часть документов юрист заказывает сам через Госуслуги; от вас — сфотографировать то, что дома, по понятной инструкции. Ваша задача — быть на связи, как правой рукой. Всё остальное делаем мы — вы за это и платите.'],why:'Метафора «правая рука» + конкретика делят ответственность, а не перекладывают.'},
+{id:7,t:'«А машину / квартиру не заберут?»',c:'При банкротстве же всё заберут?',ans:['Единственное жильё по закону защищено. По автомобилю: наша главная задача — его сохранить; юрист после анализа подберёт самый безопасный вариант защиты. Мы используем весь опыт и правовые инструменты — важно понимать, что итоговое решение за судом, но именно наша работа в том, чтобы у судьи не возникло лишних вопросов.'],why:'Формулировка из официального скрипта — честная: задача + практика, без «100% сохраним».'},
+{id:8,t:'«Может, взять займ на оплату?»',c:'Возьму займ и оплачу вам',ans:['Не нужно — новые займы перед процедурой только вредят делу: суд смотрит на добросовестность. Внесите из своих сколько есть сегодня, остальное — с зарплаты. Найдём комфортный график из реальных средств.'],why:'Защищает дело клиента = доверие; дробление закрывает деньги без токсичного займа.'},
+{id:9,t:'«Надо подумать / посоветоваться»',c:'Дайте посоветоваться с женой, наберу завтра',ans:['Конечно. Тогда прямо сейчас отправлю вам в чат три вещи: расчёт по вашим цифрам — что списываем, какой платёж, какая экономия; образец договора в PDF — спокойно изучите вместе с женой; и примеры завершённых дел с номерами — убедитесь, что мы существуем. А завтра в 18:00 набираю: откроем экран с условиями, пройдём договор вместе — и, если всё устроит, подпишете кодом из СМС.','И сразу уточню, чтобы я понимал: если посоветуетесь и жена скажет «нет» — вы всё равно будете решать вопрос с долгами или на этом закрываем? Мне важно, ждать ли вас.'],why:'Домашнее задание + жёсткая дата + квал намерения — три обязательных действия на каждом «подумаю». Без них звонок = пустой дожим.'},
+{id:10,t:'«А есть гарантия?»',c:'Гарантируете, что спишете?',ans:['Да — даю 100%. Мы не берём дела, которые не пройдут: перед договором юристы проверяют все риски, поэтому в результате уверены. И это не слова, а пункт договора: если долги не списаны — возвращаем деньги. Что думаете?'],why:'Наш «100%» подкреплён отбором дел и договором. Конкретика по договору: списание — возврат 100% оплаченного за 7 рабочих дней; реструктуризация — если план не утверждён по вине компании. Гарантия работает, пока клиент честно даёт информацию и платит по графику — это тоже говорим прямо.'},
+{id:11,t:'«Что у меня останется на жизнь?»',c:'А на что я жить буду в процедуре?',ans:['По закону вам положен прожиточный минимум — около 20 000, по регионам отличается. Плюс учитываются дети, лекарства, обучение, при отсутствии жилья — аренда. Что реально защитить в вашем случае — разберёт юрист, легально. Согласитесь: лучше чуть потерпеть полгода, чем ещё годы отдавать всю зарплату банкам?'],why:'Честный расчёт + сравнение с альтернативой.',stop:'НЕ говорим «перейдите на полставки / получайте неофициально» — сокрытие дохода = суд не спишет долг.'},
+{id:12,t:'«Последствия пугают»',c:'Банкротом буду, клеймо на всю жизнь…',ans:['Последствий немного, и они конечны: руководящие должности — 3 года, повторное списание — через 5 лет. Кредиты брать можно, за границу можно, работать можно. А если статус принципиален — есть реструктуризация: без статуса банкрота, платите только тело долга. Что вам ближе?'],why:'Честные последствия + развилка продуктов как выход.'},
+{id:13,t:'Срыв / отчаяние (клиент плачет)',c:'Я настолько в яме…',ans:['Я понимаю, не переживайте — проблемы скидываем на нас, мы точно сможем помочь. В вашей вине того, что так сложилось, нет: зарплаты не растут, кредиты дорогие. Вы уже делаете правильный шаг — решаете вопрос по закону.'],why:'Дословный приём Светы — раппорт + снятие вины переводят из паралича в доверие.'},
+{id:14,t:'«Передумал / расторгнуть» (после оплаты)',c:'Я передумал, верните деньги',ans:['[Имя], расскажите, пожалуйста, почему приняли такое решение? (слушаем, не перебивая) Давайте будем думать не как расторгнуть, а что нам нужно сделать, чтобы такого желания не было. Вы же пришли, чтобы [его боль]. Она решена? Возможно, вас что-то напугало по дороге — или родственники предложили другой вариант?'],why:'Клиент в защите — спор укрепляет решение, вопрос «почему» его размягчает; возврат к первоначальной боли напоминает, зачем он приходил.',stop:'Твёрдое взвешенное «расторгаю» после честного разбора — принимаем корректно, без дожима.'},
+];
+
+/* ── карта звонка: 10 шагов /script/ ── */
+const MAP=[['s1','Приветствие'],['s2','Диагностика'],['s3','Развилка продукта'],['s4','Процесс'],['s5','О компании'],['s6','Цена'],['s7','Презентация'],['s8','Деньги сегодня'],['s9','Онбординг'],['fin','Исход звонка']];
+/* гейт 16 — канон v1.1.15 */
+const GATE=[[1,'Причина и боль'],[2,'Общий долг'],[3,'Продукты долга'],[4,'Просрочка'],[5,'Платёж в месяц'],[6,'Доход и занятость'],[7,'Семья и иждивенцы'],[8,'ИП / ООО'],[9,'Имущество и залоги'],[10,'Сделки за 3 года'],[11,'Супруг в курсе'],[12,'Желаемый исход'],[13,'Конкуренты'],[14,'Деньги на жизнь'],[15,'Госплатежи отдельно'],[16,'Следующий шаг с датой']];
+
+/* ── состояние: localStorage — перезагрузка продолжает звонок с того же места ── */
+let S=null;
+const BLANK={screen:'start',name:'Иван Иванович',stepDone:[],D:{},events:[],started:0,objStack:null};
+function load(){try{S=JSON.parse(localStorage.getItem('sl_v1'))||null}catch(e){S=null} if(!S||!S.screen)S=JSON.parse(JSON.stringify(BLANK));}
+function save(){try{localStorage.setItem('sl_v1',JSON.stringify(S))}catch(e){}}
+function ev(type,detail){S.events.push({at:Date.now(),type,detail:detail||''});save();}
+
+/* ── гейт: закрывается сам, из данных (ноль отдельной бухгалтерии) ── */
+function gate(){
+  const D=S.D, g={};
+  g[1]=!!D.painDone; g[2]=+D.debt>0; g[3]=(D.prods||[]).length>0; g[4]=!!D.ovd; g[5]=+D.pay>0;
+  g[6]=D.income!==undefined&&D.income!==''; g[7]=!!D.fam; g[8]=!!D.ipo; g[9]=!!D.assets; g[10]=!!D.deals;
+  g[11]=!!D.spouse; g[12]=!!D.wish; g[13]=!!D.comp; g[14]=!!D.pmTold; g[15]=!!D.gosTold; g[16]=!!(D.outcome&&D.outcome.ok);
+  return g;
+}
+function gateCount(){const g=gate();let n=0;for(let i=1;i<=16;i++)if(g[i])n++;return n;}
+
+/* переменные в репликах */
+function V(x){return '<span class="var">'+x+'</span>';}
+function mergeVars(){
+  const D=S.D, pay=+D.pay||0, debt=+D.debt||0;
+  return {name:S.name.split(' ')[0]?S.name:'Иван Иванович', pay:pay?fmt(pay)+' ₽':'[платёж]', debt:debt?fmt(debt)+' ₽':'[долг]',
+    intr:pay?'~'+fmt(pay*0.85)+' ₽':'[проценты]', total:pay?fmt(pay*36)+' ₽':'[платёж × месяцы]'};
+}
+
+/* ── рендер ── */
+function go(screen){S.screen=screen;ev('step_enter',screen);render();window.scrollTo({top:0,behavior:'smooth'});}
+function markDone(id){if(!S.stepDone.includes(id))S.stepDone.push(id);}
+function render(){
+  const r=SCREENS[S.screen]; if(!r){S.screen='start';return render();}
+  $('stage').innerHTML=r();
+  /* шапка */
+  $('t_name').textContent=S.screen==='start'?'Скрипт-пилот':S.name;
+  $('t_sub').textContent=S.screen==='start'?'первый звонок · консультация':'звонок идёт · '+({s1:'шаг 1 · приветствие',s2:'шаг 2 · диагностика',s3:'шаг 3 · развилка',s4:'шаг 4 · процесс',s5:'шаг 5 · о компании',s6:'шаг 6 · цена',s7:'шаг 7 · презентация',s8:'шаг 8 · деньги',s9:'шаг 9 · онбординг',fin:'исход звонка',closed:'звонок закрыт'}[S.screen.split('_')[0]]||'');
+  const pb=$('t_prod'); const prod=S.D.product;
+  pb.classList.toggle('show',!!prod); pb.textContent=prod==='rdg'?'РДГ · реструктуризация':prod==='bfl'?'БФЛ · списание':'';
+  const n=gateCount(); $('t_gate').textContent=n+'/16'; $('g_cnt').textContent=n+'/16'; $('t_gbar').style.transform='scaleX('+(n/16)+')';
+  /* карта */
+  const curTop=S.screen.split('_')[0];
+  $('maprows').innerHTML=MAP.map(([id,t],i)=>{
+    const done=S.stepDone.includes(id), cur=curTop===id||(id==='s2'&&curTop==='s2');
+    return '<div class="mrow'+(done&&!cur?' done':'')+(cur?' cur':'')+'"'+(done&&!cur?' onclick="go(\''+(id==='s2'?'s2_q1':id)+'\')" title="Вернуться"':'')+'><span class="md">'+(done&&!cur?'✓':(i+1))+'</span>'+t+'</div>';
+  }).join('');
+  /* гейт-список */
+  const g=gate();
+  $('glist').innerHTML=GATE.map(([i,t])=>'<div class="gi'+(g[i]?' on':(S.screen==='fin'?' miss':''))+'">'+'<span class="gq"></span><span>'+i+' · '+t+(g[i]?' <span class="am">· из данных</span>':'')+'</span></div>').join('');
+  save();
+  const f=$('stage').querySelector('input,select'); if(f&&S.screen!=='start')try{f.focus({preventScroll:true})}catch(e){}
+}
+/* кнопки-ответы с хоткеями */
+let hot={};
+function A(list){
+  hot={};
+  return '<div class="answers"><div class="alab">Что ответил клиент / что делаешь</div>'+list.map((a,i)=>{
+    const k=i+1; hot[k]=a.fn;
+    return '<button type="button" class="abtn '+(a.cls||'')+'" onclick="'+a.fn+'"><span class="key">'+k+'</span><span>'+a.t+(a.s?'<small>'+a.s+'</small>':'')+'</span></button>';
+  }).join('')+'</div>';
+}
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input,select,textarea'))return;
+  if(e.key==='o'||e.key==='щ'||e.key==='O'){openTray();return;}
+  if(e.key==='Escape'){closeTray();return;}
+  const f=hot[+e.key]; if(f){e.preventDefault();eval(f);}
+});
+
+/* сеттеры данных */
+function setD(k,v){S.D[k]=v;ev('field_set',k+'='+String(v).slice(0,60));render();}
+function setInp(k,id){setD(k,$(id).value);}
+function togArr(k,v,el){const a=S.D[k]||[];const i=a.indexOf(v);i<0?a.push(v):a.splice(i,1);S.D[k]=a;el.classList.toggle('on');ev('field_set',k+'='+a.join('+'));save();
+  const n=gateCount(); $('t_gate').textContent=n+'/16'; $('g_cnt').textContent=n+'/16'; $('t_gbar').style.transform='scaleX('+(n/16)+')';}
+function chipRow(k,opts){const cur=S.D[k];return '<div class="chips">'+opts.map(o=>'<button type="button" class="chip'+(cur===o[0]?' on':'')+'" onclick="setD(\''+k+'\',\''+o[0]+'\')">'+o[1]+'</button>').join('')+'</div>';}
+function chipMulti(k,opts){const a=S.D[k+'A']||[];return '<div class="chips">'+opts.map(o=>'<button type="button" class="chip'+(a.includes(o)?' on':'')+'" onclick="togArr(\''+k+'A\',\''+o+'\',this)">'+o+'</button>').join('')+'</div>';}
+
+/* ── ЭКРАНЫ ── */
+const SCREENS={
+
+start(){ const has=S.started>0&&S.screen!=='start';
+  return '<div class="startlogo">ДН</div><div class="big">Скрипт-пилот: первый звонок</div>'
+  +'<p style="margin-top:10px;font-size:14.5px;color:#4a5560;max-width:520px">Экран сам говорит, что сказать, и сам ведёт дальше по ответам клиента. Всё, что ты вводишь, — уже заполнение сделки: гейт «консультация состоялась» соберётся по ходу, без отдельной работы. Возражение клиента — жми <b>⚡ Возражение</b> (клавиша O) в любой момент.</p>'
+  +'<div class="frow"><label>Клиент (из карточки амо)</label><input type="text" id="in_name" value="'+S.name.replace(/"/g,'&quot;')+'"></div>'
+  +'<div class="hintbox">Перед звонком открой историю: заявка, прошлые касания. В проде имя и заявка подставятся из сделки сами.</div>'
+  +A([{t:'Начать звонок',s:'таймер пойдёт, скрипт поведёт с приветствия',cls:'main',fn:"S.name=$('in_name').value||'Иван Иванович';S.started=Date.now();S.stepDone=[];ev('call_start');go('s1')"}]
+    .concat(localStorage.getItem('sl_v1')&&S.started?[{t:'Сбросить прошлый прогон',s:'начать с чистого листа',cls:'ghost',fn:"localStorage.removeItem('sl_v1');S=null;load();render()"}]:[]));
+},
+
+s1(){ const m=mergeVars();
+  return '<div class="goal"><span class="stepno">шаг 1 из 10</span>ПРИВЕТСТВИЕ — ТЁПЛАЯ ПЕРЕДАЧА · клиент дважды говорит «да» до первого вопроса</div>'
+  +'<div class="say">«Добрый день, '+V(m.name)+'?»</div>'
+  +'<div class="say">«Меня зовут [Имя Отчество], финансовый эксперт компании ДоНуля. Мой коллега передал мне вашу заявку — разобраться с кредитной нагрузкой: списать долги полностью или снизить платёж. Верно?»</div>'
+  +'<div class="say">«Тогда задам несколько вопросов, полностью проанализирую вашу проблему и дам пошаговое решение. И не переживайте: мы каждый день сталкиваемся с подобными случаями, вашей вины тут нет — зарплаты не растут, кредиты дорогие. Хорошо?»</div>'
+  +'<div class="own">пауза под «да» после каждой реплики; говори как со своим близким — это первое, что оценивает ИИ</div>'
+  +A([
+    {t:'Клиент слушает — идём к его истории',cls:'main',fn:"markDone('s1');go('s2_q1')"},
+    {t:'«Сейчас неудобно говорить»',s:'фиксируем перезвон с датой и временем — это уже шаг с датой',fn:"go('s1_re')"},
+    {t:'Жёсткий отказ / не тот человек',s:'«не звоните больше» — к финалу с цитатой',fn:"go('fin')"},
+  ]);
+},
+
+s1_re(){
+  return '<div class="goal"><span class="stepno">шаг 1 · перенос</span>НЕУДОБНО ГОВОРИТЬ — НЕ ОТПУСКАЕМ БЕЗ ДАТЫ</div>'
+  +'<div class="say">«Понимаю. Когда удобно созвониться, чтобы спокойно разобрать вашу ситуацию, — сегодня вечером или завтра? В какое время?»</div>'
+  +'<div class="frow"><label>Договорились на</label><input type="date" id="re_d"><input type="time" id="re_t" style="width:120px"></div>'
+  +A([
+    {t:'Дата и время зафиксированы',s:'уйдёт исходом «созвон» на финальный экран',cls:'main',fn:"S.D.reD=$('re_d').value;S.D.reT=$('re_t').value;if(S.D.reD&&S.D.reT){go('fin')}else{alert('«Созвонимся на днях» — незачёт: нужна дата И время')}"},
+    {t:'← Назад к приветствию',cls:'ghost',fn:"go('s1')"},
+  ]);
+},
+
+/* ═══ ШАГ 2 · ДИАГНОСТИКА: один вопрос за раз, ответ = поле сделки = пункт гейта ═══ */
+s2_q1(){ const m=mergeVars();
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 1 из 12</span>ПРИЧИНА И БОЛЬ — СЛУШАЕМ, НЕ ПЕРЕБИВАЯ</div>'
+  +'<div class="say">«Расскажите, что у вас за история с кредитами, почему решили обратиться? Как вообще получилось, что такая ситуация сложилась?»</div>'
+  +'<div class="own">клиент закрыт — помоги: «наверное, что-то случилось, раз стало тяжело платить? …а сами уже пытались решить?»</div>'
+  +'<div class="frow"><label>Боль клиента (2–4 слова)</label><input type="text" id="in_pain" value="'+(S.D.pain||'')+'" placeholder="напр.: платежи душат, коллекторы звонят жене"  style="width:340px"></div>'
+  +A([{t:'Выслушал, боль записал',cls:'main',fn:"S.D.pain=$('in_pain').value;S.D.painDone=true;ev('field_set','pain');go('s2_q2')"}]);
+},
+s2_q2(){
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 2 из 12</span>ОБЩИЙ ДОЛГ</div>'
+  +'<div class="say">«Какая общая сумма долга на текущий момент?»</div>'
+  +'<div class="frow"><label>Долг, ₽</label><input type="number" id="in_debt" value="'+(S.D.debt||'')+'" placeholder="800 000"></div>'
+  +A([{t:'Записал →',cls:'main',fn:"S.D.debt=+$('in_debt').value||0;ev('field_set','debt='+S.D.debt);go('s2_q3')"}]);
+},
+s2_q3(){
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 3 из 12</span>ПРОДУКТЫ ДОЛГА — тип, не имена банков</div>'
+  +'<div class="say">«Что именно за долги — потребкредиты, займы МФО, кредитные карты, может, расписки?»</div>'
+  +'<div class="own">тип продукта определяет проценты и аргументы; имена кредиторов юрист возьмёт из КИ</div>'
+  +chipMulti('prods',['Потребкредит','Займ МФО','Кредитная карта','Расписка','Залоговый','Ипотека'])
+  +A([{t:'Отметил типы →',cls:'main',fn:"S.D.prods=S.D.prodsA||[];if(!S.D.prods.length){alert('Отметь хотя бы один тип долга')}else go('s2_q4')"}]);
+},
+s2_q4(){
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 4 из 12</span>ПРОСРОЧКА — ГЛАВНАЯ РАЗВИЛКА АНКЕТЫ</div>'
+  +'<div class="say">«Есть ли просрочки — и как давно начались?»</div>'
+  +A([
+    {t:'«Пока плачу исправно»',s:'ветка: болит платёж',fn:"setD('ovd','none');go('s2_q4a')"},
+    {t:'«Просрочка 1–3 месяца»',s:'ветка: требования банков, коллекторы',fn:"setD('ovd','soft');go('s2_q4b')"},
+    {t:'«Просрочка 3+ месяцев»',s:'ветка: приставы, аресты',fn:"setD('ovd','hard');go('s2_q4c')"},
+  ]);
+},
+s2_q4a(){
+  return '<div class="goal"><span class="stepno">шаг 2 · ветка «без просрочек»</span>ПЛАТЁЖ — СЫРЬЁ ОЦИФРОВКИ БОЛИ</div>'
+  +'<div class="say">«Когда ближайший платёж? Какой <u>ежемесячный платёж по всем обязательствам</u>?»</div>'
+  +'<div class="frow"><label>Платёж в месяц, ₽</label><input type="number" id="in_pay" value="'+(S.D.pay||'')+'" placeholder="40 000"></div>'
+  +A([{t:'Записал →',cls:'main',fn:"S.D.pay=+$('in_pay').value||0;ev('field_set','pay='+S.D.pay);go('s2_dig')"}]);
+},
+s2_q4b(){
+  return '<div class="goal"><span class="stepno">шаг 2 · ветка «1–3 мес»</span>ЦЕНА ВОЗВРАТА В ГРАФИК + ПЛАТЁЖ</div>'
+  +'<div class="say">«Сколько банки требуют, чтобы вернуться в график?» → «То есть нужно заплатить [сумма], просто чтобы платить дальше?» · «Коллекторы беспокоят?»</div>'
+  +'<div class="frow"><label>Платёж в месяц, ₽</label><input type="number" id="in_pay" value="'+(S.D.pay||'')+'" placeholder="40 000"></div>'
+  +A([{t:'Записал →',cls:'main',fn:"S.D.pay=+$('in_pay').value||0;ev('field_set','pay='+S.D.pay);go('s2_dig')"}]);
+},
+s2_q4c(){
+  return '<div class="goal"><span class="stepno">шаг 2 · ветка «3+ мес»</span>ПРИСТАВЫ — ЗДЕСЬ ЖИВЁТ БОЛЬ</div>'
+  +'<div class="say">«Приставы уже арестовали зарплатную карту? Имущество приходили описывать?»</div>'
+  +'<div class="frow"><label>Платёж, который требуют, ₽/мес</label><input type="number" id="in_pay" value="'+(S.D.pay||'')+'" placeholder="40 000"></div>'
+  +A([{t:'Записал →',cls:'main',fn:"S.D.pay=+$('in_pay').value||0;ev('field_set','pay='+S.D.pay);go('s2_dig')"}]);
+},
+s2_dig(){ const m=mergeVars();
+  return '<div class="goal"><span class="stepno">шаг 2 · оцифровка</span>ОЦИФРОВКА БОЛИ — ПРЯМО В АНКЕТЕ</div>'
+  +'<div class="say">«'+V(m.name)+', получается: исходя из вашего платежа и срока, вернуть кредиторам придётся минимум '+V(m.total)+' со всеми процентами — а не те '+V(m.debt)+', что вы занимали. Это же целое состояние — можно квартиру или машину купить! И кредиторы требуют это с вас. Вы бы хотели оставить эти деньги себе?»</div>'
+  +A([{t:'«Конечно хотел бы» — дальше по чек-листу',cls:'main',fn:"go('s2_q5')"}]);
+},
+s2_q5(){
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 5 из 12</span>ДОХОД И ЗАНЯТОСТЬ + человеческий вопрос</div>'
+  +'<div class="say">«Какой официальный доход? …А как справляетесь-то? Кто-то помогает?»</div>'
+  +'<div class="frow"><label>Доход, ₽/мес</label><input type="number" id="in_inc" value="'+(S.D.income||'')+'" placeholder="60 000"></div>'
+  +chipRow('incOff',[['off','Официальный'],['gray','Неофициальный'],['no','Дохода нет']])
+  +A([{t:'Записал →',cls:'main',fn:"S.D.income=+$('in_inc').value||0;if(!S.D.incOff){alert('Отметь: официальный / нет')}else{ev('field_set','income='+S.D.income);go('s2_q6')}"}]);
+},
+s2_q6(){
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 6 из 12</span>СЕМЬЯ И ИЖДИВЕНЦЫ</div>'
+  +'<div class="say">«Официальный брак? Несовершеннолетние дети?»</div>'
+  +chipRow('fam',[['marr_kids','Брак + дети'],['marr','Брак, детей нет'],['kids','Дети, брака нет'],['single','Одинокий']])
+  +A([{t:'Дальше →',cls:'main',fn:"if(!S.D.fam){alert('Отметь семейное положение')}else go('s2_q7')"}]);
+},
+s2_q7(){
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 7 из 12</span>ИП / ООО — ЮР-МИНА УРОВНЯ СДЕЛОК</div>'
+  +'<div class="say">«ИП, ООО открывали? Сейчас или раньше — гендиректор, учредитель, доли?»</div>'
+  +'<div class="own">действующее ИП прекращается при банкротстве, доля в ООО попадает в конкурсную массу — узнать ДО денег</div>'
+  +chipRow('ipo',[['no','Нет и не было'],['past','Было в прошлом'],['now','Есть сейчас ⚠']])
+  +A([{t:'Дальше →',cls:'main',fn:"if(!S.D.ipo){alert('Отметь ИП/ООО')}else go('s2_q8')"}]);
+},
+s2_q8(){
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 8 из 12 · ⚠ критично для суда</span>ИМУЩЕСТВО И ЗАЛОГИ — КЛИЕНТА И СУПРУГА</div>'
+  +'<div class="say">«Что на вас оформлено — включая оружие, лодки, технику? Имущество супруги, приобретённое в браке? Ипотека — на ком?»</div>'
+  +chipMulti('asset',['Единств. жильё','Ипотека','Авто','Дача/участок','Оружие','Лодка/техника','Ничего нет'])
+  +A([{t:'Отметил →',cls:'main',fn:"const a=S.D.assetA||[];if(!a.length){alert('Отметь имущество или «Ничего нет»')}else{S.D.assets=a.join('+');ev('field_set','assets');go('s2_q9')}"}]);
+},
+s2_q9(){
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 9 из 12 · ⚠ критично для суда</span>СДЕЛКИ ЗА 3 ГОДА — ГЛАВНЫЙ ЮРИДИЧЕСКИЙ СЮРПРИЗ</div>'
+  +'<div class="say">«Продавали, дарили имущество за последние 3 года? Кому, за сколько?»</div>'
+  +chipRow('deals',[['no','Не было'],['yes','Были ⚠ — что и кому, в комментарий сделки']])
+  +A([{t:'Дальше →',cls:'main',fn:"if(!S.D.deals){alert('Отметь сделки')}else go('s2_q10')"}]);
+},
+s2_q10(){
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 10 из 12</span>СУПРУГ И БЛИЗКИЕ — КАРТА ЛПР</div>'
+  +'<div class="say">«Подскажите, а супруга знает, что вы рассматриваете вариант — пройти процедуру? Как относится к этому решению?»</div>'
+  +'<div class="own">ЛПР вскрывается сейчас — и «надо посоветоваться» не станет сюрпризом в конце</div>'
+  +chipRow('spouse',[['yes','В курсе, поддерживает'],['doubt','В курсе, сомневается ⚠'],['no','Не знает ⚠'],['na','н/п — одинокий, близких нет']])
+  +A([{t:'Дальше →',cls:'main',fn:"if(!S.D.spouse){alert('Отметь про супруга/близких')}else go('s2_q11')"}]);
+},
+s2_q11(){
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 11 из 12</span>ЖЕЛАЕМЫЙ ИСХОД — КЛИЕНТ САМ НАЗЫВАЕТ ПРОДУКТ</div>'
+  +'<div class="say">«Скажите, а вам как комфортнее: списать долги полностью — или платить, но комфортным платежом, без процентов?»</div>'
+  +A([
+    {t:'«Списать полностью»',cls:'main',fn:"setD('wish','spisat');go('s2_q12')"},
+    {t:'«Платить комфортно, без статуса банкрота»',fn:"setD('wish','platit');go('s2_q12')"},
+    {t:'«Не знаю, что посоветуете?»',fn:"setD('wish','sovet');go('s2_q12')"},
+  ]);
+},
+s2_q12(){
+  return '<div class="goal"><span class="stepno">шаг 2 · вопрос 12 из 12</span>КОНКУРЕНТЫ — КАРТА НАСТОЯЩЕГО БАРЬЕРА</div>'
+  +'<div class="say">«А вы уже что-то слышали о процедуре? Может, где-то уже консультировались?» → «А что не понравилось? Почему не заключили договор?»</div>'
+  +chipRow('comp',[['no','Не слышал, не консультировался'],['heard','Слышал, не ходил'],['was','Консультировался ⚠ — почему не заключил, в комментарий']])
+  +A([{t:'К резюме диагностики →',cls:'main',fn:"if(!S.D.comp){alert('Отметь про конкурентов')}else go('s2_sum')"}]);
+},
+s2_sum(){ const m=mergeVars(); const D=S.D;
+  return '<div class="goal"><span class="stepno">шаг 2 · финал</span>РЕЗЮМЕ СЛОВАМИ КЛИЕНТА + КАРТИНКА БУДУЩЕГО — сигнал эмпатии (е)</div>'
+  +'<div class="say">«'+V(m.name)+', ситуацию понял: у вас '+V(fmt(+D.debt||0)+' ₽ долга')+', платите '+V(m.pay)+' в месяц'+(D.pain?', '+D.pain:'')+'. Вы же понимаете: если сейчас вопрос не решать — аресты, проценты растут, из ямы не выбраться. Хотите решить?»</div>'
+  +'<div class="hintbox">Диагностика собрана: '+gateCount()+'/16 пунктов гейта уже закрыто твоими ответами — отдельно ничего отмечать не нужно.</div>'
+  +A([{t:'«Хочу» — выбираем продукт',cls:'main',fn:"markDone('s2');go('s3')"}]);
+},
+
+s3(){ const D=S.D;
+  /* рекомендация из данных: стабильный доход + желание платить/имущество → РДГ, иначе БФЛ */
+  const rdgWhy=[], bflWhy=[];
+  if(D.incOff==='off'&&+D.income>0)rdgWhy.push('официальный доход '+fmt(+D.income)+' ₽');
+  if(D.wish==='platit')rdgWhy.push('сам сказал «платить комфортно»');
+  if((D.assets||'').includes('Ипотека')||(D.assets||'').includes('Авто'))rdgWhy.push('имущество, которым рисковать нельзя');
+  if(D.wish==='spisat')bflWhy.push('сам сказал «списать полностью»');
+  if(D.incOff!=='off'||!+D.income)bflWhy.push('доход низкий/неофициальный');
+  if(+D.debt>0&&+D.pay>0&&+D.pay*12>+D.debt*0.3)bflWhy.push('платёж непосилен');
+  const rec=rdgWhy.length>bflWhy.length?'rdg':'bfl';
+  return '<div class="goal"><span class="stepno">шаг 3 из 10</span>РАЗВИЛКА ПРОДУКТА — ОФФЕР ВОПРОСОМ, КЛИЕНТ ГОВОРИТ «ДА» ДО ЦЕНЫ</div>'
+  +'<div class="act">Система рекомендует: <b>'+(rec==='rdg'?'РДГ (реструктуризация)':'БФЛ (списание)')+'</b> — '+(rec==='rdg'?rdgWhy:bflWhy).join(' · ')+'. Решение за тобой — точный маршрут считает пульт.</div>'
+  +'<div class="say" style="margin-top:18px">БФЛ: «Вас устроит вариант: уже сегодня вы свободны от всех платежей по кредитам на законных основаниях, а через 10–12 месяцев долги списываются полностью?»'+(D.ovd==='hard'?' <i>+ «…и в ближайшие месяцы снимаем аресты — приставы не смогут с вами взаимодействовать».</i>':'')+'</div>'
+  +'<div class="say">РДГ: «Вас устроит: объединяем все кредиты в один, убираем проценты — платите только сам долг, комфортным платежом, без статуса банкрота? До утверждения плана — около полугода — по старому графику вы уже не платите».</div>'
+  +A([
+    {t:'Клиент: «Да, устроит» — продукт БФЛ',cls:rec==='bfl'?'main':'',fn:"setD('product','bfl');markDone('s3');go('s4')"},
+    {t:'Клиент: «Да, устроит» — продукт РДГ',cls:rec==='rdg'?'main':'',fn:"setD('product','rdg');markDone('s3');go('s4')"},
+    {t:'Сомневается / спросил про МФЦ',s:'открой карточку возражения — кнопка ⚡ или клавиша O',cls:'warn',fn:"openTray(3)"},
+  ]);
+},
+
+s4(){ const D=S.D; const bfl=D.product!=='rdg';
+  return '<div class="goal"><span class="stepno">шаг 4 из 10</span>ПРОЦЕСС — КАРТА, «ПЕРВАЯ ПОБЕДА», ЧЕСТНЫЕ ПОСЛЕДСТВИЯ</div>'
+  +'<div class="say">«Тогда давайте расскажу, как пройдёт процедура и сколько это будет стоить. Договорились?»</div>'
+  +'<div class="own">костяк: документы (40–50, юрист заказывает сам через Госуслуги) → заявление в Арбитражный суд → номер дела = ПЕРВАЯ ПОБЕДА: банки и коллекторы не имеют права звонить, пени приостанавливаются → на судах присутствовать не нужно → всего 10–12 месяцев</div>'
+  +(bfl
+    ?'<div class="say">«На время процедуры вам по закону положен прожиточный минимум — около 20 000, по регионам отличается. Плюс дети, лекарства, обучение; при отсутствии жилья — аренда. Мы постараемся сохранить вам максимум дохода — в рамках закона».</div>'
+    :'<div class="say">«При реструктуризации на руки вам выделяется 50 000 ₽ в месяц. И всё, что сверху, не сгорает — эти деньги копятся и возвращаются вам, когда суд утверждает план».</div>')
+  +'<div class="say">«Теперь честно о последствиях, их немного: руководящие должности — 3 года; повторное списание — через 5 лет. Кредиты брать можно, за границу можно, работать можно».</div>'
+  +'<div class="warnbox">✕ НЕ говорим: «свои проверенные управляющие» (аффилированность ФУ) · «перейдите на полставки / неофициальный доход» (суд не спишет) · обещание сроков «через 3 месяца аресты сняты».</div>'
+  +A([
+    {t:'Рассказал процесс и деньги на жизнь',s:'закрывает п.14 гейта «деньги на жизнь проговорены»',cls:'main',fn:"S.D.pmTold=true;ev('field_set','pm_told');markDone('s4');go('s5')"},
+    {t:'Клиент испугался / возражает',cls:'warn',fn:"openTray()"},
+  ]);
+},
+
+s5(){
+  return '<div class="goal"><span class="stepno">шаг 5 из 10</span>О КОМПАНИИ — ДОВЕРИЕ ПРОВЕРЯЕМЫМИ ФАКТАМИ</div>'
+  +'<div class="say">«Пару слов о нас. Компания ДоНуля работает с 2015 года, на счету тысячи завершённых дел — отзывы на Яндексе и 2ГИС. Товарный знак в Роспатенте. Открытый телеграм-канал на 3 000 клиентов — эфиры юристов и видеоотзывы с номерами дел, проверяются на сайте суда».</div>'
+  +'<div class="act">Отправь клиенту ссылку на телеграм-канал прямо сейчас — «подпишитесь, пока мы на связи». Подписка = прогрев на каждое следующее касание.</div>'
+  +'<div class="say">«И главное — гарантия: мы даём 100%, потому что не берём дела, которые не пройдут. И это не слова, а пункт договора: если долги не списаны — возвращаем деньги».</div>'
+  +'<div class="warnbox">✕ НЕ говорим: «аккредитованы государством» · обещания возврата, которых нет в договоре («в двойном объёме»). «100%» — всегда со ссылкой на договор.</div>'
+  +A([
+    {t:'Рассказал, канал отправил',cls:'main',fn:"ev('tg_sent');markDone('s5');go('s6')"},
+    {t:'«Не верю / вы кто такие»',cls:'warn',fn:"openTray(4)"},
+  ]);
+},
+
+s6(){ const m=mergeVars();
+  return '<div class="goal"><span class="stepno">шаг 6 из 10</span>ЦЕНА — «13 500 ПОТЯНЕТЕ?» · ПОЛНУЮ СУММУ НЕ НАЗЫВАЕМ · это 40% оценки ИИ</div>'
+  +'<div class="say">«Возьмите бумагу и ручку, сориентирую по цене. Есть государственные платежи и наши услуги. Вы когда-нибудь платили пошлины — за паспорт, права? Тут такие же: 25 000 — суд, 15 000 — оповещение кредиторов, 10 000 — почта. Оплачиваются не сразу — до трёх месяцев, но важно начать откладывать эти 50 000 с начала процедуры».</div>'
+  +A([
+    {t:'Госплатежи проговорил «листком»',s:'закрывает п.15 гейта; дальше — сама цена',cls:'main',fn:"S.D.gosTold=true;ev('field_set','gos_told');go('s6_price')"},
+  ]);
+},
+s6_price(){ const m=mergeVars();
+  return '<div class="goal"><span class="stepno">шаг 6 · цена услуги</span>ЛЕСТНИЦА ДЕНЕГ: ОЦИФРОВАЛ БОЛЬ → ЦЕНА + «ПОТЯНЕТЕ?»</div>'
+  +'<div class="say">«Теперь наши услуги. Смотрите: вы сейчас платите '+V(m.pay)+' в месяц — и '+V(m.intr)+' из них проценты, так из долга не выбраться. Наша услуга — 13 500 в месяц. Потянете?»</div>'
+  +'<div class="hintbox">Полную сумму — только если клиент сам спросил: «всего это 14 платежей по 13 500. Разово — 169 000 вместо 189 000». Первым числом всегда 13 500.</div>'
+  +A([
+    {t:'«Потяну» — к презентации и подписи',cls:'main',fn:"ev('price_ok');markDone('s6');go('s7')"},
+    {t:'«Дорого / где взять»',s:'эталон откроется сам',cls:'warn',fn:"openTray(1)"},
+    {t:'«Деньги будут с зарплаты»',s:'фиксируй дату + минималка от 1 000 сегодня',cls:'warn',fn:"openTray(2)"},
+    {t:'Просит скидку',s:'СТОП: скидка существует только после пересчёта по КИ — предложи запрос КИ',cls:'warn',fn:"openTray(1)"},
+  ]);
+},
+
+s7(){ const p=S.D.pages||[];
+  const rows=[['0','Стартовый экран','«Видите надпись „дождитесь менеджера“? Это я — идём вместе, ничего не листайте сами»'],
+   ['1','Выжимка условий','7 блоков — проговорить каждый: «здесь всё, о чём мы говорили, — проверьте глазами»'],
+   ['2','Кредитный доктор','допродукт +1 438 ₽/мес: «восстановление кредитной истории — добавляем?»'],
+   ['3','SIM — бонус за «сегодня»','ТОЛЬКО если деньги реально сегодня: «подписываем и вносите любой платёж сегодня — акция фиксируется; SIM с первым полным платежом 13 500»'],
+   ['4','Оформление','«большинство оформляется по СМС — быстрее, сканировать не нужно»'],
+   ['5','Договор','читаем вместе: предмет, гарантия, стоимость. «Сначала договор — он вас защищает»'],
+   ['6','Подпись по СМС','«придёт код — продиктуйте или введите: это юридически значимая подпись»'],
+   ['7','Оплата СБП','«деньги напрямую на счёт компании, моментально и без комиссии» — сумма = что договорились сегодня']];
+  return '<div class="goal"><span class="stepno">шаг 7 из 10</span>ПРЕЗЕНТАЦИЯ — ВЕДЁШЬ ПО СТРАНИЦАМ, НЕ ОТПУСКАЯ С ЛИНИИ</div>'
+  +'<div class="say">«Сейчас направлю вам ссылку — откройте, не вешая трубку. Я проведу вас по каждому экрану: посмотрим условия, договор, и оформим. Открыли?»</div>'
+  +'<div class="act">Ссылку формирует и отправляет пульт (Обнулятор) — этот сервис только фиксирует прохождение. Отмечай страницы по мере того, как проговорили:</div>'
+  +'<div class="chips" style="margin-top:10px">'+rows.map(r=>'<button type="button" class="chip'+(p.includes(r[0])?' on':'')+'" title="'+r[2].replace(/"/g,'&quot;')+'" onclick="togArr(\'pagesA\',\''+r[0]+'\',this);S.D.pages=S.D.pagesA;ev(\'page_told\',\''+r[0]+'\')">'+r[0]+' · '+r[1]+'</button>').join('')+'</div>'
+  +'<div class="hintbox">Наведи на чип — подсказка, что говорить на этой странице. Клиент не может открыть сейчас (звонит с того же телефона)? Это НОРМА — назначь звонок-презентацию с датой и временем: он и станет шагом с датой.</div>'
+  +A([
+    {t:'Прошли страницы — клиент подписал',s:'к деньгам сегодня',cls:'main',fn:"S.D.pages=S.D.pagesA||[];markDone('s7');go('s8')"},
+    {t:'Не может открыть сейчас',s:'звонок-презентация с датой и временем → финал',fn:"markDone('s7');go('fin')"},
+    {t:'Возражение по ходу',cls:'warn',fn:"openTray()"},
+  ]);
+},
+
+s8(){
+  return '<div class="goal"><span class="stepno">шаг 8 из 10</span>ДЕНЬГИ СЕГОДНЯ — ЛЕСТНИЦА ДО КОНЦА · ноль «созвонимся на днях»</div>'
+  +'<div class="say">Выбери ступень — сверху вниз, начинай всегда с верхней:</div>'
+  +A([
+    {t:'13 500 сегодня — полный платёж',s:'«Поздравляю — процедура запущена!» (только ПОСЛЕ прихода денег) + SIM заказываем',cls:'main',fn:"S.D.money='full';ev('money','full');go('s8_full')"},
+    {t:'Частичка сегодня + добор с зарплаты',s:'1 000–3 000 в зачёт + жёсткая дата остатка',fn:"S.D.money='part';go('s8_part')"},
+    {t:'0 сегодня — но договор подписываем',s:'жёсткая дата платежа + вопрос намерения',fn:"S.D.money='zero';go('s8_zero')"},
+    {t:'Не подписал — «подумаю»',s:'три обязательных действия: материалы + дата + квал намерения',cls:'warn',fn:"openTray(9)"},
+  ]);
+},
+s8_full(){
+  return '<div class="goal"><span class="stepno">шаг 8 · полный платёж</span>ДЕНЬГИ ПРИШЛИ — ФИКСИРУЕМ</div>'
+  +'<div class="say">«Поздравляю — процедура запущена! SIM-карта за вами: заказываем на Озоне — и начинаем работать».</div>'
+  +'<div class="warnbox">«Поздравляю с началом процедуры» — ТОЛЬКО после реального прихода денег (комплаенс-класс 9: до денег это ложный статус).</div>'
+  +'<div class="frow"><label>Дата ежемесячного платежа</label><input type="date" id="in_payd" value="'+(S.D.payDate||'')+'"></div>'
+  +A([{t:'К онбордингу — продать специалиста',cls:'main',fn:"S.D.payDate=$('in_payd').value;markDone('s8');go('s9')"}]);
+},
+s8_part(){
+  return '<div class="goal"><span class="stepno">шаг 8 · частичка</span>МИКРОПЛАТЁЖ «ЗАВОДИТ» КЛИЕНТА В РАБОТУ</div>'
+  +'<div class="say">«Внесите сколько есть — достаточно от 1 000 ₽, всё идёт в зачёт по договору. Фиксирую доплату на [дату зарплаты] — и я уже начинаю работу по вам».</div>'
+  +'<div class="say">«SIM-акция за вами — платёж сегодня был. Внесёте 13 500 — заказываем вашу SIM на Озоне и начинаем работать».</div>'
+  +'<div class="frow"><label>Частичка сегодня, ₽ (от 1 000)</label><input type="number" id="in_part" value="'+(S.D.part||'')+'" placeholder="1 000"></div>'
+  +'<div class="frow"><label>Дата добора</label><input type="date" id="in_payd" value="'+(S.D.payDate||'')+'"></div>'
+  +A([{t:'Зафиксировал →',cls:'main',fn:"const p=+$('in_part').value||0;const d=$('in_payd').value;if(p<1000){alert('Частичка — от 1 000 ₽ (канон)')}else if(!d){alert('Добор без даты — незачёт')}else{S.D.part=p;S.D.payDate=d;ev('money','part='+p);markDone('s8');go('s9')}"}]);
+},
+s8_zero(){
+  return '<div class="goal"><span class="stepno">шаг 8 · ноль сегодня</span>ДОГОВОР ВСЁ РАВНО СЕЙЧАС + ЖЁСТКАЯ ДАТА + КВАЛ НАМЕРЕНИЯ</div>'
+  +'<div class="say">«Договор подпишем сейчас, платёж зафиксируем на [дату]. И сразу уточню: если посоветуетесь и будет „нет“ — вы всё равно решаете вопрос с долгами, или на этом закрываем? Мне важно, ждать ли вас».</div>'
+  +'<div class="frow"><label>Жёсткая дата платежа</label><input type="date" id="in_payd" value="'+(S.D.payDate||'')+'"></div>'
+  +A([{t:'Подписал, дата зафиксирована →',cls:'main',fn:"const d=$('in_payd').value;if(!d){alert('Без даты платежа исход не зачтётся')}else{S.D.payDate=d;ev('money','zero_signed');markDone('s8');go('s9')}"}]);
+},
+
+s9(){
+  return '<div class="goal"><span class="stepno">шаг 9 из 10</span>ОНБОРДИНГ — ПРОДАТЬ СПЕЦИАЛИСТА, ЗАПРОГРАММИРОВАТЬ ОЖИДАНИЯ</div>'
+  +'<div class="say">«Вас принимает юрист сопровождения — ваш личный юрист по делу: ведёт весь процесс от документов до результата. Ваша задача — быть его правой рукой. Коллега свяжется в течение 24 часов — придёт СМС с номером, запишите в телефонную книгу».</div>'
+  +'<div class="say">«По графику: сопровождение работает по будням 9:00–18:00 по Москве, как и суды. Платежи у нас на [число]: просрочку допускать нельзя — система блокирует доступ к делу. Сможете по графику?»</div>'
+  +'<div class="act">Гейт передачи: анкета заполнена (сделки за 3 года, имущество вкл. супруга, ИП/ООО) — без анкеты амо не пропустит передачу юристам. Ты остаёшься на связи до 2-го платежа.</div>'
+  +A([{t:'Передал, ожидания запрограммированы',cls:'main',fn:"markDone('s9');markDone('s10');go('fin')"}]);
+},
+
+/* ═══ ФИНАЛ: замок исхода — без «шаг + дата» звонок не закрывается ═══ */
+fin(){ const D=S.D; const oc=D.outcome||{};
+  const pre=D.money==='full'?'pay_today':D.money==='part'?'part':(D.money==='zero'?'signed':(D.reD?'call':''));
+  const type=oc.type!==undefined?oc.type:pre;
+  const OPT=[['pay_today','Подпись + оплата сегодня','—'],['signed','Подписал · оплата [дата]','d'],['part','Частичка · добор [дата]','d'],['ki','Пересчёт по КИ · завтра до 12:00','—'],['pres','Звонок-презентация [дата·время]','dt'],['call','Созвон [дата·время]','dt'],['ref','Отказ · закрыть с цитатой','q']];
+  const cur=OPT.find(o=>o[0]===type);
+  const needD=cur&&(cur[2]==='d'||cur[2]==='dt'), needT=cur&&cur[2]==='dt', needQ=cur&&cur[2]==='q';
+  const okDate=oc.d||D.payDate||D.reD||'', okTime=oc.t||D.reT||'';
+  const g=gate(); const miss=GATE.filter(([i])=>!g[i]&&i!==16).map(([i,t])=>i+' '+t);
+  return '<div class="goal"><span class="stepno">финал</span>ИСХОД ЗВОНКА — ЗАМОК: БЕЗ «ШАГ + ДАТА» НЕ ЗАКРЫВАЕТСЯ</div>'
+  +'<div class="chips" style="margin-top:12px">'+OPT.map(o=>'<button type="button" class="chip'+(type===o[0]?' on':'')+'" onclick="S.D.outcome={type:\''+o[0]+'\'};save();render()">'+o[1]+'</button>').join('')+'</div>'
+  +(needD?'<div class="frow"><label>Дата</label><input type="date" id="oc_d" value="'+okDate+'" onchange="S.D.outcome.d=this.value;save();render()">'+(needT?'<input type="time" id="oc_t" value="'+okTime+'" style="width:120px" onchange="S.D.outcome.t=this.value;save();render()">':'')+'</div>':'')
+  +(needQ?'<div class="frow"><label>Цитата клиента, дословно</label><input type="text" id="oc_q" value="'+(oc.q||'')+'" placeholder="«не звоните больше»" style="width:340px" onchange="S.D.outcome.q=this.value;save();render()"></div><div class="hintbox">«Подумаю», «дорого», «нет денег» — это возражения, НЕ отказ. Отказ = требование прекратить контакт.</div>':'')
+  +(miss.length?'<div class="warnbox">Гейт недобран ('+(16-1-miss.length+1===16?'':'')+miss.length+' пунктов): '+miss.slice(0,5).join(' · ')+(miss.length>5?'…':'')+' — движок поставит задачу «добери диагностику» в следующий звонок. Деньги сильнее гейта: оплата/подпись двигают сделку в любом случае.</div>':'<div class="hintbox">Гейт 16/16 — консультация состоялась ✓</div>')
+  +A([{t:'Закрыть звонок',s:'запишет исход, «Дату след. шага» и пакет событий',cls:'main',fn:"finClose()"},{t:'← Вернуться в звонок',cls:'ghost',fn:"go(S.stepDone.includes('s8')?'s9':(S.stepDone.includes('s7')?'s8':'s2_q1'))"}]);
+},
+closed(){ const D=S.D, oc=D.outcome||{}; const g=gateCount();
+  const lbl={pay_today:'подпись + оплата сегодня',signed:'подписал · оплата '+(oc.d||''),part:'частичка · добор '+(oc.d||''),ki:'завтра до 12:00 · пересчёт по КИ',pres:'звонок-презентация '+(oc.d||'')+' '+(oc.t||''),call:'созвон '+(oc.d||'')+' '+(oc.t||''),ref:'отказ · DNC'}[oc.type]||'—';
+  return '<div class="startlogo" style="background:var(--live)">✓</div><div class="big">Звонок закрыт</div>'
+  +'<div style="max-width:560px;margin-top:14px">'
+  +'<div class="sumrow"><span>Исход · «Дата след. шага»</span><b>'+lbl+'</b></div>'
+  +'<div class="sumrow"><span>Гейт «консультация состоялась»</span><b>'+g+'/16 '+(g>=16?'✓':'· задача «добери диагностику»')+'</b></div>'
+  +'<div class="sumrow"><span>Продукт</span><b>'+(D.product==='rdg'?'РДГ':D.product==='bfl'?'БФЛ':'—')+'</b></div>'
+  +'<div class="sumrow"><span>Долг / платёж / доход</span><b>'+fmt(+D.debt||0)+' / '+fmt(+D.pay||0)+' / '+fmt(+D.income||0)+' ₽</b></div>'
+  +'<div class="sumrow"><span>Открывались возражения</span><b>'+S.events.filter(e=>e.type==='objection_opened').length+'</b></div>'
+  +'</div>'
+  +'<div style="margin-top:16px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)">Пакет событий для движка · AI-QA сверит с записью звонка</div>'
+  +'<div class="evlist">'+S.events.map(e=>{const d=new Date(e.at);return '<div>'+d.toLocaleTimeString('ru-RU')+' · '+e.type+(e.detail?' · '+e.detail:'')+'</div>'}).join('')+'</div>'
+  +A([{t:'Новый звонок',cls:'main',fn:"localStorage.removeItem('sl_v1');S=null;load();render()"}]);
+},
+};
+function finClose(){
+  /* предвыбор экрана = реальное значение: тип от лестницы шага 8, дата от добора/переноса — иначе чип «выбран», а замок ругается (баг интерактив-теста) */
+  const D=S.D; let oc=D.outcome||{};
+  if(oc.type===undefined){const pre=D.money==='full'?'pay_today':D.money==='part'?'part':(D.money==='zero'?'signed':(D.reD?'call':''));if(pre)oc={type:pre};}
+  if(oc.type&&!oc.d)oc.d=D.payDate||D.reD||'';
+  if(oc.type&&!oc.t)oc.t=D.reT||'';
+  S.D.outcome=oc;
+  const need={pay_today:0,ki:0,signed:1,part:1,pres:2,call:2,ref:3}[oc.type];
+  if(need===undefined){alert('Выбери исход — без «шаг + дата» звонок не закрывается');return;}
+  if(need>=1&&!oc.d){alert('Этот исход требует дату');return;}
+  if(need===2&&!oc.t){alert('Звонок/созвон — дата И время (канон п.16)');return;}
+  if(need===3&&!(oc.q&&oc.q.length>=8)){alert('Отказ фиксируется только с дословной цитатой клиента');return;}
+  ev('next_step_set',oc.type+(oc.d?' '+oc.d:'')+(oc.t?' '+oc.t:''));ev('call_closed');
+  markDone('fin');S.D.outcome.ok=true;go('closed');
+}
+
+/* ── лоток возражений ── */
+function openTray(id){
+  ev('objection_tray_open',id||'');
+  S.objStack=S.screen;save();
+  $('otray').classList.add('on');
+  renderTray(id||null);
+}
+function renderTray(id){
+  const p=$('opanel');
+  if(!id){
+    p.innerHTML='<h2>⚡ Возражения — 14 карточек, дословные эталоны</h2><div class="osub">Нажми на то, что сказал клиент. Отработал — вернёшься ровно туда, где остановился.</div>'
+    +'<div class="ogrid">'+OBJ.map(o=>'<button type="button" class="ocard" onclick="renderTray('+o.id+')"><b>'+o.t+'</b><small>клиент: «'+o.c+'»</small></button>').join('')+'</div>'
+    +'<button type="button" class="olink" onclick="closeTray()">Закрыть (Esc)</button>';
+  }else{
+    const o=OBJ.find(x=>x.id===id); ev('objection_opened','#'+id+' '+o.t);
+    p.innerHTML='<h2>'+o.t+'</h2><div class="oview"><div class="osaid">Клиент: «'+o.c+'»</div>'
+    +o.ans.map(a=>'<div class="oans">«'+a+'»</div>').join('')
+    +(o.stop?'<div class="ostop">⚠ '+o.stop+'</div>':'')
+    +'<div class="owhy"><b>Почему работает:</b> '+o.why+'</div>'
+    +'<button type="button" class="obk" onclick="closeTray()">✓ Отработал — вернуться в скрипт</button>'
+    +'<button type="button" class="olink" onclick="renderTray(null)">← Все возражения</button></div>';
+  }
+}
+function closeTray(){$('otray').classList.remove('on');}
+
+/* таймер */
+setInterval(()=>{if(S&&S.started&&S.screen!=='start'&&S.screen!=='closed'){const s=Math.floor((Date.now()-S.started)/1000);$('t_timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}},1000);
+
+load();render();
+</script>
+</body>
+</html>
