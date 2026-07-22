@@ -67,6 +67,33 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
 .kv span b{color:var(--ink)}
 .cap{margin-top:18px;font-size:11.5px;color:var(--faint);line-height:1.5}
 .cap b{color:var(--muted)}
+
+/* ── плакат-воронка: ступени + действия в статусе, всё видно сразу ── */
+.fvis{margin-top:22px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px 22px;box-shadow:var(--shadow-sm);scroll-margin-top:16px}
+.fvis>h2{font-size:18px;letter-spacing:-.01em;color:var(--green-ink)}
+.fvis>p{font-size:12.5px;color:var(--muted);margin-top:3px}
+.flegend{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.flegend span{font-size:11px;font-weight:700;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--muted)}
+.frow{display:grid;grid-template-columns:330px 1fr;gap:0 18px;align-items:stretch}
+.fsegwrap{display:flex;align-items:stretch;justify-content:center}
+a.fseg{display:flex;flex-direction:column;justify-content:center;text-decoration:none;color:#fff;padding:11px 18px;margin:3px 0;background:linear-gradient(165deg,var(--pine2),var(--pine));clip-path:polygon(0 0,100% 0,94% 100%,6% 100%);transition:filter .15s ease-out}
+a.fseg:hover{filter:brightness(1.12)}
+a.fseg b{font-size:14px;line-height:1.2;display:flex;align-items:center;gap:7px}
+a.fseg b .no{flex:none;width:21px;height:21px;border-radius:6px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:11px;font-weight:800}
+a.fseg small{display:block;font-size:10px;opacity:.75;margin-top:2px;line-height:1.3}
+.frow.money a.fseg{background:linear-gradient(165deg,#D9A845,var(--gold));color:#3d2f07}
+.frow.money a.fseg b .no{background:rgba(61,47,7,.14)}
+.frow.fin a.fseg{background:linear-gradient(165deg,#137A57,var(--green))}
+.facts{align-self:center;padding:7px 0}
+.facts div{font-size:12.5px;line-height:1.5;padding:2px 0;color:var(--ink)}
+.facts div b{color:var(--green-ink)}
+.facts .ico{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;background:var(--green-soft);font-size:10.5px;margin-right:6px;vertical-align:-4px}
+.facts .ico.s{background:var(--card2);border:1px solid var(--line)}
+.facts .ico.m{background:var(--gold-soft)}
+.fexits{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.fexits div{flex:1;min-width:240px;font-size:12px;line-height:1.5;border:1px dashed var(--line);border-radius:12px;padding:9px 12px;color:var(--muted);background:var(--card2)}
+.fexits b{color:var(--ink)}
+@media(max-width:680px){.frow{grid-template-columns:1fr}.fsegwrap{justify-content:stretch}a.fseg{width:100%!important;clip-path:polygon(0 0,100% 0,97% 100%,3% 100%)}.facts{padding:4px 2px 12px}}
 </style>
 </head>
 <body>
@@ -81,6 +108,7 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
 <nav class="toc">
   <b>Уроки</b>
   <div class="links">
+    <a href="#fvis" style="background:var(--pine);color:#fff">Воронка · плакат</a>
     <a href="#u0">0 · Пять опор</a>
     <a href="#u1">1 · Новый лид</a>
     <a href="#u2">2 · Консультация</a>
@@ -97,6 +125,86 @@ body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(12
     <a href="#u13">13 · Как тебя оценивают</a>
   </div>
 </nav>
+
+<!-- ═══ ПЛАКАТ-ВОРОНКА: статусы + действия, всё видно сразу (запрос заказчика 22.07 «добавить прямо воронку, действия в статусе, наглядно») ═══ -->
+<section class="fvis" id="fvis">
+  <h2>Воронка одним взглядом: статус → твои действия</h2>
+  <p>Ступень = статус сделки (двигает система). Справа — что делаешь именно в нём. Клик по ступени — подробный урок.</p>
+  <div class="flegend"><span>📞 — делаешь ты</span><span>⚙ — делает система</span><span>₽ — деньги</span></div>
+
+  <div class="frow">
+    <div class="fsegwrap"><a class="fseg" style="width:100%" href="#u1"><b><span class="no num">1</span>Новый лид</b><small>набор ≤5 мин · горячий от бота ≤1 мин</small></a></div>
+    <div class="facts">
+      <div><span class="ico">📞</span>Набираешь <b>сразу</b> — дозвонился → консультация на этом же звонке.</div>
+      <div><span class="ico s">⚙</span>3 недозвона → бот-дозвонщики (5 попыток / 3 дня); не взял лида за 5 мин → лид другому.</div>
+    </div>
+  </div>
+
+  <div class="frow">
+    <div class="fsegwrap"><a class="fseg" style="width:93%" href="#u2"><b><span class="no num">2</span>Консультация</b><small>48 ч на попытку · потолок ст.2+3 = 3 дня</small></a></div>
+    <div class="facts">
+      <div><span class="ico">📞</span>Скрипт 10 шагов, диагностика — все <b>16 пунктов</b>; закрываешь на подпись сегодня.</div>
+      <div><span class="ico">📞</span>Не закрылся → <b>запрос КИ</b> («бесплатное юр. заключение») + шаг с датой.</div>
+      <div><span class="ico s">⚙</span>Гейт собран → лид сам переходит в ст.3; жёсткий отказ → закрытие с цитатой.</div>
+    </div>
+  </div>
+
+  <div class="frow">
+    <div class="fsegwrap"><a class="fseg" style="width:86%" href="#u3"><b><span class="no num">3</span>Принимает решение</b><small>48 ч на двусторонний шаг · потолок 3 дня</small></a></div>
+    <div class="facts">
+      <div><span class="ico">📞</span>«Подумаю» = <b>материалы + жёсткая дата-время + квал намерения</b> — все три, каждый раз.</div>
+      <div><span class="ico">📞</span>КИ пришла → <b>всё бросаем</b>: звонок-разбор заключения (только в звонке).</div>
+      <div><span class="ico s">⚙</span>Назвал дату → парковка (1–2 переноса); потолок → пул тёплым.</div>
+    </div>
+  </div>
+
+  <div class="frow">
+    <div class="fsegwrap"><a class="fseg" style="width:79%" href="#u4"><b><span class="no num">4</span>Договор на подписи</b><small>горячий час · 2 ч ноль попыток → пул</small></a></div>
+    <div class="facts">
+      <div><span class="ico">📞</span>Ведёшь по страницам, <b>не вешая трубку</b>, до подписи кодом из СМС.</div>
+      <div><span class="ico">📞</span>Не может открыть → звонок-презентация с <b>датой И временем</b>.</div>
+    </div>
+  </div>
+
+  <div class="frow money">
+    <div class="fsegwrap"><a class="fseg" style="width:72%" href="#u5"><b><span class="no num">5</span>Подписан · не оплачен</b><small>попытка каждый день ×3 → раз в 48 ч · потолка нет</small></a></div>
+    <div class="facts">
+      <div><span class="ico">📞</span>Час 0: СБП 15 секунд / <b>частичка от 990 ₽</b> / точная дата вслух + в сделку.</div>
+      <div><span class="ico m">₽</span>Дата дальше сегодня → <b>ускоритель</b>: «оплатите сегодня — последний платёж прощаем», до 23:59.</div>
+      <div><span class="ico s">⚙</span>День без твоей попытки → лид уходит другому; РОП видит «застрявшие деньги».</div>
+    </div>
+  </div>
+
+  <div class="frow money">
+    <div class="fsegwrap"><a class="fseg" style="width:65%" href="#u6"><b><span class="no num">6</span>Частичка · добор</b><small>раз в сутки ×5 → 48 ч · &gt;14 дней = разбор РОПа</small></a></div>
+    <div class="facts">
+      <div><span class="ico">📞</span><b>Горячий час добора</b>: дата доплаты сразу, пока решение тёплое.</div>
+      <div><span class="ico m">₽</span>Друг оплатил по договору → первый платёж клиента <b>3 500</b> (реферальная).</div>
+    </div>
+  </div>
+
+  <div class="frow money">
+    <div class="fsegwrap"><a class="fseg" style="width:58%" href="#u7"><b><span class="no num">7</span>Полная продажа</b><small>анкета → передача в ОС ≤24 ч</small></a></div>
+    <div class="facts">
+      <div><span class="ico">📞</span>«Поздравляю» — <b>только после денег</b>; анкета передачи; продать специалиста.</div>
+      <div><span class="ico m">₽</span>Твои <b>первые 50%</b>.</div>
+    </div>
+  </div>
+
+  <div class="frow fin">
+    <div class="fsegwrap"><a class="fseg" style="width:51%" href="#u8"><b><span class="no num">8</span>До 2-го платежа</b><small>ритм ведёт бот · ты — по эскалации</small></a></div>
+    <div class="facts">
+      <div><span class="ico s">⚙</span>Ежедневное ведение — бот и сопровождение, не ты.</div>
+      <div><span class="ico">📞</span>Сигнал «сомневаюсь / расторгаю» → твой звонок <b>в тот же день</b> (возражение №14).</div>
+      <div><span class="ico m">₽</span>2-й платёж прошёл → твои <b>вторые 50%</b>.</div>
+    </div>
+  </div>
+
+  <div class="fexits">
+    <div><b>→ Пул:</b> молчание при честных попытках или потолок — лид уходит тёплым, <b>без штрафа</b> тебе; собранное переезжает с ним.</div>
+    <div><b>→ Закрытые:</b> только с причиной-артефактом (цитата отказа / дисквал). Недозвон и «не наш» вернутся в работу через 30–90 дней, отказ-DNC — нет.</div>
+  </div>
+</section>
 
 <!-- ═══ УРОК 0 ═══ -->
 <section class="lesson" id="u0">
