@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Тренажёр менеджера · интерактивное обучение — ДОНУЛЯ</title>
+<style>
+/* ═══ ТРЕНАЖЁР МЕНЕДЖЕРА (заказчик 23.07: «интерактивное обучение, с персонажем справа»).
+   Контент = только КАНОН: учебник /manager-training/ (49 правил) + скрипт /script/ (14 возражений).
+   Механики — из исследования обучения US-колл-центров (7 агентов, 23.07):
+   · линейный путь уровней с exit-критерием 80% (Zenarate/Second Nature/USAA: гейт по критерию, не по календарю)
+   · «Разминка дня» 5 вопросов + интервальный повтор ошибок SM-2-лайт (Axonify/EdApp: сессии ≤5 мин, retrieval +41%)
+   · красная линия на экзамене = мгновенный ноль (Quantified instant-fail = канон «гейт ×0», урок 12)
+   · протокол ошибки Duolingo: мягкий красный, эталон дословно, без «НЕВЕРНО» капсом
+   · персонаж-наставник: реагирует ТОЛЬКО после ответа (анти-Clippy), помнит имя и серию, есть «тихий режим»
+   · стрик внутри сессии (праздник на 3 и 5) + дневная серия с токеном заморозки (Kahoot/Duolingo)
+   · тренировка приватна, наружу — только зачёты (Retorio/Mindtickle: психобезопасность = драйвер №1).
+   Персонаж «Саныч» — SVG из простых форм в палитре системы, эмоции переключаются классом. ═══ */
+@font-face{font-family:"Golos Text";src:url(../calc-widget/fonts/golos-var-cyrillic.woff2) format("woff2");font-weight:400 800;font-display:swap;unicode-range:U+0400-04FF,U+2010-2027,U+20BD}
+@font-face{font-family:"Golos Text";src:url(../calc-widget/fonts/golos-var-latin.woff2) format("woff2");font-weight:400 800;font-display:swap;unicode-range:U+0000-00FF,U+2013-2014,U+2018-201F,U+2026}
+:root{
+  --paper:#F6F2E9;--card:#FFFFFF;--card2:#FBF8F1;--line:#E3DCCB;
+  --ink:#16231D;--muted:#5C6660;--faint:#8B948E;
+  --pine:#0B3B2E;--pine2:#0F4A39;--green:#0F6B4F;--green-ink:#0B5540;--green-soft:#E4EFE7;
+  --gold:#C99A33;--gold-bright:#F4C775;--gold-soft:#F7EDD6;--gold-ink:#8A6212;
+  --brick:#A8442E;--brick-soft:#F6E3DC;
+  --shadow:0 18px 44px -18px rgba(11,59,46,.28);--shadow-sm:0 6px 18px -10px rgba(22,35,29,.16);
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),var(--paper);color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 80px}
+
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:22px 24px;box-shadow:var(--shadow)}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
+.hdr .brand b{font-size:15px}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:23px;line-height:1.18;letter-spacing:-.02em;font-weight:800}
+.hdr p{margin-top:7px;font-size:13.5px;color:rgba(255,255,255,.8);max-width:560px}
+.hdr p a{color:var(--gold-bright);font-weight:700;text-decoration:none}
+
+/* ── сцена: контент + наставник справа ── */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:18px;margin-top:18px;align-items:start}
+.coach{position:sticky;top:14px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px 16px 14px;box-shadow:var(--shadow-sm);text-align:center}
+.coach .avatar{width:168px;margin:0 auto;display:block}
+.coach .cname{margin-top:4px;font-size:13px;font-weight:800}
+.coach .cname small{display:block;font-size:10.5px;font-weight:600;color:var(--faint);letter-spacing:.06em;text-transform:uppercase;margin-top:1px}
+.bubble{position:relative;margin:0 0 12px;background:var(--green-soft);border-radius:14px;padding:11px 13px;font-size:13.5px;font-weight:600;color:var(--green-ink);text-align:left;line-height:1.5;transition:background .2s var(--ease)}
+.bubble:after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);border:8px solid transparent;border-bottom:none;border-top:8px solid var(--green-soft);transition:border-top-color .2s var(--ease)}
+.bubble.warn{background:var(--brick-soft);color:var(--brick)}
+.bubble.warn:after{border-top-color:var(--brick-soft)}
+.bubble.gold{background:var(--gold-soft);color:var(--gold-ink)}
+.bubble.gold:after{border-top-color:var(--gold-soft)}
+.bubble .why{display:block;margin-top:6px;font-weight:400;color:var(--ink);font-size:13px}
+.bubble a{color:var(--green-ink);font-weight:700}
+.bubble.warn a{color:var(--brick)}
+.bubble .nf{display:flex;gap:6px;margin-top:8px}
+.bubble .nf input{flex:1;min-width:0;font:inherit;font-size:13px;border:1px solid var(--line);border-radius:9px;padding:6px 9px;color:var(--ink);background:#fff}
+.bubble .nf button{background:var(--green);color:#fff;border:none;border-radius:9px;padding:6px 12px;font-size:12.5px;font-weight:700}
+.coach .cstats{display:flex;justify-content:center;gap:6px;margin-top:10px;flex-wrap:wrap}
+.coach .cstats span{font-size:11px;font-weight:700;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--muted)}
+.coach .cstats span b{color:var(--ink)}
+.coach .qt{margin-top:8px;background:none;border:none;font-size:11px;color:var(--faint);text-decoration:underline;padding:2px 0}
+
+/* ── персонаж: эмоции классом на svg ── */
+.avatar .blink{transform-origin:center;animation:blink 4.6s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}96%,98%{transform:scaleY(.08)}}
+.avatar .brow{transition:transform .2s var(--ease)}
+.avatar g[data-m]{display:none}
+.avatar.e-idle g[data-m="smile"],.avatar.e-think g[data-m="hmm"],.avatar.e-happy g[data-m="grin"],
+.avatar.e-fire g[data-m="grin"],.avatar.e-err g[data-m="oops"],.avatar.e-strict g[data-m="flat"]{display:block}
+.avatar.e-happy .brow,.avatar.e-fire .brow{transform:translateY(-3px)}
+.avatar.e-err .brow.l{transform:rotate(9deg) translateY(-1px)}
+.avatar.e-err .brow.r{transform:rotate(-9deg) translateY(-1px)}
+.avatar.e-strict .brow.l{transform:rotate(-11deg) translateY(2px)}
+.avatar.e-strict .brow.r{transform:rotate(11deg) translateY(2px)}
+.avatar.e-think .pupils{transform:translate(3px,-2px)}
+.avatar .pupils{transition:transform .2s var(--ease)}
+.avatar.e-fire .badge-star{opacity:1}
+.avatar .badge-star{opacity:0;transition:opacity .3s}
+@media (prefers-reduced-motion: no-preference){
+  .coach.bump .avatar{animation:bump .5s var(--ease)}
+  @keyframes bump{0%{transform:translateY(0)}35%{transform:translateY(-9px)}70%{transform:translateY(2px)}100%{transform:translateY(0)}}
+  .coach.shake .avatar{animation:shake .45s var(--ease)}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}55%{transform:translateX(5px)}80%{transform:translateX(-2px)}}
+  .qcard,.result{animation:rise .35s var(--ease)}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+}
+
+/* ── карта уровней ── */
+.warm{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:linear-gradient(165deg,#D9A845,var(--gold));border:none;border-radius:16px;padding:13px 16px;margin-bottom:12px;color:#3d2f07;box-shadow:var(--shadow-sm);transition:transform .15s var(--ease)}
+.warm:hover{transform:translateY(-1px)}
+.warm:active{transform:scale(.99)}
+.warm .wi{flex:none;width:42px;height:42px;border-radius:12px;background:rgba(61,47,7,.12);display:grid;place-items:center;font-size:20px}
+.warm b{display:block;font-size:14.5px}
+.warm small{display:block;font-size:12px;opacity:.8;margin-top:1px}
+.warm:disabled{filter:grayscale(.5);opacity:.7;cursor:not-allowed;transform:none}
+.levels{display:flex;flex-direction:column;gap:10px}
+.lvl{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 16px;box-shadow:var(--shadow-sm);transition:transform .15s var(--ease),box-shadow .15s var(--ease)}
+.lvl:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.lvl:active{transform:translateY(0) scale(.99)}
+.lvl .ico{flex:none;width:42px;height:42px;border-radius:12px;background:var(--pine);color:#fff;display:grid;place-items:center;font-size:19px}
+.lvl.money .ico{background:linear-gradient(165deg,#D9A845,var(--gold))}
+.lvl.red .ico{background:var(--brick)}
+.lvl .t{flex:1;min-width:0}
+.lvl .t b{font-size:14.5px;display:block}
+.lvl .t small{font-size:12px;color:var(--muted);display:block;margin-top:1px}
+.lvl .st{flex:none;text-align:right}
+.lvl .stars{font-size:15px;letter-spacing:1px;color:var(--gold);white-space:nowrap}
+.lvl .stars .off{color:var(--line)}
+.lvl .st small{display:block;font-size:10.5px;color:var(--faint);font-weight:600;margin-top:1px}
+.lvl.locked{opacity:.58;cursor:not-allowed}
+.lvl.locked:hover{transform:none;box-shadow:var(--shadow-sm)}
+.lvl.exam{background:linear-gradient(165deg,var(--pine2),var(--pine));color:#fff;border-color:transparent}
+.lvl.exam .t small{color:rgba(255,255,255,.7)}
+.lvl.exam .ico{background:rgba(255,255,255,.14);color:var(--gold-bright)}
+.hint{margin-top:12px;font-size:12px;color:var(--faint);line-height:1.5}
+.hint a{color:var(--green-ink);font-weight:700}
+.reset{margin-top:8px;background:none;border:none;font-size:11.5px;color:var(--faint);text-decoration:underline;padding:4px 0}
+
+/* ── экран вопроса ── */
+.runbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.runbar .back{flex:none;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12px;font-weight:700;color:var(--muted)}
+.runbar .pb{flex:1;height:8px;background:var(--card);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.runbar .pb i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--green),#159A6E);border-radius:999px;transform-origin:left;transform:scaleX(0);transition:transform .35s var(--ease)}
+.runbar .hearts{flex:none;font-size:13px;letter-spacing:1px}
+.runbar .hearts .off{opacity:.25}
+.qcard{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+.qcard .tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;border-radius:999px;padding:3px 9px;background:var(--green-soft);color:var(--green-ink)}
+.qcard .tag.red{background:var(--brick-soft);color:var(--brick)}
+.qcard .tag.gold{background:var(--gold-soft);color:var(--gold-ink)}
+.qcard .sit{margin-top:10px;font-size:16px;font-weight:800;line-height:1.4;letter-spacing:-.01em}
+.qcard .q{margin-top:6px;font-size:13.5px;color:var(--muted)}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;background:var(--card2);border:1.5px solid var(--line);border-radius:13px;padding:11px 13px;font-size:13.5px;font-weight:600;line-height:1.45;color:var(--ink);transition:border-color .15s,background .15s,transform .1s}
+.opt:hover:not(:disabled){border-color:var(--green);background:#fff}
+.opt:active:not(:disabled){transform:scale(.99)}
+.opt .k{flex:none;width:22px;height:22px;border-radius:7px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--muted);margin-top:1px}
+.opt:disabled{cursor:default}
+.opt.ok{border-color:var(--green);background:var(--green-soft)}
+.opt.ok .k{background:var(--green);border-color:var(--green);color:#fff}
+.opt.bad{border-color:var(--brick);background:var(--brick-soft)}
+.opt.bad .k{background:var(--brick);border-color:var(--brick);color:#fff}
+.opt.dim{opacity:.55}
+.opts.duo{flex-direction:row}
+.opts.duo .opt{flex-direction:column;align-items:center;text-align:center;padding:14px 10px;font-weight:800;font-size:14px}
+.opts.duo .opt .k{display:none}
+.nextrow{display:flex;justify-content:flex-end;margin-top:14px}
+.next{background:linear-gradient(165deg,var(--pine2),var(--pine));color:#fff;border:none;border-radius:13px;padding:11px 26px;font-size:14px;font-weight:800;box-shadow:var(--shadow-sm);transition:transform .12s var(--ease),filter .15s}
+.next:hover{filter:brightness(1.12)}
+.next:active{transform:scale(.98)}
+.streak{display:inline-flex;align-items:center;gap:5px;margin-right:auto;font-size:12px;font-weight:800;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:6px 12px;align-self:center}
+
+/* ── итог уровня ── */
+.result{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow-sm);text-align:center}
+.result .bigstars{font-size:34px;letter-spacing:6px;color:var(--gold)}
+.result .bigstars .off{color:var(--line)}
+.result h2{margin-top:8px;font-size:20px;letter-spacing:-.01em}
+.result .sc{margin-top:4px;font-size:13.5px;color:var(--muted)}
+.result .verdict{display:inline-block;margin-top:10px;font-size:12px;font-weight:800;border-radius:999px;padding:6px 14px;background:var(--green-soft);color:var(--green-ink)}
+.result .verdict.gold{background:var(--gold-soft);color:var(--gold-ink)}
+.result .verdict.bad{background:var(--brick-soft);color:var(--brick)}
+.mist{margin-top:16px;text-align:left}
+.mist>b{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint)}
+.mist .mi{margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:12.5px}
+.mist .mi .s{font-weight:800}
+.mist .mi .r{margin-top:4px;color:var(--green-ink)}
+.mist .mi a{font-size:11.5px;font-weight:700;color:var(--gold-ink);text-decoration:none}
+.ctas{display:flex;gap:8px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.btn2{background:var(--card2);border:1px solid var(--line);border-radius:13px;padding:10px 20px;font-size:13.5px;font-weight:700;color:var(--ink)}
+.btn2:hover{background:#fff;border-color:var(--green)}
+.cert{margin-top:16px;border:2px solid var(--gold);border-radius:16px;padding:16px;background:linear-gradient(165deg,#FFFDF6,var(--gold-soft))}
+.cert b{font-size:16px;color:var(--gold-ink);letter-spacing:.04em}
+.cert div{margin-top:4px;font-size:12.5px;color:var(--muted)}
+
+.cap{margin-top:20px;font-size:11.5px;color:var(--faint);line-height:1.5}
+.cap a{color:var(--green-ink);font-weight:700}
+
+@media(max-width:840px){
+  .stage{display:flex;flex-direction:column-reverse}
+  .coach{position:static;display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px}
+  .coach .avatar{width:74px;flex:none;margin:0}
+  .coach .cbody{flex:1;min-width:0}
+  .bubble{margin:0}
+  .bubble:after{left:auto;right:-8px;bottom:14px;transform:none;border:8px solid transparent;border-right:none;border-left:8px solid var(--green-soft)}
+  .bubble.warn:after{border-left-color:var(--brick-soft);border-top-color:transparent}
+  .bubble.gold:after{border-left-color:var(--gold-soft);border-top-color:transparent}
+  .coach .cname,.coach .cstats,.coach .qt{display:none}
+  .opts.duo{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hdr">
+  <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · ТРЕНАЖЁР МЕНЕДЖЕРА</b><small>ИНТЕРАКТИВНОЕ ОБУЧЕНИЕ · СИТУАЦИЯ → ТВОЙ ХОД</small></div></div>
+  <h1>Отработай каждый ход до автоматизма</h1>
+  <p>8 уровней по воронке + экзамен «Смена» + разминка дня. Клиент говорит — ты выбираешь ход, Саныч разбирает почему. Теория — в <a href="../manager-training/index.html">учебнике</a>, здесь — практика.</p>
+</header>
+
+<div class="stage">
+  <main id="main"></main>
+
+  <aside class="coach" id="coach">
+    <div class="bubble" id="bubble" aria-live="polite">Привет! Я Саныч, наставник.</div>
+    <svg class="avatar e-idle" id="avatar" viewBox="0 0 200 220" role="img" aria-label="Саныч — наставник">
+      <!-- корпус: пиджак-сосна, рубашка, галстук-золото -->
+      <path d="M38 220c2-46 24-64 62-64s60 18 62 64z" fill="#0B3B2E"/>
+      <path d="M78 160c6 10 38 10 44 0l-8 26h-28z" fill="#FBF8F1"/>
+      <path d="M100 172l7 12-7 26-7-26z" fill="#C99A33"/>
+      <path d="M60 168c10-8 18-10 18-10l10 52H64z" fill="#0F4A39"/>
+      <path d="M140 168c-10-8-18-10-18-10l-10 52h24z" fill="#0F4A39"/>
+      <!-- голова -->
+      <circle cx="100" cy="96" r="52" fill="#EAB98F"/>
+      <!-- волосы с сединой на висках -->
+      <path d="M48 92c0-32 23-50 52-50s52 18 52 50c0 0-7-10-14-12 2-8-4-16-4-16s-6 6-16 6c-16 0-26-10-26-10s-2 10-12 14c-8 3-12 10-12 10s-6 2-20 8z" fill="#3E3A34"/>
+      <path d="M48 92c4-3 9-6 12-7 1 4 1 8 0 11-4 2-9 5-12 8z" fill="#8B948E"/>
+      <path d="M152 92c-4-3-9-6-12-7-1 4-1 8 0 11 4 2 9 5 12 8z" fill="#8B948E"/>
+      <!-- уши -->
+      <circle cx="48" cy="100" r="9" fill="#EAB98F"/><circle cx="152" cy="100" r="9" fill="#EAB98F"/>
+      <!-- брови -->
+      <rect class="brow l" x="66" y="82" width="22" height="5" rx="2.5" fill="#3E3A34"/>
+      <rect class="brow r" x="112" y="82" width="22" height="5" rx="2.5" fill="#3E3A34"/>
+      <!-- глаза -->
+      <g class="blink"><g class="pupils">
+        <circle cx="78" cy="98" r="5.5" fill="#16231D"/><circle cx="122" cy="98" r="5.5" fill="#16231D"/>
+        <circle cx="80" cy="96" r="1.8" fill="#fff"/><circle cx="124" cy="96" r="1.8" fill="#fff"/>
+      </g></g>
+      <!-- рты по эмоциям -->
+      <g data-m="smile"><path d="M86 122q14 10 28 0" stroke="#8A5A38" stroke-width="4" fill="none" stroke-linecap="round"/></g>
+      <g data-m="grin"><path d="M84 119q16 16 32 0z" fill="#6E4226"/><path d="M87 121q13 6 26 0z" fill="#fff"/></g>
+      <g data-m="hmm"><path d="M90 124h20" stroke="#8A5A38" stroke-width="4" fill="none" stroke-linecap="round"/></g>
+      <g data-m="oops"><ellipse cx="100" cy="124" rx="8" ry="6" fill="#6E4226"/></g>
+      <g data-m="flat"><path d="M88 126q12-6 24 0" stroke="#8A5A38" stroke-width="4" fill="none" stroke-linecap="round"/></g>
+      <!-- гарнитура -->
+      <path d="M46 88c0-34 24-54 54-54s54 20 54 54" stroke="#16231D" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <rect x="38" y="86" width="14" height="26" rx="7" fill="#16231D"/>
+      <path d="M45 112c0 16 14 22 30 23" stroke="#16231D" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <circle cx="80" cy="136" r="6" fill="#C99A33"/>
+      <!-- звёздочка-настроение (серия) -->
+      <g class="badge-star"><path d="M162 44l4.5 9 10 1.5-7.2 7 1.7 10-9-4.7-9 4.7 1.7-10-7.2-7 10-1.5z" fill="#F4C775"/></g>
+    </svg>
+    <div class="cbody-meta">
+      <div class="cname">Саныч <small>наставник · 20 лет в продажах</small></div>
+      <div class="cstats" id="cstats"></div>
+      <button class="qt" id="qt"></button>
+    </div>
+  </aside>
+</div>
+
+<p class="cap"><b>Источники канона:</b> <a href="../manager-training/index.html">учебник менеджера</a> (14 уроков, 49 правил) · <a href="../script/index.html">скрипт первого звонка</a> (10 шагов, 14 возражений) · рубрика ИИ v1.1.15. Прогресс хранится на этом устройстве; наружу — только сданные зачёты. Разночтение — прав свод.</p>
+
+</div>
+
+<script>
+/* ═══ ДАННЫЕ: 81 вопрос / 8 уровней. say:1 — варианты-реплики. binary:1 — раунд «можно/нельзя». ═══ */
+const LEVELS=[
+{id:'l0',n:'Пять опор',ico:'🏛',desc:'База системы — без неё остальное не сложится',qs:[
+ {sit:'Ты написал клиенту в чат подробное сообщение с расчётом.',q:'Окно попытки закрыто?',o:['Нет — попытка это только набор номера, сообщение лишь дополнение','Да — содержательное сообщение считается попыткой','Да, если клиент прочитал'],ok:0,fb:'Попытка = телефонный набор, его видит телефония. Сообщение помогает, но окно попытки не закрывает.',a:'#u0'},
+ {sit:'Консультация прошла отлично, клиент горячий.',q:'Кто переводит сделку в «Принимает решение»?',o:['Система — по оценке ИИ, что гейт консультации собран','Ты — перетаскиваешь карточку в CRM','РОП после проверки'],ok:0,fb:'Статусы двигают события: подпись — вебхук СМС, оплата — эквайринг, гейт — оценка ИИ. Ручные статусы = «левые статусы», у нас их нет.',a:'#u0'},
+ {sit:'Клиент внёс частичку 990 ₽, но диагностика добрана не полностью.',q:'Что со сделкой?',o:['Деньги сильнее гейта: сделка двигается, недобранное станет задачей','Сделка стоит, пока не соберёшь все 16 пунктов','Частичку нужно вернуть — гейт не собран'],ok:0,fb:'Любой денежный артефакт закрепляет лида и двигает сделку. Недобранные пункты — задача на следующий звонок, а не блок.',a:'#u0'},
+ {sit:'Лид три недели вялый, тебе он надоел.',q:'Можно закрыть?',o:['Нет — закрытие только с причиной-артефактом: цитата отказа или обоснованный дисквал','Да, если долго не покупает','Да, если предупредил РОПа'],ok:0,fb:'Закрыл живого лида без основания → система вернёт его другому менеджеру, а тебе — разбор. «Вялый» — это пул, не закрытие.',a:'#u0'},
+ {sit:'Ты отлично провёл звонок, но клиент не купил.',q:'Что с твоей оценкой?',o:['Хороший звонок засчитывается: 65+ баллов — рабочий, без штрафа','Нет продажи — нет балла','Оценка снижается за отказ клиента'],ok:0,fb:'ИИ оценивает усилие, не исход: эмпатия 20 · возражения 25 · лестница денег 40 · шаг с датой 15. Отказ клиента — не твоя вина.',a:'#u13'},
+ {sit:'Ты позвонил: «Всё в силе? — Да». Положил трубку.',q:'Такой пинг держит лида за тобой?',o:['Нет — лида держат содержательные касания и артефакты: платёж, документ, названная дата','Да — попытка же была','Да, если клиент ответил'],ok:0,fb:'Пустой пинг попыткой считается, но лид не держит. Держат артефакты: деньги, документы, названные даты.',a:'#u0'}
+]},
+{id:'l1',n:'Лид и консультация',ico:'📞',desc:'Ступени 1–2: скорость набора, гейт 16 пунктов, отказ vs возражение',qs:[
+ {sit:'Тебе упал новый лид. Ты допиваешь кофе.',q:'Сколько времени на набор?',o:['5 минут (горячий от бота — 1 минута), иначе лид уходит другому','15 минут','До конца дня'],ok:0,fb:'Лид остывает быстрее кофе. Не взял за 5 минут — система отдаст его другому менеджеру.',a:'#u1'},
+ {sit:'Дозвонился новому лиду, он готов говорить.',q:'Твой ход?',o:['Консультация прямо на этом звонке — открой пульт и веди по скрипту','«Удобно будет завтра пообщаться подробнее?»','Коротко представиться и отправить презентацию в чат'],ok:0,fb:'Клиент оставил заявку сейчас — говори сейчас. «Созвонимся завтра» = сам предложил отсрочку.',a:'#u1'},
+ {sit:'Три твоих набора — не берёт трубку.',q:'Что дальше?',o:['Лид уходит боту-дозвонщику: 5 попыток за 3 дня; дозвонится — вернёт тебе','Продолжаешь набирать каждый час сам','Закрываешь как недозвон'],ok:0,fb:'Дозвон — машине, продажа — человеку. Совсем впустую → «Закрытые (недозвон)», система вернёт его через 30–90 дней.',a:'#u1'},
+ {sit:'Клиент на консультации: «оформляем, что нужно?»',q:'Твой ход?',o:['Не отпуская с линии — ссылка на страницу и ведёшь по экранам до подписи','Отправить договор на почту, созвониться завтра','Записать на подпись на завтра'],ok:0,fb:'Готовый клиент — высший приоритет. Пока он на линии — доводи до подписи кодом из СМС.',a:'#u2'},
+ {sit:'Клиент слушает, но презентацию смотреть не хочет. Не отказывается.',q:'Твой заход?',say:1,o:['«Пришлите кредитную историю — юрист сделает бесплатное заключение по рискам»','«Давайте я всё-таки покажу презентацию, это 10 минут»','«Хорошо, наберу вас на следующей неделе»'],ok:0,fb:'Не дави презентацией — меняй заход. КИ даёт повод для следующего звонка с точными цифрами: это твой главный дожимной ход.',a:'#u2'},
+ {sit:'Что открывает лиду переход в «Принимает решение»?',q:'Гейт «консультация состоялась» — это…',o:['Все 16 пунктов диагностики собраны (или честное «неприменимо»)','Разговор длился больше 20 минут','Клиент согласился подумать'],ok:0,fb:'Гейт проверяет ИИ по чек-листу 16 пунктов. Длительность и вежливость ни при чём.',a:'#u13'},
+ {sit:'Не успел добрать диагностику, денег нет.',q:'Что произойдёт?',o:['Задача «добери диагностику»; таких лидов максимум 10 — потом кран новых закрывается','Ничего, доберёшь когда-нибудь','Лид сразу уходит в пул'],ok:0,fb:'Максимум 10 недобранных — дальше новые лиды не выдаются, пока не разгребёшь. Прятать лидов «на потом» не выйдет: потолок 3 дня.',a:'#u2'},
+ {sit:'Клиент замолчал. Ты честно звонил по окнам.',q:'Что с лидом?',o:['Уйдёт в пул тёплым — без штрафа тебе','Закрываешь: молчание = отказ','Держишь у себя, пока не ответит'],ok:0,fb:'Молчание — не отказ и не повод закрывать. Честные попытки были — пул, штрафа нет.',a:'#u2'},
+ {sit:'«Не звоните мне больше!»',q:'Твой ход?',o:['Закрыть с дословной цитатой — лид уходит в DNC без возврата','Перезвонить через неделю, когда остынет','Передать лида коллеге — пусть попробует'],ok:0,fb:'Жёсткий отказ — единственное, что не дожимаем. Цитата = причина-артефакт. Набор по DNC = флаг.',a:'#u2'},
+ {sit:'«Перезвоните позже», «дорого», «нет денег», «подумаю».',q:'Что из этого отказ?',o:['Ничего — это возражения, их работаем','Всё — клиент же не согласился','«Нет денег» — отказ, остальное возражения'],ok:0,fb:'Отказ — только требование прекратить контакт. Всё остальное — возражения: у каждого есть эталонный ход.',a:'#u2'}
+]},
+{id:'l2',n:'«Подумаю» — дожим',ico:'🤔',desc:'Ступень 3: три обязательных хода, парковка, КИ-контур',qs:[
+ {sit:'«Надо посоветоваться с женой, наберу завтра».',q:'Сколько обязательных ходов и каких?',o:['Три: материалы в чат + жёсткая дата-время звонка + квалификация намерения','Один: договориться о звонке','Два: отправить расчёт и ждать'],ok:0,fb:'Все три, каждый раз: расчёт + договор PDF + кейсы в чат, «завтра в 18:00 набираю», и квал намерения. Без них «подумаю» = потерянный лид.',a:'#u3'},
+ {sit:'Квалификация намерения на «посоветуюсь с женой».',q:'Какая реплика — канон?',say:1,o:['«Если жена скажет „нет" — вы всё равно будете решать вопрос с долгами, или на этом закрываем? Мне важно, ждать ли вас»','«А жена вообще в курсе ваших долгов?»','«Хорошо, надеюсь, жена согласится. До связи!»'],ok:0,fb:'Квал намерения заставляет клиента самого назвать позицию — и показывает, ждать ли его. Это третий обязательный ход.',a:'#u3'},
+ {sit:'«Оплачу после зарплаты, 10-го».',q:'Что делаешь?',o:['Дата вслух + в сделку → парковка: таймеры на паузе, лид сам вернётся 10-го','Звонишь каждый день до 10-го — вдруг передумает','Ставишь себе напоминалку в телефоне'],ok:0,fb:'Парковка защищает обоих: окна не горят, клиента не долбим. Но переносов максимум 1–2 — дальше пул.',a:'#u3'},
+ {sit:'Клиент прислал кредитную историю.',q:'Твой приоритет?',o:['Всё бросаем: пересчёт за полчаса → звонок-разбор юр. заключения','Посмотришь вечером, когда освободишься','Отправить заключение в чат — пусть читает'],ok:0,fb:'Звонок-разбор КИ — самый сильный звонок воронки: точные цифры, все договоры, вердикты. Заключение — только в звонке: документ без твоего голоса не продаёт.',a:'#u3'},
+ {sit:'Обещал прислать КИ и тянет второй день.',q:'Твой ход?',o:['Звонок: черновик заключения по словам (только в звонке) и закрытие на договор','Ждёшь, пока пришлёт — без КИ смысла нет','Пишешь в чат напоминание про КИ'],ok:0,fb:'Не жди бумагу — продавай по словам, КИ докрутим после. Черновик тоже показываем только в звонке.',a:'#u3'},
+ {sit:'«Да лень мне эту КИ качать, не буду».',q:'Что это и что делаешь?',say:1,o:['Квал-фильтр: «Скажите честно — вопрос с долгами решать будем или закрываем тему?»','Ничего страшного — работаем без КИ дальше как обычно','Объясняешь ещё раз, как скачать, и ждёшь'],ok:0,fb:'Если клиенту лень 5 минут для своего же дела — вопрос ребром. Готов → ведёшь по словам. Не готов → закрытие с цитатой.',a:'#u3'},
+ {sit:'Ты «греешь» думающего третий день. Разговоры тёплые, движения нет.',q:'Что произойдёт?',o:['Потолок ст.2+3 = 3 дня: лид уйдёт в пул тёплым, другому менеджеру','Ничего — главное, что контакт есть','РОП продлит потолок, если попросить'],ok:0,fb:'Разговоры потолок не двигают — двигают деньги и договор. Закрывай на подпись сегодня, а не грей неделями.',a:'#u3'},
+ {sit:'Думающий просит: «скиньте презентацию с ценами, сам посмотрю».',q:'Отправляешь?',o:['Нет. Расчёт, договор PDF, кейсы — да; экран условий — только в живом звонке','Конечно, пусть изучает','Отправляешь, но со скидкой-дедлайном'],ok:0,fb:'Цена и договор без твоего голоса рядом = «ой, дорого» и слив. Презентация условий открывается только в звонке.',a:'#u3'},
+ {sit:'Договорились «созвонимся на днях».',q:'Это шаг с датой?',o:['Нет — нужна жёсткая дата И время: «завтра в 18:00 набираю»','Да, договорённость же есть','Да, если клиент сам предложил'],ok:0,fb:'«На днях» = звонок в никуда. Шаг с датой (п.16) — конкретные дата и время, названные вслух.',a:'#u3'},
+ {sit:'Клиент второй раз переносит названную дату оплаты.',q:'Что дальше?',o:['Вторая перенесённая дата отправляет лида в тёплый пул','Переносишь сколько угодно — лишь бы платил','Закрываешь как отказника'],ok:0,fb:'Лимит переносов парковки — 1–2. Бесконечных «оплачу завтра» не бывает: дальше пул, без штрафа.',a:'#u3'}
+]},
+{id:'l3',n:'Договор на подписи',ico:'✍️',desc:'Ступень 4: горячий час, «отложено до», дожим от договора',qs:[
+ {sit:'Отправил клиенту ссылку на страницу договора.',q:'Что делаешь, пока он открывает?',o:['Остаёшься на линии: проговариваешь каждый экран до подписи кодом из СМС','Вешаешь трубку — пусть спокойно почитает','Ставишь задачу «проверить через час»'],ok:0,fb:'Клиент не листает сам. Выжимка условий → договор («сначала договор — он вас защищает») → подпись СМС.',a:'#u4'},
+ {sit:'Клиент подписал договор.',q:'Твой следующий ход?',o:['Не прощаешься — сразу закрываешь на оплату: СБП 15 секунд или частичка от 990 ₽','Поздравляешь с покупкой и прощаешься','Даёшь сутки «переварить» и звонишь завтра'],ok:0,fb:'Подпись без денег — главная течь воронки. Пока клиент на линии и решение тёплое — веди к оплате.',a:'#u4'},
+ {sit:'«Я на смене, к странице вернусь вечером, часов в 19».',q:'Что со сделкой?',o:['Остаётся на подписи: «📅 отложено до 19:00», автозадача ровно на это время','Откатывается в «Принимает решение»','Закрывается — не захотел же'],ok:0,fb:'Причина техническая, не содержательная — сделку не понижаем. Клиент сам назвал время = твой шаг с датой закрыт. Из ст.4 назад дороги нет.',a:'#u4'},
+ {sit:'Был готов, а теперь: «я ещё подумаю, не буду пока подписывать».',q:'Твой ход?',say:1,o:['«Вы уже видели договор и условия — осталась одна СМС. Что смущает?»','Проводишь презентацию заново, с самого начала','Возвращаешь сделку в «Принимает решение»'],ok:0,fb:'Подсостояние «🔁 дожим подписи»: каденция как в ст.3 (48 ч, три хода), но тексты ОТ ДОГОВОРА. Клиент дальше по пути — говори с места, где он остановился.',a:'#u4'},
+ {sit:'Звонок прервался, когда клиент был на странице договора.',q:'Что делаешь?',o:['Перезваниваешь сразу и продолжаешь с того же места','Ждёшь — перезвонит сам, если надо','Пишешь СМС «наберите, как освободитесь»'],ok:0,fb:'Горячий час — счёт на минуты. Задача «помочь подписать» и так придёт через 30 минут, но зачем ждать?',a:'#u4'},
+ {sit:'Клиент в ст.4 без подписи уже третий день (вместе со ст.2–3).',q:'Что произойдёт?',o:['Потолок ст.2+3+4 = 3 дня: уйдёт в пул тёплым — вбок, не назад','Ничего — он же дошёл до договора','Вернётся в ст.3'],ok:0,fb:'Потолок расширен на ст.4 до артефакта подписи — страховка от «прятанья» сделок. Пул = вбок: воронка ходит только вперёд.',a:'#u4'},
+ {sit:'Клиент говорит с того же телефона и не может открыть страницу.',q:'Твой ход?',o:['Звонок-презентация: договариваешься на конкретные дату И время','Диктуешь договор голосом прямо сейчас','Отправляешь договор бумажной почтой'],ok:0,fb:'Не может открыть — не повод терять сделку: назначай звонок-презентацию с датой и временем.',a:'#u4'},
+ {sit:'Недоподписавший вчера клиент — и свежий «думающий» из ст.3.',q:'Кто горячее?',o:['Недоподписавший: он уже видел договор — он дальше по пути','Думающий: он ещё не успел отказаться','Одинаково'],ok:0,fb:'Решение заказчика: «недоподписавший за час горячее думающих — не мешать его с ними». Поэтому ст.4 без отката назад.',a:'#u4'}
+]},
+{id:'l4',n:'Деньги',ico:'₽',money:1,desc:'Ступени 5–7: час 0, ускоритель, частичка 990, добор, передача',qs:[
+ {sit:'Клиент подписал. Полную сумму сейчас «не потянет».',q:'Твой ход в час 0?',say:1,o:['«Внесите сколько есть — достаточно от тысячи, всё идёт в зачёт. И я уже сегодня начинаю работу по вам»','«Хорошо, оплатите, когда сможете»','«Тогда договор пока отменим, вернёмся позже»'],ok:0,fb:'Лестница часа 0: СБП 15 секунд → частичка от 990 ₽ → точная дата вслух + в сделку + запрос КИ. Всё — не вешая трубку.',a:'#u5'},
+ {sit:'Подписал, но: «оплачу в пятницу» (сегодня вторник).',q:'Что открывается?',say:1,o:['Ускоритель: «оплатите сегодня — последний платёж прощаем. До конца дня, завтра предложения не будет»','Скидка 20% за быструю оплату','Ничего — ждёшь пятницы'],ok:0,fb:'189 000 вместо 199 000: клиент платит те же 13 500 сегодня — просто на один платёж меньше в конце. Дедлайн честный: 23:59, потом кнопка гаснет.',a:'#u5'},
+ {sit:'Клиент на консультации: «дорого!». Хочется дать скидку.',q:'Можно ускоритель?',o:['Нет: ускоритель только ПОСЛЕ подписи при дате оплаты дальше сегодня. На «дорого» — возражение №1','Да, скидка снимает возражение','Да, если клиент горячий'],ok:0,fb:'На «дорого» работаем переключением на месячный платёж («13 500 — потянете?»), не скидкой. Скидка до подписи = обесценивание продукта.',a:'#u10'},
+ {sit:'Вчера сказал «только сегодня», клиент не оплатил. Просит скидку снова.',q:'Продлеваешь?',o:['Нет — предложение погасло в 23:59; повтор только через РОПа','Да, один раз можно','Да, но уже минус 5 000, не 10 000'],ok:0,fb:'Один раз соврёшь «только сегодня» — клиент научится ждать скидку, а ИИ увидит расхождение. Дедлайн честный или его нет.',a:'#u5'},
+ {sit:'Подписан, не оплачен, день 2. Вчера ты говорил про гарантию.',q:'Содержание сегодняшней попытки?',say:1,o:['Бронь юриста: «для старта нужны два условия — первый платёж и кредитный отчёт»','Снова про гарантию — повторение мать учения','«Ну что, оплатили?»'],ok:0,fb:'Каждый день — новое содержание: Д1 гарантия возврата (п.6, 7 рабочих дней) · Д2 бронь юриста · Д3 прямо «что мешает?» + перенос на 25-е.',a:'#u5'},
+ {sit:'Ст.5, ты сегодня ни разу не набрал клиента.',q:'Чем это кончится?',o:['День без попытки → лид уходит другому менеджеру','Ничем — потолка же в ст.5 нет','Штрафом от РОПа'],ok:0,fb:'Потолка нет, но правило жёсткое: попытка каждый день первые 3 дня (дальше раз в 48 ч). РОП видит «застрявшие деньги» с первого дня.',a:'#u5'},
+ {sit:'Клиент внёс частичку 990 ₽.',q:'Что делаешь в этот же час?',say:1,o:['«Фиксирую доплату на [дату зарплаты] — и я уже начинаю работу. Внесёте 13 500 — заказываем вашу SIM и стартуем полностью»','Благодаришь и ждёшь, когда доплатит сам','Ставишь задачу «позвонить через неделю»'],ok:0,fb:'Горячий час добора: клиент только что принял решение деньгами — закрепи дату доплаты, пока решение тёплое.',a:'#u6'},
+ {sit:'«Может, займу у МФО и оплачу вам всё сразу?»',q:'Твой ответ?',say:1,o:['«Новые займы перед процедурой вредят делу — суд смотрит на добросовестность. Внесите из своих сколько есть, остальное с зарплаты»','«Отличная идея, давайте!»','«Как вам удобнее, главное оплатить»'],ok:0,fb:'Защита дела клиента = доверие + меньше расторжений. Займ «чтобы оплатить нас» — красная линия.',a:'#u6'},
+ {sit:'Клиент привёл друга, друг оплатил по договору.',q:'Что получает твой клиент?',o:['Первый платёж 3 500 вместо 13 500 (10 000 в зачёт)','Скидку 10% на всё','Ничего — реферальная для новых'],ok:0,fb:'Реферальная срабатывает только от ОПЛАТЫ друга, не от обещания «поспрашиваю знакомых». За обещание — ничего.',a:'#u6'},
+ {sit:'Деньги пришли полностью.',q:'Когда можно «поздравляю с началом процедуры»?',o:['Теперь — только после прихода денег','Можно было сразу после подписи','После передачи юристу'],ok:0,fb:'«Поздравляю, процедура запущена» ДО денег — ложный статус, красная линия №9. После денег — обязательно: «Видел вашу оплату — поздравляю!»',a:'#u7'},
+ {sit:'Полная оплата прошла.',q:'Что обязательно перед передачей в сопровождение?',o:['Анкета передачи: сделки за 3 года, имущество вкл. супруга, ИП/ООО','Ничего — сопровождение само разберётся','Прощальный звонок клиенту'],ok:0,fb:'Без анкеты система передачу не пропустит. Передача в ОС ≤24 ч. Дальше — онбординг: продать специалиста.',a:'#u7'},
+ {sit:'Передаёшь клиента юристу сопровождения.',q:'Как «продать специалиста»?',say:1,o:['«Вас принимает ваш личный юрист по делу, свяжется в течение 24 часов. Ваша задача — быть его правой рукой»','«Дальше вами занимается другой отдел, всего доброго»','«Если что — звоните мне, я на связи»'],ok:0,fb:'Плюс программируй ожидания: будни 9–18 по Москве, платежи по графику, просрочка блокирует работу. Клиент, знающий правила, не паникует и не расторгает.',a:'#u7'},
+ {sit:'Клиент спросил цену.',q:'С какого числа начинаешь?',say:1,o:['«13 500 в месяц — потянете?»','«189 000 за всё под ключ»','«Смотря какой у вас случай»'],ok:0,fb:'Первым числом всегда месячный платёж. Полная сумма и VIP 169 000 — только на прямой вопрос или готовность платить разом. Госплатежи 50 000 — «листком», до цены услуги.',a:'#u10'}
+]},
+{id:'l5',n:'После оплаты и сквозные',ico:'🛡',desc:'Ступени 8–9: эскалации, горячая очередь, пул, хвост',qs:[
+ {sit:'Сопровождение сигналит: клиент заговорил о расторжении.',q:'Когда твой звонок?',o:['В тот же день — это эскалация, вторая половина твоего чека','В течение недели','Это забота сопровождения, не твоя'],ok:0,fb:'Твои вторые 50% приходят со вторым платежом клиента. Сигнал «сомневаюсь/расторгаю» = твой звонок в день сигнала.',a:'#u8'},
+ {sit:'«Я передумал, верните деньги». Клиент напряжён.',q:'С чего начинаешь?',say:1,o:['«Расскажите, пожалуйста, почему приняли такое решение?» — и слушаешь, не перебивая','Перечисляешь, сколько работы уже сделано','«По договору возврат не предусмотрен»'],ok:0,fb:'Клиент в защите — спор укрепляет его решение, вопрос «почему» размягчает. Потом верни к его боли: «вы же пришли, чтобы… Она решена?»',a:'#u8'},
+ {sit:'После честного разбора клиент твёрдо: «расторгаю».',q:'Твой ход?',o:['Принимаешь корректно, без дожима','Подключаешь РОПа для второго захода','Тянешь время — может, остынет'],ok:0,fb:'Твёрдое взвешенное «расторгаю» после честного разбора — принимаем корректно. Жёсткий отказ — не поле для давления.',a:'#u8'},
+ {sit:'Клиент открыл страницу договора / прислал КИ / написал «куда платить?»',q:'Норматив реакции?',o:['Горячая очередь: звонок немедленно, норматив — минута','Позвонить в течение часа','До конца дня'],ok:0,fb:'Клиент, который сам сделал шаг, закрывается в разы лучше остывшего. Горячий сигнал = бросай всё.',a:'#u9'},
+ {sit:'Взял тёплого лида из пула.',q:'С чего начинаешь?',o:['Открываешь историю: AI-резюме, прошлые звонки — и говоришь про ЕГО ситуацию','Звонишь сразу — скрипт с нуля','Пишешь «здравствуйте, я ваш новый менеджер»'],ok:0,fb:'Тёплый — не новый: с нуля его уже консультировали. И помни: не разобран за 2 часа — уйдёт следующему.',a:'#u9'},
+ {sit:'Лид молчал 10 дней, его вёл бот. Вдруг кликнул по ссылке.',q:'Что происходит?',o:['Горячая очередь → менеджер по ротации, история в карточке','Он возвращается к тебе автоматически','Ничего — клик не событие'],ok:0,fb:'С 4-го дня тишины лид у «Робота» (1–2 касания в неделю). Ответил/кликнул → горячая очередь по ротации.',a:'#u9'},
+ {sit:'Твоя выплата за сделку.',q:'Как она устроена?',o:['50% с полной оплаты + 50% со второго платежа клиента','100% сразу после оплаты','70/30 по итогам месяца'],ok:0,fb:'Поэтому онбординг и эскалации — не «доп. обязанности», а вторая половина твоего чека.',a:'#u13'},
+ {sit:'Жизни (5 ❤).',q:'Что сжигает одну?',o:['Плохой звонок: гейт не собран ИЛИ балл ниже 90','Отказ клиента','Лид ушёл в пул по потолку'],ok:0,fb:'Хороший звонок возвращает жизнь. Ноль жизней → пауза выдачи лидов + экзамен у РОПа. Отказ клиента и пул жизни не трогают.',a:'#u13'}
+]},
+{id:'l6',n:'Возражения',ico:'🗣',desc:'14 ситуаций из реальных звонков — выбери эталонный ход',qs:[
+ {sit:'«Дорого, где я такую сумму возьму».',q:'Эталонный ход?',say:1,o:['«Сейчас вы отдаёте 40 000 в месяц, и большая часть — проценты. Наша услуга — 13 500, и платежи по кредитам вы уже не вносите. Потянете 13 500?»','«Могу сделать скидку, давайте посчитаем»','«Ну, качество стоит денег»'],ok:0,fb:'Не спорь с ценой — переключай с «сколько платить» на «сколько теряю без процедуры». Сумма всегда месячная. Скидка на «дорого» — запрещена.',a:'#u10'},
+ {sit:'«Сегодня не смогу, зарплата только 10-го».',q:'Эталонный ход?',say:1,o:['«Фиксирую платёж на 10-е. Но давайте уже начнём: внесите от 1 000 ₽ в зачёт — и завтра жду от вас кредитную историю»','«Хорошо, наберу 10-го»','«Может, займёте у родственников?»'],ok:0,fb:'Дата зафиксирована И микрошаг сегодня — клиент «зашёл» в работу психологически. Квал-тест: 1 000 найдёт любой.',a:'#u2'},
+ {sit:'«Слышал, банкротство можно бесплатно через МФЦ».',q:'Эталонный ход?',say:1,o:['«Верно, такой вариант есть — но для узких случаев. У вас долг выше лимита — МФЦ заявление вернёт, потеряете месяцы. Ваш путь — Арбитражный суд»','«МФЦ — это развод, не верьте»','«Ну попробуйте, потом к нам вернётесь»'],ok:0,fb:'Не обесценивай МФЦ — покажи границы применимости: честно и экспертно. Клиент чувствует разницу между экспертом и продавцом.',a:'#u2'},
+ {sit:'«Не верится, что можно не платить. Сказка какая-то».',q:'Эталонный ход?',say:1,o:['«Загуглите „банкротство физических лиц, 127-ФЗ" — закон работает с 2015 года. И прежде чем платить, мы вместе пройдём договор: сначала договор, потом деньги»','«Мы на рынке 10 лет, нам можно доверять»','«Вот отзывы наших клиентов, почитайте»'],ok:0,fb:'«Проверьте сами» = нечего скрывать; «сначала договор» снимает страх отдать деньги в пустоту.',a:'#u2'},
+ {sit:'«Страшно: коллекторы уже угрожают».',q:'Эталонный ход?',say:1,o:['«Поначалу страшно каждому — это нормально. Но как только суд заводит дело, звонить и угрожать вам не имеют права. Плюс поставим переадресацию»','«Не бойтесь, через две недели все звонки прекратятся»','«Коллекторы ничего вам не сделают, игнорируйте»'],ok:0,fb:'Нормализация страха + опора на закон + конкретные механизмы. Но БЕЗ «звонки прекратятся через N дней» — обещание сроков не даём.',a:'#u2'},
+ {sit:'«Я в документах ничего не понимаю, сделайте сами».',q:'Эталонный ход?',say:1,o:['«Основное юрист заказывает сам через Госуслуги; от вас — сфотографировать то, что дома. Ваша задача — быть его правой рукой»','«Не переживайте, вам вообще ничего делать не придётся»','«Ну, без вашего участия никак, придётся разбираться»'],ok:0,fb:'Метафора «правая рука» делит ответственность, а не перекладывает. «Вообще ничего не придётся» — ложное обещание, аукнется в сопровождении.',a:'#u2'},
+ {sit:'«А машину не заберут?»',q:'Эталонный ход?',say:1,o:['«Единственное жильё защищено законом. По машине наша задача — её сохранить; юрист подберёт самый безопасный вариант. Решение за судом, но наша работа — чтобы у судьи не было лишних вопросов»','«Не переживайте, машину 100% сохраним»','«Машину, скорее всего, заберут, готовьтесь»'],ok:0,fb:'Честная формула: задача + практика, без «100% сохраним». Обещание результата, которого нет в договоре, — красная линия.',a:'#u2'},
+ {sit:'«Возьму займ и оплачу вам».',q:'Эталонный ход?',say:1,o:['«Не нужно — новые займы перед процедурой вредят делу: суд смотрит на добросовестность. Внесите из своих сколько есть»','«Главное, чтобы деньги пришли»','«Хорошо, только берите под небольшой процент»'],ok:0,fb:'Предложить или одобрить займ на оплату наших услуг — красная линия №4. Дробление закрывает деньги без токсичного займа.',a:'#u2'},
+ {sit:'«Дайте подумать, посоветуюсь, наберу завтра».',q:'Эталонный ход?',o:['Материалы в чат + «завтра в 18:00 набираю, пройдём договор вместе» + квал намерения','«Конечно, думайте, звоните как решите»','Небольшая скидка, чтобы решился сегодня'],ok:0,fb:'Три обязательных хода на каждое «подумаю»: домашнее задание + жёсткая дата + квал намерения. «Звоните как решите» = слив.',a:'#u3'},
+ {sit:'«А есть гарантия, что спишете?»',q:'Эталонный ход?',say:1,o:['«Да, 100%. Мы не берём дела, которые не пройдут. И это пункт договора: не списали — возвращаем деньги»','«Гарантий в юриспруденции не бывает»','«Гарантируем — вернём в двойном размере, если что»'],ok:0,fb:'Наш «100%» подкреплён отбором дел и пунктом договора о возврате (7 рабочих дней). «В двойном размере» — красная линия: этого нет в договоре.',a:'#u2'},
+ {sit:'«А на что я жить буду в процедуре?»',q:'Эталонный ход?',say:1,o:['«По закону вам положен прожиточный минимум — около 20 000. Плюс дети, лекарства, аренда. Лучше чуть потерпеть полгода, чем годы отдавать всю зарплату банкам»','«Перейдите на полставки — меньше доход, меньше вопросов»','«Ну, придётся затянуть пояс»'],ok:0,fb:'Честный расчёт + сравнение с альтернативой. «Полставки/неофициально» вычищено из скриптов: сокрытие дохода = суд не спишет долг.',a:'#u2'},
+ {sit:'«Банкротом буду, клеймо на всю жизнь…»',q:'Эталонный ход?',say:1,o:['«Последствий немного, и они конечны: руководящие должности — 3 года, повторное списание — через 5 лет. Если статус принципиален — есть реструктуризация, без статуса банкрота»','«Да кому вы нужны, никто не узнает»','«Зато долгов не будет, какая разница»'],ok:0,fb:'Честные последствия + развилка продуктов как выход. Обесценивание страха — потеря раппорта.',a:'#u2'},
+ {sit:'Клиент срывается: «я настолько в яме…» — почти плачет.',q:'Эталонный ход?',say:1,o:['«Я понимаю, не переживайте — проблемы скидываем на нас. В вашей вине того, что так сложилось, нет: зарплаты не растут, кредиты дорогие. Вы уже делаете правильный шаг»','Переходишь к цене, пока он эмоционально открыт','«Успокойтесь, пожалуйста, давайте по делу»'],ok:0,fb:'Дословный приём Светы: раппорт + снятие вины переводят из паралича в доверие. Дожимать на слезах — нельзя.',a:'#u2'},
+ {sit:'После оплаты: «Я передумал, верните деньги».',q:'Эталонный ход?',say:1,o:['«Расскажите, почему приняли такое решение? …Давайте думать не как расторгнуть, а что сделать, чтобы такого желания не было. Вы же пришли, чтобы решить [его боль]. Она решена?»','«Возврат только по суду, читайте договор»','«Хорошо, оформлю возврат сегодня»'],ok:0,fb:'Возражение №14: «почему» + слушать не перебивая + возврат к первоначальной боли. Перед звонком открой историю — говори про ЕГО ситуацию.',a:'#u8'}
+]},
+{id:'l7',n:'Красные линии',ico:'🚫',red:1,binary:1,desc:'Быстрый раунд: можно сказать клиенту — или это флаг компании?',qs:[
+ {sit:'«Если не спишем — вернём деньги в двойном размере!»',ok:1,fb:'Обещания возврата, которых НЕТ в договоре, — красная линия №1. В договоре — возврат оплаченного, без «двойных размеров».',a:'#u12'},
+ {sit:'«Мы даём 100% гарантию списания — это пункт договора о возврате».',ok:0,fb:'Можно: наш «100%» подкреплён отбором дел и пунктом договора о возврате. Единственная допустимая форма гарантии.',a:'#u12'},
+ {sit:'«За вас проценты будет платить Центробанк».',ok:1,fb:'Красная линия №2: «ЦБ/государство платит проценты» — ложь, реальная причина жалоб и расторжений.',a:'#u12'},
+ {sit:'«Наша компания аккредитована государством».',ok:1,fb:'Красная линия №3. Никакой «госаккредитации» юрфирм по банкротству не существует.',a:'#u12'},
+ {sit:'«Возьмите небольшой займ, чтобы внести первый платёж».',ok:1,fb:'Красная линия №4: займ на оплату наших услуг вредит делу клиента — суд смотрит на добросовестность.',a:'#u12'},
+ {sit:'«Перепишите машину на брата до подачи — целее будет».',ok:1,fb:'Красная линия №6: сокрытие имущества = оспоренные сделки + несписанный долг + проблемы клиенту в суде.',a:'#u12'},
+ {sit:'«В кредитной истории ничего видно не будет — скроем».',ok:1,fb:'Красная линия №7. Процедура отражается в КИ — врать про это нельзя.',a:'#u12'},
+ {sit:'«Не подпишете сегодня — вами может заинтересоваться полиция, статья 159».',ok:1,fb:'Красная линия №8: запугивание статьёй ради закрытия. Флаг компании мгновенно.',a:'#u12'},
+ {sit:'«Поздравляю, процедура запущена!» — сразу после подписи, до денег.',ok:1,fb:'Красная линия №9: ложный статус. «Поздравляю» — только после прихода денег.',a:'#u12'},
+ {sit:'«Как правило, аресты снимают примерно через пару месяцев после старта».',ok:0,fb:'Можно: формула «как правило, около…» — допустимая. Нельзя обещать точные сроки: «через 3 месяца снимут».',a:'#u12'},
+ {sit:'«Перейдите на полставки, чтобы доход был поменьше».',ok:1,fb:'Вычищено из старых скриптов: сокрытие дохода = суд не спишет долг. Советуем только легальное.',a:'#u12'},
+ {sit:'«У нас свои проверенные финансовые управляющие, всё схвачено».',ok:1,fb:'Вычищено: намёк на аффилированность ФУ — риск для дела и компании.',a:'#u12'}
+]}
+];
+LEVELS.forEach(l=>l.qs.forEach((q,qi)=>{q.id=l.id+':'+qi;q._bin=!!l.binary}));
+const BIN_OPTS=['✅ Можно сказать','🚫 Флаг — нельзя'];
+/* реплики Саныча: пулы, чтобы не приедались (исследование: одинаковое празднование девальвируется) */
+const SAY_OK=['Точно. Так по канону.','В точку.','Чисто сработано.','Так и продаём.','Держи темп.','Именно.'];
+const SAY_STREAK3='Три подряд. Пошла серия!';
+const SAY_STREAK5='Пять подряд — огонь. Так и веди смену.';
+const SAY_ERR=['Не то. Смотри, как по канону:','Стоп, разберём:','Тут канон другой:'];
+const SAY_RED='Стоп. Это красная линия.';
+const PASS_LVL=['Уровень твой — открываю следующий.','Сдано. Дальше клиент посложнее.','Зачёт. Так держать.'];
+const KEY='donulya-trainer-v1';
+
+/* ═══ движок ═══ */
+const $main=document.getElementById('main'),$bubble=document.getElementById('bubble'),
+      $avatar=document.getElementById('avatar'),$coach=document.getElementById('coach'),
+      $cstats=document.getElementById('cstats'),$qt=document.getElementById('qt');
+let S=load(),run=null;
+function load(){
+  let s={};try{s=JSON.parse(localStorage.getItem(KEY))||{}}catch(e){}
+  return {name:s.name||'',asked:!!s.asked,quiet:!!s.quiet,lv:s.lv||{},exam:s.exam||null,
+          srs:s.srs||{},day:s.day||{last:'',n:0,frz:1}};
+}
+function save(){localStorage.setItem(KEY,JSON.stringify(S))}
+function esc(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function addDays(iso,n){const d=new Date(iso+'T00:00:00');d.setDate(d.getDate()+n);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+/* дневная серия с одним токеном заморозки (восстанавливается на каждой 7-й ступени серии) */
+function touchDay(){const t=today(),d=S.day;
+  if(d.last===t)return;
+  if(d.last===addDays(t,-1))d.n++;
+  else if(d.last===addDays(t,-2)&&d.frz>0){d.frz--;d.n++}
+  else d.n=1;
+  d.last=t;if(d.n>0&&d.n%7===0)d.frz=1;save();
+}
+/* SM-2-лайт: ошибка → вопрос вернётся завтра; верный из очереди → интервал ×2; >8 дней = усвоено */
+function srsWrong(q){S.srs[q.id]={due:addDays(today(),1),iv:1};save()}
+function srsRight(q){const r=S.srs[q.id];if(!r)return;r.iv*=2;if(r.iv>8)delete S.srs[q.id];else r.due=addDays(today(),r.iv);save()}
+function dueCount(){const t=today();return Object.values(S.srs).filter(r=>r.due<=t).length}
+
+function say(emo,html,tone){
+  if(S.quiet){$coach.classList.remove('bump','shake')}
+  $avatar.className='avatar e-'+emo;
+  $bubble.className='bubble'+(tone==='warn'?' warn':tone==='gold'?' gold':'');
+  $bubble.innerHTML=html;
+  if(!S.quiet){
+    $coach.classList.remove('bump','shake');void $coach.offsetWidth;
+    if(emo==='happy'||emo==='fire')$coach.classList.add('bump');
+    if(emo==='err'||emo==='strict')$coach.classList.add('shake');
+  }
+}
+function stars(n){let h='';for(let i=1;i<=3;i++)h+=`<span class="${i<=n?'':'off'}">★</span>`;return h}
+function totStars(){return Object.values(S.lv).reduce((s,v)=>s+(v.stars||0),0)}
+function passed(l){return (S.lv[l.id]||{}).best>=80}
+function unlocked(i){return i===0||passed(LEVELS[i-1])}
+function allPassed(){return LEVELS.every(passed)}
+function cstats(){
+  $cstats.innerHTML=`<span>★ <b class="num">${totStars()}</b> из ${LEVELS.length*3}</span>`+
+   (S.day.n>0?`<span>серия <b class="num">${S.day.n}</b> дн.${S.day.frz>0?' ❄':''}</span>`:'')+
+   (S.exam&&S.exam.score>=65?`<span>экзамен <b class="num">${S.exam.score}</b></span>`:'');
+  $qt.textContent=S.quiet?'🔊 сделать погромче':'🔇 сделать потише';
+}
+$qt.onclick=()=>{S.quiet=!S.quiet;save();cstats()};
+
+/* ── карта уровней ── */
+function home(greet){
+  run=null;
+  const started=(S.lv.l0||{}).best!=null,due=dueCount();
+  let h=`<button class="warm" id="warm" ${started?'':'disabled'}>
+    <span class="wi">⚡</span>
+    <div><b>Разминка дня · 5 вопросов</b>
+    <small>${!started?'откроется после «Пяти опор»':S.day.last===today()?'сегодня уже была — но повторение лишним не бывает':due>0?`ждут повторения: ${due} — 3 минуты, серия останется`:'3 минуты между звонками'}</small></div>
+  </button><div class="levels">`;
+  LEVELS.forEach((l,i)=>{
+    const st=S.lv[l.id]||{},un=unlocked(i),
+          cls='lvl'+(l.money?' money':'')+(l.red?' red':'')+(un?'':' locked');
+    h+=`<button class="${cls}" data-lv="${i}"><span class="ico">${un?l.ico:'🔒'}</span>
+      <span class="t"><b>${l.n}</b><small>${un?l.desc+' · '+l.qs.length+' ситуаций':'сдай предыдущий уровень на 80%'}</small></span>
+      <span class="st"><span class="stars">${stars(st.stars||0)}</span><small>${st.best!=null?`лучший: ${st.best}%`:un?'не начат':''}</small></span></button>`;
+  });
+  const lock=!allPassed();
+  h+=`<button class="lvl exam${lock?' locked':''}" data-exam="1"><span class="ico">${lock?'🔒':'🎓'}</span>
+    <span class="t"><b>Экзамен «Смена»</b><small>${lock?'откроется, когда каждый уровень сдан на 80%':'12 случайных ситуаций · 5 ❤ · красная линия = ноль · пороги как у ИИ: 65 / 90'}</small></span>
+    <span class="st"><span class="stars">${S.exam&&S.exam.score>=65?(S.exam.score>=90?'🏆':'🎓'):''}</span><small>${S.exam?`лучший: ${S.exam.score}`:''}</small></span></button>`;
+  h+=`</div><p class="hint">Уровень = 3–5 минут, как разбор одного звонка. 100% — ★★★, от 80% — ★★ и следующий уровень, от 60% — ★. Ошибки вернутся в разминке — так и запоминается. Теория рядом: <a href="../manager-training/index.html">учебник</a> · <a href="../script/index.html">скрипт</a> · <a href="../funnel-map/index.html">воронка</a>.</p>
+  <button class="reset" id="reset">сбросить прогресс</button>`;
+  $main.innerHTML=h;
+  document.getElementById('warm').onclick=()=>{if(started)start('warm')};
+  $main.querySelectorAll('[data-lv]').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.lv;
+    if(!unlocked(i)){say('strict',`Сначала сдай «${LEVELS[i-1].n}» на 80% — у нас гейты по критерию, не по календарю.`,'warn');return}
+    start('lv',i);
+  });
+  $main.querySelector('[data-exam]').onclick=()=>{
+    if(!allPassed()){say('strict','Экзамен принимаю у готовых: каждый уровень — на 80% и выше.','warn');return}
+    start('exam');
+  };
+  document.getElementById('reset').onclick=()=>{if(confirm('Сбросить весь прогресс тренажёра?')){S={name:S.name,asked:S.asked,quiet:S.quiet,lv:{},exam:null,srs:{},day:{last:'',n:0,frz:1}};save();home()}};
+  cstats();
+  if(greet===false)return;
+  /* приветствие: спросить имя один раз; помнить серию и перерыв (анти-Clippy: знакомые помнят тебя) */
+  if(!S.name&&!S.asked){
+    say('idle',`Привет! Я Саныч, наставник. Здесь — практика к учебнику: клиент говорит, ты выбираешь ход. Как тебя зовут?
+      <span class="nf"><input id="nm" maxlength="20" placeholder="имя"><button id="nmok">Ок</button></span>`);
+    const done=v=>{S.name=(v||'').trim();S.asked=true;save();
+      say('idle',S.name?`${S.name}, отлично. Начни с «Пяти опор» — это база, дальше всё будет логично.`:'Ну, боец так боец. Начни с «Пяти опор».')};
+    document.getElementById('nmok').onclick=()=>done(document.getElementById('nm').value);
+    document.getElementById('nm').onkeydown=e=>{if(e.key==='Enter')done(e.target.value)};
+    return;
+  }
+  const nm=S.name?`, ${S.name}`:'',gap=S.day.last&&S.day.last<addDays(today(),-1);
+  say('idle',
+    totStars()===0?`Привет${nm}! Начни с «Пяти опор» — это база, дальше всё будет логично.`
+    :gap?`Давно не виделись${nm}.${due>0?` В очереди повторения ${due} — начни с разминки, это 3 минуты.`:' Продолжим — выбирай уровень.'}`
+    :allPassed()&&!(S.exam&&S.exam.score>=65)?`Все уровни сданы${nm} — жду тебя на экзамене «Смена».`
+    :S.exam&&S.exam.score>=90?`Идеальная смена в кармане${nm}. Забегай на разминку — канон любит свежую голову.`
+    :`С возвращением${nm}. ${due>0?`Разминка ждёт: ${due} к повторению.`:'Продолжим — выбирай уровень.'}`);
+}
+
+/* ── сборка сессии ── */
+function warmQs(){
+  const pool=LEVELS.filter(l=>(S.lv[l.id]||{}).best!=null).flatMap(l=>l.qs),t=today();
+  const due=shuffle(pool.filter(q=>S.srs[q.id]&&S.srs[q.id].due<=t));
+  const rest=shuffle(pool.filter(q=>!S.srs[q.id]||S.srs[q.id].due>t));
+  return due.concat(rest).slice(0,5);
+}
+function start(mode,lvIdx){
+  let qs;
+  if(mode==='exam'){
+    qs=[];LEVELS.forEach(l=>qs.push(pick(l.qs)));
+    const rest=shuffle(LEVELS.flatMap(l=>l.qs.filter(q=>!qs.includes(q))));
+    qs=shuffle(qs.concat(rest.slice(0,4)));
+  }else if(mode==='warm'){qs=warmQs()}
+  else{qs=LEVELS[lvIdx].qs.slice()}
+  run={mode,lvIdx:lvIdx||0,qs,i:0,okCnt:0,streak:0,hearts:mode==='exam'?5:null,wrong:[],redfail:false};
+  question();
+}
+function question(){
+  const {qs,i,mode}=run,q=qs[i];
+  const opts=q._bin?BIN_OPTS.map((t,j)=>({t,j})):shuffle(q.o.map((t,j)=>({t,j})));
+  let h=`<div class="runbar">
+    <button class="back" id="back">↩ карта</button>
+    <div class="pb"><i style="transform:scaleX(${i/qs.length})"></i></div>
+    ${mode==='exam'?`<span class="hearts num">${'❤'.repeat(run.hearts)}<span class="off">${'❤'.repeat(5-run.hearts)}</span></span>`:`<span class="hearts num" style="font-size:11.5px;color:var(--faint)">${i+1}/${qs.length}</span>`}
+  </div>
+  <div class="qcard">
+    <span class="tag${q._bin?' red':mode==='warm'?' gold':''}">${mode==='exam'?'экзамен «Смена»':mode==='warm'?'разминка · повторение':q._bin?'красная линия?':q.say?'клиент говорит':'ситуация'}</span>
+    <div class="sit">${esc(q.sit)}</div>
+    ${q.q?`<div class="q">${esc(q.q)}</div>`:''}
+    <div class="opts${q._bin?' duo':''}" id="opts">`;
+  opts.forEach((o,k)=>{h+=`<button class="opt" data-j="${o.j}"><span class="k">${String.fromCharCode(65+k)}</span><span>${esc(o.t)}</span></button>`});
+  h+=`</div><div class="nextrow" id="nextrow"></div></div>`;
+  $main.innerHTML=h;
+  document.getElementById('back').onclick=()=>{if(confirm('Выйти? Прогресс сессии не сохранится.'))home(false)};
+  /* Саныч молчит, пока менеджер думает (анти-Clippy) — только нейтральная поза */
+  say('think',q._bin?'Так говорить клиенту — можно или это флаг?':'Твой ход. Я послушаю.');
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(b,q));
+}
+function answer(btn,q){
+  const j=+btn.dataset.j,good=j===q.ok;
+  document.querySelectorAll('.opt').forEach(b=>{
+    b.disabled=true;
+    const bj=+b.dataset.j;
+    if(bj===q.ok)b.classList.add('ok');else if(bj===j)b.classList.add('bad');else b.classList.add('dim');
+  });
+  const link=`<a href="../manager-training/index.html${q.a}" target="_blank" rel="noopener">→ урок в учебнике</a>`;
+  const red=q._bin&&q.ok===1;
+  if(good){
+    run.okCnt++;run.streak++;srsRight(q);
+    const fire=run.streak>=5,tri=run.streak===3||run.streak===4;
+    say(fire?'fire':'happy',
+      `<b>${S.quiet?'Верно.':fire?SAY_STREAK5:tri?SAY_STREAK3:pick(SAY_OK)}</b><span class="why">${esc(q.fb)} ${link}</span>`,fire?'gold':null);
+  }else{
+    run.streak=0;run.wrong.push(q);srsWrong(q);
+    if(run.mode==='exam'){
+      if(red){run.redfail=true}
+      else{run.hearts--;const hh=document.querySelector('.hearts');if(hh)hh.innerHTML=`${'❤'.repeat(run.hearts)}<span class="off">${'❤'.repeat(5-run.hearts)}</span>`}
+    }
+    say(red?'strict':'err',
+      `<b>${S.quiet?'Канон:':red?SAY_RED+(run.mode==='exam'?' В бою такой звонок = ноль.':''):pick(SAY_ERR)}</b><span class="why">${esc(q.fb)} ${link}</span>`,'warn');
+  }
+  const last=run.i+1>=run.qs.length||run.redfail||(run.mode==='exam'&&run.hearts===0);
+  document.getElementById('nextrow').innerHTML=
+    (run.streak>=2?`<span class="streak">🔥 серия ×${run.streak}</span>`:'')+
+    `<button class="next" id="next">${last?'Итог':good?'Дальше →':'Понятно →'}</button>`;
+  const nb=document.getElementById('next');nb.focus();
+  nb.onclick=()=>{run.i++;last?result():question()};
+}
+
+/* ── итог ── */
+function result(){
+  const {qs,okCnt,wrong,mode}=run,pct=Math.round(okCnt/qs.length*100);
+  touchDay();
+  let h='';
+  if(mode==='lv'){
+    const l=LEVELS[run.lvIdx],st=pct===100?3:pct>=80?2:pct>=60?1:0,prev=S.lv[l.id]||{};
+    S.lv[l.id]={stars:Math.max(prev.stars||0,st),best:Math.max(prev.best||0,pct)};save();
+    h=`<div class="result">
+      <div class="bigstars">${stars(st)}</div>
+      <h2>${l.n}: ${okCnt} из ${qs.length}</h2>
+      <div class="sc num">${pct}% верных ходов${pct<80?' — для зачёта уровня нужно 80%':''}</div>
+      ${mistakes(wrong)}
+      <div class="ctas">
+        <button class="btn2" id="again">Ещё раз</button>
+        ${pct>=80&&run.lvIdx+1<LEVELS.length?`<button class="next" id="nxtlvl">Дальше: ${LEVELS[run.lvIdx+1].n} →</button>`:''}
+        <button class="btn2" id="map">На карту</button>
+      </div></div>`;
+    $main.innerHTML=h;
+    say(st>=2?'fire':st===1?'happy':'err',
+      st===3?'Без единой ошибки. Идеал — как звонок на 90+.'
+      :st===2?pick(PASS_LVL)
+      :st===1?'Почти. До зачёта — 80%: глянь разборы и заходи ещё раз, попытки не считаю.'
+      :'Пока рано. Разборы ниже — и ещё заход. Тренировка приватная, наружу идут только зачёты.',
+      st===0?'warn':st===3?'gold':null);
+    const ag=document.getElementById('again');if(ag)ag.onclick=()=>start('lv',run.lvIdx);
+    const nx=document.getElementById('nxtlvl');if(nx)nx.onclick=()=>start('lv',run.lvIdx+1);
+  }else if(mode==='warm'){
+    h=`<div class="result">
+      <div class="bigstars">⚡</div>
+      <h2>Разминка: ${okCnt} из ${qs.length}</h2>
+      <div class="sc num">серия тренировок — ${S.day.n} ${S.day.n===1?'день':S.day.n<5?'дня':'дней'}${S.day.frz>0?' · заморозка ❄ в запасе':''}</div>
+      ${mistakes(wrong)}
+      <div class="ctas">
+        <button class="btn2" id="again">Ещё пятёрку</button>
+        <button class="next" id="map">На карту</button>
+      </div></div>`;
+    $main.innerHTML=h;
+    say(okCnt===qs.length?'fire':'happy',
+      okCnt===qs.length?'Чистая разминка! Ошибки прошлых дней закрываются — так и работает память.':'Разминка сделана. Что не далось — вернётся завтра, дожмём.',
+      okCnt===qs.length?'gold':null);
+    document.getElementById('again').onclick=()=>start('warm');
+  }else{
+    const score=run.redfail?0:Math.round(okCnt/qs.length*100),
+          verdict=run.redfail?['bad','Красная линия — ×0, как в бою']
+            :score>=90?['gold','🏆 Идеал — 90+']:score>=65?['','🎓 Смена сдана — рабочий уровень']:['bad','Пересдача — ниже 65'];
+    if(!S.exam||score>S.exam.score){S.exam={score,date:new Date().toLocaleDateString('ru-RU')};save()}
+    h=`<div class="result">
+      <div class="bigstars">${run.redfail?'🚫':score>=90?'🏆':score>=65?'🎓':'💤'}</div>
+      <h2>Экзамен «Смена»: ${okCnt} из ${qs.length}</h2>
+      <div class="sc num">${run.redfail?'красная линия обнуляет звонок — и экзамен':'балл '+score+' · пороги как у ИИ-оценки: 65 — рабочий, 90 — идеал'}</div>
+      <span class="verdict ${verdict[0]}">${verdict[1]}</span>
+      ${score>=65?`<div class="cert"><b>СМЕНА СДАНА${score>=90?' · ИДЕАЛ':''}${S.name?' · '+esc(S.name.toUpperCase()):''}</b><div>балл <span class="num">${score}</span> · ${S.exam.date} · тренажёр ДОНУЛЯ</div></div>`:''}
+      ${mistakes(wrong)}
+      <div class="ctas">
+        <button class="btn2" id="again">Пересдать</button>
+        <button class="next" id="map">На карту</button>
+      </div></div>`;
+    $main.innerHTML=h;
+    say(run.redfail?'strict':score>=90?'fire':score>=65?'happy':'err',
+      run.redfail?'Красная линия — единственное, что я не прощаю: в бою это ноль всему звонку и флаг компании. Разбери её ниже — и пересдача.'
+      :score>=90?'Идеальная смена! С таким уровнем живой экзамен у РОПа — формальность.'
+      :score>=65?'Смена сдана. Слабые места — в разборе, добей их в разминке до идеала.'
+      :'Пока рано. Вернись в уровни, где ошибался, — разминка подскажет. И на пересдачу.',
+      run.redfail?'warn':score>=90?'gold':score<65?'warn':null);
+    document.getElementById('again').onclick=()=>{if(allPassed())start('exam')};
+  }
+  document.getElementById('map').onclick=()=>home(true);
+  cstats();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function mistakes(w){
+  if(!w.length)return '';
+  return `<div class="mist"><b>Разбор ошибок · ${w.length} · вернутся в разминке завтра</b>`+w.map(q=>{
+    const right=q._bin?BIN_OPTS[q.ok]:q.o[q.ok];
+    return `<div class="mi"><div class="s">${esc(q.sit)}</div><div class="r">✔ ${esc(right)}</div>
+      <div style="margin-top:3px;color:var(--muted)">${esc(q.fb)}</div>
+      <a href="../manager-training/index.html${q.a}" target="_blank" rel="noopener">→ урок в учебнике</a></div>`;
+  }).join('')+`</div>`;
+}
+home();
+</script>
+</body>
+</html>
