@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Задачи сегодня v3 — по макету заказчика · SALE 100.0</title>
-<meta name="description" content="Виджет задач v3.1 «фокус»: внимание менеджера на одной сделке — крупная карточка «Сейчас», всё остальное свёрнуто в тонкие секции. Начать/закончить работу, кран по горящему, оплаты, расписание, Sensei, зиро. Демо кликается.">
+<title>Задачи сегодня v3.2 — фокус на сделке · SALE 100.0</title>
+<meta name="description" content="Виджет задач v3.2: одна сделка в фокусе, списки только по иконке (вход в лид + выполнить), клок-ин с отметкой опоздания и штрафом, срочные тремя типами, задачи «на время» = точка или окно. Демо кликается.">
 <style>
   :root{
     --bg:#eef1f5; --card:#fff; --line:#e4e8ee; --ink:#1f2633; --mut:#8a93a3; --soft:#f6f8fb;
@@ -18,7 +18,7 @@
     font-size:15px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:60px}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:48px}
   body::before{content:"";display:block;height:4px;background:var(--green)}
   .hint{max-width:1080px;margin:8px auto 0;padding:0 16px;font-size:12px;color:var(--mut)}
   .hint .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:1px}
@@ -26,26 +26,34 @@
   .btn{border:0;cursor:pointer;font:inherit;font-weight:700;border-radius:10px;transition:transform .16s var(--ease),background .2s ease}
   .btn:active{transform:scale(.97)}
 
-  /* ── строка 1: старт + сигналы + статусы ── */
+  /* ── строка 1 ── */
   .bar1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   #shiftBtn{background:var(--dark);color:#fff;padding:0 16px;height:42px;font-size:14px;display:flex;align-items:center;gap:8px;flex:none}
   #shiftBtn .play{width:20px;height:20px;border-radius:50%;background:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#fff}
   #shiftBtn.finish{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
   #shiftBtn.finish.ready{background:var(--green);color:#fff;box-shadow:none}
-  #shiftTime{font-weight:600;font-size:11px;opacity:.7}
-  .sig{position:relative;height:42px;min-width:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--card);border:0;cursor:pointer;flex:none;transition:transform .16s var(--ease)}
+  #clock{font-size:11.5px;color:var(--mut);display:flex;flex-direction:column;justify-content:center;line-height:1.35;flex:none}
+  #clock b{color:var(--ink)}
+  .late-chip{display:none;align-items:center;gap:6px;height:42px;padding:0 12px;border-radius:10px;background:var(--red-bg);border:1px solid var(--red-line);color:#b23237;font-size:12px;font-weight:700;flex:none}
+  .late-chip.on{display:flex}
+  .late-chip small{font-weight:500;opacity:.85}
+
+  .sig{position:relative;height:42px;padding:0 11px;border-radius:10px;display:flex;align-items:center;gap:6px;font-size:15px;background:var(--card);border:1px solid var(--line);cursor:pointer;flex:none;font-weight:700;color:var(--ink);transition:transform .16s var(--ease),border-color .2s ease}
   .sig:active{transform:scale(.95)}
-  .sig .bdg{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:9px;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px}
-  .sig.calls{background:var(--red-bg)} .sig.calls .bdg{background:var(--red)}
-  .sig.msgs{background:var(--purple-bg)} .sig.msgs .bdg{background:var(--purple)}
-  .sig.hot{background:var(--orange-bg)} .sig.hot .bdg{background:var(--orange)}
-  .sig.zero{background:var(--card);opacity:.5} .sig.zero .bdg{background:#c6ccd6}
-  .strip{flex:1;min-width:260px;height:42px;background:var(--card);border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;gap:4px;padding:0 12px;font-size:12px;color:var(--mut);overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+  .sig .n{font-size:12.5px;font-weight:800;min-width:12px}
+  .sig.urg{background:var(--red-bg);border-color:var(--red-line);color:#b23237}
+  .sig.msgs{background:var(--purple-bg);border-color:#ddd2f5;color:var(--purple)}
+  .sig.calls{background:var(--red-bg);border-color:var(--red-line);color:#b23237}
+  .sig.pay{background:#eefaf3;border-color:#bfe8cf;color:var(--green-d)}
+  .sig.meet{background:var(--blue-bg);border-color:#cfe0f7;color:var(--blue)}
+  .sig.all{background:var(--card)}
+  .sig.zero{background:var(--card);border-color:var(--line);color:var(--mut);opacity:.55}
+  .strip{flex:1;min-width:240px;height:42px;background:var(--card);border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;gap:4px;padding:0 12px;font-size:12px;color:var(--mut);overflow-x:auto;white-space:nowrap;scrollbar-width:none}
   .strip::-webkit-scrollbar{display:none}
   .strip b{color:var(--ink);font-size:13px;margin-left:3px}
   .strip .sep{opacity:.4;margin:0 5px}
 
-  /* ── строка 2: задачи · база · кран · sensei ── */
+  /* ── строка 2 ── */
   .bar2{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;font-size:12px;color:var(--mut)}
   .bar2 .p{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:6px 11px;display:flex;align-items:center;gap:7px}
   .bar2 b{color:var(--ink);font-size:13px}
@@ -56,14 +64,15 @@
   .p.kran.closed b{color:#b23237}
   .p.kran.open{background:#eefaf3;border-color:#bfe8cf;color:var(--green-d)}
 
-  /* ── ФОКУС: сделка ── */
-  #focusWrap{margin-top:12px;opacity:0;transform:translateY(8px);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+  /* ── ФОКУС ── */
+  #focusWrap{margin-top:14px;opacity:0;transform:translateY(8px);transition:opacity .3s var(--ease),transform .3s var(--ease)}
   #focusWrap.on{opacity:1;transform:none}
   body.idle #focusWrap{opacity:.5;transform:none;pointer-events:none}
   .f-label{font-size:11px;font-weight:800;letter-spacing:.8px;color:var(--mut);text-transform:uppercase;margin-bottom:6px}
   .f-label span{font-weight:500;letter-spacing:0;text-transform:none;margin-left:6px}
   #focus{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:0 8px 28px rgba(23,32,55,.07);transition:opacity .22s var(--ease),transform .22s var(--ease)}
   #focus.swap{opacity:0;transform:translateY(6px)}
+  #focus.urgent{border-color:var(--red-line);box-shadow:0 8px 28px rgba(229,72,77,.12)}
   .f-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
   .f-name{font-size:22px;font-weight:800}
   .f-chip{font-size:12px;font-weight:700;border-radius:8px;padding:4px 10px;background:var(--soft);color:#5a6372;white-space:nowrap}
@@ -71,53 +80,60 @@
   .f-chip.red{background:var(--red-bg);color:#b23237}
   .f-chip.gold{background:var(--gold-bg);color:var(--gold)}
   .f-chip.blue{background:var(--blue-bg);color:var(--blue)}
+  .f-chip.green{background:#eefaf3;color:var(--green-d)}
   .f-timer{margin-left:auto;text-align:right;white-space:nowrap}
   .f-timer .t{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gold)}
   .f-timer.late .t{color:var(--red)}
   .f-timer .l{font-size:11px;color:var(--mut)}
   .f-ctx{margin-top:12px;font-size:14px;line-height:1.45;background:var(--soft);border-radius:10px;padding:10px 14px;color:#3a4356}
-  .f-act{margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .f-act{margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .f-act .prim{background:var(--dark);color:#fff;padding:11px 22px;font-size:14px}
   .f-act .sec2{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line);padding:11px 16px;font-size:13px}
   .f-act .skip{margin-left:auto;font-size:12px;color:var(--mut);background:none;border:0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
   .f-next{margin-top:8px;font-size:12px;color:var(--mut)}
   .f-next b{color:var(--ink);font-weight:600}
 
-  /* ── свёрнутые секции ── */
-  #secs{margin-top:14px;display:flex;flex-direction:column;gap:8px;opacity:0;transform:translateY(8px);transition:opacity .3s var(--ease) .06s,transform .3s var(--ease) .06s}
-  #secs.on{opacity:1;transform:none}
-  body.idle #secs{opacity:.5;transform:none;pointer-events:none}
-  .sec{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .sec-h{width:100%;display:flex;align-items:center;gap:9px;padding:11px 14px;background:none;border:0;cursor:pointer;font:inherit;font-size:13px;font-weight:700;color:var(--ink)}
-  .sec-h .dot{width:8px;height:8px;border-radius:50%;flex:none}
-  .sec-h .cnt{color:var(--mut);font-weight:600}
-  .sec-h .warn{font-size:11px;font-weight:700;color:#b23237;background:var(--red-bg);border-radius:6px;padding:2px 7px}
-  .sec-h .ok{font-size:12px;color:var(--green-d);font-weight:600}
-  .sec-h .chev{margin-left:auto;color:var(--mut);transition:transform .2s var(--ease);font-size:11px}
-  .sec.open .chev{transform:rotate(90deg)}
-  .sec-b{display:none;padding:0 14px 10px}
-  .sec.open .sec-b{display:block}
-  .srow{display:flex;align-items:center;gap:10px;padding:9px 10px;border-top:1px dashed var(--line);font-size:13px;cursor:pointer;border-radius:8px;transition:background .15s ease,opacity .25s var(--ease)}
-  .srow:hover{background:var(--soft)}
-  .srow:first-child{border-top:0}
-  .srow b{font-size:14px}
-  .srow .m{color:var(--mut);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-  .srow .r{margin-left:auto;font-size:12px;color:var(--mut);white-space:nowrap}
-  .srow.dn{opacity:.45;cursor:default}
-  .srow.dn b{text-decoration:line-through;text-decoration-thickness:1px}
-  .srow .go{font-size:11px;font-weight:700;color:var(--blue);white-space:nowrap}
-  .g-sub{margin:8px 0 2px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--mut);text-transform:uppercase}
-  .g-sub.red{color:var(--red)}
-  .tl{margin:10px 0 4px;display:flex;height:28px;border-radius:8px;overflow:hidden;font-size:10.5px;color:#98a1af;border:1px solid var(--line)}
-  .tl .seg{display:flex;align-items:center;justify-content:center;background:#fafbfd;border-right:1px solid var(--line);position:relative;white-space:nowrap;padding:0 4px}
+  /* ── дровер списка ── */
+  #dveil{position:fixed;inset:0;background:rgba(20,26,40,.4);opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:50}
+  #dveil.show{opacity:1;pointer-events:auto}
+  #drawer{position:fixed;top:0;right:0;bottom:0;width:min(94vw,470px);background:var(--card);z-index:55;transform:translateX(104%);transition:transform .28s var(--ease);display:flex;flex-direction:column;box-shadow:-14px 0 40px rgba(15,25,45,.18)}
+  #drawer.show{transform:none}
+  .d-h{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}
+  .d-h b{font-size:16px}
+  .d-h .cnt{color:var(--mut);font-size:13px}
+  .d-h .x{margin-left:auto;background:var(--soft);border:0;cursor:pointer;width:30px;height:30px;border-radius:8px;font-size:14px;color:var(--mut)}
+  .d-b{overflow-y:auto;padding:10px 14px 20px;flex:1}
+  .d-note{font-size:11.5px;color:var(--mut);padding:8px 4px 4px}
+  .drow{border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-top:9px}
+  .drow.dn{opacity:.5}
+  .drow-t{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .drow-t b{font-size:14.5px}
+  .drow-t .tag{font-size:11px;font-weight:700;border-radius:7px;padding:3px 7px;background:var(--soft);color:#5a6372}
+  .drow-t .tag.red{background:var(--red-bg);color:#b23237}
+  .drow-t .tag.gold{background:var(--gold-bg);color:var(--gold)}
+  .drow-t .tag.blue{background:var(--blue-bg);color:var(--blue)}
+  .drow-t .tag.green{background:#eefaf3;color:var(--green-d)}
+  .drow-t .when{margin-left:auto;font-size:11.5px;color:var(--mut);white-space:nowrap}
+  .drow .m{margin-top:5px;font-size:12.5px;color:var(--mut);line-height:1.4}
+  .drow-a{margin-top:9px;display:flex;gap:8px;flex-wrap:wrap}
+  .drow-a .b{font-size:12px;font-weight:700;border-radius:8px;padding:7px 12px;border:0;cursor:pointer;font-family:inherit;transition:transform .16s var(--ease)}
+  .drow-a .b:active{transform:scale(.96)}
+  .drow-a .do{background:var(--dark);color:#fff}
+  .drow-a .lead{background:var(--blue-bg);color:var(--blue)}
+  .drow-a .foc{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+  .drow .done-m{margin-top:8px;font-size:12px;color:var(--green-d);font-weight:600}
+  .d-empty{text-align:center;color:var(--mut);font-size:13px;padding:34px 10px}
+  .d-grp{margin:14px 0 2px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--mut);text-transform:uppercase}
+  .d-grp.red{color:var(--red)}
+  .tl{margin:10px 0 2px;display:flex;height:28px;border-radius:8px;overflow:hidden;font-size:10.5px;color:#98a1af;border:1px solid var(--line)}
+  .tl .seg{display:flex;align-items:center;justify-content:center;background:#fafbfd;border-right:1px solid var(--line);position:relative;white-space:nowrap;padding:0 3px}
   .tl .seg:last-child{border-right:0}
   .tl .seg.ev{background:var(--blue-bg);color:var(--blue);font-weight:700}
-  .tl .seg.lunch{background:#f2f4f7}
-  .tl .seg.gold{background:var(--gold-bg);color:var(--gold);font-weight:700}
+  .tl .seg.win{background:#f4f7fb;color:#7b8698}
   .tl .now{position:absolute;top:0;bottom:0;width:2px;background:var(--green)}
 
   /* ── тост ── */
-  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(140%);background:var(--dark);color:#fff;border-radius:13px;padding:12px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 34px rgba(15,25,45,.35);transition:transform .35s var(--ease);z-index:60;max-width:min(92vw,540px)}
+  #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(160%);background:var(--dark);color:#fff;border-radius:13px;padding:12px 16px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 34px rgba(15,25,45,.35);transition:transform .35s var(--ease);z-index:90;max-width:min(92vw,540px)}
   #toast.show{transform:translateX(-50%) translateY(0)}
   #toast.alarm{background:#8c2f33}
   #toast .tx b{display:block;font-size:14px}
@@ -127,13 +143,14 @@
   /* ── зиро ── */
   #veil{position:fixed;inset:0;background:rgba(20,26,40,.45);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:70}
   #veil.show{opacity:1;pointer-events:auto}
-  #zero{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.95);opacity:0;pointer-events:none;background:#fff;border-radius:18px;padding:24px 26px;width:min(92vw,440px);z-index:80;transition:transform .25s var(--ease),opacity .25s var(--ease);box-shadow:0 24px 60px rgba(15,25,45,.35)}
+  #zero{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.95);opacity:0;pointer-events:none;background:#fff;border-radius:18px;padding:24px 26px;width:min(92vw,450px);z-index:80;transition:transform .25s var(--ease),opacity .25s var(--ease);box-shadow:0 24px 60px rgba(15,25,45,.35)}
   #zero.show{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
   #zero h2{font-size:20px;margin-bottom:2px}
   #zero .zs{font-size:12px;color:var(--mut);margin-bottom:14px}
-  .zrow{display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px}
-  .zrow b{font-size:15px}
+  .zrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px}
+  .zrow b{font-size:15px;text-align:right}
   .zrow .hl{color:var(--green-d)}
+  .zrow .bad{color:var(--red)}
   #zero .prim{background:var(--dark);color:#fff;width:100%;margin-top:14px;padding:11px;font-size:14px}
   #zero .znote{margin-top:9px;font-size:11px;color:var(--mut);text-align:center}
 
@@ -148,36 +165,40 @@
 </head>
 <body class="idle">
 
-<div class="hint"><span class="dot"></span>amoCRM · «Задачи сегодня» v3.1 «фокус» · вся ширина экрана — одной сделке · демо: «Начать работу», веди фокус, «Закончить работу» откроется на зиро</div>
+<div class="hint"><span class="dot"></span>amoCRM · «Задачи сегодня» v3.2 · экран = одна сделка, списки открываются только по иконке · демо: «Начать работу» (в демо 09:12 — покажет опоздание), веди фокус, «Закончить работу» откроется на зиро</div>
 
 <div class="wrap">
 
   <div class="bar1">
-    <button class="btn" id="shiftBtn" onclick="shift()"><span class="play">▶</span><span id="shiftLabel">Начать работу</span><span id="shiftTime"></span></button>
-    <button class="sig calls" id="sigCalls" title="Пропущенные звонки" onclick="openSec('calls')">📞<span class="bdg">2</span></button>
-    <button class="sig msgs" id="sigMsgs" title="Неотвеченные сообщения" onclick="openSec('msg')">💬<span class="bdg">2</span></button>
-    <button class="sig hot" id="sigHot" title="Горящее" onclick="openSec('pay')">⚡<span class="bdg">2</span></button>
-    <div class="strip" id="strip">Новый<b>3</b><span class="sep">·</span>В работе<b>5</b><span class="sep">·</span>Думает<b>4</b><span class="sep">·</span>Подпись<b>2</b><span class="sep">·</span>Подписан<b>3</b><span class="sep">·</span>Частичка<b>3</b><span class="sep">·</span>Оплата<b id="stNew" style="display:none">3</b><b>1</b></div>
+    <button class="btn" id="shiftBtn" onclick="shift()"><span class="play">▶</span><span id="shiftLabel">Начать работу</span><span id="shiftTime" style="font-weight:600;font-size:11px;opacity:.7"></span></button>
+    <div id="clock">смена с <b>9:00</b><br>сейчас <b id="nowTime">09:12</b></div>
+    <div class="late-chip" id="lateChip">⚠ начал с опозданием<small id="lateTxt">09:12 · +12 мин · −1 000 ₽</small></div>
+    <button class="sig urg" id="sigUrg" onclick="openList('urg')" title="Срочные">⏱<span class="n">3</span></button>
+    <button class="sig msgs" id="sigMsgs" onclick="openList('msg')" title="Неотвеченные сообщения">💬<span class="n">2</span></button>
+    <button class="sig calls" id="sigCalls" onclick="openList('calls')" title="Пропущенные звонки">📞<span class="n">2</span></button>
+    <button class="sig pay" id="sigPay" onclick="openList('pay')" title="Оплаты">₽<span class="n">4</span></button>
+    <button class="sig meet" id="sigMeet" onclick="openList('meet')" title="На время">📅<span class="n">3</span></button>
+    <button class="sig all" id="sigAll" onclick="openList('all')" title="Все задачи">☰<span class="n">10</span></button>
+    <div class="strip">Новый<b>3</b><span class="sep">·</span>В работе<b>5</b><span class="sep">·</span>Думает<b>4</b><span class="sep">·</span>Подпись<b>2</b><span class="sep">·</span>Подписан<b>3</b><span class="sep">·</span>Частичка<b>3</b><span class="sep">·</span>Оплата<b>1</b><b id="stNew" style="display:none">3</b></div>
   </div>
 
   <div class="bar2">
     <div class="p">Задачи: <b><span id="tDone">0</span>/<span id="tTotal">10</span></b><span class="taskbar"><i id="tBar"></i></span></div>
     <div class="p">База: <b>47</b>· активных <b>12/20</b></div>
-    <div class="p kran closed" id="kran">⛔ новые на паузе: <b id="kranWhy">горящее (Алексей К.)</b></div>
+    <div class="p kran closed" id="kran">⛔ новые на паузе: <b>срочное (Козлова)</b></div>
     <div class="p">⚙ задачи ведёт <b>Sensei</b></div>
   </div>
 
-  <!-- ФОКУС -->
   <div id="focusWrap">
-    <div class="f-label">Сейчас<span id="fWhy">· система выбрала: горит раньше всех</span></div>
+    <div class="f-label">Сейчас<span id="fWhy"></span></div>
     <div id="focus"></div>
     <div class="f-next" id="fNext"></div>
   </div>
 
-  <!-- СЕКЦИИ -->
-  <div id="secs"></div>
-
 </div>
+
+<div id="dveil" onclick="closeList()"></div>
+<aside id="drawer"><div class="d-h"><b id="dTitle"></b><span class="cnt" id="dCnt"></span><button class="x" onclick="closeList()">✕</button></div><div class="d-b" id="dBody"></div></aside>
 
 <div id="toast"><div class="tx"><b id="toastT"></b><span id="toastS"></span></div><button class="btn ok" onclick="hideToast()">Ок</button></div>
 
@@ -185,144 +206,225 @@
 <div id="zero">
   <h2>Смена закрыта · зиро ✓</h2>
   <div class="zs">Все задачи Sensei разобраны — хвостов на завтра нет</div>
+  <div class="zrow"><span>Начало смены</span><b class="bad" id="zLate">09:12 · опоздание 12 мин · −1 000 ₽</b></div>
   <div class="zrow"><span>Новых лидов за смену</span><b class="hl" id="zNew">3</b></div>
   <div class="zrow"><span>Задач сделано</span><b id="zTasks">10 из 10</b></div>
   <div class="zrow"><span>Деньги за день</span><b class="hl">13 500 ₽ · Иванова</b></div>
-  <div class="zrow"><span>Подписей взято</span><b>1</b></div>
+  <div class="zrow"><span>Передано в сопровождение</span><b>1 · Иванова</b></div>
   <div class="zrow"><span>Завтра</span><b>добор Кузнецова после 10:00</b></div>
-  <div class="zrow"><span>Твоя база</span><b>47 · активных 11/20</b></div>
   <button class="btn prim" onclick="closeZero()">До завтра 👋</button>
-  <div class="znote">Отчёт ушёл РОПу · Sensei поставил задачи на утро</div>
+  <div class="znote">Отчёт ушёл РОПу: задачи, деньги, опоздание в график смен</div>
 </div>
 
 <div class="foot">
-  <span>Демо-прототип v3.1 «фокус» (23.07: «внимание менеджера на сделку») · данные вымышленные</span>
+  <span>Демо-прототип v3.2 (23.07: фокус на сделке · списки по иконке · опоздание · срочные) · данные вымышленные</span>
   <span>·</span><span>Задачи создаёт и контролирует Sensei — закрыть можно только результатом</span>
-  <span>·</span><span>Канон — свод v2.13</span>
+  <span>·</span><span>Канон — свод v2.14</span>
 </div>
 
 <script>
 (function(){
-  // ── данные: одна задача = один клиент, секции — представления ──
+  // ── СРОЧНЫЕ (решение заказчика 23.07): только 3 типа ──
+  // sign30 — задача через 30 мин на этапе «На подписи» · toOS — передача в сопровождение после полной оплаты · point — договорённость на КОНКРЕТНОЕ время
   var TASKS=[
-    {id:'alex',sec:'pay',grp:'overdue',hot:1,name:'Алексей К.',chip:'частичка · добор до 13 500 ₽',cls:'hot',ctx:'⚡ Открыл ссылку оплаты 12 минут назад — не оплатил. Начни со ссылки СБП, она уже у него в чате.',why:'· горячий сигнал, SLA 5 мин',timer:{up:742},tl:'горит',act:'Позвонить →',done:'Позвонил по горячему'},
-    {id:'smir',sec:'pay',grp:'overdue',hot:1,name:'Смирнов Олег',chip:'частичка 990 ₽ · добор 12 510 ₽',cls:'red',ctx:'📵 Пропущенный звонок в 10:31. Обещал доплатить 21.07 — 2 дня без новой даты. Цель: деньги сегодня или новая дата числом.',why:'· просрочка оплаты без новой даты',row:'просрочка 2 дня · был пропущенный',act:'Позвонить →',done:'Взял новую дату по оплате'},
-    {id:'kozl',sec:'sign',name:'Козлова Ирина',chip:'⏱ горячий час подписи',cls:'gold',ctx:'Конса закончилась 11:15 · открыла страницу договора, не подписала — «вы уже видели договор, осталась одна СМС».',why:'· подпись берём в течение часа после консы',timer:{down:1680},tl:'до конца часа',act:'Позвонить →',done:'Дожал подпись Козловой'},
-    {id:'petr',sec:'msg',name:'Петров Дмитрий',chip:'520 000 ₽ · в статусе 2 дня',cls:'blue',ctx:'💬 «Добрый день, когда пришлёте расчёт?» · 09:12 · не отвечено',why:'· каждое сообщение = задача Sensei',row:'«когда пришлёте расчёт?» · 09:12',act:'Ответить',act2:'Отправить расчёт',done:'Ответил Петрову и отправил расчёт'},
-    {id:'novi',sec:'msg',name:'Новикова Екатерина',chip:'договор отправлен · 720 000 ₽',cls:'blue',ctx:'💬 «Не приходит СМС с кодом для подписи» · 10:05 · не отвечено',why:'· клиент застрял на подписи — помоги сейчас',row:'«не приходит СМС для подписи» · 10:05',act:'Ответить',done:'Ответил Новиковой'},
-    {id:'soko',sec:'meet',alarm:1,name:'Соколова Анна',chip:'встреча-звонок в 12:00',cls:'blue',ctx:'📵 Пропущенный в 11:47 + «Перезвоните, пожалуйста». Сама просила звонок к 12:00 — обсуждение договора.',why:'· договорённость на время: святое',timer:{down:615},tl:'до звонка',act:'Позвонить →',done:'Провёл встречу с Соколовой'},
-    {id:'ivan',sec:'pay',grp:'today',name:'Иванова Мария',chip:'подписан · первый платёж 13 500 ₽',cls:'gold',ctx:'Договорились: платит сегодня после 14:00. Ссылка СБП уже в чате — мягко напомни.',why:'· оплата сегодня',row:'13 500 ₽ · сегодня после 14:00',act:'Напомнить · СБП',done:'Напомнил Ивановой про СБП'},
-    {id:'volk',sec:'sign',name:'Волков Андрей',chip:'📅 отложено до 17:00',cls:'gold',ctx:'Сам назвал время (на смене до 17:00) — Sensei поставит задачу в фокус ровно в 17:00.',why:'· подсостояние ст.4: отложено',row:'подпись · сегодня в 17:00',act:'Ок, жду',soft:1,done:'Подтвердил план 17:00 по Волкову'},
-    {id:'kuzn',sec:'pay',grp:'tomorrow',name:'Кузнецов Павел',chip:'частичка · добор 12 510 ₽',cls:'gold',ctx:'Зарплата завтра — оплата после 10:00. Sensei напомнит утром, сегодня действий не нужно.',why:'· оплата завтра, только подтверди план',row:'12 510 ₽ · завтра после 10:00',act:'Ок, в плане',soft:1,done:'Подтвердил план Кузнецова'},
-    {id:'orlo',sec:'meet',name:'Орлов Никита',chip:'повторная конса в 16:00',cls:'blue',ctx:'Вопросы по КИ — держи слот свободным, консультация 40 минут.',why:'· договорённость на время',row:'повторная конса · 16:00',act:'Провёл',soft:1,done:'Провёл консу с Орловым'}
-  ];
-  var CALLS=[{ref:'soko',t:'11:47'},{ref:'smir',t:'10:31'}];
-  var SECS=[
-    {key:'msg', color:'var(--purple)', title:'Сообщения', ids:['petr','novi']},
-    {key:'calls',color:'var(--red)',   title:'Пропущенные', refs:CALLS},
-    {key:'sign', color:'var(--gold)',  title:'Подписи', ids:['kozl','volk']},
-    {key:'pay',  color:'var(--green)', title:'Оплаты', ids:['smir','alex','ivan','kuzn'], grouped:1},
-    {key:'meet', color:'var(--blue)',  title:'Расписание', ids:['soko','orlo'], tl:1}
-  ];
-  var GRP={overdue:'Просрочка · без новой даты',today:'Оплата сегодня',tomorrow:'Оплата завтра'};
+    {id:'kozl',urgent:1,ut:'sign30',name:'Козлова Ирина',chip:'⏱ на подписи · задача 30 мин',cls:'gold',
+     ctx:'Договор ушёл в 08:55, страницу открыла — не подписала. Реплика: «вы уже видели договор, осталась одна СМС».',
+     why:'· срочное: подпись, задача 30 минут',when:{k:'point',lbl:'09:25'},timer:{down:300},tl:'до задачи',
+     lists:['urg','sign'],row:'подпись · задача 30 мин в 09:25',act:'Позвонить →',done:'Дожал подпись Козловой'},
 
-  var started=false,finished=false,sec=0,shiftTimer=null,alarmFired=false;
+    {id:'soko',urgent:1,ut:'point',alarm:1,name:'Соколова Анна',chip:'🕐 созвон в 09:30',cls:'blue',
+     ctx:'Пропущенный в 08:58 + «Перезвоните, пожалуйста». Сама назвала время 09:30 — ждёт звонка в эту минуту.',
+     why:'· срочное: клиент ждёт ровно в 09:30',when:{k:'point',lbl:'09:30'},timer:{down:615},tl:'до звонка',
+     lists:['urg','meet','calls'],row:'созвон 09:30 · был пропущенный 08:58',act:'Позвонить →',done:'Провёл созвон с Соколовой'},
+
+    {id:'ivan',urgent:1,ut:'toOS',name:'Иванова Мария',chip:'🤝 передать в сопровождение',cls:'green',
+     ctx:'Оплата 13 500 ₽ пришла в 09:05 — полная продажа. Передай юристу сопровождения: анкета заполнена, знакомство сегодня.',
+     why:'· срочное: полная оплата, клиент ждёт «мной занялись»',when:{k:'point',lbl:'сегодня'},
+     lists:['urg','pay'],row:'оплата 13 500 ₽ · передача в ОС',act:'Передать в ОС',done:'Передал Иванову в сопровождение'},
+
+    {id:'alex',hot:1,name:'Алексей К.',chip:'частичка · добор до 13 500 ₽',cls:'hot',
+     ctx:'⚡ Открыл ссылку оплаты 12 минут назад и не оплатил. Начни со ссылки СБП — она уже у него в чате.',
+     why:'· горячий сигнал бота',when:{k:'win',lbl:'сейчас'},timer:{up:742},tl:'горит',
+     lists:['pay'],row:'открыл оплату, не оплатил',act:'Позвонить →',done:'Позвонил по горячему сигналу'},
+
+    {id:'smir',name:'Смирнов Олег',chip:'частичка 990 ₽ · добор 12 510 ₽',cls:'red',
+     ctx:'Пропущенный в 08:41. Обещал доплатить 21.07 — 2 дня без новой даты. Цель: деньги сегодня или новая дата числом.',
+     why:'· просрочка оплаты без новой даты',when:{k:'win',lbl:'сегодня'},
+     lists:['pay','calls','meet'],row:'просрочка 2 дня · без новой даты',act:'Позвонить →',done:'Взял новую дату по оплате'},
+
+    {id:'petr',name:'Петров Дмитрий',chip:'520 000 ₽ · в статусе 2 дня',cls:'blue',
+     ctx:'💬 «Добрый день, когда пришлёте расчёт?» · 08:47 · не отвечено. Обещали расчёт сегодня — точного часа не называли.',
+     why:'· клиент ждёт в течение дня',when:{k:'win',lbl:'сегодня'},
+     lists:['msg','meet'],row:'«когда пришлёте расчёт?» · ждёт сегодня',act:'Ответить',act2:'Отправить расчёт',done:'Ответил Петрову и отправил расчёт'},
+
+    {id:'novi',name:'Новикова Екатерина',chip:'договор отправлен · 720 000 ₽',cls:'blue',
+     ctx:'💬 «Не приходит СМС с кодом для подписи» · 09:05 · не отвечено. Клиент застрял на подписи — помоги сейчас.',
+     why:'· клиент ждёт ответа в чате',when:{k:'win',lbl:'сегодня'},
+     lists:['msg','sign'],row:'«не приходит СМС для подписи»',act:'Ответить',done:'Ответил Новиковой'},
+
+    {id:'volk',name:'Волков Андрей',chip:'📅 отложено до 17:00',cls:'gold',
+     ctx:'Сам назвал время: на смене до 17:00. Sensei поднимет задачу в фокус ровно в 17:00 — сейчас не дёргай.',
+     why:'· подсостояние ст.4: отложено до времени',when:{k:'point',lbl:'17:00'},
+     lists:['sign','meet'],row:'подпись · клиент назвал 17:00',act:'Ок, жду',soft:1,done:'Подтвердил план 17:00 по Волкову'},
+
+    {id:'kuzn',name:'Кузнецов Павел',chip:'частичка · добор 12 510 ₽',cls:'gold',
+     ctx:'Зарплата завтра, оплата после 10:00. Сегодня действий не нужно — Sensei напомнит утром.',
+     why:'· оплата завтра',when:{k:'win',lbl:'завтра'},
+     lists:['pay','meet'],row:'12 510 ₽ · завтра после 10:00',act:'Ок, в плане',soft:1,done:'Подтвердил план Кузнецова'},
+
+    {id:'orlo',name:'Орлов Никита',chip:'🕐 повторная конса в 16:00',cls:'blue',
+     ctx:'Вопросы по КИ. Держи слот свободным — консультация 40 минут, клиент ждёт ровно в 16:00.',
+     why:'· договорённость на время',when:{k:'point',lbl:'16:00'},
+     lists:['meet'],row:'повторная конса · 16:00',act:'Провёл',soft:1,done:'Провёл консу с Орловым'}
+  ];
+
+  var LISTS={
+    urg:{t:'Срочные',note:'В срочные попадают только три типа: задача 30 минут на этапе «На подписи» · передача в сопровождение после полной оплаты · договорённость на конкретное время. Срочное держит кран новых закрытым.'},
+    msg:{t:'Сообщения',note:'Каждое неотвеченное сообщение — задача Sensei. Закрывается только ответом.'},
+    calls:{t:'Пропущенные',note:'Перезвонить в течение 5 минут. Пропущенный не отдельная задача — он привязан к сделке клиента.'},
+    pay:{t:'Оплаты',grp:1,note:'Просрочка без новой даты держит кран новых закрытым, пока не возьмёшь деньги или дату числом.'},
+    meet:{t:'На время',tl:1,split:1,note:'🕐 ТОЧКА — клиент назвал час и ждёт ровно в это время: перехватывает фокус, алярм за 10 минут, пропустить только с причиной РОПу. 📅 ОКНО — «сегодня», «после обеда», «завтра»: живёт в очереди и поднимается к концу окна. Тип ставит менеджер одним тапом в постобработке, ИИ сверяет с цитатой клиента из записи.'},
+    all:{t:'Все задачи',note:'Порядок живой: срочное → кто раньше сгорит → деньги ближе. Ведёт Sensei.'}
+  };
+  var GRPS=[{k:'over',t:'Просрочка · без новой даты',red:1,ids:['smir','alex']},{k:'now',t:'Оплата сегодня',ids:['ivan']},{k:'tom',t:'Оплата завтра',ids:['kuzn']}];
+
+  var started=false,finished=false,sec=0,shiftTimer=null,alarmFired=false,curList=null;
+  var LATE_MIN=12; // демо: клок-ин 09:12, грейс до 09:05
   var byId={}; TASKS.forEach(function(t){byId[t.id]=t;});
   document.getElementById('tTotal').textContent=TASKS.length;
   document.getElementById('zTasks').textContent=TASKS.length+' из '+TASKS.length;
 
   function left(){return TASKS.filter(function(t){return !t.dn;});}
-  function doneN(){return TASKS.length-left().length;}
+  function inList(key){
+    if(key==='all')return left();
+    if(key==='urg')return left().filter(function(t){return t.urgent;});
+    return left().filter(function(t){return (t.lists||[]).indexOf(key)>=0;});
+  }
+  function allOf(key){
+    if(key==='all')return TASKS;
+    if(key==='urg')return TASKS.filter(function(t){return t.urgent;});
+    return TASKS.filter(function(t){return (t.lists||[]).indexOf(key)>=0;});
+  }
   function focusTask(){var q=left();return q.length?q[0]:null;}
 
-  // ── рендер фокуса ──
+  // ── фокус ──
   function renderFocus(){
-    var f=focusTask(), el=document.getElementById('focus');
-    if(!f){el.innerHTML='<div class="f-top"><div class="f-name" style="color:var(--green-d)">Зиро ✓ Все задачи разобраны</div></div><div class="f-ctx">Кран новых открыт — жми зелёную кнопку «Закончить работу», сводка уйдёт РОПу.</div>';
-      document.getElementById('fWhy').textContent='';document.getElementById('fNext').textContent='';return;}
+    var f=focusTask(),el=document.getElementById('focus');
+    el.classList.toggle('urgent',!!(f&&f.urgent));
+    if(!f){
+      el.innerHTML='<div class="f-top"><div class="f-name" style="color:var(--green-d)">Зиро ✓ все задачи разобраны</div></div><div class="f-ctx">Кран новых открыт. Жми зелёную «Закончить работу» — сводка уйдёт РОПу.</div>';
+      document.getElementById('fWhy').textContent='';document.getElementById('fNext').textContent='';return;
+    }
     var tm='';
     if(f.timer){var v=f.timer.up!=null?f.timer.up:f.timer.down;
       tm='<div class="f-timer'+(f.timer.up!=null?' late':'')+'" data-id="'+f.id+'"><div class="t">'+fmt(v)+'</div><div class="l">'+f.tl+'</div></div>';}
+    else if(f.when)tm='<div class="f-timer"><div class="t" style="font-size:16px;color:var(--mut)">'+(f.when.k==='point'?'🕐 ':'📅 ')+f.when.lbl+'</div><div class="l">'+(f.when.k==='point'?'клиент ждёт в это время':'ждёт в течение дня')+'</div></div>';
     el.innerHTML='<div class="f-top"><div class="f-name">'+f.name+'</div><span class="f-chip '+(f.cls||'')+'">'+f.chip+'</span>'+tm+'</div>'
       +'<div class="f-ctx">'+f.ctx+'</div>'
       +'<div class="f-act"><button class="btn prim" onclick="doneTask(\''+f.id+'\')">'+f.act+'</button>'
       +(f.act2?'<button class="btn sec2" onclick="doneTask(\''+f.id+'\')">'+f.act2+'</button>':'')
-      +'<button class="skip" onclick="skipTask(\''+f.id+'\')">пропустить · в конец (1/час)</button></div>';
+      +'<button class="btn sec2" onclick="openLead(\''+f.id+'\')">Открыть лид ↗</button>'
+      +'<button class="skip" onclick="skipTask(\''+f.id+'\')">'+(f.urgent?'перенести · с причиной РОПу':'пропустить · в конец (1/час)')+'</button></div>';
     document.getElementById('fWhy').textContent=f.why||'';
     var q=left().slice(1,4).map(function(t){return t.name.split(' ')[0];});
     var more=left().length-1-q.length;
     document.getElementById('fNext').innerHTML=q.length?'Дальше: <b>'+q.join(' · ')+'</b>'+(more>0?' · ещё '+more:'')+' — порядок живой, ведёт Sensei':'';
   }
 
-  // ── рендер секций ──
-  function renderSecs(){
-    var host=document.getElementById('secs');
-    host.innerHTML=SECS.map(function(s){
-      var items=s.refs?s.refs.map(function(r){return byId[r.ref];}):s.ids.map(function(i){return byId[i];});
-      var n=items.filter(function(t){return !t.dn;}).length;
-      var open=document.querySelector('.sec[data-key="'+s.key+'"]');
-      var isOpen=open&&open.classList.contains('open');
-      var warn=s.key==='pay'&&items.some(function(t){return t.grp==='overdue'&&!t.dn;})?'<span class="warn">просрочка</span>':'';
-      var body='';
-      if(s.tl)body+='<div class="tl"><div class="seg" style="flex:3">9–12<span class="now" style="left:93%"></span></div><div class="seg ev" style="flex:1">12:00 Соколова</div><div class="seg lunch" style="flex:1">обед</div><div class="seg" style="flex:2">14–16</div><div class="seg ev" style="flex:1">16:00 Орлов</div><div class="seg gold" style="flex:1.4">16:30+ дожимы</div><div class="seg" style="flex:.8">18:00</div></div>';
-      if(s.grouped){
-        ['overdue','today','tomorrow'].forEach(function(g){
-          var gi=items.filter(function(t){return t.grp===g;});
-          if(!gi.length)return;
-          body+='<div class="g-sub'+(g==='overdue'?' red':'')+'">'+GRP[g]+'</div>'+gi.map(row).join('');
-        });
-      } else body+=items.map(function(t,i){return row(t,s.refs?s.refs[i]:null);}).join('');
-      return '<div class="sec'+(isOpen?' open':'')+'" data-key="'+s.key+'"><button class="sec-h" onclick="toggleSec(this)"><span class="dot" style="background:'+s.color+'"></span>'+s.title+' <span class="cnt">· '+n+'</span>'+warn+(n===0?'<span class="ok">✓ разобрано</span>':'')+'<span class="chev">▶</span></button><div class="sec-b">'+body+'</div></div>';
-    }).join('');
+  // ── дровер ──
+  window.openList=function(key){
+    if(!started){toast('Смена не начата','Списки и задачи откроются после клок-ина',false);return;}
+    curList=key;
+    var L=LISTS[key];
+    document.getElementById('dTitle').textContent=L.t;
+    renderList();
+    document.getElementById('dveil').classList.add('show');
+    document.getElementById('drawer').classList.add('show');
+  };
+  window.closeList=function(){curList=null;document.getElementById('dveil').classList.remove('show');document.getElementById('drawer').classList.remove('show');};
+  function renderList(){
+    if(!curList)return;
+    var L=LISTS[curList],items=allOf(curList),live=inList(curList);
+    document.getElementById('dCnt').textContent='· '+live.length+(live.length!==items.length?' из '+items.length:'');
+    var b='';
+    if(L.tl)b+='<div class="tl"><div class="seg" style="flex:.6">9:00<span class="now" style="left:80%"></span></div><div class="seg ev" style="flex:1">9:30 Соколова</div><div class="seg win" style="flex:3">окна: «сегодня» — Петров · Смирнов</div><div class="seg ev" style="flex:1">16:00 Орлов</div><div class="seg ev" style="flex:1">17:00 Волков</div><div class="seg" style="flex:.6">18:00</div></div>';
+    if(L.note)b+='<div class="d-note">'+L.note+'</div>';
+    if(!items.length)b+='<div class="d-empty">Пусто</div>';
+    else if(L.split){
+      var pts=items.filter(function(t){return t.when&&t.when.k==='point';});
+      var wins=items.filter(function(t){return !t.when||t.when.k!=='point';});
+      if(pts.length)b+='<div class="d-grp">🕐 Точное время · клиент ждёт в эту минуту</div>'+pts.map(drow).join('');
+      if(wins.length)b+='<div class="d-grp">📅 Окно · клиент ждёт в течение дня</div>'+wins.map(drow).join('');
+    }
+    else if(L.grp){
+      GRPS.forEach(function(g){
+        var gi=g.ids.map(function(i){return byId[i];}).filter(function(t){return t&&(t.lists||[]).indexOf('pay')>=0;});
+        if(!gi.length)return;
+        b+='<div class="d-grp'+(g.red?' red':'')+'">'+g.t+'</div>'+gi.map(drow).join('');
+      });
+    } else b+=items.map(drow).join('');
+    document.getElementById('dBody').innerHTML=b;
   }
-  function row(t,ref){
-    var info=ref?('пропущенный · '+ref.t+' · задача: '+(t.sec==='meet'?'встреча 12:00':'оплата')):(t.row||t.chip);
-    return '<div class="srow'+(t.dn?' dn':'')+'" onclick="toFocus(\''+t.id+'\')"><b>'+t.name+'</b><span class="m">'+info+'</span><span class="r">'+(t.dn?'✓':'')+'</span>'+(t.dn?'':'<span class="go">в фокус →</span>')+'</div>';
+  function drow(t){
+    var when=t.when?((t.when.k==='point'?'🕐 ':'📅 ')+t.when.lbl):'';
+    var tag=t.urgent?'<span class="tag red">срочное</span>':(t.hot?'<span class="tag gold">горячее</span>':'');
+    return '<div class="drow'+(t.dn?' dn':'')+'"><div class="drow-t"><b>'+t.name+'</b>'+tag+'<span class="when">'+when+'</span></div>'
+      +'<div class="m">'+(t.row||t.chip)+'</div>'
+      +(t.dn?'<div class="done-m">✓ '+t.done+'</div>'
+        :'<div class="drow-a"><button class="b do" onclick="doneTask(\''+t.id+'\',1)">✓ '+t.act+'</button>'
+         +'<button class="b lead" onclick="openLead(\''+t.id+'\')">Открыть лид ↗</button>'
+         +'<button class="b foc" onclick="toFocus(\''+t.id+'\')">В фокус</button></div>')
+      +'</div>';
   }
 
-  window.toggleSec=function(btn){btn.closest('.sec').classList.toggle('open');};
-  window.openSec=function(key){if(!started)return;var el=document.querySelector('.sec[data-key="'+key+'"]');if(el){el.classList.add('open');el.scrollIntoView({behavior:'smooth',block:'center'});}};
+  window.openLead=function(id){
+    var t=byId[id];
+    toast('Открываю сделку: '+t.name,'В amoCRM откроется карточка лида — задача Sensei видна там же и закрывается результатом',false);
+  };
   window.toFocus=function(id){
-    var t=byId[id]; if(t.dn||finished)return;
-    var i=TASKS.indexOf(t); TASKS.splice(i,1); TASKS.unshift(t);
+    var t=byId[id];if(t.dn||finished)return;
+    var i=TASKS.indexOf(t);TASKS.splice(i,1);TASKS.unshift(t);
+    closeList();
     document.getElementById('fWhy').textContent='· ты поднял вручную — Sensei записал';
-    swapFocus(); window.scrollTo({top:0,behavior:'smooth'});
+    swapFocus();window.scrollTo({top:0,behavior:'smooth'});
   };
   window.skipTask=function(id){
-    var t=byId[id]; var i=TASKS.indexOf(t); TASKS.splice(i,1); TASKS.push(t);
-    toast('Пропуск записан','Задача ушла в конец очереди · причина уйдёт РОПу в лог',false);
+    var t=byId[id];var i=TASKS.indexOf(t);TASKS.splice(i,1);TASKS.push(t);
+    toast(t.urgent?'Перенос срочного записан':'Пропуск записан',
+      t.urgent?'Срочное переносится только с причиной — РОП увидит в логе':'Задача ушла в конец очереди · причина уйдёт РОПу',!!t.urgent);
     swapFocus();
   };
   function swapFocus(){
-    var el=document.getElementById('focus'); el.classList.add('swap');
-    setTimeout(function(){renderFocus();renderSecs();el.classList.remove('swap');},220);
+    var el=document.getElementById('focus');el.classList.add('swap');
+    setTimeout(function(){renderFocus();el.classList.remove('swap');},220);
   }
 
-  window.doneTask=function(id){
-    var t=byId[id]; if(t.dn||!started)return;
+  window.doneTask=function(id,fromList){
+    var t=byId[id];if(t.dn||!started)return;
     t.dn=true;
-    var n=doneN();
+    var n=TASKS.length-left().length;
     document.getElementById('tDone').textContent=n;
     document.getElementById('tBar').style.transform='scaleX('+(n/TASKS.length)+')';
-    updSignals(); updKran();
+    updSignals();updKran();
     toast(t.done+' ✓','Sensei закрыл задачу результатом · '+n+' из '+TASKS.length,false);
+    if(fromList)renderList();
     swapFocus();
-    if(n===TASKS.length){setTimeout(function(){
+    if(n===TASKS.length)setTimeout(function(){
       document.getElementById('shiftBtn').classList.add('ready');
-      toast('Зиро собран ✓','Все задачи разобраны — можно закончить работу',false);},650);}
+      toast('Зиро собран ✓','Все задачи разобраны — можно закончить работу',false);},650);
   };
 
   function updSignals(){
-    setSig('sigCalls',CALLS.filter(function(r){return !byId[r.ref].dn;}).length);
-    setSig('sigMsgs',['petr','novi'].filter(function(i){return !byId[i].dn;}).length);
-    setSig('sigHot',TASKS.filter(function(t){return t.hot&&!t.dn;}).length);
+    [['sigUrg','urg'],['sigMsgs','msg'],['sigCalls','calls'],['sigPay','pay'],['sigMeet','meet'],['sigAll','all']].forEach(function(p){
+      var n=inList(p[1]).length,el=document.getElementById(p[0]);
+      el.querySelector('.n').textContent=n;el.classList.toggle('zero',n===0);
+    });
   }
-  function setSig(id,n){var el=document.getElementById(id);el.querySelector('.bdg').textContent=n;el.classList.toggle('zero',n===0);}
   function updKran(){
-    var hot=TASKS.filter(function(t){return t.hot&&!t.dn;});
+    var u=left().filter(function(t){return t.urgent||t.hot;});
     var k=document.getElementById('kran');
-    if(hot.length){k.className='p kran closed';k.innerHTML='⛔ новые на паузе: <b>горящее ('+hot[0].name+')</b>';}
-    else{k.className='p kran open';k.innerHTML='✅ горящих нет — кран новых открыт';}
+    if(u.length){k.className='p kran closed';k.innerHTML='⛔ новые на паузе: <b>'+(u[0].urgent?'срочное':'горячее')+' ('+u[0].name.split(' ')[0]+')</b>';}
+    else{k.className='p kran open';k.innerHTML='✅ срочного нет — кран новых открыт';}
   }
 
   window.shift=function(){
@@ -334,21 +436,23 @@
       btn.classList.add('finish');
       shiftTimer=setInterval(tick,1000);
       document.getElementById('focusWrap').classList.add('on');
-      document.getElementById('secs').classList.add('on');
-      toast('Смена началась · клок-ин зафиксирован','Sensei собрал очередь: '+TASKS.length+' задач — в фокусе то, что горит раньше всех',false);
+      if(LATE_MIN>0){
+        document.getElementById('lateChip').classList.add('on');
+        document.getElementById('lateTxt').textContent='09:12 · +'+LATE_MIN+' мин · −1 000 ₽';
+        toast('⚠ Клок-ин 09:12 — опоздание '+LATE_MIN+' мин','Отметка уйдёт в график смен РОПу: штраф 1 000 ₽. Грейс до 09:05 — без штрафа',true);
+      } else toast('Смена началась · клок-ин 09:00','Sensei собрал очередь: '+TASKS.length+' задач, 3 срочных',false);
       return;
     }
     if(finished){document.getElementById('veil').classList.add('show');document.getElementById('zero').classList.add('show');return;}
     if(left().length){
-      var parts=SECS.map(function(s){
-        var items=s.refs?[]:s.ids.map(function(i){return byId[i];}).filter(function(t){return !t.dn;});
-        return items.length?s.title.toLowerCase()+': '+items.length:null;
-      }).filter(Boolean);
+      var parts=[['urg','срочные'],['msg','сообщения'],['calls','пропущенные'],['pay','оплаты'],['meet','на время']]
+        .map(function(p){var n=inList(p[0]).length;return n?p[1]+': '+n:null;}).filter(Boolean);
       toast('Зиро ещё не собран','Сначала разбери — '+parts.join(' · '),true);
       return;
     }
-    finished=true; clearInterval(shiftTimer);
+    finished=true;clearInterval(shiftTimer);
     document.getElementById('zNew').textContent=document.getElementById('stNew').textContent;
+    document.getElementById('zLate').textContent=LATE_MIN>0?('09:12 · опоздание '+LATE_MIN+' мин · −1 000 ₽'):'09:00 · без опоздания';
     document.getElementById('veil').classList.add('show');
     document.getElementById('zero').classList.add('show');
   };
@@ -359,10 +463,14 @@
     TASKS.forEach(function(t){
       if(!t.timer||t.dn)return;
       if(t.timer.up!=null)t.timer.up++;
-      else{t.timer.down=Math.max(0,t.timer.down-1);
-        if(t.id==='soko'&&t.timer.down===600&&!alarmFired&&!finished){alarmFired=true;
-          toast('⚡ Через 10 минут — Соколова Анна, 12:00','Она просила перезвонить к этому времени. Свяжись с клиентом — встречу пропустить нельзя',true);
-          if(focusTask()&&focusTask().id!=='soko')window.toFocus('soko');}}
+      else{
+        t.timer.down=Math.max(0,t.timer.down-1);
+        if(t.alarm&&t.timer.down===600&&!alarmFired&&!finished){
+          alarmFired=true;
+          toast('⚡ Через 10 минут — Соколова Анна, 09:30','Клиент назвал это время и ждёт ровно в него. Задача встала в фокус',true);
+          var f=focusTask();if(f&&f.id!==t.id)window.toFocus(t.id);
+        }
+      }
     });
     var f=focusTask();
     if(f&&f.timer){var el=document.querySelector('.f-timer[data-id="'+f.id+'"] .t');
@@ -378,12 +486,12 @@
     document.getElementById('toastS').textContent=s2;
     el.classList.toggle('alarm',!!alarm);
     el.classList.add('show');
-    clearTimeout(toastT); toastT=setTimeout(hideToast,alarm?8000:3400);
+    clearTimeout(toastT);toastT=setTimeout(hideToast,alarm?7000:3400);
   };
   window.hideToast=function(){document.getElementById('toast').classList.remove('show');};
   window.closeZero=function(){document.getElementById('veil').classList.remove('show');document.getElementById('zero').classList.remove('show');};
 
-  renderFocus(); renderSecs(); updSignals(); updKran();
+  renderFocus();updSignals();updKran();
 })();
 </script>
 </body>
