@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Задачи сегодня v3 — по макету заказчика · SALE 100.0</title>
+<meta name="description" content="Виджет задач v3 по макету заказчика 23.07: начать/закончить работу, входящие сообщения и пропущенные звонки, горящий час подписи, блок оплат, расписание встреч, зиро-дашборд. Задачи контролирует Sensei. Демо кликается.">
+<style>
+  :root{
+    --bg:#eef1f5; --card:#fff; --line:#e4e8ee; --ink:#1f2633; --mut:#8a93a3; --soft:#f6f8fb;
+    --green:#0f9d58; --green-d:#0b7a45; --dark:#1b2437;
+    --red:#e5484d; --red-bg:#fdf1f1; --red-line:#f5c6c8;
+    --purple:#7c5cd6; --purple-bg:#f5f2fd; --purple-line:#ddd2f5;
+    --orange:#e8792b; --orange-bg:#fdf4ec; --orange-line:#f3d5b8;
+    --gold:#b98a1f; --gold-bg:#fbf6e9; --gold-line:#ecd9a8;
+    --blue:#3574d6; --blue-bg:#eff4fc;
+    --ease:cubic-bezier(.23,1,.32,1);
+    font-size:15px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:60px}
+  body::before{content:"";display:block;height:4px;background:var(--green)}
+  .hint{max-width:1240px;margin:10px auto 0;padding:0 16px;font-size:12px;color:var(--mut)}
+  .hint .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:1px}
+  .wrap{max-width:1240px;margin:12px auto 0;padding:0 16px}
+
+  /* ── верхняя панель ── */
+  .topbar{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap}
+  .btn{border:0;cursor:pointer;font:inherit;font-weight:700;border-radius:12px;transition:transform .16s var(--ease),background .2s ease,opacity .2s ease}
+  .btn:active{transform:scale(.97)}
+  #shiftBtn{background:var(--dark);color:#fff;padding:0 22px;min-height:54px;font-size:15px;display:flex;align-items:center;gap:10px}
+  #shiftBtn .play{width:26px;height:26px;border-radius:50%;background:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+  #shiftBtn.finish{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+  #shiftBtn.finish.ready{background:var(--green);color:#fff;box-shadow:none}
+  #shiftBtn.finish .play{background:var(--red)}
+  #shiftBtn.finish.ready .play{background:rgba(255,255,255,.25)}
+  #shiftTime{font-weight:600;font-size:12px;opacity:.7}
+
+  .ico-chip{position:relative;width:54px;min-height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--card);cursor:pointer;border:0;transition:transform .16s var(--ease)}
+  .ico-chip:active{transform:scale(.95)}
+  .ico-chip .bdg{position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;border-radius:11px;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 6px;transition:transform .2s var(--ease)}
+  .ico-chip.calls{box-shadow:inset 0 0 0 2px var(--red-line);background:var(--red-bg)}
+  .ico-chip.calls .bdg{background:var(--red)}
+  .ico-chip.msgs{box-shadow:inset 0 0 0 2px var(--purple-line);background:var(--purple-bg)}
+  .ico-chip.msgs .bdg{background:var(--purple)}
+  .ico-chip.hot{box-shadow:inset 0 0 0 2px var(--orange-line);background:var(--orange-bg)}
+  .ico-chip.hot .bdg{background:var(--orange)}
+  .ico-chip.zero{box-shadow:inset 0 0 0 2px var(--line);background:var(--card);opacity:.55}
+  .ico-chip.zero .bdg{background:#c6ccd6}
+
+  .stat{flex:1;min-width:128px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:9px 14px;display:flex;flex-direction:column;gap:2px;justify-content:center}
+  .stat .lb{font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .stat .lb .si{width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex:none}
+  .stat .num{font-size:21px;font-weight:800;line-height:1.1}
+
+  /* ── строка-сводка: задачи, база, кран, Sensei ── */
+  .meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .meta .pill{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px;font-size:13px;display:flex;align-items:center;gap:8px}
+  .meta b{font-size:15px}
+  .taskbar{width:110px;height:6px;border-radius:3px;background:#e7ebf1;overflow:hidden}
+  .taskbar i{display:block;height:100%;width:100%;background:var(--green);border-radius:3px;transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+  .pill.kran{font-weight:600}
+  .pill.kran.closed{background:var(--red-bg);border-color:var(--red-line);color:#b23237}
+  .pill.kran.open{background:#eefaf3;border-color:#bfe8cf;color:var(--green-d)}
+  .pill.sensei{color:var(--mut)}
+  .pill.sensei b{color:var(--ink);font-size:13px}
+
+  /* ── блоки задач ── */
+  .blocks{margin-top:14px;display:flex;flex-direction:column;gap:14px}
+  .block{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;opacity:0;transform:translateY(8px);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+  .block.on{opacity:1;transform:translateY(0)}
+  body.idle .block{opacity:.45;transform:none;pointer-events:none;filter:grayscale(.15)}
+  .b-head{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15px}
+  .b-head .bdot{width:9px;height:9px;border-radius:50%}
+  .b-head .cnt{color:var(--mut);font-weight:600}
+  .b-head .why{margin-left:auto;font-size:12px;color:var(--mut);font-weight:500;text-align:right}
+  .b-done{display:none;margin-top:10px;font-size:13px;color:var(--green-d);font-weight:600}
+  .block.empty .b-done{display:block}
+
+  .row{border:1px solid var(--line);border-left-width:4px;border-radius:12px;padding:11px 14px;margin-top:10px;display:grid;grid-template-columns:1fr auto;gap:4px 14px;align-items:center;background:#fff;overflow:hidden;transition:opacity .25s var(--ease),transform .25s var(--ease)}
+  .row.gone{opacity:0;transform:translateX(14px)}
+  .row .who{font-weight:800;font-size:15px}
+  .row .who small{font-weight:500;color:var(--mut);margin-left:8px;font-size:12px}
+  .row .right{grid-row:span 2;display:flex;align-items:center;gap:12px;justify-self:end;flex-wrap:wrap;justify-content:flex-end}
+  .row .sum{font-weight:800;font-size:15px;white-space:nowrap}
+  .row .days{font-size:12px;color:var(--mut);white-space:nowrap}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;border-radius:8px;padding:4px 9px;background:var(--soft);color:#5a6372;white-space:nowrap}
+  .chip.stx{background:var(--blue-bg);color:var(--blue)}
+  .msgline{display:flex;align-items:center;gap:8px;font-size:13px;border-radius:8px;padding:6px 10px;margin-top:2px}
+  .msgline .t{margin-left:auto;font-size:11px;color:var(--mut);white-space:nowrap}
+  .msgline.msg{background:var(--purple-bg)}
+  .msgline.call{background:var(--red-bg);color:#b23237}
+  .act{border:0;cursor:pointer;font:inherit;font-size:13px;font-weight:700;border-radius:9px;padding:8px 14px;white-space:nowrap;transition:transform .16s var(--ease),filter .2s ease}
+  .act:active{transform:scale(.96)}
+  .act:hover{filter:brightness(.96)}
+  .act.p{background:var(--dark);color:#fff}
+  .act.s{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+
+  .rw-msg{border-left-color:var(--purple)}
+  .rw-call{border-left-color:var(--red)}
+  .rw-sign{border-left-color:var(--gold);background:linear-gradient(90deg,#fffdf5,#fff 40%)}
+  .rw-payx{border-left-color:var(--red)}
+  .rw-pay0{border-left-color:var(--green)}
+  .rw-pay1{border-left-color:#c6ccd6}
+  .rw-meet{border-left-color:var(--blue)}
+
+  .timer{font-variant-numeric:tabular-nums;font-weight:800;color:var(--gold)}
+  .timer.late{color:var(--red)}
+  .sub{font-size:12px;color:var(--mut)}
+  .badge-sub{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;border-radius:7px;padding:3px 8px}
+  .badge-sub.hot{background:var(--gold-bg);color:var(--gold)}
+  .badge-sub.def{background:var(--blue-bg);color:var(--blue)}
+  .badge-sub.push{background:var(--orange-bg);color:var(--orange)}
+  .g-sub{margin-top:12px;font-size:12px;font-weight:800;letter-spacing:.4px;color:var(--mut);text-transform:uppercase}
+  .g-sub:first-of-type{margin-top:8px}
+  .g-sub.red{color:var(--red)}
+
+  /* ── расписание ── */
+  .tl{margin-top:12px;display:flex;height:34px;border-radius:9px;overflow:hidden;font-size:11px;color:#98a1af;border:1px solid var(--line)}
+  .tl .seg{display:flex;align-items:center;justify-content:center;background:#fafbfd;border-right:1px solid var(--line);position:relative;white-space:nowrap;padding:0 4px}
+  .tl .seg:last-child{border-right:0}
+  .tl .seg.ev{background:var(--blue-bg);color:var(--blue);font-weight:700}
+  .tl .seg.lunch{background:#f2f4f7}
+  .tl .seg.gold{background:var(--gold-bg);color:var(--gold);font-weight:700}
+  .tl .now{position:absolute;top:0;bottom:0;width:2px;background:var(--green)}
+
+  /* ── тост-уведомление ── */
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(140%);background:var(--dark);color:#fff;border-radius:14px;padding:13px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 12px 34px rgba(15,25,45,.35);transition:transform .35s var(--ease);z-index:60;max-width:min(92vw,560px)}
+  #toast.show{transform:translateX(-50%) translateY(0)}
+  #toast.alarm{background:#8c2f33}
+  #toast .tx b{display:block;font-size:15px}
+  #toast .tx span{font-size:12px;opacity:.75}
+  #toast .act{background:rgba(255,255,255,.16);color:#fff}
+
+  /* ── зиро-дашборд (сводка смены) ── */
+  #veil{position:fixed;inset:0;background:rgba(20,26,40,.45);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:70}
+  #veil.show{opacity:1;pointer-events:auto}
+  #zero{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.95);opacity:0;pointer-events:none;background:#fff;border-radius:20px;padding:26px 28px;width:min(92vw,470px);z-index:80;transition:transform .25s var(--ease),opacity .25s var(--ease);box-shadow:0 24px 60px rgba(15,25,45,.35)}
+  #zero.show{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto}
+  #zero h2{font-size:21px;margin-bottom:2px}
+  #zero .zs{font-size:13px;color:var(--mut);margin-bottom:16px}
+  .zrow{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
+  .zrow b{font-size:17px}
+  .zrow .hl{color:var(--green-d)}
+  #zero .act.p{width:100%;margin-top:16px;padding:12px}
+  #zero .znote{margin-top:10px;font-size:12px;color:var(--mut);text-align:center}
+
+  .foot{max-width:1240px;margin:26px auto 0;padding:0 16px;font-size:12px;color:var(--mut);display:flex;gap:14px;flex-wrap:wrap}
+  @media (max-width:900px){
+    .stat{min-width:104px}
+    .row{grid-template-columns:1fr}
+    .row .right{grid-row:auto;justify-self:start;justify-content:flex-start;margin-top:6px}
+    .b-head .why{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition-duration:.01ms!important;animation-duration:.01ms!important}
+  }
+</style>
+</head>
+<body class="idle">
+
+<div class="hint"><span class="dot"></span>amoCRM · «Задачи сегодня» v3 — вариант по макету заказчика 23.07 · демо: нажми «Начать работу», разбирай задачи кнопками, «Закончить работу» откроется на зиро</div>
+
+<div class="wrap">
+
+  <!-- верхняя панель: старт + иконки-счётчики + статусы воронки -->
+  <div class="topbar">
+    <button class="btn" id="shiftBtn" onclick="shift()"><span class="play">▶</span><span id="shiftLabel">Начать работу</span><span id="shiftTime"></span></button>
+    <button class="ico-chip calls" id="chipCalls" title="Пропущенные звонки" onclick="scrollTo2('blkCalls')">📞<span class="bdg">2</span></button>
+    <button class="ico-chip msgs" id="chipMsgs" title="Неотвеченные сообщения" onclick="scrollTo2('blkMsgs')">💬<span class="bdg">3</span></button>
+    <button class="ico-chip hot" id="chipHot" title="Горячие сигналы" onclick="scrollTo2('blkHot')">⚡<span class="bdg">1</span></button>
+    <div class="stat"><div class="lb"><span class="si" style="background:var(--blue-bg);color:var(--blue)">＋</span>Новый лид</div><div class="num" id="stNew">3</div></div>
+    <div class="stat"><div class="lb"><span class="si" style="background:var(--gold-bg);color:var(--gold)">🕐</span>В работе</div><div class="num">5</div></div>
+    <div class="stat"><div class="lb"><span class="si" style="background:#f2f4f7;color:#5a6372">💭</span>Думает</div><div class="num">4</div></div>
+    <div class="stat"><div class="lb"><span class="si" style="background:var(--orange-bg);color:var(--orange)">✍️</span>На подписи</div><div class="num">2</div></div>
+    <div class="stat"><div class="lb"><span class="si" style="background:#eefaf3;color:var(--green-d)">✔</span>Подписан</div><div class="num">3</div></div>
+    <div class="stat"><div class="lb"><span class="si" style="background:var(--gold-bg);color:var(--gold)">₽</span>Частичка</div><div class="num">3</div></div>
+    <div class="stat"><div class="lb"><span class="si" style="background:#eefaf3;color:var(--green-d)">💳</span>Оплата</div><div class="num">1</div></div>
+  </div>
+
+  <!-- сводка: задачи всего/сделано · база · кран новых · Sensei -->
+  <div class="meta">
+    <div class="pill">Задач сегодня: <b id="tTotal">13</b> · сделано <b id="tDone">0</b><span class="taskbar"><i id="tBar"></i></span></div>
+    <div class="pill">Твоя база: <b>47</b> клиентов <span style="color:var(--mut)">· активных 12/20</span></div>
+    <div class="pill kran closed" id="kran">⛔ Новые лиды на паузе · причина: <b id="kranWhy">&nbsp;горящее (Алексей К.)</b></div>
+    <div class="pill sensei">⚙ задачи ставит и закрывает <b>Sensei</b></div>
+  </div>
+
+  <div class="blocks">
+
+    <!-- ГОРЯЧЕЕ -->
+    <section class="block" id="blkHot">
+      <div class="b-head"><span class="bdot" style="background:var(--orange)"></span>Горячее <span class="cnt" id="cHot">· 1</span><span class="why">пока горящее не разобрано — новые лиды не поступают</span></div>
+      <div class="row rw-call" style="border-left-color:var(--orange)" data-hot="1" data-blk="Hot">
+        <div class="who">Алексей К.<small>частичка · добор до 13 500 ₽</small></div>
+        <div class="msgline msg" style="background:var(--orange-bg)">⚡ Открыл ссылку оплаты 12 минут назад — не оплатил<span class="t">SLA 5 мин</span></div>
+        <div class="right"><span class="days">горит <b class="timer late" data-up="742">12:22</b></span><button class="act p" onclick="done(this,'Позвонил по горячему')">Позвонить →</button></div>
+      </div>
+      <div class="b-done">✓ Горячие сигналы разобраны</div>
+    </section>
+
+    <!-- НЕОТВЕЧЕННЫЕ СООБЩЕНИЯ -->
+    <section class="block" id="blkMsgs">
+      <div class="b-head"><span class="bdot" style="background:var(--purple)"></span>Неотвеченные сообщения <span class="cnt" id="cMsgs">· 3</span><span class="why">каждое сообщение = задача Sensei · закрывается только ответом</span></div>
+      <div class="row rw-msg" data-blk="Msgs">
+        <div class="who">Петров Дмитрий<small>+7 921 660-14-08</small></div>
+        <div class="msgline msg">💬 Добрый день, когда пришлёте расчёт?<span class="t">не отвечено · 09:12</span></div>
+        <div class="right"><span class="chip stx">Отправить расчёт</span><span class="sum">520 000 ₽</span><span class="days">в статусе 2 дня</span><button class="act p" onclick="done(this,'Ответил Петрову')">Ответить</button></div>
+      </div>
+      <div class="row rw-msg" data-blk="Msgs">
+        <div class="who">Новикова Екатерина<small>+7 981 240-51-93</small></div>
+        <div class="msgline msg">💬 Не приходит СМС с кодом для подписи<span class="t">не отвечено · 10:05</span></div>
+        <div class="right"><span class="chip stx">Договор отправлен</span><span class="sum">720 000 ₽</span><span class="days">в статусе 2 дня</span><button class="act p" onclick="done(this,'Ответил Новиковой')">Ответить</button></div>
+      </div>
+      <div class="row rw-msg" data-blk="Msgs">
+        <div class="who">Соколова Анна<small>+7 911 902-63-55</small></div>
+        <div class="msgline msg">💬 Перезвоните, пожалуйста<span class="t">не отвечено · 11:47</span></div>
+        <div class="right"><span class="chip stx">Встреча сегодня 12:00</span><span class="sum">630 000 ₽</span><span class="days">в статусе 3 дня</span><button class="act p" onclick="done(this,'Ответил Соколовой')">Ответить</button></div>
+      </div>
+      <div class="b-done">✓ Все сообщения разобраны</div>
+    </section>
+
+    <!-- ПРОПУЩЕННЫЕ ЗВОНКИ -->
+    <section class="block" id="blkCalls">
+      <div class="b-head"><span class="bdot" style="background:var(--red)"></span>Пропущенные звонки <span class="cnt" id="cCalls">· 2</span><span class="why">перезвонить в течение 5 минут</span></div>
+      <div class="row rw-call" data-blk="Calls">
+        <div class="who">Соколова Анна<small>+7 911 902-63-55</small></div>
+        <div class="msgline call">📵 Пропущенный звонок<span class="t">11:47</span></div>
+        <div class="right"><span class="chip stx">Встреча сегодня 12:00</span><span class="days">в статусе 3 дня</span><button class="act p" onclick="done(this,'Перезвонил Соколовой')">Перезвонить</button></div>
+      </div>
+      <div class="row rw-call" data-blk="Calls">
+        <div class="who">Смирнов Олег<small>+7 903 118-27-44</small></div>
+        <div class="msgline call">📵 Пропущенный звонок · 2 попытки<span class="t">10:31</span></div>
+        <div class="right"><span class="chip stx">Частичка · просрочка</span><span class="days">в статусе 9 дней</span><button class="act p" onclick="done(this,'Перезвонил Смирнову')">Перезвонить</button></div>
+      </div>
+      <div class="b-done">✓ Пропущенных нет</div>
+    </section>
+
+    <!-- ГОРЯЩИЙ ЧАС ПОДПИСИ -->
+    <section class="block" id="blkSign">
+      <div class="b-head"><span class="bdot" style="background:var(--gold)"></span>Горящий час подписи <span class="cnt" id="cSign">· 2</span><span class="why">конса прошла — клиент горячий, подпись берём в течение часа</span></div>
+      <div class="row rw-sign" data-blk="Sign">
+        <div class="who">Козлова Ирина<small>конса закончилась 11:15 · договор отправлен</small></div>
+        <div class="sub"><span class="badge-sub hot">⏱ горячий час</span>&nbsp; открыла страницу договора, не подписала 32 мин — «осталась одна СМС»</div>
+        <div class="right"><span class="days">до конца часа <b class="timer" data-down="1680">28:00</b></span><button class="act p" onclick="done(this,'Дожал подпись Козловой')">Позвонить →</button></div>
+      </div>
+      <div class="row rw-sign" data-blk="Sign">
+        <div class="who">Волков Андрей<small>конса прошла вчера · на смене до 17:00</small></div>
+        <div class="sub"><span class="badge-sub def">📅 отложено до 17:00</span>&nbsp; сам назвал время — Sensei поставит задачу ровно на 17:00</div>
+        <div class="right"><span class="days">сегодня в 17:00</span><button class="act s" onclick="done(this,'Подтвердил план 17:00')">Ок, жду</button></div>
+      </div>
+      <div class="b-done">✓ Подписи разобраны</div>
+    </section>
+
+    <!-- ОПЛАТЫ -->
+    <section class="block" id="blkPay">
+      <div class="b-head"><span class="bdot" style="background:var(--green)"></span>Оплаты <span class="cnt" id="cPay">· 3</span><span class="why">просрочка без новой даты — звонок сегодня обязателен</span></div>
+      <div class="g-sub red">Просрочка · без новой даты</div>
+      <div class="row rw-payx" data-hot="1" data-blk="Pay">
+        <div class="who">Смирнов Олег<small>частичка 990 ₽ внесена · добор 12 510 ₽</small></div>
+        <div class="sub">Обещал доплатить 21.07 — 2 дня без новой даты. Цель звонка: деньги сегодня или новая дата с числом</div>
+        <div class="right"><span class="sum">12 510 ₽</span><span class="days">просрочка 2 дня</span><button class="act p" onclick="done(this,'Взял новую дату по оплате')">Позвонить — новая дата</button></div>
+      </div>
+      <div class="g-sub">Оплата сегодня</div>
+      <div class="row rw-pay0" data-blk="Pay">
+        <div class="who">Иванова Мария<small>договор подписан · первый платёж</small></div>
+        <div class="sub">Договорились: платит сегодня после 14:00. Ссылка СБП уже в чате</div>
+        <div class="right"><span class="sum">13 500 ₽</span><span class="days">сегодня</span><button class="act p" onclick="done(this,'Напомнил про СБП Ивановой')">Напомнить · СБП</button></div>
+      </div>
+      <div class="g-sub">Оплата завтра</div>
+      <div class="row rw-pay1" data-blk="Pay">
+        <div class="who">Кузнецов Павел<small>частичка · добор</small></div>
+        <div class="sub">Зарплата завтра — оплата после 10:00. Sensei напомнит утром</div>
+        <div class="right"><span class="sum">12 510 ₽</span><span class="days">завтра 10:00</span><button class="act s" onclick="done(this,'Подтвердил план на завтра')">Ок, в плане</button></div>
+      </div>
+      <div class="b-done">✓ По оплатам план на сегодня закрыт</div>
+    </section>
+
+    <!-- РАСПИСАНИЕ -->
+    <section class="block" id="blkMeet">
+      <div class="b-head"><span class="bdot" style="background:var(--blue)"></span>Расписание · договорённости на время <span class="cnt" id="cMeet">· 2</span><span class="why">за 10 минут придёт горящее уведомление — встречу пропустить нельзя</span></div>
+      <div class="tl">
+        <div class="seg" style="flex:3">9–12<span class="now" style="left:93%"></span></div>
+        <div class="seg ev" style="flex:1">12:00 Соколова</div>
+        <div class="seg lunch" style="flex:1">обед</div>
+        <div class="seg" style="flex:2">14–16</div>
+        <div class="seg ev" style="flex:1">16:00 Орлов</div>
+        <div class="seg gold" style="flex:1.4">16:30+ дожимы</div>
+        <div class="seg" style="flex:.8">18:00</div>
+      </div>
+      <div class="row rw-meet" data-blk="Meet">
+        <div class="who">Соколова Анна<small>встреча-звонок · обсуждение договора</small></div>
+        <div class="sub">Сама попросила перезвонить к 12:00 — задача Sensei встанет в фокус ровно в 11:50</div>
+        <div class="right"><span class="chip stx">сегодня 12:00</span><span class="days">до звонка <b class="timer" id="meetTimer" data-down="615">10:15</b></span><button class="act s" onclick="done(this,'Провёл встречу с Соколовой')">Провёл встречу</button></div>
+      </div>
+      <div class="row rw-meet" data-blk="Meet">
+        <div class="who">Орлов Никита<small>повторная конса · вопросы по КИ</small></div>
+        <div class="sub">Договорились на 16:00 — держи слот свободным, консультация 40 минут</div>
+        <div class="right"><span class="chip stx">сегодня 16:00</span><button class="act s" onclick="done(this,'Провёл консу с Орловым')">Провёл</button></div>
+      </div>
+      <div class="b-done">✓ Встречи на сегодня проведены</div>
+    </section>
+
+  </div>
+</div>
+
+<!-- горящее уведомление -->
+<div id="toast"><div class="tx"><b id="toastT"></b><span id="toastS"></span></div><button class="act" id="toastBtn" onclick="hideToast()">Ок</button></div>
+
+<!-- зиро-дашборд конца смены -->
+<div id="veil" onclick="closeZero()"></div>
+<div id="zero">
+  <h2>Смена закрыта · зиро ✓</h2>
+  <div class="zs">Все задачи Sensei разобраны — хвостов на завтра нет</div>
+  <div class="zrow"><span>Новых лидов за смену</span><b class="hl" id="zNew">3</b></div>
+  <div class="zrow"><span>Задач сделано</span><b id="zTasks">13 из 13</b></div>
+  <div class="zrow"><span>Деньги за день</span><b class="hl">13 500 ₽ · Иванова</b></div>
+  <div class="zrow"><span>Подписей взято</span><b>1</b></div>
+  <div class="zrow"><span>Завтра</span><b>добор Кузнецова после 10:00</b></div>
+  <div class="zrow"><span>Твоя база</span><b>47 клиентов · активных 11/20</b></div>
+  <button class="act p" onclick="closeZero()">До завтра 👋</button>
+  <div class="znote">Отчёт ушёл РОПу · Sensei поставил задачи на утро</div>
+</div>
+
+<div class="foot">
+  <span>Демо-прототип v3 по макету заказчика 23.07 · данные вымышленные</span>
+  <span>·</span><span>Задачи создаёт и контролирует Sensei (amoCRM) — закрыть можно только результатом</span>
+  <span>·</span><span>Канон — свод v2.13 (виджет по макету заказчика 23.07)</span>
+</div>
+
+<script>
+(function(){
+  var started=false, finished=false, sec=0, doneN=0, shiftTimer=null;
+  var total=document.querySelectorAll('.row').length;
+  document.getElementById('tTotal').textContent=total;
+  document.getElementById('zTasks').textContent=total+' из '+total;
+
+  window.shift=function(){
+    var btn=document.getElementById('shiftBtn');
+    if(!started){
+      started=true;
+      document.body.classList.remove('idle');
+      document.getElementById('shiftLabel').textContent='Закончить работу';
+      btn.classList.add('finish');
+      shiftTimer=setInterval(tick,1000); tick();
+      // блоки въезжают каскадом
+      var blocks=document.querySelectorAll('.block');
+      blocks.forEach(function(b,i){setTimeout(function(){b.classList.add('on');},60*i);});
+      toast('Смена началась · клок-ин зафиксирован','Sensei собрал очередь: '+total+' задач — горящее наверху',false);
+      return;
+    }
+    if(finished){document.getElementById('veil').classList.add('show');document.getElementById('zero').classList.add('show');return;}
+    if(doneN<total){
+      var parts=[];
+      var m={Hot:'горящее',Msgs:'сообщения',Calls:'звонки',Sign:'подписи',Pay:'оплаты',Meet:'встречи'};
+      Object.keys(m).forEach(function(k){var n=document.querySelectorAll('.row[data-blk="'+k+'"]:not(.gone)').length; if(n) parts.push(m[k]+': '+n);});
+      toast('Зиро ещё не собран','Сначала разбери: '+parts.join(' · '),true);
+      return;
+    }
+    finished=true; clearInterval(shiftTimer);
+    document.getElementById('zNew').textContent=document.getElementById('stNew').textContent;
+    document.getElementById('veil').classList.add('show');
+    document.getElementById('zero').classList.add('show');
+  };
+
+  function countLeft(k){return document.querySelectorAll('.row[data-blk="'+k+'"]:not(.gone)').length;}
+
+  window.done=function(btn,label){
+    var row=btn.closest('.row'); if(row.classList.contains('gone'))return;
+    row.classList.add('gone');
+    setTimeout(function(){
+      row.style.display='none';
+      var blk=row.dataset.blk;
+      var left=countLeft(blk);
+      var cEl=document.getElementById('c'+blk);
+      if(cEl)cEl.textContent='· '+left;
+      var blkSec=row.closest('.block');
+      if(left===0){blkSec.classList.add('empty'); if(cEl)cEl.textContent='';}
+      updChips(); updKran();
+    },260);
+    doneN++;
+    document.getElementById('tDone').textContent=doneN;
+    document.getElementById('tBar').style.transform='scaleX('+(doneN/total)+')';
+    if(label)toast(label+' ✓','Sensei закрыл задачу результатом · сделано '+doneN+' из '+total,false);
+    if(doneN>=total){
+      setTimeout(function(){
+        var b=document.getElementById('shiftBtn'); b.classList.add('ready');
+        toast('Зиро-дашборд собран ✓','Все задачи разобраны — можно закончить работу',false);
+      },700);
+    }
+  };
+
+  function updChips(){
+    setChip('chipCalls',countLeft('Calls'));
+    setChip('chipMsgs',countLeft('Msgs'));
+    setChip('chipHot',countLeft('Hot'));
+  }
+  function setChip(id,n){
+    var el=document.getElementById(id);
+    el.querySelector('.bdg').textContent=n;
+    el.classList.toggle('zero',n===0);
+  }
+  function updKran(){
+    var hot=document.querySelectorAll('.row[data-hot]:not(.gone)').length;
+    var k=document.getElementById('kran');
+    if(hot>0){
+      var first=document.querySelector('.row[data-hot]:not(.gone) .who');
+      var nm=first?first.childNodes[0].textContent.trim():'—';
+      k.className='pill kran closed';
+      k.innerHTML='⛔ Новые лиды на паузе · причина: <b>&nbsp;горящее ('+nm+')</b>';
+    }else{
+      k.className='pill kran open';
+      k.innerHTML='✅ Горящих нет — кран новых открыт, лиды поступают';
+    }
+  }
+
+  function tick(){
+    sec++;
+    document.getElementById('shiftTime').textContent='на смене '+Math.floor(sec/3600)+':'+pad(Math.floor(sec/60)%60)+':'+pad(sec%60);
+    // живые таймеры на строках
+    document.querySelectorAll('.timer[data-down]').forEach(function(t){
+      var v=(+t.dataset.down)-1; if(v<0)v=0; t.dataset.down=v; t.textContent=fmt(v);
+      if(t.id==='meetTimer'&&v===600&&!finished)toast('⚡ Через 10 минут — Соколова Анна, 12:00','Она просила перезвонить к этому времени. Свяжись с клиентом — встречу пропустить нельзя',true);
+      if(v===0)t.classList.add('late');
+    });
+    document.querySelectorAll('.timer[data-up]').forEach(function(t){
+      var v=(+t.dataset.up)+1; t.dataset.up=v; t.textContent=fmt(v);
+    });
+  }
+  function fmt(v){return pad(Math.floor(v/60))+':'+pad(v%60);}
+  function pad(n){return (n<10?'0':'')+n;}
+
+  var toastT=null;
+  window.toast=function(t,s,alarm){
+    var el=document.getElementById('toast');
+    document.getElementById('toastT').textContent=t;
+    document.getElementById('toastS').textContent=s;
+    el.classList.toggle('alarm',!!alarm);
+    el.classList.add('show');
+    clearTimeout(toastT);
+    toastT=setTimeout(hideToast, alarm?8000:3600);
+  };
+  window.hideToast=function(){document.getElementById('toast').classList.remove('show');};
+  window.closeZero=function(){document.getElementById('veil').classList.remove('show');document.getElementById('zero').classList.remove('show');};
+  window.scrollTo2=function(id){var el=document.getElementById(id); if(el)el.scrollIntoView({behavior:'smooth',block:'start'});};
+
+  updKran();
+})();
+</script>
+</body>
+</html>
