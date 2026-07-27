@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Что берём у американцев · рабочее место менеджера — ДОНУЛЯ</title>
+<meta name="description" content="Выжимка по американским системам для отделов продаж и колл-центров: Salesloft Rhythm, Outreach, Genesys, NICE, Balto, Cresta, Gong, power dialer, Centrical. Что берём в наш виджет, что потом, чего не берём.">
+<style>
+/* ═══ ВЫЖИМКА ПО US-СЕРВИСАМ (запрос заказчика 24.07: «сделай выжимку из сервисов,
+   хочу наглядно посмотреть, что мы можем взять оттуда или сам порекомендуй»).
+   Источники — официальные страницы продуктов и отраслевые бенчмарки, ссылки внизу.
+   Дизайн-система справочников проекта: бумага, сосна, золото, Golos Text. ═══ */
+@font-face{font-family:"Golos Text";src:url(../calc-widget/fonts/golos-var-cyrillic.woff2) format("woff2");font-weight:400 800;font-display:swap;unicode-range:U+0400-04FF,U+2010-2027,U+20BD}
+@font-face{font-family:"Golos Text";src:url(../calc-widget/fonts/golos-var-latin.woff2) format("woff2");font-weight:400 800;font-display:swap;unicode-range:U+0000-00FF,U+2013-2014,U+2018-201F,U+2026}
+:root{
+  --paper:#F6F2E9;--card:#FFFFFF;--card2:#FBF8F1;--line:#E3DCCB;
+  --ink:#16231D;--muted:#5C6660;--faint:#8B948E;
+  --pine:#0B3B2E;--pine2:#0F4A39;--green:#0F6B4F;--green-ink:#0B5540;--green-soft:#E4EFE7;
+  --gold:#C99A33;--gold-bright:#F4C775;--gold-soft:#F7EDD6;--gold-ink:#8A6212;
+  --brick:#A8442E;--brick-soft:#F6E3DC;
+  --shadow:0 18px 44px -18px rgba(11,59,46,.28);--shadow-sm:0 6px 18px -10px rgba(22,35,29,.16);
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:radial-gradient(120% 60% at 100% 0%, #EFE7D8 0%, transparent 55%),var(--paper);color:var(--ink);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 16px 80px}
+
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:24px;box-shadow:var(--shadow)}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:11px}
+.hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--gold-bright)}
+.hdr .brand b{font-size:15px}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:24px;line-height:1.18;letter-spacing:-.02em;font-weight:800}
+.hdr p{margin-top:8px;font-size:13.5px;color:rgba(255,255,255,.8);max-width:640px}
+
+/* главная мысль */
+.big{margin-top:18px;background:linear-gradient(165deg,#FFFDF6,var(--gold-soft));border:2px solid var(--gold);border-radius:20px;padding:22px 24px}
+.big .lb{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink)}
+.big h2{margin-top:7px;font-size:23px;line-height:1.25;letter-spacing:-.02em;color:var(--gold-ink)}
+.big p{margin-top:9px;font-size:14px;color:#6b5417;max-width:70ch}
+
+/* три опоры */
+.pillars{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:760px){.pillars{grid-template-columns:1fr}}
+.pil{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 17px;box-shadow:var(--shadow-sm)}
+.pil .n{width:26px;height:26px;border-radius:8px;background:var(--pine);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800}
+.pil b{display:block;margin-top:9px;font-size:14.5px;line-height:1.3}
+.pil span{display:block;margin-top:5px;font-size:12.5px;color:var(--muted);line-height:1.5}
+
+h2.sec{margin-top:30px;font-size:19px;letter-spacing:-.01em;color:var(--green-ink)}
+h2.sec + p.lead{margin-top:4px;font-size:13px;color:var(--muted)}
+
+/* карточки категорий */
+.cat{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+.cat > .h{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.cat .ic{flex:none;width:38px;height:38px;border-radius:11px;background:var(--green-soft);display:grid;place-items:center;font-size:18px}
+.cat.take .ic{background:var(--green-soft)}
+.cat.later .ic{background:var(--gold-soft)}
+.cat.no .ic{background:var(--brick-soft)}
+.cat .ht{flex:1;min-width:200px}
+.cat h3{font-size:17px;letter-spacing:-.01em}
+.cat .who{margin-top:3px;font-size:12.5px;color:var(--faint)}
+.verdict{flex:none;font-size:11px;font-weight:800;border-radius:999px;padding:5px 12px;white-space:nowrap}
+.verdict.take{background:var(--green-soft);color:var(--green-ink)}
+.verdict.later{background:var(--gold-soft);color:var(--gold-ink)}
+.verdict.no{background:var(--brick-soft);color:var(--brick)}
+
+.cat .what{margin-top:12px;font-size:13.5px;line-height:1.55}
+.cat .what b{color:var(--green-ink)}
+.quote{margin-top:10px;background:var(--card2);border-radius:12px;padding:10px 13px;font-size:13px;line-height:1.5;color:var(--muted)}
+.quote b{color:var(--ink)}
+.us{margin-top:11px;border-radius:12px;padding:11px 13px;font-size:13px;line-height:1.5}
+.us.take{background:var(--green-soft);color:var(--green-ink)}
+.us.later{background:var(--gold-soft);color:var(--gold-ink)}
+.us.no{background:var(--brick-soft);color:var(--brick)}
+.us b{font-weight:800}
+.nums{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.nums span{font-size:11.5px;font-weight:700;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 11px;color:var(--muted)}
+.nums span b{color:var(--ink)}
+
+/* предохранитель */
+.warn{margin-top:26px;background:var(--brick-soft);border:1px solid #ecc9bd;border-radius:20px;padding:20px 22px}
+.warn h3{font-size:17px;color:var(--brick)}
+.warn p{margin-top:8px;font-size:13.5px;line-height:1.55;color:#7d3423;max-width:74ch}
+.warn p + p{margin-top:7px}
+.warn b{font-weight:800}
+
+/* итоговая таблица */
+.sum{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.srow{display:grid;grid-template-columns:26px 1fr 132px;gap:12px;align-items:center;padding:12px 18px;border-top:1px solid var(--line)}
+.srow:first-child{border-top:0}
+.srow .m{font-size:16px;text-align:center}
+.srow .t{font-size:13.5px;line-height:1.4}
+.srow .t small{display:block;font-size:11.5px;color:var(--faint);margin-top:2px}
+.srow .v{font-size:11px;font-weight:800;border-radius:999px;padding:5px 10px;text-align:center;white-space:nowrap}
+.srow .v.take{background:var(--green-soft);color:var(--green-ink)}
+.srow .v.later{background:var(--gold-soft);color:var(--gold-ink)}
+.srow .v.no{background:var(--brick-soft);color:var(--brick)}
+@media(max-width:620px){.srow{grid-template-columns:24px 1fr;gap:8px}.srow .v{grid-column:2;justify-self:start;margin-top:4px}}
+
+.cap{margin-top:22px;font-size:11.5px;color:var(--faint);line-height:1.6}
+.cap a{color:var(--green-ink);font-weight:600;text-decoration:none}
+.cap a:hover{text-decoration:underline}
+.cap b{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hdr">
+  <div class="brand"><span class="lg">ДН</span><div><b>ДОНУЛЯ · РАЗБОР US-СИСТЕМ</b><small>РАБОЧЕЕ МЕСТО МЕНЕДЖЕРА · ЧТО БЕРЁМ</small></div></div>
+  <h1>Как устроены американские системы для отделов продаж — и что из этого берём мы</h1>
+  <p>Класс называется sales engagement platform (для продаж) и agent desktop (для колл-центров). Разобрал девять продуктов по категориям: что делает каждый, что берём в наш виджет, что откладываем и чего не берём вовсе.</p>
+</header>
+
+<section class="big">
+  <div class="lb">Главный смысл, одной фразой</div>
+  <h2>Система решает, ЧТО делать. Человек решает только, КАК сделать это хорошо.</h2>
+  <p>Решение «кому теперь звонить» убирают у менеджера намеренно. Не ради контроля — ради снятия нагрузки. Каждое такое микрорешение стоит внимания, а когда их сотня за смену, дисциплина протекает предсказуемо: неприятные задачи откладываются, и к вечеру остаются только они.</p>
+</section>
+
+<div class="pillars">
+  <div class="pil"><span class="n">1</span><b>Очередь считает машина</b><span>По сигналам, а не человек глазами по списку. И рядом всегда видно, почему задача первая.</span></div>
+  <div class="pil"><span class="n">2</span><b>Экран открывается сам</b><span>Ноль кликов между «закончил» и «начал следующее». Карточка клиента появляется до ответа.</span></div>
+  <div class="pil"><span class="n">3</span><b>Состояние агента — объект</b><span>На связи · разговор · постобработка · перерыв. Без него нельзя ни маршрутизировать, ни мерить.</span></div>
+</div>
+
+<h2 class="sec">Разбор по категориям</h2>
+<p class="lead">Девять продуктов, семь категорий. Вердикт — что делаем с этим у себя.</p>
+
+<!-- 1 -->
+<section class="cat take">
+  <div class="h">
+    <span class="ic">🎯</span>
+    <div class="ht"><h3>Приоритизированная очередь вместо списка задач</h3>
+      <div class="who">Salesloft Rhythm · Outreach</div></div>
+    <span class="verdict take">✓ уже взяли</span>
+  </div>
+  <div class="what">Rhythm формулирует это прямо: <b>вместо того чтобы продавец сам решал, что делать дальше, просматривая список задач</b>, система анализирует сигналы по всем каналам и строит очередь действий. Ключевое — продавец видит не только задачу, но и <b>контекст, почему именно она важна</b>. Focus Zones — режимы работы: «набирать пайплайн» или «закрывать сделки», внутри каждого приоритеты считаются отдельно. У Outreach это Sequences — многошаговые цепочки из звонков, писем и задач.</div>
+  <div class="nums"><span>+<b>39%</b> задач в день у аккаунт-менеджеров</span><span>+<b>57%</b> продуктивности у SDR</span><span style="color:var(--faint)">цифры вендора</span></div>
+  <div class="us take"><b>У нас:</b> маршрут дня ведёт Sensei по правилам канона, а не ИИ по вероятностям — на старте это надёжнее, правила объяснимы и не «плывут». Сегодня добавили недостающее: <b>«⚡ первая, потому что: горячий час подписи»</b> в полосе, карточке и строках очереди. Цепочки касаний 1–6 у Виктории — это ровно Sequences.</div>
+</section>
+
+<!-- 2 -->
+<section class="cat take">
+  <div class="h">
+    <span class="ic">📞</span>
+    <div class="ht"><h3>Автоподача и screen pop</h3>
+      <div class="who">Power dialer: Nextiva · Kixie · Aircall · Orum · Nooks</div></div>
+    <span class="verdict take">✓ уже взяли</span>
+  </div>
+  <div class="what">Дозвонщик набирает следующий номер, <b>как только агент освободился</b>, и не раньше — живой человек всегда на линии. Одновременно срабатывает <b>screen pop</b>: карточка клиента открывается сама ещё до ответа — имя, компания, прошлые касания, заметки с прошлых звонков.</div>
+  <div class="us take"><b>У нас:</b> конвейер подачи сделок с отсчётом 3 секунды. Отличие в нашу пользу — <b>отмена на 60 секунд, один раз на задачу</b> (дописать комментарий), срочное не отменяется вовсе, а честные простои вынесены в «Перерыв» и автопаузу на активном звонке.</div>
+</section>
+
+<!-- 3 -->
+<section class="cat take">
+  <div class="h">
+    <span class="ic">🟢</span>
+    <div class="ht"><h3>Состояние агента как объект первого класса</h3>
+      <div class="who">Genesys Cloud CX · NICE CXone · Five9</div></div>
+    <span class="verdict take">✓ уже взяли</span>
+  </div>
+  <div class="what">Статус агента — не украшение, а то, от чего работает маршрутизация и вся аналитика: <b>доступен · занят разговором · постобработка (ACW) · перерыв</b>. ACW — работа сразу после звонка: записать результат, поставить задачу. Плюс guided workflow прямо в рабочем окне, чтобы <b>сократить время на решение о следующем шаге в загруженные периоды</b>.</div>
+  <div class="us take"><b>У нас:</b> статус точкой у логотипа, постобработка 10 минут, перерыв с бюджетом смены. Просрочка постобработки закрывает кран новых сразу и открывает сразу, как разобрал — самоисправляющийся механизм вместо приговора на весь день.</div>
+</section>
+
+<!-- 4 -->
+<section class="cat later">
+  <div class="h">
+    <span class="ic">🎧</span>
+    <div class="ht"><h3>Подсказки в реальном времени, прямо в разговоре</h3>
+      <div class="who">Balto · Cresta</div></div>
+    <span class="verdict later">🟡 фаза 3</span>
+  </div>
+  <div class="what">Система слушает разговор и <b>выводит на экран нужную подсказку по ходу</b>: комплаенс-напоминание, если агент забыл проверить личность клиента; ответ из базы знаний, как только клиент назвал проблему; готовая отработка возражения, собранная <b>из звонков лучших продавцов</b>. И главное — <b>чек-лист «что обязательно сказать» отмечается сам</b>, когда пункт прозвучал в речи.</div>
+  <div class="quote">Именно про этот класс была фраза заказчика: <b>«сделаем как Balto, но дёшево»</b>. А «чек-лист отмечается сам» — это буквально наш урок с рейкой скрипта: <b>ноль двойной бухгалтерии</b>, менеджер не должен отмечать то, что система и так слышит.</div>
+  <div class="us later"><b>У нас:</b> скрипт статичный — лежит в карточке касания, но не реагирует на речь. Это фаза 3, после распознавания речи. Ближайший дешёвый шаг: <b>гейт 16 пунктов закрывается сам из полей расчёта</b>, а не галочками руками.</div>
+</section>
+
+<!-- 5 -->
+<section class="cat later">
+  <div class="h">
+    <span class="ic">🔍</span>
+    <div class="ht"><h3>Разбор звонков и риски по сделкам</h3>
+      <div class="who">Gong · Clari</div></div>
+    <span class="verdict later">🟡 частично есть</span>
+  </div>
+  <div class="what">Система разбирает записи разговоров и <b>предупреждает о сделках в зоне риска</b>: нет вовлечения, разговор с одним человеком вместо нескольких, сделка застряла, вопрос цены так и не отработан. Предупреждение говорит не «всё плохо», а <b>что именно нужно сделать, пока сделка не потеряна</b>.</div>
+  <div class="quote">Отраслевой комментарий, который стоит запомнить: <b>«Gong продают руководителям, Clari — директорам, а менеджеры тихо ненавидят оба»</b>. Инструмент, сделанный ради контроля, менеджер саботирует — и это главная причина, почему наш виджет должен в первую очередь помогать менеджеру, а уже потом отчитываться РОПу.</div>
+  <div class="us later"><b>У нас:</b> AI-QA каждого звонка в каноне есть — гейт «консультация состоялась» и балл 0–100. Чего нет — предупреждений <b>по сделке</b> в духе «два дня без движения, ещё день и уйдёт в пул». Кандидат в следующую версию.</div>
+</section>
+
+<!-- 6 -->
+<section class="cat take">
+  <div class="h">
+    <span class="ic">🎓</span>
+    <div class="ht"><h3>Обучение и симуляции звонков</h3>
+      <div class="who">Zenarate · Second Nature · Hyperbound</div></div>
+    <span class="verdict take">✓ уже сделали</span>
+  </div>
+  <div class="what">Цикл <b>Learn It → Practice It → Master It</b>: сначала разбор, потом тренировка с подсказками, потом симуляция живого звонка с виртуальным клиентом, и только в конце — сертификация по критерию выхода, а не по календарю. Зенарейт заявляет 56% ускорения выхода на проф-уровень и минус треть текучки.</div>
+  <div class="us take"><b>У нас:</b> тренажёр с Санычем построен ровно по этой модели — разбор → тренировка с подсказками → живой звонок с отмоткой → зачёт от 80%. Запрещённая фраза обнуляет экзамен, как instant-fail у Quantified.</div>
+</section>
+
+<!-- 7 -->
+<section class="cat take">
+  <div class="h">
+    <span class="ic">🔥</span>
+    <div class="ht"><h3>Мотивация без лидерборда</h3>
+      <div class="who">Centrical · Axonify · 1Huddle</div></div>
+    <span class="verdict take">✓ частично взяли</span>
+  </div>
+  <div class="what">Что реально работает на фронтлайне: <b>серии</b> (их берегут сильнее, чем очки), микро-сессии по 3–5 минут, личные рекорды и близкая цель. Что не работает: публичная таблица с местами — она демотивирует нижние 60% команды, потому что они видят, что не догонят, и перестают стараться.</div>
+  <div class="us take"><b>У нас:</b> блок «Моё» — жизни, рейтинг ИИ, серия смен с зиро, план месяца. Самое сильное там — <b>«3 сделки ждут второго платежа»</b>: это деньги, которые менеджер уже заработал, но ещё не получил. Конкретнее и ближе любого рейтинга.</div>
+</section>
+
+<div class="warn">
+  <h3>⚠️ Цифра-предохранитель, которая меняет дизайн</h3>
+  <p>Отраслевая норма загрузки — <b>occupancy 85%</b>. То есть <b>15% простоя это норма, а не потеря</b>. При 90% у агента остаётся шесть минут незанятого времени в час: нет паузы между тяжёлым разговором и следующим.</p>
+  <p>Колл-центры, которые держат загрузку выше 90%, за недели получают выгорание, рост ошибок и текучку — опытные уходят быстрее, чем приходят новые. Замена одного агента стоит <b>6 000–20 000 долларов</b>, а с учётом потерянной продуктивности до 35 000.</p>
+  <p>Вывод для нас: <b>паузы надо закладывать, а не выжигать</b>. Наш бюджет перерывов 1:30 на смену — это около 17%, попадает в норму. Занижать его будет дороже, чем кажется.</p>
+</div>
+
+<h2 class="sec">Итог: что делаем</h2>
+<p class="lead">Свод по всем находкам.</p>
+
+<div class="sum">
+  <div class="srow"><span class="m">🎯</span><span class="t">Очередь с причиной «почему первая»<small>Salesloft Rhythm</small></span><span class="v take">взяли сегодня</span></div>
+  <div class="srow"><span class="m">📞</span><span class="t">Автоподача сделки + отмена на 60 секунд<small>power dialer + наша защита от спама отменой</small></span><span class="v take">взяли</span></div>
+  <div class="srow"><span class="m">🟢</span><span class="t">Статусы агента, постобработка, перерыв с бюджетом<small>Genesys · NICE · Five9</small></span><span class="v take">взяли</span></div>
+  <div class="srow"><span class="m">🔗</span><span class="t">Цепочки касаний как Sequences<small>Outreach · доски Виктории</small></span><span class="v take">взяли</span></div>
+  <div class="srow"><span class="m">🎓</span><span class="t">Тренажёр по модели Learn → Practice → Master<small>Zenarate · Second Nature</small></span><span class="v take">сделали</span></div>
+  <div class="srow"><span class="m">🔥</span><span class="t">Серии и близкая цель вместо лидерборда<small>Centrical · Axonify</small></span><span class="v take">взяли</span></div>
+  <div class="srow"><span class="m">⏱</span><span class="t">Предупреждения по сделке: «два дня без движения»<small>Gong · Clari</small></span><span class="v later">следующая версия</span></div>
+  <div class="srow"><span class="m">🎧</span><span class="t">Подсказки по ходу разговора, чек-лист отмечается сам<small>Balto · Cresta</small></span><span class="v later">фаза 3</span></div>
+  <div class="srow"><span class="m">📊</span><span class="t">Публичный лидерборд с местами<small>демотивирует нижние 60% команды</small></span><span class="v no">не берём</span></div>
+  <div class="srow"><span class="m">🏃</span><span class="t">Загрузка выше 90%<small>выгорание и текучка за недели</small></span><span class="v no">не берём</span></div>
+</div>
+
+<p class="cap"><b>Источники:</b>
+<a href="https://www.salesloft.com/platform/rhythm" target="_blank" rel="noopener">Salesloft Rhythm</a> ·
+<a href="https://www.salesloft.com/platform/rhythm/focus-zones" target="_blank" rel="noopener">Rhythm Focus Zones</a> ·
+<a href="https://www.nooks.ai/blog-posts/7-top-sales-engagement-platforms-for-prospecting-in-2026" target="_blank" rel="noopener">обзор sales engagement платформ</a> ·
+<a href="https://www.nice.com/glossary/agent-status" target="_blank" rel="noopener">NICE: Agent Status</a> ·
+<a href="https://docs.genesys.com/Documentation/IW/latest/Dep/ManagingAgentStatus" target="_blank" rel="noopener">Genesys: Managing Agent Status</a> ·
+<a href="https://www.nextiva.com/blog/power-dialers.html" target="_blank" rel="noopener">Nextiva: Power Dialers</a> ·
+<a href="https://www.balto.ai/real-time-agent-assist/" target="_blank" rel="noopener">Balto: Real-Time Agent Assist</a> ·
+<a href="https://www.gong.io/deal-execution" target="_blank" rel="noopener">Gong: Deal Execution</a> ·
+<a href="https://www.calabrio.com/wfo/quality-management/calculating-occupancy-rate-in-contact-centers/" target="_blank" rel="noopener">Calabrio: Occupancy Rate</a> ·
+<a href="https://simplycontact.com/blog/occupancy-call-center/" target="_blank" rel="noopener">Simply Contact: Occupancy</a> ·
+<a href="https://www.techtarget.com/searchcustomerexperience/tip/Why-contact-centers-have-high-turnover-and-how-to-combat-it" target="_blank" rel="noopener">TechTarget: текучка в колл-центрах</a>.
+<br>Цифры продуктов (+39%, +57%, 56%) — заявления вендоров, не независимые замеры. Бенчмарки загрузки и стоимости замены агента — отраслевые источники.
+<br>Наш прототип: <a href="../manager-widget/tasks-v4-card.html">полоса смены в карточке amoCRM</a> · <a href="../trainer/index.html">тренажёр менеджера</a>.</p>
+
+</div>
+</body>
+</html>
