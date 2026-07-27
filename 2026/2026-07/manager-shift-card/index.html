@@ -73,6 +73,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .mini .nw{flex:none;font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--faint);text-transform:uppercase}
 .mini .nm{font-size:14px;font-weight:700;white-space:nowrap}
 .mini .act{font-size:12.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+/* «почему эта задача первая» — то, что делает очередь убедительной (паттерн Salesloft Rhythm) */
+.mini .why{flex:none;font-size:11.5px;font-weight:700;color:var(--gold);background:var(--gold-bg);border-radius:7px;padding:3px 8px;white-space:nowrap}
 .chip{font-size:11px;font-weight:700;border-radius:7px;padding:3px 8px;white-space:nowrap;flex:none}
 .chip.g{background:var(--green-bg);color:var(--green-d)}
 .chip.b{background:var(--blue-bg);color:var(--blue)}
@@ -155,6 +157,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .dots.g i.d{background:var(--green)}
 .f-chain .lb{font-size:11.5px;font-weight:700}
 .f-chain .ago{font-size:11px;color:var(--mut)}
+.whyline{margin-top:6px;font-size:11.5px;line-height:1.35;color:var(--gold);background:var(--gold-bg);border-radius:8px;padding:5px 9px;flex:none}
+.whyline b{font-weight:700}
+.whyline.big{margin-top:9px;font-size:12.5px;padding:8px 11px}
 .f-act{margin-top:6px;font-size:13.5px;font-weight:700;line-height:1.3;flex:none}
 .f-say{margin-top:5px;background:var(--soft);border-radius:9px;padding:6px 10px;font-size:11.5px;line-height:1.4;color:#3b4551;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;flex:none}
 .f-btns{margin-top:auto;padding-top:7px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex:none}
@@ -285,6 +290,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .qrow:hover{border-color:var(--dark);background:var(--soft)}
 .qrow .n{font-size:13.5px;font-weight:700;white-space:nowrap}
 .qrow .a{font-size:12px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.qrow .qwhy{font-size:11px;font-weight:700;color:var(--gold);background:var(--gold-bg);border-radius:6px;padding:3px 7px;white-space:nowrap;flex:none}
 .qrow .w{font-size:11.5px;color:var(--faint);white-space:nowrap}
 .qhead{font-size:11px;color:var(--faint);padding:6px 2px 0}
 
@@ -451,44 +457,44 @@ var PHASES=[
 ];
 
 var TASKS=[
- {ph:'msg',id:'m1',name:'Новикова Ольга',chip:{t:'на подписи',c:'g'},when:'08:41',bud:6,
+ {ph:'msg',id:'m1',why:'окно сообщений до 09:15 · ждёт с ночи',name:'Новикова Ольга',chip:{t:'на подписи',c:'g'},when:'08:41',bud:6,
   sub:'Написала ночью, ждёт ответа',quote:'«Не приходит СМС для подписи, что делать?»',
   act:'Ответь и доведи до подписи',btn:'Ответил'},
- {ph:'msg',id:'m2',name:'Гусев Артём',chip:{t:'новый лид',c:'n'},when:'09:03',bud:5,
+ {ph:'msg',id:'m2',why:'окно сообщений до 09:15 · новый лид в чате',name:'Гусев Артём',chip:{t:'новый лид',c:'n'},when:'09:03',bud:5,
   sub:'Ответил боту',quote:'«Здравствуйте, а сколько это стоит?»',
   act:'Ответь и переводи в звонок',btn:'Ответил'},
 
- {ph:'pay',id:'p1',grp:'Просрочка · без новой даты',name:'Смирнов Олег',chip:{t:'добор 12 510 ₽',c:'r'},when:'просрочка 2 дня',bud:12,
+ {ph:'pay',id:'p1',why:'просрочка 2 дня без новой даты · держит кран новых закрытым',grp:'Просрочка · без новой даты',name:'Смирнов Олег',chip:{t:'добор 12 510 ₽',c:'r'},when:'просрочка 2 дня',bud:12,
   sub:'Обещал 22-го, новой даты не назвал',act:'Бери деньги или дату числом',btn:'Позвонил',call:1},
- {ph:'pay',id:'p2',grp:'Просрочка · без новой даты',name:'Алексеев Роман',chip:{t:'13 500 ₽',c:'r'},when:'просрочка 1 день',bud:12,
+ {ph:'pay',id:'p2',why:'просрочка + второй перенос · дальше тёплый пул',grp:'Просрочка · без новой даты',name:'Алексеев Роман',chip:{t:'13 500 ₽',c:'r'},when:'просрочка 1 день',bud:12,
   sub:'Двигает оплату второй раз',act:'Второй перенос — последний',btn:'Позвонил',call:1},
- {ph:'pay',id:'p3',grp:'Оплата сегодня',name:'Иванова Мария',chip:{t:'13 500 ₽',c:'gold'},when:'🕐 16:00',bud:15,point:'16:00',
+ {ph:'pay',id:'p3',why:'клиент ждёт ровно в 16:00 · точка-время',grp:'Оплата сегодня',name:'Иванова Мария',chip:{t:'13 500 ₽',c:'gold'},when:'🕐 16:00',bud:15,point:'16:00',
   sub:'Договорились созвониться в 16:00 по оплате',act:'Доводи до СБП на линии — 15 секунд',btn:'Позвонил',call:1},
- {ph:'pay',id:'p4',grp:'Оплата завтра',name:'Кузнецов Павел',chip:{t:'добор 12 510 ₽',c:'b'},when:'завтра 10:00',bud:8,
+ {ph:'pay',id:'p4',why:'платёж завтра · подтвердить, пока договорённость живая',grp:'Оплата завтра',name:'Кузнецов Павел',chip:{t:'добор 12 510 ₽',c:'b'},when:'завтра 10:00',bud:8,
   sub:'Зарплата завтра',act:'Подтверди завтрашний платёж',btn:'Подтвердил',call:1},
 
- {ph:'touch',id:'t1',grp:'🟢 На подписи — дожим подписи',name:'Козлова Ирина',chip:{t:'договор открыт, не подписан',c:'g'},when:'⏱ 30 мин',bud:15,
+ {ph:'touch',id:'t1',why:'горячий час подписи · открыла договор 28 минут назад',grp:'🟢 На подписи — дожим подписи',name:'Козлова Ирина',chip:{t:'договор открыт, не подписан',c:'g'},when:'⏱ 30 мин',bud:15,
   chain:{track:'g',i:1,n:3,lbl:'Задача через 30 минут',ago:'открыла страницу 28 мин назад'},
   sub:'Зашла на договор, до подписи не дошла',act:'Помоги подписать прямо сейчас',
   say:['«Иван, я вижу, что договор не удалось подписать. Возникли технические сложности или остались сомнения по поводу данного решения?','Давайте я помогу вам сделать это прямо сейчас, договорились?»'],
   call:1,btn:'Дозвонился'},
- {ph:'touch',id:'t2',grp:'🟢 На подписи — дожим подписи',name:'Волков Андрей',chip:{t:'Д1 · получи КИ',c:'g'},when:'сегодня',bud:15,
+ {ph:'touch',id:'t2',why:'Д1 после сорванной подписи · окно 48 часов',grp:'🟢 На подписи — дожим подписи',name:'Волков Андрей',chip:{t:'Д1 · получи КИ',c:'g'},when:'сегодня',bud:15,
   chain:{track:'g',i:2,n:3,lbl:'Д1 — второй день',ago:'вчера не подписал'},
   sub:'Вчера сорвалась подпись',act:'Получи КИ и составь юрзаключение. Нет КИ — презентация со слов',
   say:['«Иван, добрый день! Я вам звоню, чтобы презентовать юридическое заключение: вот такая выгода, вот столько сэкономите. Нравится? Подписываем договор?»'],
   call:1,btn:'Дозвонился'},
- {ph:'touch',id:'t3',grp:'🔵 Подписан + частичка — дожим оплаты',name:'Петров Дмитрий',chip:{t:'частичка 990 ₽',c:'b'},when:'касание 48 ч назад',bud:12,
+ {ph:'touch',id:'t3',why:'48 часов с последнего касания · цепочка требует хода',grp:'🔵 Подписан + частичка — дожим оплаты',name:'Петров Дмитрий',chip:{t:'частичка 990 ₽',c:'b'},when:'касание 48 ч назад',bud:12,
   chain:{track:'b',i:3,n:6,lbl:'Касание 3',ago:'последнее касание 2 дня назад'},
   sub:'Юрзаключение разобрали',act:'Предложи скидку и закрой на платёж сегодня',
   say:['«Иван, добрый! Руководство выделило 3 места на старт процедуры со скидкой. Если начнём сегодня, вы сэкономите 10 000 рублей.','Сможем найти сумму, чтобы начать со скидкой?»'],
   call:1,btn:'Дозвонился'},
- {ph:'touch',id:'t4',grp:'🔵 Подписан + частичка — дожим оплаты',name:'Ким Сергей',chip:{t:'частичка 1 500 ₽',c:'b'},when:'касание 48 ч назад',bud:12,
+ {ph:'touch',id:'t4',why:'48 часов с последнего касания · кейс уже отправлен',grp:'🔵 Подписан + частичка — дожим оплаты',name:'Ким Сергей',chip:{t:'частичка 1 500 ₽',c:'b'},when:'касание 48 ч назад',bud:12,
   chain:{track:'b',i:5,n:6,lbl:'Касание 5',ago:'кейс отправлен позавчера'},
   sub:'Кейс посмотрел, по оплате тянет',act:'Предложи заказать SIM — спецпредложение лично ему',
   say:['«Договорился с руководством на сим-карту с бесплатной связью вам уже сегодня! Уже сегодня огородим вас от неприятных звонков, согласны?','Подскажите, что у нас по оплате?»'],
   call:1,btn:'Дозвонился'},
 
- {ph:'sec',id:'s1',name:'Орлов Никита',chip:{t:'тёплый пул',c:'n'},when:'часы дожима',bud:12,
+ {ph:'sec',id:'s1',why:'часы дожима · тёплый из пула, 2 часа на разбор',name:'Орлов Никита',chip:{t:'тёплый пул',c:'n'},when:'часы дожима',bud:12,
   sub:'Вернулся из пула',act:'Открой историю, говори про ЕГО ситуацию',btn:'Позвонил',call:1}
 ];
 
@@ -528,6 +534,7 @@ function renderMini(){
   else{
     n.innerHTML='<span class="nw">Сейчас</span><span class="nm">'+t.name+'</span>'
       +'<span class="chip '+t.chip.c+'">'+t.chip.t+'</span>'
+      +(t.why?'<span class="why" title="Почему эта задача первая: '+t.why+'">⚡ '+t.why.split(' · ')[0]+'</span>':'')
       +'<span class="act">'+t.act+'</span>'
       +'<span class="tmr '+tmrCls()+'">⏱ '+fmt(taskSec)+(t.bud?' <span style="font-weight:500;opacity:.7">/ '+t.bud+' мин</span>':'')+'</span>';
   }
@@ -592,6 +599,7 @@ function renderFull(){
     f.innerHTML='<div class="ch">Сейчас · '+PHASES[cur].ico+' '+PHASES[cur].n+'</div>'
       +'<div class="fk"><b>'+t.name+'</b><span class="chip '+t.chip.c+'">'+t.chip.t+'</span>'
       +'<span class="tmr '+tmrCls()+'">⏱ '+fmt(taskSec)+(t.bud?' / '+t.bud+' мин':'')+'</span></div>'
+      +(t.why?'<div class="whyline">⚡ <b>первая, потому что:</b> '+t.why+'</div>':'')
       +ch+'<div class="f-act">'+t.act+'</div>'
       +(t.say?'<div class="f-say">'+t.say[0]+'</div>':(t.quote?'<div class="f-say">'+t.quote+'</div>':''))
       +'<div class="f-btns">'+btns+'</div>';
@@ -658,7 +666,9 @@ function renderModal(){
     lf.slice(1).forEach(function(t){
       out+='<div class="qrow" onclick="focusOn(\''+t.id+'\')">'
         +'<span class="n">'+t.name+'</span><span class="chip '+t.chip.c+'">'+t.chip.t+'</span>'
-        +'<span class="a">'+t.act+'</span><span class="w">'+t.when+'</span></div>';
+        +'<span class="a">'+t.act+'</span>'
+        +(t.why?'<span class="qwhy" title="'+t.why+'">⚡ '+t.why.split(' · ')[0]+'</span>':'')
+        +'<span class="w">'+t.when+'</span></div>';
     });
   }
   q.innerHTML=out;
@@ -667,7 +677,8 @@ function bigCard(t){
   var o='<div class="tcard" id="mc_'+t.id+'">'
     +'<div class="tc-top"><b>'+t.name+'</b><span class="chip '+t.chip.c+'">'+t.chip.t+'</span>'
     +'<span class="tc-when">'+t.when+' · <b class="num">⏱ '+fmt(taskSec)+'</b>'+(t.bud?' из '+t.bud+' мин':'')+'</span></div>'
-    +'<div class="tc-sub">'+t.sub+'</div>';
+    +'<div class="tc-sub">'+t.sub+'</div>'
+    +(t.why?'<div class="whyline big">⚡ <b>Первая в очереди, потому что:</b> '+t.why+'</div>':'');
   if(t.chain){var d='';for(var k=1;k<=t.chain.n;k++)d+='<i class="'+(k<=t.chain.i?'d':'')+'"></i>';
     o+='<div class="f-chain" style="margin-top:9px"><span class="dots '+(t.chain.track==='g'?'g':'')+'">'+d+'</span><span class="lb">'+t.chain.lbl+'</span><span class="ago">· '+t.chain.ago+'</span></div>'}
   o+='<div class="tc-act">'+t.act+'</div>';
