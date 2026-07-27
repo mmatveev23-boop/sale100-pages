@@ -89,8 +89,10 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 
 /* напоминание / жёсткий сигнал */
 .alrt{flex:none;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:9px;padding:7px 10px;white-space:nowrap}
-/* при активном сигнале описание действия уступает место — приоритет у того, что горит */
-.mini:has(.alrt) .act{display:none}
+/* приоритет места в полосе: причина и таймер важнее описания действия
+   (что делать — уже на кнопке и в развёрнутом виде), сигнал важнее всего */
+.mini:has(.why) .act,.mini:has(.alrt) .act{display:none}
+.mini:has(.alrt) .why{display:none}
 .alrt.soon{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-line)}
 .alrt.hard{background:var(--red-bg);color:var(--red-d);border:1px solid var(--red-line)}
 @media (prefers-reduced-motion: no-preference){.alrt.hard{animation:pulse 1.6s infinite}}
