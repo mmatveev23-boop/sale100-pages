@@ -437,7 +437,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 
 <div id="toast"><div><b id="tT"></b><span id="tS"></span></div><button class="btn ok" style="padding:7px 12px" onclick="hideToast()">Ок</button></div>
 
-<div class="tip"><b>Демо:</b> «Начать работу» открывает маршрут.
+<div class="tip"><b>Демо:</b> «Начать работу» открывает маршрут. Кнопка одна: «Открыть и выполнить» → результат отмечается в Sensei → виджет подаёт следующую.
   <button class="btn" onclick="demoRemind()">⏰ напоминание о звонке</button>
   <button class="btn" onclick="demoStuck()">⏳ 60 минут в задаче</button>
   <button class="btn" onclick="demoLead()">🆕 выдать новый лид (5 мин)</button>
@@ -502,7 +502,7 @@ var TASKS=[
 
 /* ═══ СОСТОЯНИЕ ═══ */
 var started=false,cur=0,done={},called={},secLeft=176,tmr=null,open=false;
-var pend=null,cancels=0,onBreak=false,breakSec=0,onCall=false;
+var pend=null,cancels=0,onBreak=false,breakSec=0,onCall=false,working=null;
 var lives=5,qa=87,crosses=0;
 var BREAK_BUDGET=90*60;                    /* бюджет перерывов на смену */
 var taskSec=0,taskId=null,ropAlert=false;  /* живой таймер текущей задачи */
@@ -566,8 +566,12 @@ function renderMini(){
   }
   if(!t){pr.innerHTML=allDone()?'<button class="btn ok" onclick="toggleShift()">Закончить работу</button>'
     :'<button class="btn prim" onclick="nextPhase()">Дальше по маршруту →</button>';return}
-  if(t.call&&!called[t.id]){pr.innerHTML='<button class="btn prim" onclick="markCall(\''+t.id+'\')">📞 '+t.btn+'</button>';return}
-  pr.innerHTML='<button class="btn prim" onclick="finishTask(\''+t.id+'\')">'+(t.call?'✉ Смс и закрыть':t.btn)+'</button>';
+  if(working===t.id){
+    pr.innerHTML='<span class="pend-lb">в работе · отметь результат в Sensei</span>'
+      +'<button class="btn sec" onclick="resultMarked(\''+t.id+'\')" title="Демо: имитирует выбор результата в Sensei">✓ результат отмечен</button>';
+    return;
+  }
+  pr.innerHTML='<button class="btn prim" onclick="openAndDo(\''+t.id+'\')">Открыть и выполнить →</button>';
 }
 function livesHtml(){var h='';for(var i=1;i<=5;i++)h+='<span class="'+(i<=lives?'':'off')+'">❤</span>';return h}
 function qaCls(){return qa>=90?'ok':qa>=65?'mid':'low'}
@@ -593,11 +597,11 @@ function renderFull(){
     var ch='';
     if(t.chain){var d='';for(var k=1;k<=t.chain.n;k++)d+='<i class="'+(k<=t.chain.i?'d':'')+'"></i>';
       ch='<div class="f-chain"><span class="dots '+(t.chain.track==='g'?'g':'')+'">'+d+'</span><span class="lb">'+t.chain.lbl+'</span><span class="ago">· '+t.chain.ago+'</span></div>'}
-    var btns=t.call
-      ? '<button class="btn prim" onclick="markCall(\''+t.id+'\')" '+(called[t.id]?'disabled':'')+'>📞 '+(called[t.id]?'Дозвонился ✓':t.btn)+'</button>'
-        +'<button class="btn sec" onclick="finishTask(\''+t.id+'\')" '+(called[t.id]?'':'disabled')+'>✉ Смс и закрыть</button>'
-        +'<span class="f-gate'+(called[t.id]?' done':'')+'">'+(called[t.id]?'✓ звонок отмечен':'🔒 сначала звонок')+'</span>'
-      : '<button class="btn prim" onclick="finishTask(\''+t.id+'\')">'+t.btn+'</button>';
+    var btns=(working===t.id)
+      ? '<span class="f-gate">в работе · результат отмечаешь в Sensei</span>'
+        +'<button class="btn sec" onclick="resultMarked(\''+t.id+'\')">✓ результат отмечен</button>'
+      : '<button class="btn prim" onclick="openAndDo(\''+t.id+'\')">Открыть и выполнить →</button>'
+        +(t.call?'<span class="f-gate">📞 факт звонка фиксирует PBX</span>':'');
     f.innerHTML='<div class="ch">Сейчас · '+PHASES[cur].ico+' '+PHASES[cur].n+'</div>'
       +'<div class="fk"><b>'+t.name+'</b><span class="chip '+t.chip.c+'">'+t.chip.t+'</span>'
       +'<span class="tmr '+tmrCls()+'">⏱ '+fmt(taskSec)+(t.bud?' / '+t.bud+' мин':'')+'</span></div>'
@@ -687,12 +691,12 @@ function bigCard(t){
   if(t.quote)o+='<div class="say"><span class="qh">Клиент написал</span>'+t.quote+'</div>';
   if(t.say){o+='<div class="say"><span class="qh">Что говоришь</span>';t.say.forEach(function(s){o+='<p>'+s+'</p>'});o+='</div>'}
   o+='<div class="tc-btns">';
-  if(t.call)o+='<button class="btn prim" onclick="markCall(\''+t.id+'\')" '+(called[t.id]?'disabled':'')+'>📞 '+(called[t.id]?'Дозвонился ✓':t.btn)+'</button>'
-    +'<button class="btn sec" onclick="finishTask(\''+t.id+'\')" '+(called[t.id]?'':'disabled')+'>✉ Отправить смс и закрыть</button>';
-  else o+='<button class="btn prim" onclick="finishTask(\''+t.id+'\')">'+t.btn+'</button>';
-  o+='<button class="btn sec" onclick="toast(\'Сделка открыта\',\'В бою откроется карточка amoCRM с Пультом сделки внутри.\')">Открыть сделку ↗</button></div>';
-  if(t.call)o+='<div class="gate'+(called[t.id]?' done':'')+'">'+(called[t.id]?'✓ <b>звонок отмечен</b> — сообщение открылось':'🔒 сначала <b>звонок</b>, смс открывается после него')+'</div>';
-  o+='<div class="sensei">⚙ задачу поставил Sensei · закрыть можно только результатом</div></div>';
+  if(working===t.id)o+='<button class="btn sec" onclick="resultMarked(\''+t.id+'\')">✓ результат отмечен в Sensei</button>'
+    +'<span class="gate" style="margin:0">задача открыта · выбери результат в Sensei, он закроет её и поставит следующую</span>';
+  else o+='<button class="btn prim" onclick="openAndDo(\''+t.id+'\')">Открыть и выполнить →</button>';
+  o+='</div>';
+  if(t.call)o+='<div class="gate">📞 <b>факт звонка фиксирует PBX</b> · правило «звонок, только потом смс» держит Sensei — сообщением задачу не закрыть</div>';
+  o+='<div class="sensei">⚙ задачу поставил Sensei · результат отмечается там же, виджет подаёт следующую</div></div>';
   return o;
 }
 function focusOn(id){
@@ -708,7 +712,7 @@ function focusOn(id){
 
 /* ── действия ── */
 function render(){renderMini();renderFull();if(open)renderModal()}
-function resetTaskTimer(){taskSec=0;ropAlert=false;taskId=focusTask()?focusTask().id:null;document.getElementById('strip').classList.remove('alarm')}
+function resetTaskTimer(){taskSec=0;ropAlert=false;working=null;taskId=focusTask()?focusTask().id:null;document.getElementById('strip').classList.remove('alarm')}
 function toggleStrip(){document.getElementById('strip').classList.toggle('open')}
 function openModal(){open=true;document.getElementById('veil').classList.add('on');document.getElementById('modal').classList.add('on');renderModal()}
 function closeModal(){open=false;document.getElementById('veil').classList.remove('on');document.getElementById('modal').classList.remove('on')}
@@ -734,7 +738,19 @@ function goPhase(i){
   if((p.id==='new'||p.id==='sec')&&!kranOpen()){toast('Кран закрыт','Сначала сообщения и оплаты.');return}
   cur=i;resetTaskTimer();render();
 }
-function markCall(id){called[id]=1;render();toast('Звонок отмечен','Теперь открылась отправка сообщения. Канон: звонок, только потом смс.')}
+/* ЦИКЛ (решение заказчика 24.07): Sensei ставит задачу → виджет показывает её первой →
+   менеджер открывает сделку и выполняет → РЕЗУЛЬТАТ ОТМЕЧАЕТ В SENSEI → Sensei закрывает задачу
+   и ставит следующую → виджет подаёт следующую сделку. Виджет результат НЕ пишет: одно место.
+   Факт звонка фиксирует PBX, факт сообщения — чат; подтверждать это кнопкой менеджера не просим. */
+function openAndDo(id){
+  working=id;pend=null;render();
+  toast('Открыта карточка: '+(byId[id]?byId[id].name:''),'Звони и отмечай результат в Sensei — он закроет задачу и поставит следующую. Виджет подаст её сюда.');
+}
+function resultMarked(id){
+  working=null;
+  toast('Sensei принял результат','Задача закрыта, следующая по цепочке поставлена. Подаю сделку.');
+  finishTask(id);
+}
 function finishTask(id){
   var el=document.getElementById('mc_'+id);if(el)el.classList.add('gone');
   var t=byId[id];
