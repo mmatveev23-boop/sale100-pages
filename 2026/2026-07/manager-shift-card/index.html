@@ -83,6 +83,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .btn.sec{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .mini .exp{width:34px;height:34px;border-radius:9px;background:var(--soft);color:var(--mut);display:grid;place-items:center;font-size:12px;flex:none}
+.btn.go{display:flex;align-items:center;gap:7px;background:var(--green)}
+.btn.go .pl{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:8px}
 
 /* развёрнутый вид */
 .full{display:none;height:190px;grid-template-columns:212px 1fr 300px;gap:0}
@@ -274,6 +276,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
         <div class="now" id="mNow"></div>
         <div class="route" id="mRoute"></div>
         <button class="btn sec" onclick="openModal()">Открыть смену</button>
+        <span id="mPrim"></span>
         <button class="exp" onclick="toggleStrip()" title="Развернуть полосу">▾</button>
       </div>
 
@@ -453,6 +456,19 @@ function renderMini(){
   PHASES.forEach(function(p,i){h+='<i class="'+(phDone(p.id)?'d':(i===cur&&started?'cur':''))+'"></i>'});
   var lf=started?TASKS.filter(function(t){return !done[t.id]}).length:TASKS.length;
   r.innerHTML=h+'<b>'+lf+' задач</b>';
+
+  /* главная кнопка полосы контекстная: смена не начата → старт; идёт → ход по текущей задаче;
+     всё разобрано → закрыть смену. Менеджеру не нужно никуда заходить, чтобы начать день. */
+  var pr=document.getElementById('mPrim');
+  if(!started){pr.innerHTML='<button class="btn prim go" onclick="toggleShift()"><span class="pl">▶</span>Начать работу</button>';return}
+  if(!t){
+    pr.innerHTML=allDone()
+      ? '<button class="btn ok" onclick="toggleShift()">Закончить работу</button>'
+      : '<button class="btn prim" onclick="nextPhase()">Дальше по маршруту →</button>';
+    return;
+  }
+  if(t.call&&!called[t.id]){pr.innerHTML='<button class="btn prim" onclick="markCall(\''+t.id+'\')">📞 '+t.btn+'</button>';return}
+  pr.innerHTML='<button class="btn prim" onclick="finishTask(\''+t.id+'\')">'+(t.call?'✉ Смс и закрыть':t.btn)+'</button>';
 }
 
 /* ── полоса развёрнутая ── */
@@ -566,6 +582,14 @@ function toggleShift(){
   }
   if(!allDone()){toast('Ещё не зиро','Осталось задач: '+TASKS.filter(function(t){return !done[t.id]}).length+'. Разбери маршрут — тогда смена закроется.');return}
   toast('Смена закрыта · зиро ✓','Начало 09:12 (опоздание 12 мин) · конец 18:04 · сводка ушла РОПу.');
+}
+/* перейти к ближайшему незакрытому и не запертому этапу */
+function nextPhase(){
+  for(var i=0;i<PHASES.length;i++){
+    var p=PHASES[i],lk=(p.id==='new'||p.id==='sec')&&!kranOpen();
+    if(!phDone(p.id)&&!lk){cur=i;render();toast('Дальше по маршруту','Этап: '+p.ico+' '+p.n);return}
+  }
+  toast('Маршрут пройден ✓','Все задачи разобраны — можно закрывать смену.');
 }
 function goPhase(i){
   var p=PHASES[i];
