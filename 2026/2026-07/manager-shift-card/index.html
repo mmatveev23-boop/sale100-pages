@@ -438,7 +438,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 
 <div id="toast"><div><b id="tT"></b><span id="tS"></span></div><button class="btn ok" style="padding:7px 12px" onclick="hideToast()">Ок</button></div>
 
-<div class="tip"><b>Демо:</b> «Начать работу» открывает маршрут. Кнопка одна: «Открыть и выполнить» → результат отмечается в Sensei → виджет подаёт следующую.
+<div class="tip"><b>Демо:</b> «Начать работу» открывает маршрут. Дальше кнопок нет: конвейер сам открывает карточку, полоса говорит что делать, результат отмечается в Sensei, виджет подаёт следующую.
   <button class="btn" onclick="demoRemind()">⏰ напоминание о звонке</button>
   <button class="btn" onclick="demoStuck()">⏳ 60 минут в задаче</button>
   <button class="btn" onclick="demoLead()">🆕 выдать новый лид (5 мин)</button>
@@ -576,7 +576,7 @@ function renderMini(){
     :'<button class="btn prim" onclick="nextPhase()">Дальше по маршруту →</button>';return}
   if(openedId===t.id){
     /* нормальный ход: карточка открыта, кнопок не надо — результат менеджер выбирает в Sensei */
-    pr.innerHTML='<span class="pend-lb">результат отмечаешь в Sensei →</span>'
+    pr.innerHTML='<span class="pend-lb" title="Результат задачи менеджер выбирает в Sensei — виджет его не дублирует">→ Sensei</span>'
       +'<button class="btn sec" onclick="resultMarked(\''+t.id+'\')" title="Демо: имитирует выбор результата в Sensei">✓ демо: результат отмечен</button>';
     return;
   }
