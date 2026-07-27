@@ -84,7 +84,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .chip.n{background:var(--soft);color:var(--mut)}
 
 /* таймер текущей задачи */
-.tmr{flex:none;display:flex;align-items:center;gap:5px;font-size:13px;font-weight:800;color:var(--mut);background:var(--soft);border-radius:8px;padding:6px 10px;white-space:nowrap}
+.tmr{flex:none;display:flex;align-items:center;gap:5px;font-size:13.5px;font-weight:800;color:var(--mut);background:var(--soft);border-radius:8px;padding:6px 10px;white-space:nowrap}
 .tmr.warn{background:var(--orange-bg);color:var(--orange)}
 .tmr.bad{background:var(--red-bg);color:var(--red-d)}
 
@@ -129,30 +129,33 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .pend-lb{font-size:12.5px;color:var(--mut);background:var(--soft);border-radius:9px;padding:8px 12px;flex:none;white-space:nowrap}
 
 /* ── развёрнутая полоса ── */
-.full{display:none;height:190px;grid-template-columns:236px 1fr 290px}
+.full{display:none;height:190px;grid-template-columns:190px minmax(0,1fr) 206px}
 #strip.open .mini{display:none}
 #strip.open .full{display:grid}
 .col{padding:11px 13px;min-width:0;overflow:hidden;display:flex;flex-direction:column}
-.col + .col{border-left:1px solid var(--line)}
+/* боковые зоны приглушены фоном и мелким кеглем — центр выступает вперёд без рамок */
+.col.side{background:var(--soft)}
+.col.side .ch{color:#9aa2af}
+.col.focus{background:#fff;padding:12px 18px}
 .ch{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);flex:none}
 
 .sh-who{margin-top:6px;display:flex;align-items:center;gap:8px;flex:none}
 .sh-av{width:30px;height:30px;border-radius:9px;background:var(--dark);color:#fff;display:grid;place-items:center;font-size:11.5px;font-weight:800;flex:none}
-.sh-who b{font-size:12.5px;display:block;line-height:1.2}
+.sh-who b{font-size:12px;display:block;line-height:1.2}
 .sh-who span{font-size:10.5px;color:var(--mut)}
 .sh-st{margin-left:auto;font-size:10px;font-weight:700;border-radius:6px;padding:3px 7px;white-space:nowrap}
 .sh-st.on{background:var(--green-bg);color:var(--green-d)}
 .sh-st.brk{background:var(--orange-bg);color:var(--orange)}
 .sh-st.call{background:var(--blue-bg);color:var(--blue)}
-.sh-row{margin-top:7px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--mut);flex:none}
-.sh-row b{font-size:13px;color:var(--ink)}
+.sh-row{margin-top:6px;display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--mut);flex:none}
+.sh-row b{font-size:12px;color:var(--ink);font-weight:700}
 .sh-row .lives{font-size:13px}
 .sh-btns{margin-top:auto;padding-top:7px;display:flex;gap:6px;flex:none}
 .sh-btns .btn{flex:1;text-align:center;padding:7px 8px;font-size:12px}
 
 .fk{margin-top:6px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;flex:none}
-.fk b{font-size:15.5px;font-weight:800}
-.fk .tmr{margin-left:auto}
+.fk b{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.fk .tmr{margin-left:auto;font-size:15px;padding:7px 12px}
 .f-chain{margin-top:6px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;flex:none}
 .dots{display:flex;gap:4px}
 .dots i{width:7px;height:7px;border-radius:50%;background:#dfe4ea}
@@ -160,23 +163,23 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .dots.g i.d{background:var(--green)}
 .f-chain .lb{font-size:11.5px;font-weight:700}
 .f-chain .ago{font-size:11px;color:var(--mut)}
-.whyline{margin-top:6px;font-size:11.5px;line-height:1.35;color:var(--gold);background:var(--gold-bg);border-radius:8px;padding:5px 9px;flex:none}
+.whyline{margin-top:7px;font-size:12.5px;line-height:1.35;color:var(--gold);background:var(--gold-bg);border-radius:8px;padding:5px 9px;flex:none}
 .whyline b{font-weight:700}
 .whyline.big{margin-top:9px;font-size:12.5px;padding:8px 11px}
-.f-act{margin-top:6px;font-size:13.5px;font-weight:700;line-height:1.3;flex:none}
-.f-say{margin-top:5px;background:var(--soft);border-radius:9px;padding:6px 10px;font-size:11.5px;line-height:1.4;color:#3b4551;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;flex:none}
+.f-act{margin-top:7px;font-size:16.5px;font-weight:800;line-height:1.3;letter-spacing:-.01em;flex:none}
+.f-say{margin-top:7px;background:var(--soft);border-radius:9px;padding:6px 10px;font-size:11.5px;line-height:1.4;color:#3b4551;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;flex:none}
 .f-btns{margin-top:auto;padding-top:7px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex:none}
 .f-gate{font-size:10.5px;color:var(--mut)}
 .f-gate.done{color:var(--green-d)}
 
 .day-prog{margin-top:6px;flex:none}
 .day-prog .t{display:flex;justify-content:space-between;font-size:11px;color:var(--mut)}
-.day-prog .t b{color:var(--ink);font-size:12.5px}
+.day-prog .t b{color:var(--ink);font-size:15px;font-weight:800}
 .day-prog .bar{margin-top:4px;height:6px;border-radius:4px;background:#e3e7ee;overflow:hidden}
 .day-prog .bar i{display:block;height:100%;background:var(--green);border-radius:4px;transition:width .3s var(--ease)}
 .day-g{margin-top:7px;display:grid;grid-template-columns:repeat(3,1fr);gap:5px;flex:none}
-.dcell{background:var(--soft);border-radius:8px;padding:5px 7px}
-.dcell b{display:block;font-size:14px;font-weight:800;line-height:1.1}
+.dcell{background:#fff;border-radius:8px;padding:5px 7px}
+.dcell b{display:block;font-size:13px;font-weight:800;line-height:1.1}
 .dcell span{font-size:9.5px;color:var(--mut)}
 .dcell.red{background:var(--red-bg)}.dcell.red b{color:var(--red-d)}
 .dcell.gold{background:var(--gold-bg)}.dcell.gold b{color:var(--gold)}
@@ -345,7 +348,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
       </div>
 
       <div class="full">
-        <div class="col">
+        <div class="col side">
           <div class="ch">Смена</div>
           <div class="sh-who">
             <div class="sh-av">БВ</div>
@@ -356,14 +359,14 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
           <div class="sh-row"><span>рейтинг ИИ</span><b id="fQa">87</b></div>
           <div class="sh-row"><span id="fBrkLb">перерыв</span><b id="fBrk">0:00 / 1:30</b></div>
           <div class="sh-btns">
-            <button class="btn prim" id="fShift" onclick="toggleShift()">Начать</button>
             <button class="btn sec" id="fBreakBtn" onclick="toggleBreak()">⏸ Перерыв</button>
+            <button class="btn prim" id="fShift" onclick="toggleShift()">Начать</button>
           </div>
         </div>
 
-        <div class="col" id="fFocus"></div>
+        <div class="col focus" id="fFocus"></div>
 
-        <div class="col">
+        <div class="col side">
           <div class="ch">День</div>
           <div class="day-prog"><div class="t"><span>разобрано</span><b id="fPr">0 из 12</b></div><div class="bar"><i id="fPrBar" style="width:0"></i></div></div>
           <div class="day-g" id="fDay"></div>
@@ -594,8 +597,11 @@ function renderFull(){
   var q=document.getElementById('fQa');q.textContent=qa;q.className=qaCls()==='ok'?'':'';
   document.getElementById('fBrk').textContent=fmt(breakSec)+' / '+fmt(BREAK_BUDGET);
   document.getElementById('fBrkLb').textContent=breakSec>BREAK_BUDGET?'перерыв · перерасход':'перерыв';
-  document.getElementById('fShift').textContent=!started?'Начать':(allDone()?'Закончить':'Идёт');
-  document.getElementById('fShift').className='btn '+(!started?'prim':(allDone()?'ok':'sec'));
+  var sb=document.getElementById('fShift');
+  /* «Идёт» была мёртвой кнопкой — статус смены и так виден чипом; показываем только действие */
+  if(!started){sb.style.display='';sb.textContent='Начать';sb.className='btn prim'}
+  else if(allDone()){sb.style.display='';sb.textContent='Закончить';sb.className='btn ok'}
+  else sb.style.display='none';
   var bb=document.getElementById('fBreakBtn');
   bb.textContent=onBreak?'▶ В работу':'⏸ Перерыв';bb.className='btn '+(onBreak?'ok':'sec');
 
