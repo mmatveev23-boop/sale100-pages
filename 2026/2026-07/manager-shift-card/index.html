@@ -87,6 +87,12 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .btn.sec{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .mini .exp{width:34px;height:34px;border-radius:9px;background:var(--soft);color:var(--mut);display:grid;place-items:center;font-size:12px;flex:none}
+.pend{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mut);background:var(--soft);border-radius:9px;padding:8px 12px;flex:none;white-space:nowrap}
+.pend b{color:var(--ink)}
+.pend i{font-style:normal;font-weight:800;color:var(--dark)}
+.pend.grace{background:var(--red-bg);color:var(--red-d)}
+.pend.grace b,.pend.grace i{color:var(--red-d)}
+.pend-lb{font-size:12.5px;color:var(--mut);background:var(--soft);border-radius:9px;padding:8px 12px;flex:none;white-space:nowrap}
 .btn.go{display:flex;align-items:center;gap:7px;background:var(--green)}
 .btn.go .pl{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:8px}
 
@@ -305,7 +311,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
           <div class="kran" id="fKran">⛔ кран новых закрыт</div>
           <div class="day-btn">
             <button class="btn prim" onclick="openModal()">Маршрут дня</button>
-            <button class="btn sec" onclick="toggleStrip()">Свернуть ▴</button>
+            <button class="btn sec" id="fBreak" onclick="toggleBreak()">⏸ Перерыв</button>
+            <button class="btn sec" onclick="toggleStrip()" title="Свернуть полосу">▴</button>
           </div>
         </div>
       </div>
@@ -376,7 +383,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 
 <div id="toast"><div><b id="tT"></b><span id="tS"></span></div><button class="btn ok" style="padding:7px 12px" onclick="hideToast()">Ок</button></div>
 
-<div class="tip"><b>Демо:</b> полоса в карточке сделки. «Начать работу» = отметка прихода, маршрут дня открывается сам. Дальше кнопка ведёт по задачам, клик по полосе возвращает к маршруту, «▾» разворачивает полосу в 190 px.</div>
+<div class="tip"><b>Демо:</b> «Начать работу» = отметка прихода, маршрут открывается сам. Отметил результат → конвейер подаёт следующую сделку с отсчётом; «Отмена» даёт 60 секунд и второй раз по той же задаче недоступна; срочное не отменяется. Честный простой — «Перерыв».
+<button class="btn sec" style="margin-left:8px;padding:5px 10px;font-size:11.5px" onclick="toggleCall()">📞 переключить «разговор идёт»</button></div>
 
 <script>
 /* ═══ ДАННЫЕ (в бою приходят от Sensei: тип касания, номер в цепочке, трек, срок) ═══ */
@@ -436,6 +444,42 @@ var TASKS=[
 ];
 
 var started=false,cur=0,done={},called={},secLeft=176,tmr=null,open=false;
+/* ── конвейер подачи сделок ──
+   pend = {id, left, canCancel} — обратный отсчёт до автооткрытия карточки.
+   «Отмена» отменяет НАВИГАЦИЮ, а не задачу: даёт 60 секунд дописать, второй раз ту же
+   задачу отменить нельзя. Срочное (подпись 30 мин, точка-время, горячий сигнал) не отменяется.
+   Честный простой — «Перерыв» с причиной, он считается и уходит РОПу. */
+var pend=null,cancels=0,onBreak=false,breakSec=0,onCall=false;
+function isUrgent(t){return !!t&&(/30 мин|🕐/.test(t.when||'')||!!t.urgent)}
+function queueNext(){
+  var t=focusTask();
+  if(!t){pend=null;render();return}
+  pend={id:t.id,left:3,canCancel:!isUrgent(t),grace:false};
+  render();
+}
+function cancelPend(){
+  if(!pend||!pend.canCancel)return;
+  cancels++;
+  pend={id:pend.id,left:60,canCancel:false,grace:true};
+  toast('Отложил на минуту','Сделка осталась первой в очереди. Через 60 секунд откроется без спроса — отменить ещё раз нельзя.'
+    +(cancels>=3?' Третья отмена за смену: РОП видит, кран новых закрыт.':''));
+  render();
+}
+function openDeal(id){
+  var t=byId[id];pend=null;render();
+  toast('Открыта карточка: '+(t?t.name:''),'В бою виджет переводит amoCRM в эту сделку и держит скрипт касания перед глазами.');
+}
+function toggleBreak(){
+  onBreak=!onBreak;
+  if(onBreak)toast('Перерыв','Очередь не подаёт сделки. Время перерыва считается и уходит РОПу в сводку смены.');
+  else toast('Вернулся в работу','Конвейер снова подаёт сделки.');
+  render();
+}
+function toggleCall(){
+  onCall=!onCall;
+  toast(onCall?'Разговор идёт':'Разговор завершён',onCall?'Пока PBX видит активный звонок, конвейер молчит сам — отмена для этого не нужна.':'Конвейер продолжает подачу.');
+  render();
+}
 function inPh(p){return TASKS.filter(function(t){return t.ph===p})}
 function leftIn(p){return inPh(p).filter(function(t){return !done[t.id]})}
 function phDone(p){return leftIn(p).length===0}
@@ -465,6 +509,18 @@ function renderMini(){
      всё разобрано → закрыть смену. Менеджеру не нужно никуда заходить, чтобы начать день. */
   var pr=document.getElementById('mPrim');
   if(!started){pr.innerHTML='<button class="btn prim go" onclick="toggleShift()"><span class="pl">▶</span>Начать работу</button>';return}
+  if(onBreak){pr.innerHTML='<button class="btn ok" onclick="toggleBreak()">Вернуться в работу</button>';return}
+  if(onCall){pr.innerHTML='<span class="pend-lb">разговор идёт · конвейер ждёт</span>';return}
+  /* идёт подача следующей сделки */
+  if(pend){
+    var pt=byId[pend.id];
+    pr.innerHTML='<span class="pend'+(pend.grace?' grace':'')+'">'
+      +(pend.grace?'ждёт':'открываю')+' <b>'+(pt?pt.name.split(' ')[0]:'')+'</b> <i class="num">'+fmtSec(pend.left)+'</i></span>'
+      +(pend.canCancel
+        ? '<button class="btn sec" onclick="cancelPend()">Отмена</button>'
+        : '<button class="btn prim" onclick="openDeal(\''+pend.id+'\')">Открыть</button>');
+    return;
+  }
   if(!t){
     pr.innerHTML=allDone()
       ? '<button class="btn ok" onclick="toggleShift()">Закончить работу</button>'
@@ -514,7 +570,11 @@ function renderFull(){
   document.getElementById('fDay').innerHTML=counts.map(function(c){
     return '<div class="dcell '+c.c+'"><b class="num">'+c.n+'</b><span>'+c.l+'</span></div>'}).join('');
   document.getElementById('fRest').innerHTML='просрочка <b>2</b> · новые <b>'+leftIn('new').length
-    +'</b> · вторичка <b>'+leftIn('sec').length+'</b>';
+    +'</b> · вторичка <b>'+leftIn('sec').length+'</b>'
+    +(cancels?' · отмен <b style="color:var(--red-d)">'+cancels+'</b>':'')
+    +(breakSec?' · перерыв <b>'+fmt(breakSec)+'</b>':'');
+  var bb=document.getElementById('fBreak');
+  if(bb){bb.textContent=onBreak?'▶ В работу':'⏸ Перерыв';bb.className='btn '+(onBreak?'ok':'sec')}
   var k=document.getElementById('fKran');
   k.className='kran'+(kranOpen()?' open':'');
   k.textContent=kranOpen()?'✓ кран новых открыт':'⛔ новые на паузе';
@@ -617,9 +677,17 @@ function finishTask(id){
       else if(allDone())toast('Маршрут пройден ✓','Все задачи разобраны — можно закрывать смену на зиро.');
     }
     render();
+    queueNext();   /* результат отмечен → Sensei ведёт цепочку, виджет подаёт следующую сделку */
   },200);
 }
 function tick(){
+  if(onBreak){breakSec++;renderMini()}
+  /* конвейер молчит на разговоре и в перерыве; отмена даёт 60 секунд и не повторяется */
+  else if(pend&&!onCall){
+    pend.left--;
+    if(pend.left<=0)openDeal(pend.id);
+    else renderMini();
+  }
   if(!phDone('msg')&&secLeft>-3600)secLeft--;
   var tv=document.getElementById('mTv');
   if(tv)tv.textContent=(secLeft<0?'+':'')+fmt(Math.abs(secLeft));
@@ -628,6 +696,7 @@ function tick(){
   document.getElementById('fNow').textContent=s;
 }
 function fmt(s){return pad(Math.floor(s/60))+':'+pad(s%60)}
+function fmtSec(s){return s>=60?fmt(s):s+' с'}
 function pad(n){return (n<10?'0':'')+n}
 function toast(t,s){document.getElementById('tT').textContent=t;document.getElementById('tS').textContent=s||'';
   document.getElementById('toast').classList.add('on');clearTimeout(window.__t);window.__t=setTimeout(hideToast,5000)}
