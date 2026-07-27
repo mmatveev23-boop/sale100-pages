@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Моя смена — рабочее место менеджера · SALE 100.0</title>
+<meta name="description" content="Полноэкранная «Моя смена»: маршрут дня (сообщения 09:00–09:15 → оплаты → касания → новые лиды), цепочки касаний со скриптами, правило «звонок, только потом смс», зиро в конце смены.">
+<style>
+/* ═══ «МОЯ СМЕНА» — рабочее место менеджера (запрос заказчика 24.07: «виджет управляет вниманием,
+   дисциплина = победа»; маршрут дня от Виктории: 09:00–09:15 только сообщения → оплаты
+   просрочка/сегодня/завтра → касания → новые лиды и вторичка).
+   Подход «В» из брейншторма: ДВЕ поверхности — эта полноэкранная страница (рабочее место)
+   и полоса 186px над воронкой (только «Сейчас»). Токены = tasks-v3.html (identity-preservation:
+   виджет живёт внутри amoCRM и обязан выглядеть как amoCRM, а не как наши брендовые страницы).
+   Цепочки касаний — доски Виктории: ЗЕЛЁНЫЙ трек = «на подписи» (30 мин → Д1 → Д2),
+   СИНИЙ трек = «подписан + частичка» (касания 1–6+, дальше раз в 48 ч). ═══ */
+:root{
+  --bg:#eef1f5; --card:#fff; --line:#e4e8ee; --ink:#1f2633; --mut:#6c7686; --faint:#8a93a3; --soft:#f6f8fb;
+  --green:#0f9d58; --green-d:#0b7a45; --green-bg:#eefaf3; --green-line:#bfe8cf;
+  --dark:#1b2437;
+  --red:#e5484d; --red-d:#b23237; --red-bg:#fdf1f1; --red-line:#f5c6c8;
+  --purple:#7c5cd6; --purple-bg:#f5f2fd; --purple-line:#ddd2f5;
+  --orange:#e8792b; --orange-bg:#fdf4ec; --orange-line:#f7d9bd;
+  --gold:#9a7318; --gold-bg:#fbf6e9; --gold-line:#ecdcae;
+  --blue:#2f68c4; --blue-bg:#eff4fc; --blue-line:#cfe0f7;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --z-sticky:10; --z-veil:40; --z-modal:50; --z-toast:60;
+  font-size:15px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.45}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+
+.hint{padding:8px 20px 0;font-size:12px;color:var(--mut);max-width:1400px;margin:0 auto}
+.hint b{color:var(--ink)}
+
+/* ── каркас: маршрут слева, работа справа ── */
+.shell{max-width:1400px;margin:0 auto;padding:12px 20px 60px;display:grid;grid-template-columns:288px minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:940px){.shell{grid-template-columns:1fr}}
+
+/* ── ЛЕВО: смена + маршрут ── */
+.rail{position:sticky;top:12px;display:flex;flex-direction:column;gap:12px}
+@media(max-width:940px){.rail{position:static}}
+
+.me{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.me-top{display:flex;align-items:center;gap:10px}
+.me-av{width:38px;height:38px;border-radius:11px;background:var(--dark);color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+.me-n b{display:block;font-size:14.5px;line-height:1.25}
+.me-n span{font-size:12px;color:var(--mut)}
+.me-clock{margin-top:12px;display:flex;align-items:baseline;justify-content:space-between;font-size:12.5px;color:var(--mut)}
+.me-clock b{font-size:15px;color:var(--ink)}
+.me-clock .live{font-size:20px;font-weight:800;color:var(--ink)}
+#shiftBtn{margin-top:12px;width:100%;height:44px;border-radius:11px;background:var(--dark);color:#fff;font-weight:700;font-size:14.5px;display:flex;align-items:center;justify-content:center;gap:9px;transition:transform .16s var(--ease),background .2s ease,opacity .2s ease}
+#shiftBtn .play{width:20px;height:20px;border-radius:50%;background:var(--green);display:grid;place-items:center;font-size:9px}
+#shiftBtn:active{transform:scale(.985)}
+#shiftBtn.fin{background:var(--soft);color:var(--mut);box-shadow:inset 0 0 0 1.5px var(--line)}
+#shiftBtn.fin.ready{background:var(--green);color:#fff;box-shadow:none}
+.late{margin-top:10px;display:none;align-items:flex-start;gap:8px;background:var(--red-bg);border:1px solid var(--red-line);border-radius:10px;padding:9px 11px;font-size:12px;color:var(--red-d);font-weight:600}
+.late.on{display:flex}
+.late span{font-weight:500;opacity:.9}
+.stamp{margin-top:10px;display:none;font-size:12px;color:var(--mut);gap:6px;align-items:center}
+.stamp.on{display:flex}
+.stamp b{color:var(--ink)}
+
+/* маршрут дня */
+.route{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px}
+.route h2{font-size:12px;font-weight:700;color:var(--mut);padding:8px 10px 10px;letter-spacing:.01em}
+.step{width:100%;text-align:left;display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:10px;padding:10px 10px;border-radius:11px;transition:background .18s ease}
+.step + .step{margin-top:2px}
+.step:hover:not(.lock){background:var(--soft)}
+.step .idx{width:26px;height:26px;border-radius:8px;background:var(--soft);color:var(--faint);display:grid;place-items:center;font-size:12.5px;font-weight:800;flex:none;transition:background .2s ease,color .2s ease}
+.step .tx b{display:block;font-size:13.5px;font-weight:600;line-height:1.3}
+.step .tx span{font-size:11.5px;color:var(--mut)}
+.step .st{font-size:12px;font-weight:700;color:var(--faint);white-space:nowrap}
+.step.cur{background:var(--dark)}
+.step.cur .idx{background:rgba(255,255,255,.14);color:#fff}
+.step.cur .tx b{color:#fff}
+.step.cur .tx span{color:rgba(255,255,255,.68)}
+.step.cur .st{color:#8fe0b4}
+.step.done .idx{background:var(--green-bg);color:var(--green-d)}
+.step.done .tx b{color:var(--mut);font-weight:500}
+.step.done .st{color:var(--green-d)}
+.step.lock{cursor:not-allowed;opacity:.55}
+.route .base{margin:6px 4px 2px;padding:10px;border-top:1px solid var(--line);font-size:12px;color:var(--mut);display:flex;flex-wrap:wrap;gap:4px 10px}
+.route .base b{color:var(--ink)}
+
+/* ── ПРАВО: работа ── */
+.work{display:flex;flex-direction:column;gap:12px;min-width:0}
+
+/* перехват */
+.intercept{display:none;background:var(--red-bg);border:1px solid var(--red-line);border-radius:14px;padding:14px 16px;align-items:center;gap:14px}
+.intercept.on{display:flex;animation:pop .26s var(--ease)}
+@keyframes pop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.intercept .ic{width:40px;height:40px;border-radius:12px;background:var(--red);color:#fff;display:grid;place-items:center;font-size:19px;flex:none}
+.intercept .tx{flex:1;min-width:0}
+.intercept .tx b{display:block;font-size:15px;color:var(--red-d)}
+.intercept .tx span{font-size:12.5px;color:var(--red-d);opacity:.85}
+.intercept .go{background:var(--red);color:#fff;font-weight:700;font-size:13.5px;padding:10px 18px;border-radius:10px;flex:none;transition:transform .16s var(--ease)}
+.intercept .go:active{transform:scale(.97)}
+
+/* шапка этапа */
+.phase-h{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.phase-h .t{display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.phase-h .t h1{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.phase-h .t .cnt{font-size:13px;color:var(--mut);font-weight:600}
+.timebox{margin-left:auto;display:flex;align-items:center;gap:9px;background:var(--purple-bg);border:1px solid var(--purple-line);border-radius:10px;padding:7px 12px}
+.timebox .lb{font-size:11.5px;color:var(--purple);font-weight:600;line-height:1.2}
+.timebox .tm{font-size:19px;font-weight:800;color:var(--purple);letter-spacing:-.02em}
+.timebox.over{background:var(--red-bg);border-color:var(--red-line)}
+.timebox.over .lb,.timebox.over .tm{color:var(--red-d)}
+.rule{margin-top:10px;font-size:13px;color:var(--mut);background:var(--soft);border-radius:10px;padding:9px 12px}
+.rule b{color:var(--ink)}
+.pbar{margin-top:11px;height:5px;border-radius:3px;background:#e7ebf1;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--green);border-radius:3px;transform-origin:left;transition:transform .35s var(--ease)}
+
+/* очередь */
+.queue{display:flex;flex-direction:column;gap:10px}
+.grp{font-size:12.5px;font-weight:700;color:var(--mut);padding:6px 2px 0;display:flex;align-items:center;gap:8px}
+.grp .b{font-size:11.5px;font-weight:700;border-radius:7px;padding:2px 8px}
+.grp .b.red{background:var(--red-bg);color:var(--red-d)}
+.grp .b.gold{background:var(--gold-bg);color:var(--gold)}
+.grp .b.blue{background:var(--blue-bg);color:var(--blue)}
+
+/* карточка задачи */
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 17px;transition:opacity .25s var(--ease),box-shadow .2s ease}
+.card.now{box-shadow:0 6px 22px rgba(23,32,55,.08)}
+.card.gone{opacity:.42}
+.c-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.c-top b{font-size:16px;font-weight:700}
+.chip{font-size:11.5px;font-weight:700;border-radius:8px;padding:3px 9px;white-space:nowrap}
+.chip.g{background:var(--green-bg);color:var(--green-d)}
+.chip.b{background:var(--blue-bg);color:var(--blue)}
+.chip.r{background:var(--red-bg);color:var(--red-d)}
+.chip.o{background:var(--orange-bg);color:var(--orange)}
+.chip.gold{background:var(--gold-bg);color:var(--gold)}
+.chip.n{background:var(--soft);color:var(--mut)}
+.c-when{margin-left:auto;font-size:12px;color:var(--mut);white-space:nowrap}
+.c-sub{margin-top:5px;font-size:13px;color:var(--mut)}
+
+/* цепочка касаний */
+.chain{margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dots{display:flex;gap:5px}
+.dots i{width:8px;height:8px;border-radius:50%;background:#dde2ea}
+.dots i.d{background:var(--blue)}
+.dots.g i.d{background:var(--green)}
+.dots i.cur{box-shadow:0 0 0 3px var(--blue-bg)}
+.dots.g i.cur{box-shadow:0 0 0 3px var(--green-bg)}
+.chain .lb{font-size:12.5px;font-weight:700}
+.chain .ago{font-size:12px;color:var(--mut)}
+
+.act{margin-top:11px;font-size:15px;font-weight:700;line-height:1.4}
+.say{margin-top:9px;background:var(--soft);border-radius:11px;padding:11px 13px;font-size:13.5px;line-height:1.5;color:#39424f}
+.say .qh{display:block;font-size:11.5px;font-weight:700;color:var(--mut);margin-bottom:5px}
+.say p + p{margin-top:7px}
+
+.btns{margin-top:13px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border-radius:10px;font-weight:700;font-size:13.5px;padding:10px 17px;transition:transform .16s var(--ease),background .18s ease,opacity .18s ease}
+.btn:active{transform:scale(.97)}
+.btn.prim{background:var(--dark);color:#fff}
+.btn.sec{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.ok{background:var(--green);color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn.lnk{background:none;color:var(--mut);font-weight:600;font-size:12.5px;text-decoration:underline;text-underline-offset:3px;padding:10px 4px}
+.gate{margin-top:9px;font-size:12px;color:var(--mut);display:flex;align-items:center;gap:6px}
+.gate b{color:var(--ink)}
+.gate.done{color:var(--green-d)}
+.gate.done b{color:var(--green-d)}
+
+/* пустой этап */
+.empty{background:var(--card);border:1px dashed var(--line);border-radius:14px;padding:26px 20px;text-align:center}
+.empty .e{font-size:26px}
+.empty b{display:block;margin-top:8px;font-size:15px}
+.empty span{display:block;margin-top:4px;font-size:13px;color:var(--mut)}
+.empty .btn{margin-top:14px}
+
+/* заперто краном */
+.locked{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 20px;text-align:center}
+.locked .e{font-size:24px}
+.locked b{display:block;margin-top:8px;font-size:15px}
+.locked span{display:block;margin-top:5px;font-size:13px;color:var(--mut);max-width:52ch;margin-inline:auto}
+
+/* зиро */
+#veil{position:fixed;inset:0;background:rgba(18,24,38,.5);opacity:0;pointer-events:none;transition:opacity .22s ease;z-index:var(--z-veil)}
+#veil.on{opacity:1;pointer-events:auto}
+#zero{position:fixed;left:50%;top:50%;transform:translate(-50%,-46%) scale(.98);opacity:0;pointer-events:none;width:min(94vw,470px);background:var(--card);border-radius:18px;padding:24px;z-index:var(--z-modal);transition:opacity .24s var(--ease),transform .24s var(--ease);box-shadow:0 26px 70px rgba(15,25,45,.28)}
+#zero.on{opacity:1;transform:translate(-50%,-50%);pointer-events:auto}
+#zero h2{font-size:20px;font-weight:800}
+#zero .zs{margin-top:5px;font-size:13px;color:var(--mut)}
+.zrow{display:flex;justify-content:space-between;gap:14px;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px;margin-top:10px}
+.zrow:first-of-type{margin-top:14px}
+.zrow span{color:var(--mut)}
+.zrow b{text-align:right}
+.zrow b.bad{color:var(--red-d)}
+.zrow b.hl{color:var(--green-d)}
+#zero .btn{width:100%;margin-top:16px;justify-content:center;display:flex}
+#zero .zn{margin-top:10px;font-size:11.5px;color:var(--faint);text-align:center}
+
+/* тост */
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);opacity:0;pointer-events:none;background:var(--dark);color:#fff;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:14px;z-index:var(--z-toast);transition:opacity .2s ease,transform .2s var(--ease);max-width:min(92vw,460px)}
+#toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast b{font-size:13.5px}
+#toast span{display:block;font-size:12px;opacity:.75;margin-top:2px}
+
+.demo{max-width:1400px;margin:0 auto;padding:0 20px 34px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--faint)}
+.demo .btn{background:var(--card);box-shadow:inset 0 0 0 1px var(--line);color:var(--mut);font-size:12px;padding:7px 12px}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+</style>
+</head>
+<body>
+
+<div class="hint"><b>amoCRM · раздел «⚡ Моя смена»</b> — рабочее место менеджера. Маршрут дня ведёт Sensei: 09:00–09:15 только сообщения → оплаты → касания → новые лиды. Демо кликается: «Начать работу» (сейчас 09:12 — покажет опоздание).</div>
+
+<div class="shell">
+
+  <!-- ЛЕВО -->
+  <aside class="rail">
+    <div class="me">
+      <div class="me-top">
+        <div class="me-av">БВ</div>
+        <div class="me-n"><b>Барыкина Виктория</b><span>клоузер · КЛОУЗЕРЫ</span></div>
+      </div>
+      <div class="me-clock">
+        <div>смена с <b>9:00</b></div>
+        <div class="live num" id="now">09:12</div>
+      </div>
+      <button id="shiftBtn" onclick="toggleShift()"><span class="play">▶</span><span id="shiftLbl">Начать работу</span></button>
+      <div class="late" id="late">⚠<div>начал с опозданием<span><br>09:12 · +12 мин · −1 000 ₽</span></div></div>
+      <div class="stamp" id="stamp">Начал <b id="stampT">09:12</b></div>
+    </div>
+
+    <nav class="route">
+      <h2>Маршрут дня</h2>
+      <div id="steps"></div>
+      <div class="base">
+        <span>База <b>47</b></span><span>активных <b>12/20</b></span><span>ведёт <b>⚙ Sensei</b></span>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ПРАВО -->
+  <main class="work">
+    <div class="intercept" id="intercept">
+      <div class="ic">🔥</div>
+      <div class="tx"><b id="icT">Козлова Ирина открыла страницу договора</b><span id="icS">Клиент на странице прямо сейчас — звони, норматив минута. Маршрут подождёт.</span></div>
+      <button class="go" onclick="takeIntercept()">Звоню</button>
+    </div>
+
+    <div class="phase-h" id="phaseH"></div>
+    <div class="queue" id="queue"></div>
+  </main>
+</div>
+
+<div class="demo">
+  <span>Демо:</span>
+  <button class="btn" onclick="fireIntercept()">🔥 прилетел горячий сигнал</button>
+  <button class="btn" onclick="skipPhase()">промотать этап</button>
+  <span>· данные вымышленные · канон — свод v2.14</span>
+</div>
+
+<div id="veil" onclick="closeZero()"></div>
+<div id="zero">
+  <h2>Смена закрыта · зиро ✓</h2>
+  <div class="zs">Все задачи маршрута разобраны — хвостов на завтра нет</div>
+  <div class="zrow"><span>Начало смены</span><b class="bad">09:12 · опоздание 12 мин · −1 000 ₽</b></div>
+  <div class="zrow"><span>Конец смены</span><b id="zEnd">18:04</b></div>
+  <div class="zrow"><span>Задач сделано</span><b id="zTasks">12 из 12</b></div>
+  <div class="zrow"><span>Касаний по цепочкам</span><b>5 · все со звонком</b></div>
+  <div class="zrow"><span>Деньги за день</span><b class="hl">13 500 ₽ · Иванова</b></div>
+  <div class="zrow"><span>Завтра первым делом</span><b>добор Кузнецова после 10:00</b></div>
+  <button class="btn ok" onclick="closeZero()">До завтра 👋</button>
+  <div class="zn">Отчёт ушёл РОПу: маршрут, деньги, опоздание в график смен</div>
+</div>
+
+<div id="toast"><div><b id="toastT"></b><span id="toastS"></span></div><button class="btn ok" style="padding:8px 14px" onclick="hideToast()">Ок</button></div>
+
+<script>
+/* ═══ ДАННЫЕ ДЕМО ═══ */
+var PHASES=[
+ {id:'msg',n:'Сообщения',ico:'💬',meta:'09:00–09:15',
+  rule:'Пока не ответишь всем — к звонкам не переходим. <b>Это первое, что делает менеджер на смене.</b>',
+  timebox:'09:15'},
+ {id:'pay',n:'Оплаты',ico:'₽',meta:'прозвон',
+  rule:'Порядок жёсткий: <b>просрочка без новой даты → сегодня → завтра</b>. Просрочка держит кран новых закрытым, пока не возьмёшь деньги или дату числом.'},
+ {id:'touch',n:'Касания',ico:'📞',meta:'цепочки дожима',
+  rule:'<b>Звонок, только потом смс.</b> Кнопка сообщения открывается после отметки звонка — так цепочка не превращается в переписку.'},
+ {id:'new',n:'Новые лиды',ico:'🆕',meta:'кран',
+  rule:'Новые падают только после разбора сообщений и оплат. <b>Набор ≤5 минут</b> с момента выдачи.'},
+ {id:'sec',n:'Вторичка',ico:'♻️',meta:'в перерывах',
+  rule:'Тёплые из пула и возвраты — в перерывах или по договорённости с РОПом. Сначала открой историю, говори про ЕГО ситуацию.'}
+];
+
+var TASKS=[
+ /* ── 1. СООБЩЕНИЯ ── */
+ {ph:'msg',id:'m1',name:'Новикова Ольга',chip:{t:'на подписи',c:'g'},when:'08:41',
+  sub:'Написала в чат ночью, ждёт ответа',
+  quote:'«Не приходит СМС для подписи, что делать?»',
+  act:'Ответь и доведи до подписи — она уже на странице договора',
+  btn:'Ответил'},
+ {ph:'msg',id:'m2',name:'Гусев Артём',chip:{t:'новый лид',c:'n'},when:'09:03',
+  sub:'Ответил на приветственное сообщение бота',
+  quote:'«Здравствуйте, а сколько это стоит?»',
+  act:'Ответь коротко и переводи в звонок — цену считаем от его долга',
+  btn:'Ответил'},
+
+ /* ── 2. ОПЛАТЫ ── */
+ {ph:'pay',id:'p1',grp:'Просрочка · без новой даты',grpc:'red',name:'Смирнов Олег',chip:{t:'частичка · добор 12 510 ₽',c:'r'},when:'просрочка 2 дня',
+  sub:'Обещал 22-го, денег нет, новой даты не назвал',
+  act:'Звони: бери деньги или дату числом. Без этого кран новых закрыт',
+  btn:'Позвонил'},
+ {ph:'pay',id:'p2',grp:'Просрочка · без новой даты',grpc:'red',name:'Алексеев Роман',chip:{t:'подписан · 13 500 ₽',c:'r'},when:'просрочка 1 день',
+  sub:'Подписал, оплату двигает второй раз',
+  act:'Звони: второй перенос — последний, дальше в тёплый пул',
+  btn:'Позвонил'},
+ {ph:'pay',id:'p3',grp:'Оплата сегодня',grpc:'gold',name:'Иванова Мария',chip:{t:'13 500 ₽ сегодня',c:'gold'},when:'сегодня',
+  sub:'Назвала сегодня, ссылка отправлена',
+  act:'Звони и доводи до СБП на линии — 15 секунд',
+  btn:'Позвонил'},
+ {ph:'pay',id:'p4',grp:'Оплата завтра',grpc:'blue',name:'Кузнецов Павел',chip:{t:'добор 12 510 ₽',c:'b'},when:'завтра после 10:00',
+  sub:'Зарплата завтра, договорённость живая',
+  act:'Короткое касание: подтверди завтрашний платёж, чтобы не сорвался',
+  btn:'Подтвердил'},
+
+ /* ── 3. КАСАНИЯ ── */
+ {ph:'touch',id:'t1',grp:'🟢 На подписи — дожим подписи',grpc:'',name:'Козлова Ирина',chip:{t:'договор открыт, не подписан',c:'g'},when:'⏱ 30 мин',
+  chain:{track:'g',i:1,n:3,lbl:'Задача через 30 минут',ago:'открыла страницу 28 мин назад'},
+  sub:'Зашла на договор, до подписи не дошла',
+  act:'Помоги подписать прямо сейчас',
+  say:['«Иван, я вижу, что договор не удалось подписать. Возникли технические сложности или остались сомнения по поводу данного решения?','Давайте я помогу вам сделать это прямо сейчас, договорились?»'],
+  call:1,btn:'Дозвонился'},
+ {ph:'touch',id:'t2',grp:'🟢 На подписи — дожим подписи',grpc:'',name:'Волков Андрей',chip:{t:'Д1 · получи КИ',c:'g'},when:'сегодня',
+  chain:{track:'g',i:2,n:3,lbl:'Д1 — второй день',ago:'вчера не подписал'},
+  sub:'Вчера сорвалась подпись, договорились на сегодня',
+  act:'Получи КИ и составь юрзаключение. Нет КИ — презентация со слов',
+  say:['«Иван, добрый день! Я вам звоню, чтобы презентовать юридическое заключение: вот такая выгода, вот так всё будет происходить, вот столько сэкономите. Нравится? Подписываем договор?»','Если нет: «Давайте так, чтобы не выглядело, что я уговариваю вас решить ваш же вопрос — что вам нужно, чтобы принять решение?»'],
+  call:1,btn:'Дозвонился'},
+ {ph:'touch',id:'t3',grp:'🔵 Подписан + частичка — дожим оплаты',grpc:'',name:'Петров Дмитрий',chip:{t:'частичка 990 ₽',c:'b'},when:'касание 48 ч назад',
+  chain:{track:'b',i:3,n:6,lbl:'Касание 3',ago:'последнее касание 2 дня назад'},
+  sub:'Юрзаключение разобрали, документы собирает',
+  act:'Предложи скидку и закрой на платёж сегодня',
+  say:['«Иван, добрый! У меня для вас отличная новость! Руководство выделило 3 места на старт процедуры со скидкой. Я знаю ваше финансовое положение, поэтому хочу предложить именно вам!','Если начнём процедуру сегодня, вы сэкономите 10 000 рублей. Сможем найти сумму, чтобы начать со скидкой?»'],
+  call:1,btn:'Дозвонился'},
+ {ph:'touch',id:'t4',grp:'🔵 Подписан + частичка — дожим оплаты',grpc:'',name:'Ким Сергей',chip:{t:'частичка 1 500 ₽',c:'b'},when:'касание 48 ч назад',
+  chain:{track:'b',i:5,n:6,lbl:'Касание 5',ago:'кейс отправлен позавчера'},
+  sub:'Кейс посмотрел, по оплате тянет',
+  act:'Предложи заказать SIM уже сейчас — спецпредложение лично ему',
+  say:['«Иван, расскажите, как ваши дела? Мы уже давно общаемся, хочется поскорее вам помочь, поэтому договорился с руководством на сим-карту с бесплатной связью вам уже сегодня!','Давайте направлю ссылку и инструкцию, как сделать заказ — уже сегодня огородим вас от неприятных звонков, согласны? Подскажите, что у нас по оплате?»'],
+  call:1,btn:'Дозвонился'},
+ {ph:'touch',id:'t5',grp:'🔵 Подписан + частичка — дожим оплаты',grpc:'',name:'Титова Ольга',chip:{t:'подписан, 0 ₽',c:'b'},when:'касание 48 ч назад',
+  chain:{track:'b',i:2,n:6,lbl:'Касание 2',ago:'вчера прислала паспорт'},
+  sub:'Прислала паспорт и СНИЛС, кредитных договоров нет',
+  act:'Сбор документов + разбор дорожной карты',
+  say:['«Иван, вижу, прислали паспорт и снилс, что насчёт кредитных договоров? Давайте помогу и подскажу, где их искать, направлю инструкцию.','Также вы посмотрели дорожную карту? Отлично, нам с вами по сути осталось оплатить, и я готов двигать вас дальше. Позвоню вам завтра, договорились?»'],
+  call:1,btn:'Дозвонился'},
+
+ /* ── 4. НОВЫЕ ── */
+ {ph:'new',id:'n1',name:'Соколова Анна',chip:{t:'заявка 09:41',c:'o'},when:'набор ≤5 мин',
+  sub:'Анкета с сайта: долг ~640 000, 4 кредита',
+  act:'Набирай сейчас — консультация на этом же звонке',
+  btn:'Дозвонился'},
+ {ph:'new',id:'n2',name:'Егоров Илья',chip:{t:'заявка 09:52',c:'o'},when:'набор ≤5 мин',
+  sub:'Анкета с сайта: долг ~310 000, МФО',
+  act:'Набирай сейчас — консультация на этом же звонке',
+  btn:'Дозвонился'},
+
+ /* ── 5. ВТОРИЧКА ── */
+ {ph:'sec',id:'s1',name:'Орлов Никита',chip:{t:'тёплый пул',c:'n'},when:'в перерыв',
+  sub:'Консультация была 3 недели назад, вернулся из пула',
+  act:'Открой историю и звони про ЕГО ситуацию, не с нуля',
+  btn:'Позвонил'}
+];
+
+/* ═══ СОСТОЯНИЕ ═══ */
+var started=false,finished=false,cur=0,done={},called={},secLeft=180,tmr=null,interceptOn=false,parked=null;
+var byId={};TASKS.forEach(function(t){byId[t.id]=t});
+
+function inPhase(p){return TASKS.filter(function(t){return t.ph===p})}
+function leftIn(p){return inPhase(p).filter(function(t){return !done[t.id]})}
+function phaseDone(p){return leftIn(p).length===0}
+function allDone(){return TASKS.every(function(t){return done[t.id]})}
+/* кран новых: открывается только когда сообщения и оплаты разобраны */
+function kranOpen(){return phaseDone('msg')&&phaseDone('pay')}
+
+/* ═══ РЕНДЕР МАРШРУТА ═══ */
+function renderSteps(){
+  var h='';
+  PHASES.forEach(function(p,i){
+    var lft=leftIn(p.id).length,dn=phaseDone(p.id),isCur=(i===cur&&started&&!finished);
+    var lock=(p.id==='new'||p.id==='sec')&&!kranOpen();
+    var st=dn?'✓':(lock?'🔒':lft);
+    var cls='step'+(isCur?' cur':'')+(dn?' done':'')+(lock&&!dn?' lock':'');
+    h+='<button class="'+cls+'" onclick="goPhase('+i+')">'
+      +'<span class="idx">'+(dn?'✓':(i+1))+'</span>'
+      +'<span class="tx"><b>'+p.ico+' '+p.n+'</b><span>'+(lock?'откроется после оплат':p.meta)+'</span></span>'
+      +'<span class="st">'+st+'</span></button>';
+  });
+  document.getElementById('steps').innerHTML=h;
+}
+
+/* ═══ РЕНДЕР ЭТАПА ═══ */
+function renderPhase(){
+  var p=PHASES[cur],lft=leftIn(p.id),total=inPhase(p.id).length,dn=total-lft.length;
+  var lock=(p.id==='new'||p.id==='sec')&&!kranOpen();
+
+  /* шапка */
+  var hh='<div class="t"><h1>'+p.ico+' '+p.n+'</h1><span class="cnt">'+dn+' из '+total+'</span>';
+  if(p.timebox&&started&&!phaseDone(p.id)){
+    hh+='<div class="timebox'+(secLeft<=0?' over':'')+'" id="tbox"><div class="lb">окно до '+p.timebox+'<br>только сообщения</div><div class="tm num" id="tval">'+fmt(Math.max(0,secLeft))+'</div></div>';
+  }
+  hh+='</div><div class="rule">'+p.rule+'</div>';
+  hh+='<div class="pbar"><i style="transform:scaleX('+(total?dn/total:1)+')"></i></div>';
+  document.getElementById('phaseH').innerHTML=hh;
+
+  /* очередь */
+  var q=document.getElementById('queue');
+  if(!started){
+    q.innerHTML='<div class="empty"><div class="e">☕</div><b>Смена не начата</b><span>Нажми «Начать работу» — Sensei откроет маршрут дня</span></div>';
+    return;
+  }
+  if(lock){
+    q.innerHTML='<div class="locked"><div class="e">🔒</div><b>Кран новых закрыт</b><span>Новые лиды и вторичка откроются, когда разберёшь сообщения и оплаты. Так лид не падает в момент, когда ты не можешь набрать его за 5 минут.</span></div>';
+    return;
+  }
+  if(!lft.length){
+    var nx=cur+1<PHASES.length?PHASES[cur+1]:null;
+    q.innerHTML='<div class="empty"><div class="e">✓</div><b>Этап закрыт</b><span>'+(nx?'Дальше по маршруту: '+nx.ico+' '+nx.n:'Маршрут пройден — можно закрывать смену')+'</span>'
+      +(nx?'<button class="btn prim" onclick="goPhase('+(cur+1)+')">Перейти →</button>':'')+'</div>';
+    return;
+  }
+
+  var h='',lastGrp=null;
+  lft.forEach(function(t,i){
+    if(t.grp&&t.grp!==lastGrp){h+='<div class="grp">'+t.grp+'</div>';lastGrp=t.grp}
+    h+=card(t,i===0);
+  });
+  q.innerHTML=h;
+}
+
+function card(t,isNow){
+  var h='<div class="card'+(isNow?' now':'')+'" id="c_'+t.id+'">';
+  h+='<div class="c-top"><b>'+t.name+'</b><span class="chip '+t.chip.c+'">'+t.chip.t+'</span><span class="c-when">'+t.when+'</span></div>';
+  h+='<div class="c-sub">'+t.sub+'</div>';
+  if(t.chain){
+    var d='';for(var k=1;k<=t.chain.n;k++)d+='<i class="'+(k<t.chain.i?'d':(k===t.chain.i?'d cur':''))+'"></i>';
+    h+='<div class="chain"><span class="dots '+(t.chain.track==='g'?'g':'')+'">'+d+'</span>'
+      +'<span class="lb">'+t.chain.lbl+'</span><span class="ago">· '+t.chain.ago+'</span></div>';
+  }
+  h+='<div class="act">'+t.act+'</div>';
+  if(t.quote)h+='<div class="say"><span class="qh">Клиент написал</span>'+t.quote+'</div>';
+  if(t.say){
+    h+='<div class="say"><span class="qh">Что говоришь</span>';
+    t.say.forEach(function(s){h+='<p>'+s+'</p>'});
+    h+='</div>';
+  }
+  h+='<div class="btns">';
+  if(t.call){
+    h+='<button class="btn prim" onclick="markCall(\''+t.id+'\')" '+(called[t.id]?'disabled':'')+'>📞 '+(called[t.id]?'Дозвонился ✓':t.btn)+'</button>';
+    h+='<button class="btn sec" onclick="finishTask(\''+t.id+'\')" '+(called[t.id]?'':'disabled')+'>✉ Отправить смс и закрыть</button>';
+  }else{
+    h+='<button class="btn prim" onclick="finishTask(\''+t.id+'\')">'+t.btn+'</button>';
+  }
+  h+='<button class="btn lnk" onclick="openLead(\''+t.id+'\')">Открыть сделку ↗</button>';
+  h+='</div>';
+  if(t.call){
+    h+='<div class="gate'+(called[t.id]?' done':'')+'">'+(called[t.id]
+      ? '✓ <b>звонок отмечен</b> — теперь можно отправить сообщение'
+      : '🔒 сначала <b>звонок</b>, смс открывается после него')+'</div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+/* ═══ ДЕЙСТВИЯ ═══ */
+function toggleShift(){
+  if(!started){
+    started=true;
+    document.getElementById('shiftLbl').textContent='Закончить работу';
+    document.getElementById('shiftBtn').classList.add('fin');
+    document.getElementById('shiftBtn').querySelector('.play').style.display='none';
+    document.getElementById('late').classList.add('on');
+    document.getElementById('stamp').classList.add('on');
+    tmr=setInterval(tick,1000);
+    toast('Смена начата · 09:12','Опоздание 12 минут ушло в график смен РОПу. Первые 15 минут — только сообщения.');
+    render();
+    return;
+  }
+  if(!allDone()){
+    toast('Ещё не зиро','Останутся хвосты: '+TASKS.filter(function(t){return !done[t.id]}).length+' задач. Разбери маршрут — тогда смена закроется.');
+    return;
+  }
+  finished=true;clearInterval(tmr);
+  document.getElementById('veil').classList.add('on');
+  document.getElementById('zero').classList.add('on');
+}
+function goPhase(i){
+  var p=PHASES[i];
+  if((p.id==='new'||p.id==='sec')&&!kranOpen()){
+    toast('Кран закрыт','Сначала сообщения и оплаты. Новые лиды не падают, пока ты не готов набрать их за 5 минут.');
+    return;
+  }
+  cur=i;render();
+}
+function markCall(id){
+  called[id]=1;render();
+  toast('Звонок отмечен','Теперь открылась отправка сообщения. Канон: звонок, только потом смс.');
+}
+function finishTask(id){
+  var el=document.getElementById('c_'+id);
+  if(el)el.classList.add('gone');
+  setTimeout(function(){
+    done[id]=1;
+    var p=PHASES[cur];
+    if(phaseDone(p.id)){
+      var nx=cur+1;
+      while(nx<PHASES.length){
+        var np=PHASES[nx];
+        var lock=(np.id==='new'||np.id==='sec')&&!kranOpen();
+        if(!phaseDone(np.id)&&!lock)break;
+        nx++;
+      }
+      if(nx<PHASES.length){cur=nx;toast('Этап закрыт ✓','Дальше по маршруту: '+PHASES[nx].ico+' '+PHASES[nx].n)}
+      else if(allDone()){
+        document.getElementById('shiftBtn').classList.add('ready');
+        toast('Маршрут пройден ✓','Все задачи разобраны — можно закрывать смену на зиро.');
+      }
+    }
+    render();
+  },220);
+}
+function openLead(id){toast('Сделка открыта','В бою здесь откроется карточка amoCRM с Пультом сделки (обнулятор) внутри.')}
+
+/* перехват */
+function fireIntercept(){
+  if(!started){toast('Сначала начни смену','Маршрут и перехваты работают со старта смены.');return}
+  interceptOn=true;document.getElementById('intercept').classList.add('on');
+}
+function takeIntercept(){
+  document.getElementById('intercept').classList.remove('on');
+  interceptOn=false;
+  toast('Вернулись в маршрут','Горячий сигнал отработан — виджет вернул тебя туда, где ты прервался: '+PHASES[cur].ico+' '+PHASES[cur].n+'.');
+}
+function skipPhase(){
+  if(!started){toast('Сначала начни смену','');return}
+  leftIn(PHASES[cur].id).forEach(function(t){done[t.id]=1;called[t.id]=1});
+  var nx=cur;
+  while(nx<PHASES.length){
+    var np=PHASES[nx],lock=(np.id==='new'||np.id==='sec')&&!kranOpen();
+    if(!phaseDone(np.id)&&!lock)break;
+    nx++;
+  }
+  if(nx<PHASES.length)cur=nx;
+  if(allDone())document.getElementById('shiftBtn').classList.add('ready');
+  render();
+}
+
+/* таймер окна сообщений */
+function tick(){
+  if(!phaseDone('msg')&&secLeft>-3600)secLeft--;
+  var tv=document.getElementById('tval');
+  if(tv){
+    tv.textContent=(secLeft<0?'+':'')+fmt(Math.abs(secLeft));
+    var b=document.getElementById('tbox');
+    if(b){if(secLeft<=0)b.classList.add('over');else b.classList.remove('over')}
+  }
+  var n=new Date(2026,6,24,9,12,0);n.setSeconds(n.getSeconds()+(180-secLeft));
+  document.getElementById('now').textContent=pad(n.getHours())+':'+pad(n.getMinutes());
+}
+function fmt(s){return pad(Math.floor(s/60))+':'+pad(s%60)}
+function pad(n){return (n<10?'0':'')+n}
+
+function toast(t,s){
+  document.getElementById('toastT').textContent=t;
+  document.getElementById('toastS').textContent=s||'';
+  document.getElementById('toast').classList.add('on');
+  clearTimeout(window.__tt);window.__tt=setTimeout(hideToast,5200);
+}
+function hideToast(){document.getElementById('toast').classList.remove('on')}
+function closeZero(){document.getElementById('veil').classList.remove('on');document.getElementById('zero').classList.remove('on')}
+
+function render(){renderSteps();renderPhase()}
+render();
+</script>
+</body>
+</html>
