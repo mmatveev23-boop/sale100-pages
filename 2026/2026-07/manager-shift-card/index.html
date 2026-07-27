@@ -450,6 +450,7 @@ var started=false,cur=0,done={},called={},secLeft=176,tmr=null,open=false;
    задачу отменить нельзя. Срочное (подпись 30 мин, точка-время, горячий сигнал) не отменяется.
    Честный простой — «Перерыв» с причиной, он считается и уходит РОПу. */
 var pend=null,cancels=0,onBreak=false,breakSec=0,onCall=false;
+var byId={};TASKS.forEach(function(t){byId[t.id]=t});
 function isUrgent(t){return !!t&&(/30 мин|🕐/.test(t.when||'')||!!t.urgent)}
 function queueNext(){
   var t=focusTask();
