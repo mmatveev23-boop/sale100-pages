@@ -131,6 +131,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .dcell.red{background:var(--red-bg)}.dcell.red b{color:var(--red-d)}
 .dcell.gold{background:var(--gold-bg)}.dcell.gold b{color:var(--gold)}
 .dcell.green{background:var(--green-bg)}.dcell.green b{color:var(--green-d)}
+.day-rest{margin-top:6px;font-size:10.5px;color:var(--mut);flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day-rest b{color:var(--ink)}
 .kran{margin-top:6px;font-size:10.5px;border-radius:7px;padding:5px 8px;background:var(--red-bg);color:var(--red-d);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
 .kran.open{background:var(--green-bg);color:var(--green-d)}
 .day-btn{margin-top:auto;padding-top:6px;display:flex;gap:6px}
@@ -293,6 +295,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
         <div class="col">
           <div class="ch">День</div>
           <div class="day-g" id="fDay"></div>
+          <div class="day-rest" id="fRest"></div>
           <div class="kran" id="fKran">⛔ кран новых закрыт</div>
           <div class="day-btn">
             <button class="btn prim" onclick="openModal()">Открыть смену</button>
@@ -486,13 +489,12 @@ function renderFull(){
   var counts=[
     {n:leftIn('msg').length,l:'сообщ.',c:leftIn('msg').length?'':'green'},
     {n:leftIn('pay').length,l:'оплаты',c:'gold'},
-    {n:leftIn('touch').length,l:'касания',c:''},
-    {n:2,l:'просроч.',c:'red'},
-    {n:leftIn('new').length,l:'новые',c:''},
-    {n:leftIn('sec').length,l:'вторичка',c:''}
+    {n:leftIn('touch').length,l:'касания',c:''}
   ];
   document.getElementById('fDay').innerHTML=counts.map(function(c){
     return '<div class="dcell '+c.c+'"><b class="num">'+c.n+'</b><span>'+c.l+'</span></div>'}).join('');
+  document.getElementById('fRest').innerHTML='просрочка <b>2</b> · новые <b>'+leftIn('new').length
+    +'</b> · вторичка <b>'+leftIn('sec').length+'</b>';
   var k=document.getElementById('fKran');
   k.className='kran'+(kranOpen()?' open':'');
   k.textContent=kranOpen()?'✓ кран новых открыт':'⛔ новые на паузе';
