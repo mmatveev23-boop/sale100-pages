@@ -72,6 +72,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .mini .now:hover{background:var(--soft)}
 .mini .nw{flex:none;font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--faint);text-transform:uppercase}
 .mini .nm{font-size:14px;font-weight:700;white-space:nowrap}
+.mini .actnow{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
 .mini .act{font-size:12.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
 /* «почему эта задача первая» — то, что делает очередь убедительной (паттерн Salesloft Rhythm) */
 .mini .why{flex:none;font-size:11.5px;font-weight:700;color:var(--gold);background:var(--gold-bg);border-radius:7px;padding:3px 8px;white-space:nowrap}
@@ -379,9 +380,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
     <div class="card-wrap">
       <div class="card-l">
         <div class="pane">
-          <h3>Рассказова Ольга Васильевна</h3>
-          <div class="id">#25891966 <b>ФССП</b></div>
-          <div class="stg">МПП 2 уровень<b>Квал лиды <span style="color:var(--faint);font-weight:400">(Сегодня)</span></b><div class="bar"><i></i></div></div>
+          <h3 id="cName">Рассказова Ольга Васильевна</h3>
+          <div class="id">#25891966 <b id="cChip">ФССП</b></div>
+          <div class="stg">МПП 2 уровень<b><span id="cStage">Квал лиды</span> <span style="color:var(--faint);font-weight:400">(Сегодня)</span></b><div class="bar"><i></i></div></div>
           <div class="tabs"><b>Основное</b><span>МПП</span><span>Анкета</span><span>Сбор доков</span><span>Суд</span></div>
           <div class="fields">
             <div class="fld"><span>Отв-ный</span><b>Никитина Анна</b></div>
@@ -502,7 +503,7 @@ var TASKS=[
 
 /* ═══ СОСТОЯНИЕ ═══ */
 var started=false,cur=0,done={},called={},secLeft=176,tmr=null,open=false;
-var pend=null,cancels=0,onBreak=false,breakSec=0,onCall=false,working=null;
+var pend=null,cancels=0,onBreak=false,breakSec=0,onCall=false,working=null,openedId=null;
 var lives=5,qa=87,crosses=0;
 var BREAK_BUDGET=90*60;                    /* бюджет перерывов на смену */
 var taskSec=0,taskId=null,ropAlert=false;  /* живой таймер текущей задачи */
@@ -530,15 +531,22 @@ function renderMini(){
   document.getElementById('mDot').className='dot '+(started?statusKey():'');
   document.getElementById('mSh').textContent=started?statusLabel()+' · с 09:12':'не начата';
 
-  var n=document.getElementById('mNow');
+  var n=document.getElementById('mNow'),here=(t&&openedId===t.id);
   if(!started)n.innerHTML='<span class="nw">Сейчас</span><span class="act">Нажми «Начать работу» — Sensei откроет маршрут дня</span>';
   else if(!t)n.innerHTML='<span class="nw">Сейчас</span><span class="act">Маршрут пройден — можно закрывать смену</span>';
-  else{
-    n.innerHTML='<span class="nw">Сейчас</span><span class="nm">'+t.name+'</span>'
+  else if(here){
+    /* сделка уже открыта на экране — имя не повторяем, полоса говорит ЧТО ДЕЛАТЬ */
+    n.innerHTML='<span class="nw">Что делать</span>'
+      +(t.why?'<span class="why" title="Почему эта задача первая: '+t.why+'">⚡ '+t.why.split(' · ')[0]+'</span>':'')
+      +'<span class="actnow">'+t.act+'</span>'
+      +(t.chain?'<span class="chip n">'+t.chain.lbl+'</span>':'')
+      +'<span class="tmr '+tmrCls()+'">⏱ '+fmt(taskSec)+(t.bud?' <span style="font-weight:500;opacity:.7">/ '+t.bud+' мин</span>':'')+'</span>';
+  }else{
+    /* менеджер в другой сделке или подача ещё не сработала — тогда имя нужно */
+    n.innerHTML='<span class="nw">Следующая</span><span class="nm">'+t.name+'</span>'
       +'<span class="chip '+t.chip.c+'">'+t.chip.t+'</span>'
       +(t.why?'<span class="why" title="Почему эта задача первая: '+t.why+'">⚡ '+t.why.split(' · ')[0]+'</span>':'')
-      +'<span class="act">'+t.act+'</span>'
-      +'<span class="tmr '+tmrCls()+'">⏱ '+fmt(taskSec)+(t.bud?' <span style="font-weight:500;opacity:.7">/ '+t.bud+' мин</span>':'')+'</span>';
+      +'<span class="act">'+t.act+'</span>';
   }
 
   /* напоминание о звонке / жёсткий сигнал зависания / SLA нового лида */
@@ -566,12 +574,13 @@ function renderMini(){
   }
   if(!t){pr.innerHTML=allDone()?'<button class="btn ok" onclick="toggleShift()">Закончить работу</button>'
     :'<button class="btn prim" onclick="nextPhase()">Дальше по маршруту →</button>';return}
-  if(working===t.id){
-    pr.innerHTML='<span class="pend-lb">в работе · отметь результат в Sensei</span>'
-      +'<button class="btn sec" onclick="resultMarked(\''+t.id+'\')" title="Демо: имитирует выбор результата в Sensei">✓ результат отмечен</button>';
+  if(openedId===t.id){
+    /* нормальный ход: карточка открыта, кнопок не надо — результат менеджер выбирает в Sensei */
+    pr.innerHTML='<span class="pend-lb">результат отмечаешь в Sensei →</span>'
+      +'<button class="btn sec" onclick="resultMarked(\''+t.id+'\')" title="Демо: имитирует выбор результата в Sensei">✓ демо: результат отмечен</button>';
     return;
   }
-  pr.innerHTML='<button class="btn prim" onclick="openAndDo(\''+t.id+'\')">Открыть и выполнить →</button>';
+  pr.innerHTML='<button class="btn prim" onclick="openDeal(\''+t.id+'\')">Вернуться к задаче →</button>';
 }
 function livesHtml(){var h='';for(var i=1;i<=5;i++)h+='<span class="'+(i<=lives?'':'off')+'">❤</span>';return h}
 function qaCls(){return qa>=90?'ok':qa>=65?'mid':'low'}
@@ -597,11 +606,10 @@ function renderFull(){
     var ch='';
     if(t.chain){var d='';for(var k=1;k<=t.chain.n;k++)d+='<i class="'+(k<=t.chain.i?'d':'')+'"></i>';
       ch='<div class="f-chain"><span class="dots '+(t.chain.track==='g'?'g':'')+'">'+d+'</span><span class="lb">'+t.chain.lbl+'</span><span class="ago">· '+t.chain.ago+'</span></div>'}
-    var btns=(working===t.id)
-      ? '<span class="f-gate">в работе · результат отмечаешь в Sensei</span>'
-        +'<button class="btn sec" onclick="resultMarked(\''+t.id+'\')">✓ результат отмечен</button>'
-      : '<button class="btn prim" onclick="openAndDo(\''+t.id+'\')">Открыть и выполнить →</button>'
-        +(t.call?'<span class="f-gate">📞 факт звонка фиксирует PBX</span>':'');
+    var btns=(openedId===t.id)
+      ? '<span class="f-gate">карточка открыта · результат отмечаешь в Sensei</span>'
+        +'<button class="btn sec" onclick="resultMarked(\''+t.id+'\')">✓ демо: результат отмечен</button>'
+      : '<button class="btn prim" onclick="openDeal(\''+t.id+'\')">Вернуться к задаче →</button>';
     f.innerHTML='<div class="ch">Сейчас · '+PHASES[cur].ico+' '+PHASES[cur].n+'</div>'
       +'<div class="fk"><b>'+t.name+'</b><span class="chip '+t.chip.c+'">'+t.chip.t+'</span>'
       +'<span class="tmr '+tmrCls()+'">⏱ '+fmt(taskSec)+(t.bud?' / '+t.bud+' мин':'')+'</span></div>'
@@ -691,9 +699,9 @@ function bigCard(t){
   if(t.quote)o+='<div class="say"><span class="qh">Клиент написал</span>'+t.quote+'</div>';
   if(t.say){o+='<div class="say"><span class="qh">Что говоришь</span>';t.say.forEach(function(s){o+='<p>'+s+'</p>'});o+='</div>'}
   o+='<div class="tc-btns">';
-  if(working===t.id)o+='<button class="btn sec" onclick="resultMarked(\''+t.id+'\')">✓ результат отмечен в Sensei</button>'
-    +'<span class="gate" style="margin:0">задача открыта · выбери результат в Sensei, он закроет её и поставит следующую</span>';
-  else o+='<button class="btn prim" onclick="openAndDo(\''+t.id+'\')">Открыть и выполнить →</button>';
+  if(openedId===t.id)o+='<button class="btn sec" onclick="resultMarked(\''+t.id+'\')">✓ демо: результат отмечен</button>'
+    +'<span class="gate" style="margin:0">карточка открыта · выбери результат в Sensei — он закроет задачу и поставит следующую</span>';
+  else o+='<button class="btn prim" onclick="openDeal(\''+t.id+'\')">Вернуться к задаче →</button>';
   o+='</div>';
   if(t.call)o+='<div class="gate">📞 <b>факт звонка фиксирует PBX</b> · правило «звонок, только потом смс» держит Sensei — сообщением задачу не закрыть</div>';
   o+='<div class="sensei">⚙ задачу поставил Sensei · результат отмечается там же, виджет подаёт следующую</div></div>';
@@ -742,10 +750,6 @@ function goPhase(i){
    менеджер открывает сделку и выполняет → РЕЗУЛЬТАТ ОТМЕЧАЕТ В SENSEI → Sensei закрывает задачу
    и ставит следующую → виджет подаёт следующую сделку. Виджет результат НЕ пишет: одно место.
    Факт звонка фиксирует PBX, факт сообщения — чат; подтверждать это кнопкой менеджера не просим. */
-function openAndDo(id){
-  working=id;pend=null;render();
-  toast('Открыта карточка: '+(byId[id]?byId[id].name:''),'Звони и отмечай результат в Sensei — он закроет задачу и поставит следующую. Виджет подаст её сюда.');
-}
 function resultMarked(id){
   working=null;
   toast('Sensei принял результат','Задача закрыта, следующая по цепочке поставлена. Подаю сделку.');
@@ -770,7 +774,7 @@ function finishTask(id){
       if(nx<PHASES.length){cur=nx;toast('Этап закрыт ✓','Дальше: '+PHASES[nx].ico+' '+PHASES[nx].n)}
       else if(allDone())toast('Маршрут пройден ✓','Все задачи разобраны — можно закрывать смену на зиро.');
     }
-    resetTaskTimer();render();queueNext();
+    resetTaskTimer();openedId=null;renderCard();render();queueNext();
   },200);
 }
 
@@ -786,8 +790,19 @@ function cancelPend(){
   toast('Отложил на минуту','Сделка осталась первой в очереди. Через 60 секунд откроется без спроса — отменить ещё раз нельзя.'+(cancels>=3?' Третья отмена: РОП видит.':''));
   render();
 }
-function openDeal(id){var t=byId[id];pend=null;resetTaskTimer();render();
-  toast('Открыта карточка: '+(t?t.name:''),'В бою виджет переводит amoCRM в эту сделку и держит скрипт касания перед глазами.')}
+function openDeal(id){
+  var t=byId[id];pend=null;taskSec=0;ropAlert=false;working=id;openedId=id;
+  document.getElementById('strip').classList.remove('alarm');
+  renderCard();render();
+  toast('Карточка открыта: '+(t?t.name:''),'Виджет перевёл amoCRM в эту сделку. Дальше — звонок и результат в Sensei; кнопок нажимать не надо.');
+}
+/* рама карточки едет за конвейером — иначе непонятно, что виджет реально открыл сделку */
+function renderCard(){
+  var t=openedId?byId[openedId]:null;
+  document.getElementById('cName').textContent=t?t.name:'Рассказова Ольга Васильевна';
+  document.getElementById('cChip').textContent=t?t.chip.t:'ФССП';
+  document.getElementById('cStage').textContent=t?(t.ph==='msg'?'Квал лиды':t.ph==='pay'?'Подписан · не оплачен':t.ph==='touch'?'На подписи / частичка':'В работе'):'Квал лиды';
+}
 function toggleBreak(){
   onBreak=!onBreak;
   if(onBreak)toast('Перерыв','Очередь не подаёт сделки. Бюджет смены '+fmt(BREAK_BUDGET)+', перерасход виден РОПу.');
