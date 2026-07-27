@@ -86,7 +86,9 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .tmr.bad{background:var(--red-bg);color:var(--red-d)}
 
 /* напоминание / жёсткий сигнал */
-.alrt{flex:none;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;border-radius:9px;padding:7px 11px;white-space:nowrap;max-width:300px;overflow:hidden;text-overflow:ellipsis}
+.alrt{flex:none;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:9px;padding:7px 10px;white-space:nowrap}
+/* при активном сигнале описание действия уступает место — приоритет у того, что горит */
+.mini:has(.alrt) .act{display:none}
 .alrt.soon{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-line)}
 .alrt.hard{background:var(--red-bg);color:var(--red-d);border:1px solid var(--red-line)}
 @media (prefers-reduced-motion: no-preference){.alrt.hard{animation:pulse 1.6s infinite}}
@@ -532,9 +534,9 @@ function renderMini(){
 
   /* напоминание о звонке / жёсткий сигнал зависания / SLA нового лида */
   var a=document.getElementById('mAlert');
-  if(ropAlert)a.innerHTML='<span class="alrt hard">⏳ ты в задаче больше часа — иди дальше · РОП уведомлён</span>';
-  else if(leadSla!==null)a.innerHTML='<span class="alrt hard">🆕 новый лид · набери за '+fmt(leadSla)+', иначе уйдёт другому</span>';
-  else if(remind)a.innerHTML='<span class="alrt soon">⏰ через '+remind.min+' мин — '+remind.name+' · '+remind.what+'</span>';
+  if(ropAlert)a.innerHTML='<span class="alrt hard" title="Больше часа в одной задаче. Уведомление ушло РОПу — он проверит, чем занят сотрудник.">⏳ час в задаче · РОП</span>';
+  else if(leadSla!==null)a.innerHTML='<span class="alrt hard" title="Новый лид: набор ≤5 минут. Не позвонишь — уйдёт другому менеджеру.">🆕 лид · <span class="num">'+fmt(leadSla)+'</span></span>';
+  else if(remind)a.innerHTML='<span class="alrt soon" title="'+remind.name+' — '+remind.what+'. За 10 минут до точки новые лиды тебе не выдаются.">⏰ '+remind.min+' мин · '+remind.name.split(' ')[0]+'</span>';
   else a.innerHTML='';
 
   document.getElementById('mStats').innerHTML=
