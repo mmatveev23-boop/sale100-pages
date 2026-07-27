@@ -61,7 +61,11 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 .mini .lg.run{background:var(--green)}
 .mini .bt b{display:block;font-size:12.5px;line-height:1.15}
 .mini .bt span{font-size:10.5px;color:var(--mut)}
-.mini .now{flex:1;min-width:0;display:flex;align-items:center;gap:10px}
+.mini .now{flex:1;min-width:0;display:flex;align-items:center;gap:10px;cursor:pointer;border-radius:9px;padding:6px 8px;margin-left:-8px;transition:background .16s ease}
+.mini .now:hover,.mini .route:hover{background:var(--soft)}
+.mini .now .go-hint{flex:none;font-size:11px;color:var(--faint);white-space:nowrap;opacity:0;transition:opacity .16s ease}
+.mini .now:hover .go-hint{opacity:1}
+.mini .route{cursor:pointer;transition:background .16s ease}
 .mini .nw{flex:none;font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--faint);text-transform:uppercase}
 .mini .nm{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mini .act{font-size:12.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -273,9 +277,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
           <div class="lg" id="mLg">ДН</div>
           <div class="bt"><b>Моя смена</b><span id="mSh">не начата</span></div>
         </div>
-        <div class="now" id="mNow"></div>
-        <div class="route" id="mRoute"></div>
-        <button class="btn sec" onclick="openModal()">Открыть смену</button>
+        <div class="now" id="mNow" onclick="openModal()" title="Открыть маршрут дня"></div>
+        <div class="route" id="mRoute" onclick="openModal()" title="Открыть маршрут дня"></div>
         <span id="mPrim"></span>
         <button class="exp" onclick="toggleStrip()" title="Развернуть полосу">▾</button>
       </div>
@@ -301,7 +304,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
           <div class="day-rest" id="fRest"></div>
           <div class="kran" id="fKran">⛔ кран новых закрыт</div>
           <div class="day-btn">
-            <button class="btn prim" onclick="openModal()">Открыть смену</button>
+            <button class="btn prim" onclick="openModal()">Маршрут дня</button>
             <button class="btn sec" onclick="toggleStrip()">Свернуть ▴</button>
           </div>
         </div>
@@ -373,7 +376,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
 
 <div id="toast"><div><b id="tT"></b><span id="tS"></span></div><button class="btn ok" style="padding:7px 12px" onclick="hideToast()">Ок</button></div>
 
-<div class="tip"><b>Демо:</b> полоса в карточке сделки. Свёрнута 56 px → «▾» разворачивает в 190 px → «Открыть смену» = модал на всю ширину. Нажми «Начать работу».</div>
+<div class="tip"><b>Демо:</b> полоса в карточке сделки. «Начать работу» = отметка прихода, маршрут дня открывается сам. Дальше кнопка ведёт по задачам, клик по полосе возвращает к маршруту, «▾» разворачивает полосу в 190 px.</div>
 
 <script>
 /* ═══ ДАННЫЕ (в бою приходят от Sensei: тип касания, номер в цепочке, трек, срок) ═══ */
@@ -445,12 +448,13 @@ function renderMini(){
   document.getElementById('mLg').className='lg'+(started?' run':'');
   document.getElementById('mSh').textContent=started?'идёт · с 09:12':'не начата';
   var t=focusTask(),n=document.getElementById('mNow');
-  if(!started){n.innerHTML='<span class="nw">Сейчас</span><span class="act">Нажми «Начать работу» — Sensei откроет маршрут</span>'}
-  else if(!t){n.innerHTML='<span class="nw">Сейчас</span><span class="act">Маршрут пройден — можно закрывать смену</span>'}
+  var hint='<span class="go-hint">маршрут дня ↗</span>';
+  if(!started){n.innerHTML='<span class="nw">Сейчас</span><span class="act">Нажми «Начать работу» — Sensei откроет маршрут дня</span>'+hint}
+  else if(!t){n.innerHTML='<span class="nw">Сейчас</span><span class="act">Маршрут пройден — можно закрывать смену</span>'+hint}
   else{
     n.innerHTML='<span class="nw">Сейчас</span><span class="nm">'+t.name+'</span>'
       +'<span class="chip '+t.chip.c+'">'+t.chip.t+'</span>'
-      +'<span class="act">'+t.act+'</span>';
+      +'<span class="act">'+t.act+'</span>'+hint;
   }
   var r=document.getElementById('mRoute'),h='';
   PHASES.forEach(function(p,i){h+='<i class="'+(phDone(p.id)?'d':(i===cur&&started?'cur':''))+'"></i>'});
@@ -577,8 +581,10 @@ function closeModal(){open=false;document.getElementById('veil').classList.remov
 function toggleShift(){
   if(!started){
     started=true;tmr=setInterval(tick,1000);
+    render();
+    openModal();   /* отметился на смене → маршрут дня открывается сам, отдельная кнопка не нужна */
     toast('Смена начата · 09:12','Опоздание 12 минут ушло РОПу. Первые 15 минут — только сообщения.');
-    render();return;
+    return;
   }
   if(!allDone()){toast('Ещё не зиро','Осталось задач: '+TASKS.filter(function(t){return !done[t.id]}).length+'. Разбери маршрут — тогда смена закроется.');return}
   toast('Смена закрыта · зиро ✓','Начало 09:12 (опоздание 12 мин) · конец 18:04 · сводка ушла РОПу.');
