@@ -59,7 +59,27 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-a
 /* ═══ ПОЛОСА-ПЛИТКИ ═══ */
 #strip{flex:none;background:var(--d-bg);color:var(--d-ink);overflow:hidden;position:relative;z-index:var(--z-strip);
   border-bottom:1px solid var(--amo-line)}
-.bar{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));height:104px}
+/* слева — управление сменой и её время, дальше плитки данных */
+.bar{display:grid;grid-template-columns:252px repeat(5,minmax(0,1fr));height:104px}
+.ctl{padding:6px 14px;border-right:1px solid var(--d-line);background:#0d1420;display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0;overflow:hidden}
+.ctl .top{flex:none;display:flex;align-items:center;gap:9px;min-width:0}
+.ctl .lg{width:30px;height:30px;border-radius:9px;background:#1d2637;color:var(--d-ink);display:grid;place-items:center;font-size:12px;font-weight:800;position:relative;flex:none}
+.ctl .lg .dot{position:absolute;right:-2px;bottom:-2px;width:10px;height:10px;border-radius:50%;border:2px solid #0d1420;background:#4a5468}
+.ctl .lg .dot.on{background:var(--d-green)}
+.ctl .lg .dot.brk{background:var(--d-gold)}
+.ctl .lg .dot.call{background:var(--d-blue)}
+.ctl .who{min-width:0}
+.ctl .who .k{display:block;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--d-mut);white-space:nowrap}
+.ctl .who .t{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ctl .who .t.off{font-size:14px;color:var(--d-mut);font-weight:700}
+.ctl .sp2{flex:none;font-size:10px;color:var(--d-mut);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctl .sp2 b{color:#c3ccdb;font-weight:600}
+.ctl .btns{flex:none;display:flex;gap:6px}
+.ctl .cbtn{flex:1;text-align:center;border-radius:8px;font-weight:700;font-size:11.5px;padding:7px 8px;white-space:nowrap;transition:transform .15s var(--ease),background .18s ease}
+.ctl .cbtn:active{transform:scale(.97)}
+.ctl .cbtn.go{background:var(--d-green);color:#06231a}
+.ctl .cbtn.gh{background:#1d2637;color:var(--d-ink)}
+.ctl .cbtn.dn{background:var(--d-red);color:#2a0a0c}
 .tile{padding:10px 13px;border-right:1px solid var(--d-line);background:var(--d-tile);display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0;overflow:hidden;cursor:pointer;transition:background .16s ease}
 .tile:last-child{border-right:0}
 .tile:hover{background:#1b2434}
@@ -513,7 +533,7 @@ var taskSec=0,ropAlert=false,STUCK=60*60,BREAK_BUDGET=90*60;
 var lives=5,qa=87,crosses=0,senseiScore=94,devs=[];
 var nowMin=9*60+12, DAY_A=9*60, DAY_B=18*60, tickCount=0;
 var PLAN_CONS=4, LEAD_PLAN=8, consDone=0, leadsDone=0, sales=1, money=13500;
-var workSec=3*3600+42*60, talkSec=1*3600+38*60, idleSec=37*60;
+var shiftSec=0, talkSec=0, idleSec=0;   /* время смены идёт только после «Начать смену» */
 var streakDays=4,planDone=12,planGoal=18,waiting2nd=3;
 var CONV_TEAM=24.2;
 var byId={};TASKS.forEach(function(t){byId[t.id]=t});
@@ -537,8 +557,6 @@ function greyOpen(){return yellowOpen()&&inZone('yellow').length===0}
 function overdueCount(){return alive().filter(function(t){
   if(t.kind==='overdue'||t.kind==='invoice')return true;
   return t.kind==='time'&&nowMin>hm(t.at)+15}).length}
-function missedCalls(){return alive().filter(function(t){return t.kind==='missed'}).length}
-function missedMsgs(){return alive().filter(function(t){return t.kind==='msg'}).length}
 function current(){
   if(workId&&!done[workId])return byId[workId];
   var r=ordered(redDue());if(r.length)return r[0];
@@ -562,21 +580,37 @@ function renderBar(){
   var d=conv()-CONV_TEAM;
 
   document.getElementById('bar').innerHTML=
-   tile('gr','📋','Задачи дня',dn+' <small>/ '+totalDay+'</small>','<div class="segs">'+segs+'</div>',1)
+   ctlBlock()
+  +tile('gr','📋','Задачи дня',dn+' <small>/ '+totalDay+'</small>','<div class="segs">'+segs+'</div>',1)
   +tile('gd','⏳','Осталось',rd+' <small>'+plural(rd,['действие','действия','действий'])+'</small>',
         rd?'до разблокировки<br>новых лидов':'красная зона<br>закрыта',1)
   +tile(leadsOpen()?'gr':'gd',leadsOpen()?'🔓':'🔒','Новые лиды',
         '<span style="font-size:15px">'+(leadsOpen()?'открыты':'заблокированы')+'</span>',
         leadsOpen()?'выдаются по SLA<br>5 минут':'после выполнения<br>'+rd+' '+plural(rd,['действия','действий','действий']),1)
-  +tile('cy','🕐','Время в работе',hms(workSec),'Из них разговоры <b>'+hms(talkSec)+'</b><br>Простой '+hms(idleSec),0)
   +tile('gr','📈','Конверсия',conv().toFixed(1).replace('.',',')+'%',
         'Средняя отдела '+CONV_TEAM.toString().replace('.',',')+'%<br><span class="up">'+(d>=0?'↑ +':'↓ ')+d.toFixed(1).replace('.',',')+'% к средней</span>',0)
   +tile('pu','☆','Sensei score',senseiScore+'<span class="badge pu">A+</span>',
-        devs.length?devs.length+' '+plural(devs.length,['отклонение','отклонения','отклонений'])+' с причиной':'Отличная работа',0)
-  +tile('rd','📞','Пропущенные звонки',missedCalls(),'Нужно перезвонить',1)
-  +tile('bl','💬','Пропущенные сообщения',missedMsgs(),'Требуют ответа',1);
+        devs.length?devs.length+' '+plural(devs.length,['отклонение','отклонения','отклонений'])+' с причиной':'Отличная работа',0);
 
   renderDrop();
+}
+function statusKey(){if(!started)return '';if(onBreak)return 'brk';if(onCall)return 'call';return 'on'}
+/* УПРАВЛЕНИЕ СМЕНОЙ СЛЕВА: кнопка старта, после старта — время смены с разбивкой */
+function ctlBlock(){
+  var red=inZone('red').length;
+  var h='<div class="ctl"><div class="top">'
+    +'<span class="lg">ДН<span class="dot '+statusKey()+'"></span></span>'
+    +'<span class="who"><span class="k">'+(started?(onBreak?'перерыв':'смена идёт'):'смена')+'</span>'
+    +'<span class="t'+(started?'':' off')+'">'+(started?hms(shiftSec):'не начата')+'</span></span></div>';
+  if(started)h+='<div class="sp2">разговоры <b>'+hms(talkSec)+'</b> · простой '+hms(idleSec)+'</div>';
+  else h+='<div class="sp2">задачи не подаются,<br>время не идёт</div>';
+  h+='<div class="btns">';
+  if(!started)h+='<button class="cbtn go" onclick="startShift()">▶ Начать смену</button>';
+  else{
+    h+='<button class="cbtn gh" onclick="toggleBreak()">'+(onBreak?'▶ В работу':'⏸ Перерыв')+'</button>';
+    h+='<button class="cbtn '+(red?'dn':'go')+'" onclick="endShift()">'+(red?'Закончить с долгом':'Закончить смену')+'</button>';
+  }
+  return h+'</div></div>';
 }
 function tile(c,ic,h,v,s,click){
   return '<button class="tile '+c+'"'+(click?' onclick="toggleDrop()"':' onclick="openPlan()"')+'>'
@@ -898,6 +932,8 @@ function toggleCall(){
   render();
 }
 function jumpTo(m){
+  /* демо-перемотка: время смены и её разбивка едут вместе с часами, иначе цифры разъезжаются */
+  if(started&&m>nowMin){var d=(m-nowMin)*60;shiftSec+=d;talkSec+=Math.round(d*.45);idleSec+=Math.round(d*.15)}
   nowMin=m;queueNext();render();
   var need=needBy(nowMin);
   toast('Сейчас '+clock(nowMin),behind()?'К этому времени нужно '+need+' консультаций, у тебя '+consDone+'. Догоняй.'
@@ -908,11 +944,11 @@ function jumpTo(m){
 function tick(){
   tickCount++;
   if(tickCount%5===0&&nowMin<20*60){nowMin++;if(!openedId&&!pend&&!onBreak&&!onCall)queueNext()}
-  if(onBreak){breakSec++;idleSec++;
+  if(onBreak){breakSec++;idleSec++;shiftSec++;
     if(breakSec===BREAK_BUDGET)toast('Бюджет перерывов исчерпан','Дальше перерасход попадёт в сводку РОПу.',1);
     render();return}
-  if(onCall){talkSec++;workSec++;return}
-  workSec++;
+  if(onCall){talkSec++;shiftSec++;render();return}
+  if(started)shiftSec++;
   if(started&&current()){
     taskSec++;
     if(taskSec===STUCK&&!ropAlert){ropAlert=true;
