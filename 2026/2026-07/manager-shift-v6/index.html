@@ -59,8 +59,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-a
 /* ═══ ПОЛОСА-ПЛИТКИ ═══ */
 #strip{flex:none;background:var(--d-bg);color:var(--d-ink);overflow:hidden;position:relative;z-index:var(--z-strip);
   border-bottom:1px solid var(--amo-line)}
-/* слева — управление сменой и её время, дальше плитки данных */
-.bar{display:grid;grid-template-columns:252px repeat(5,minmax(0,1fr));height:104px}
+/* слева — управление сменой, дальше плитки; три плитки-зоны работают как переключатели списка */
+.bar{display:grid;grid-template-columns:246px 1.15fr .82fr .82fr .82fr .95fr .95fr .95fr;height:104px}
 .ctl{padding:6px 14px;border-right:1px solid var(--d-line);background:#0d1420;display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0;overflow:hidden}
 .ctl .top{flex:none;display:flex;align-items:center;gap:9px;min-width:0}
 .ctl .lg{width:30px;height:30px;border-radius:9px;background:#1d2637;color:var(--d-ink);display:grid;place-items:center;font-size:12px;font-weight:800;position:relative;flex:none}
@@ -99,6 +99,17 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-a
 .segs{display:flex;gap:3px;margin-top:1px}
 .segs i{flex:1;height:5px;border-radius:2px;background:#2b3548}
 .segs i.on{background:var(--d-green)}
+/* активная зона: полоска сверху плитки — не меняем фон, чтобы цвет зоны остался читаемым */
+.tile.zone{position:relative}
+.tile.zone.act{background:#1c2434}
+.tile.zone.act:before{content:"";position:absolute;left:0;right:0;top:0;height:3px}
+.tile.zone.act.zr:before{background:var(--d-red)}
+.tile.zone.act.zy:before{background:var(--d-gold)}
+.tile.zone.act.zg:before{background:var(--d-green)}
+.tile.zone .v{font-size:22px}
+.zr .v,.zr .h i{color:var(--d-red)}
+.zy .v,.zy .h i{color:var(--d-gold)}
+.zg .v,.zg .h i{color:var(--d-green)}
 .badge{display:inline-flex;align-items:center;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:800;margin-left:6px}
 .badge.pu{background:rgba(167,139,250,.16);color:var(--d-purple)}
 .up{color:var(--d-green);font-weight:700}
@@ -114,8 +125,13 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-a
 .dh b{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
 .dh span{font-size:11.5px;color:var(--d-mut)}
 .dh .more{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--d-cyan)}
-.drow{display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;background:#0d1420;margin-bottom:6px}
+.dlist{max-height:224px;overflow-y:auto;padding-right:4px}
+.drow{width:100%;display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;background:#0d1420;margin-bottom:6px;cursor:pointer;transition:background .15s ease}
+.drow:hover{background:#141d2c}
+.drow.sel{background:#1a2434;box-shadow:inset 0 0 0 1px #37425a}
 .drow.first{background:rgba(242,85,90,.13);box-shadow:inset 0 0 0 1px rgba(242,85,90,.3)}
+.drow.first.sel{background:rgba(242,85,90,.2);box-shadow:inset 0 0 0 1px rgba(242,85,90,.55)}
+.drow .rec{font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--d-red);white-space:nowrap}
 .drow .mk{width:24px;height:24px;border-radius:7px;background:#1d2637;display:grid;place-items:center;font-size:11px}
 .drow .tx{min-width:0}
 .drow .tx b{font-size:13px;font-weight:700}
@@ -126,6 +142,11 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-a
 .dnext .kb{font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--d-red)}
 .dnext h4{margin-top:4px;font-size:16px;font-weight:800;letter-spacing:-.01em}
 .dnext .sb{margin-top:3px;font-size:11.5px;color:var(--d-mut);line-height:1.4}
+.dnext .kv{margin-top:11px;border-top:1px solid var(--d-line);padding-top:9px}
+.dnext .kv .r2{display:flex;justify-content:space-between;gap:12px;padding:4px 0;font-size:11.5px;color:var(--d-mut)}
+.dnext .kv .r2 b{color:var(--d-ink);font-weight:600;text-align:right;min-width:0}
+.dnext .desc{margin-top:9px;background:#111a28;border-radius:9px;padding:9px 11px;font-size:11.5px;line-height:1.45;color:#c3ccdb}
+.dnext .desc .lb{display:block;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--d-mut);margin-bottom:3px}
 .dnext .btns{margin-top:11px;display:flex;gap:7px;flex-wrap:wrap}
 .dbtn{border-radius:9px;font-weight:700;font-size:12px;padding:8px 13px;transition:transform .15s var(--ease),background .18s ease}
 .dbtn:active{transform:scale(.97)}
@@ -348,9 +369,9 @@ button.trow:hover .take{background:var(--dark);color:#fff;box-shadow:none}
       <div class="bar" id="bar"></div>
       <div class="drop"><div class="drop-in">
         <div>
-          <div class="dh"><b>Приоритетные задачи</b><span id="dhSub"></span>
+          <div class="dh"><b id="dhTitle">Красные · обязательные</b><span id="dhSub"></span>
             <button class="more" onclick="openPlan()">Весь план дня →</button></div>
-          <div id="dList"></div>
+          <div class="dlist" id="dList"></div>
         </div>
         <div id="dNext"></div>
       </div></div>
@@ -447,11 +468,12 @@ button.trow:hover .take{background:var(--dark);color:#fff;box-shadow:none}
   </div></div>
 </div>
 
-<div id="pop"></div>
 <div id="toast"><div><b id="tT"></b><span id="tS"></span></div><button class="btn ok" style="padding:7px 12px" onclick="hideToast()">Ок</button></div>
 
 <div class="tip"><b>Демо v6:</b> клик по полосе раскрывает приоритетные задачи. Система ведёт, но «Отклониться» доступно всегда — с причиной, которую видит РОП.
   <button class="btn" onclick="toggleDrop()">▾ раскрыть полосу</button>
+  <button class="btn" onclick="var t=current();if(t)talked(t.id)">✓ демо: результат в Sensei</button>
+  <button class="btn" onclick="var t=current();if(t)noAnswer(t.id)">✕ демо: недозвон</button>
   <button class="btn" onclick="jumpTo(11*60+20)">🕚 11:20 · время Волкова</button>
   <button class="btn" onclick="jumpTo(14*60)">🕑 14:00</button>
   <button class="btn" onclick="jumpTo(18*60)">🕕 конец дня</button>
@@ -530,7 +552,8 @@ var TASKS=[
 var started=false,done={},tmr=null,onBreak=false,breakSec=0,onCall=false;
 var openedId=null,workId=null,pend=null,cancels=0,seq=0;
 var taskSec=0,ropAlert=false,STUCK=60*60,BREAK_BUDGET=90*60;
-var lives=5,qa=87,crosses=0,senseiScore=94,devs=[];
+var lives=5,qa=87,crosses=0,senseiScore=94;
+var selZone='red',selId=null;           /* какая зона раскрыта в полосе и какая задача выбрана */
 var nowMin=9*60+12, DAY_A=9*60, DAY_B=18*60, tickCount=0;
 var PLAN_CONS=4, LEAD_PLAN=8, consDone=0, leadsDone=0, sales=1, money=13500;
 var shiftSec=0, talkSec=0, idleSec=0;   /* время смены идёт только после «Начать смену» */
@@ -582,17 +605,24 @@ function renderBar(){
   document.getElementById('bar').innerHTML=
    ctlBlock()
   +tile('gr','📋','Задачи дня',dn+' <small>/ '+totalDay+'</small>','<div class="segs">'+segs+'</div>',1)
-  +tile('gd','⏳','Осталось',rd+' <small>'+plural(rd,['действие','действия','действий'])+'</small>',
-        rd?'до разблокировки<br>новых лидов':'красная зона<br>закрыта',1)
+  +zoneTile('red','zr','🔴','Красные','обязательные')
+  +zoneTile('yellow','zy','🟡','Жёлтые','задачи дня')
+  +zoneTile('grey','zg','🟢','Зелёные','рекомендуемые')
   +tile(leadsOpen()?'gr':'gd',leadsOpen()?'🔓':'🔒','Новые лиды',
         '<span style="font-size:15px">'+(leadsOpen()?'открыты':'заблокированы')+'</span>',
-        leadsOpen()?'выдаются по SLA<br>5 минут':'после выполнения<br>'+rd+' '+plural(rd,['действия','действий','действий']),1)
+        leadsOpen()?'по SLA 5 минут':'после '+rd+' '+plural(rd,['действия','действий','действий']),1)
   +tile('gr','📈','Конверсия',conv().toFixed(1).replace('.',',')+'%',
         'Средняя отдела '+CONV_TEAM.toString().replace('.',',')+'%<br><span class="up">'+(d>=0?'↑ +':'↓ ')+d.toFixed(1).replace('.',',')+'% к средней</span>',0)
-  +tile('pu','☆','Sensei score',senseiScore+'<span class="badge pu">A+</span>',
-        devs.length?devs.length+' '+plural(devs.length,['отклонение','отклонения','отклонений'])+' с причиной':'Отличная работа',0);
+  +tile('pu','☆','Sensei score',senseiScore+'<span class="badge pu">A+</span>','Отличная работа',0);
 
   renderDrop();
+}
+/* плитка-зона = переключатель списка: клик открывает панель на этой зоне */
+function zoneTile(z,cls,ic,name,sub){
+  var n=inZone(z).length,act=(selZone===z&&dropOpen());
+  return '<button class="tile zone '+cls+(act?' act':'')+'" onclick="openZone(\''+z+'\')">'
+    +'<span class="h"><i>'+ic+'</i>'+name+'</span>'
+    +'<span class="v">'+n+'</span><span class="s">'+sub+'</span></button>';
 }
 function statusKey(){if(!started)return '';if(onBreak)return 'brk';if(onCall)return 'call';return 'on'}
 /* УПРАВЛЕНИЕ СМЕНОЙ СЛЕВА: кнопка старта, после старта — время смены с разбивкой */
@@ -617,101 +647,85 @@ function tile(c,ic,h,v,s,click){
     +'<span class="h"><i>'+ic+'</i>'+h+'</span><span class="v">'+v+'</span><span class="s">'+s+'</span></button>';
 }
 
+var ZLB={red:{n:'Красные · обязательные',s:'порядок держит Sensei, новые лиды заблокированы'},
+         yellow:{n:'Жёлтые · задачи дня',s:'должны закрыться до конца дня'},
+         grey:{n:'Зелёные · рекомендуемые',s:'Sensei подкидывает после обязательной работы'}};
 function renderDrop(){
-  var red=ordered(inZone('red')),t=current();
-  document.getElementById('dhSub').textContent=red.length
-    ? red.length+' '+plural(red.length,['обязательное','обязательных','обязательных'])+' · порядок держит Sensei'
-    : 'красная зона закрыта — дальше день планируешь сам';
+  var list=ordered(inZone(selZone)),rec=current();
+  if(selId&&done[selId])selId=null;
+  if(!selId||!byId[selId]||zone(byId[selId])!==selZone)selId=list.length?list[0].id:null;
+
+  document.getElementById('dhTitle').textContent=ZLB[selZone].n;
+  document.getElementById('dhSub').textContent=list.length
+    ? list.length+' '+plural(list.length,['задача','задачи','задач'])+' · '+ZLB[selZone].s
+    : 'зона закрыта';
 
   var h='';
-  (red.length?red:ordered(inZone('yellow'))).slice(0,4).forEach(function(x,i){
-    var wait=(x.kind==='time'&&!dueNow(x));
-    h+='<div class="drow'+(t&&x.id===t.id?' first':'')+'">'
+  list.forEach(function(x){
+    var wait=(x.kind==='time'&&!dueNow(x)),cool=(x.cool&&nowMin<x.cool);
+    h+='<button class="drow'+(rec&&x.id===rec.id?' first':'')+(x.id===selId?' sel':'')+'" onclick="selectTask(\''+x.id+'\')">'
       +'<span class="mk">'+KIND[x.kind].ico+'</span>'
       +'<span class="tx"><b>'+x.name+'</b><span>'+x.why+'</span></span>'
-      +'<span class="w'+(dueNow(x)&&x.at?' due':'')+'">'+(x.at?(wait?'в '+x.at:x.at):KIND[x.kind].lb)+'</span></div>';
+      +'<span class="w'+(dueNow(x)&&x.at?' due':'')+'">'
+      +(rec&&x.id===rec.id?'<span class="rec">рекомендует Sensei</span> · ':'')
+      +(cool?'снова в '+clock(x.cool):(x.at?(wait?'в '+x.at:x.at):KIND[x.kind].lb))+'</span></button>';
   });
-  document.getElementById('dList').innerHTML=h||'<div class="drow"><span class="mk">✓</span><span class="tx"><b>Пусто</b><span>обязательного и задач дня нет</span></span></div>';
+  document.getElementById('dList').innerHTML=h
+    ||'<div class="drow" style="cursor:default"><span class="mk">✓</span><span class="tx"><b>Зона закрыта</b><span>задач в этой зоне не осталось</span></span></div>';
 
+  renderDetail();
+}
+/* КАРТОЧКА ЗАДАЧИ. Описание приходит из Sensei; КНОПОК ДЕЙСТВИЙ НЕТ —
+   результат менеджер отмечает в Sensei, виджет только приводит его в нужную сделку. */
+function renderDetail(){
   var n=document.getElementById('dNext');
-  if(!started){n.innerHTML='<div class="dnext"><span class="kb">смена</span><h4>Не начата</h4>'
-    +'<div class="sb">Пока смена не начата, Sensei не подаёт сделки и время смены не идёт.</div>'
-    +'<div class="btns"><button class="dbtn go" onclick="openPlan()">Открыть план дня</button></div></div>';return}
-  if(onBreak){n.innerHTML='<div class="dnext"><span class="kb">перерыв</span><h4>'+fmt(breakSec)+' из '+fmt(BREAK_BUDGET)+'</h4>'
-    +'<div class="sb">Очередь не подаёт сделки. Перерасход виден РОПу.</div>'
-    +'<div class="btns"><button class="dbtn go" onclick="toggleBreak()">Вернуться в работу</button></div></div>';return}
-  if(!t){n.innerHTML='<div class="dnext"><span class="kb" style="color:var(--d-green)">всё разобрано</span><h4>Зиро</h4>'
-    +'<div class="sb">Все три зоны закрыты.</div>'
-    +'<div class="btns"><button class="dbtn go" onclick="endShift()">Закрыть смену</button></div></div>';return}
+  if(!started){n.innerHTML=card('смена','Не начата','Пока смена не начата, Sensei не подаёт сделки и время смены не идёт.',
+    '<button class="dbtn go" onclick="startShift()">▶ Начать смену</button>');return}
+  if(onBreak){n.innerHTML=card('перерыв',fmt(breakSec)+' из '+fmt(BREAK_BUDGET),'Очередь не подаёт сделки. Перерасход виден РОПу.',
+    '<button class="dbtn go" onclick="toggleBreak()">Вернуться в работу</button>');return}
+  var t=selId?byId[selId]:null;
+  if(!t){n.innerHTML=card('зона закрыта','Задач нет','Переключись на другую зону плиткой в полосе.','');return}
 
-  var open=(openedId===t.id);
-  n.innerHTML='<div class="dnext"><span class="kb"'+(zone(t)==='red'?'':' style="color:var(--d-mut)"')+'>'
-    +(zone(t)==='red'?'Следующее обязательное действие':'Следующее действие')+'</span>'
+  var rec=current(),isRec=(rec&&rec.id===t.id),open=(openedId===t.id);
+  var wait=(t.kind==='time'&&!dueNow(t)),cool=(t.cool&&nowMin<t.cool);
+  var srok=cool?'снова в '+clock(t.cool):(t.at?(wait?'ждёт '+t.at:t.at):'без точного времени');
+
+  n.innerHTML='<div class="dnext">'
+    +'<span class="kb"'+(isRec&&zone(t)==='red'?'':' style="color:var(--d-mut)"')+'>'
+      +(isRec?(zone(t)==='red'?'Следующее обязательное действие':'Рекомендует Sensei'):'Задача из Sensei')+'</span>'
     +'<h4>'+t.act+': '+t.name+'</h4>'
-    +'<div class="sb">'+t.why+'<br>'+t.full+(open?' · <b style="color:var(--d-cyan)">⏱ '+fmt(taskSec)+' из '+t.bud+' мин</b>':'')+'</div>'
-    +'<div class="btns">'
-    +(pend?'<span class="dbtn gh">открываю '+fmtSec(pend.left)+'</span>':'')
-    +(!open&&!pend?'<button class="dbtn go" onclick="openDeal(\''+t.id+'\')">Начать →</button>':'')
-    +(open?'<button class="dbtn go" onclick="talked(\''+t.id+'\')">✓ поговорил</button>'
-          +'<button class="dbtn gh" onclick="noAnswer(\''+t.id+'\')">✕ недозвон</button>':'')
-    +'<button class="dbtn dev" onclick="askDeviate(event,\''+t.id+'\')">Отклониться</button>'
+    +'<div class="sb">'+t.why+'</div>'
+    +'<div class="kv">'
+      +'<div class="r2"><span>зона</span><b>'+ZLB[zone(t)].n.split(' · ')[0]+' · '+KIND[t.kind].lb+'</b></div>'
+      +'<div class="r2"><span>сделка</span><b>'+t.chip.t+'</b></div>'
+      +'<div class="r2"><span>срок</span><b>'+srok+'</b></div>'
+      +'<div class="r2"><span>бюджет времени</span><b>'+t.bud+' мин'+(open?' · идёт '+fmt(taskSec):'')+'</b></div>'
+      +(t.att?'<div class="r2"><span>попытки</span><b>'+t.att+' из 3</b></div>':'')
+      +(t.moved?'<div class="r2"><span>переносы</span><b>'+t.moved+' из 2</b></div>':'')
     +'</div>'
-    +'<div class="dnote">Касание засчитывается по факту звонка из PBX, а не по нажатию кнопки. Отклониться можно всегда — система попросит причину и покажет её РОПу.</div></div>';
+    +'<div class="desc"><span class="lb">Что сделать · описание из Sensei</span>'+t.full+'</div>'
+    +'<div class="btns">'
+      +(open?'<span class="dbtn gh">сделка открыта</span>'
+            :'<button class="dbtn go" onclick="openDeal(\''+t.id+'\')">Перейти в сделку →</button>')
+    +'</div>'
+    +'<div class="dnote">Кнопок действий здесь нет: результат и перенос менеджер отмечает <b>в Sensei</b>, внутри сделки. Виджет показывает, что делать, и приводит в нужную карточку. Касание засчитывается по факту звонка из PBX.</div></div>';
 }
+function card(kb,h4,sb,btns){
+  return '<div class="dnext"><span class="kb" style="color:var(--d-mut)">'+kb+'</span><h4>'+h4+'</h4>'
+    +'<div class="sb">'+sb+'</div>'+(btns?'<div class="btns">'+btns+'</div>':'')+'</div>';
+}
+function dropOpen(){return document.getElementById('strip').classList.contains('open')}
 function toggleDrop(){document.getElementById('strip').classList.toggle('open');renderBar()}
+function openZone(z){
+  var s=document.getElementById('strip');
+  if(selZone===z&&dropOpen()){s.classList.remove('open');renderBar();return}
+  selZone=z;selId=null;s.classList.add('open');renderBar();
+}
+function selectTask(id){selId=id;renderBar()}
 
-/* ═══ ОБОСНОВАННОЕ ОТКЛОНЕНИЕ ═══ */
-function askDeviate(ev,id){
-  ev.stopPropagation();
-  var t=byId[id],p=document.getElementById('pop'),used=t.moved||0;
-  var h='<h4>Отклониться от рекомендации</h4>'
-   +'<div class="sub">Sensei ведёт по порядку, но решение за тобой. Выбери причину — она попадёт в карточку сделки и в сводку РОПу.</div>'
-   +'<button class="slot" onclick="deviate(\''+id+'\',\'later\')">Клиент просил позже<span>перенос</span></button>'
-   +'<button class="slot" onclick="deviate(\''+id+'\',\'noanswer\')">Не берёт трубку<span>попытка</span></button>'
-   +'<button class="slot" onclick="deviate(\''+id+'\',\'other\')">Работаю по другой срочной<span>вернусь</span></button>'
-   +'<button class="slot" onclick="deviate(\''+id+'\',\'broken\')">Нет данных или сбой<span>РОПу</span></button>'
-   +'<div class="warn gold">Отклонения не запрещены и не штрафуются. Они видны РОПу, чтобы понять, где система мешает работать.</div>';
-  p.innerHTML=h;p.classList.add('on');place(p,ev.currentTarget);
-}
-function deviate(id,reason){
-  var t=byId[id];closePop();
-  devs.push({id:id,r:reason,at:clock(nowMin)});
-  if(reason==='later'){askMoveDirect(id);return}
-  if(reason==='noanswer'){noAnswer(id);return}
-  if(reason==='other'){
-    workId=null;openedId=null;t.seq=++seq;resetTaskTimer();renderCard();render();openPlan();
-    toast('Отклонение зафиксировано','Причина «работаю по другой срочной» записана в карточку. Выбери задачу сам — Sensei вернёт эту в очередь.');return}
-  senseiScore=Math.max(60,senseiScore-1);
-  done[id]=1;workId=null;openedId=null;resetTaskTimer();renderCard();render();queueNext();
-  toast('Ушло РОПу','Причина «нет данных или сбой» записана. Задача снята с тебя и встала РОПу на разбор.',1);
-}
-function askMoveDirect(id){
-  var t=byId[id],p=document.getElementById('pop'),used=t.moved||0;
-  var slots=[{lb:'через 2 часа',at:nowMin+120,note:clock(nowMin+120)},
-             {lb:'сегодня, вторая половина',at:16*60,note:'16:00'},
-             {lb:'завтра, первым делом',at:10*60+1440,note:'завтра 10:00'}]
-            .filter(function(s){return s.at>nowMin});
-  var h='<h4>Когда вернуться к клиенту</h4>'
-   +'<div class="sub">Дата только числом. Дальше завтрашнего утра перенести нельзя — клиент в БФЛ остынет или уйдёт к конкурентам.</div>';
-  if(used>=2)h+='<div class="warn">Перенос исчерпан: двигали два раза. Дальше только результат — деньги или дата, иначе сделка уходит в пул.</div>';
-  else{slots.forEach(function(s){h+='<button class="slot" onclick="doMove(\''+id+'\','+s.at+')">'+s.lb+'<span>'+s.note+'</span></button>'});
-    h+='<div class="warn">Перенос '+(used+1)+' из 2. Второй перенос — последний.</div>'}
-  p.innerHTML=h;p.classList.add('on');
-  p.style.left=Math.max(10,Math.min(window.innerWidth-320,window.innerWidth/2-160))+'px';p.style.top='120px';
-}
-function place(p,el){
-  var r=el.getBoundingClientRect();
-  p.style.left=Math.max(10,Math.min(window.innerWidth-330,r.left-140))+'px';
-  p.style.top=(r.bottom+8)+'px';
-}
-function closePop(){document.getElementById('pop').classList.remove('on')}
-function doMove(id,at){
-  var t=byId[id];t.moved=(t.moved||0)+1;
-  if(at>=1440){done[id]=1;toast('Перенесено на завтра 10:00','Задача ушла в завтрашний план первой строкой. Перенос '+t.moved+' из 2.')}
-  else{t.kind='time';t.at=clock(at);t.why='перенос '+t.moved+' из 2 · договорились на '+t.at;
-    toast('Перенесено на '+t.at,'Дата записана числом. '+(t.moved>=2?'Перенос исчерпан: дальше только результат.':'Остался один перенос.'))}
-  closePop();workId=null;openedId=null;resetTaskTimer();renderCard();render();queueNext();
-}
+/* ОТКЛОНЕНИЕ И ПЕРЕНОС ЖИВУТ В SENSEI (решение заказчика 28.07: «кнопок там уже не будет,
+   так как действия ставятся в сенсей, а не в виджете»). Виджет показывает, что делать,
+   и приводит в нужную сделку; результат, перенос и отклонение менеджер отмечает внутри Sensei. */
 
 /* ═══ РЕЗУЛЬТАТ: КАСАНИЕ ПО ФАКТУ ═══ */
 function talked(id){
@@ -728,7 +742,7 @@ function noAnswer(id){
   if(t.att>=3){done[id]=1;
     toast('Три попытки без ответа','Касание так и не засчитано. Задача уходит на решение: в пул или РОПу на разбор.',1)}
   else toast('Касание НЕ засчитано','Нет ответа, звонок длился 8 секунд. Попытка '+t.att+' из 3, а не касание. Задача остаётся в зоне и вернётся в '+clock(t.cool)+'.',1);
-  closePop();workId=null;openedId=null;resetTaskTimer();renderCard();render();queueNext();
+  workId=null;openedId=null;resetTaskTimer();renderCard();render();queueNext();
 }
 function peekNext(skip){
   var had=done[skip];done[skip]=1;var w=workId;workId=null;
@@ -823,7 +837,7 @@ function renderPlan(){
     +'<div class="mrow"><span>перерыв</span><b'+(breakSec>BREAK_BUDGET?' style="color:var(--red-d)"':'')+'>'+fmt(breakSec)+' / '+fmt(BREAK_BUDGET)+'</b></div>'
     +'<div class="mgoal"><div class="mrow" style="padding:0;border:0"><span>план месяца</span><b>'+planDone+' из '+planGoal+'</b></div>'
     +'<div class="bar3"><i style="width:'+(planDone/planGoal*100)+'%"></i></div></div>'
-    +'<div class="devlog"><b>Отклонений за смену: '+devs.length+'</b><br>Отклонение не штраф. РОП смотрит их, чтобы понять, где система мешает работать.</div>';
+    +'<div class="devlog">Отклониться от рекомендации и перенести касание менеджер может <b>в Sensei</b>, внутри сделки. Виджет только показывает порядок и приводит в карточку.</div>';
 
   var st=document.getElementById('pStart'),bk=document.getElementById('pBreak'),nt=document.getElementById('pNote');
   bk.style.display=started?'':'none';
@@ -864,7 +878,7 @@ function renderSum(){
    +'<div class="scell green"><b>'+sales+'</b><span>'+plural(sales,['продажа','продажи','продаж'])+' · '+money.toLocaleString('ru-RU')+' ₽</span></div>'
    +'<div class="scell"><b>'+conv().toFixed(1).replace('.',',')+'%</b><span>конверсия · отдел '+CONV_TEAM.toString().replace('.',',')+'%</span></div>'
    +'<div class="scell '+(red.length?'red':'green')+'"><b>'+(red.length?'0':(streakDays+1))+'</b><span>серия смен с зиро</span></div>'
-   +'<div class="scell"><b>'+devs.length+'</b><span>отклонений с причиной</span></div>'
+   +'<div class="scell"><b>'+TASKS.filter(function(t){return t.moved}).length+'</b><span>сделок с переносом</span></div>'
    +'</div>';
   if(red.length){
     h+='<div class="debt"><div class="lh">Смена закрыта с долгом: красная зона '+red.length+'. РОПу поставлена задача на разбор, серия обнулена. Завтра эти встанут первыми и будут держать новые лиды заблокированными.</div>';
@@ -967,14 +981,9 @@ function toast(t,s,bad,good){document.getElementById('tT').textContent=t;documen
   clearTimeout(window.__t);window.__t=setTimeout(hideToast,6200)}
 function hideToast(){document.getElementById('toast').className=''}
 
-document.addEventListener('click',function(e){
-  var p=document.getElementById('pop');
-  if(p.classList.contains('on')&&!p.contains(e.target))closePop();
-});
 document.addEventListener('keydown',function(e){
   if(e.key!=='Escape')return;
-  if(document.getElementById('pop').classList.contains('on'))closePop();
-  else if(document.getElementById('sum').classList.contains('on'))closeSum();
+  if(document.getElementById('sum').classList.contains('on'))closeSum();
   else if(planOpen()&&started)closePlan();
 });
 
