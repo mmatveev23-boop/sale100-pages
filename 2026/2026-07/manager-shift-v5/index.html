@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Виджет смены v5 · План дня и конвейер · SALE 100.0</title>
+<meta name="description" content="Виджет смены менеджера v5 в карточке сделки amoCRM: экран «План дня» на старте (фазы, ось обязательств ко времени, блок «Моё»), затем полоса 56 px — что делать сейчас, таймер и остаток дня. Список задач — витрина, в работу поднимает только конвейер.">
+<style>
+/* ═══ ВИДЖЕТ СМЕНЫ v5 (запрос заказчика 27.07)
+   ВОПРОС: «менеджер должен видеть задачи дня — но зачем ему список, если система подбрасывает
+   автоматом?» ОТВЕТ: список и конвейер отвечают на РАЗНЫЕ вопросы.
+     План дня  — «сколько мне сегодня работать и не потеряно ли что-то» → 10 секунд утром.
+     Конвейер  — «что делать прямо сейчас»                             → вся смена.
+   Правило американских систем (Salesloft Rhythm, Outreach, Orum/Nooks, Genesys/Five9):
+   СПИСОК НЕ ЕСТЬ СПОСОБ ВЫБОРА ЗАДАЧИ. Выбор убран намеренно — иначе менеджер снимает сливки,
+   а просрочка висит.
+
+   ЧТО ИЗМЕНИЛОСЬ ПРОТИВ v4:
+   1. Три уровня (полоса 56 → развёрнутая 190 → модал) дублировали друг друга — это и был
+      «расфокус». Стало ТРИ СОСТОЯНИЯ: план дня → полоса → сводка смены.
+   2. Развёрнутая полоса удалена целиком. Жизни, рейтинг, деньги, кран, счётчики переехали
+      в план дня: во время работы мотивация и обзор отвлекают.
+   3. Клик-подъём строки очереди убран (cherry-picking ломал конвейер). Перескочить фазу тоже
+      нельзя — порядок держит конвейер. Список стал витриной.
+   4. В полосе появилась строка остатка «оплаты 2 из 3 · дальше 12 касаний» — БЕЗ ИМЁН,
+      чтобы видеть дистанцию, но не выбирать.
+   5. План дня открывается сам при первом входе за день; пока не нажато «Начать смену» —
+      конвейер молчит и время смены не идёт.
+
+   Токены 1:1 из v3/v4 — виджет живёт внутри amoCRM и обязан выглядеть как amoCRM. ═══ */
+:root{
+  --bg:#eef1f5; --card:#fff; --line:#e4e8ee; --ink:#1f2633; --mut:#6c7686; --faint:#8a93a3; --soft:#f6f8fb;
+  --green:#0f9d58; --green-d:#0b7a45; --green-bg:#eefaf3; --green-line:#bfe8cf;
+  --dark:#1b2437;
+  --red:#e5484d; --red-d:#b23237; --red-bg:#fdf1f1; --red-line:#f5c6c8;
+  --purple:#7c5cd6; --purple-bg:#f5f2fd; --purple-line:#ddd2f5;
+  --orange:#e8792b; --orange-bg:#fdf4ec; --orange-line:#f5d3b3;
+  --gold:#9a7318; --gold-bg:#fbf6e9; --gold-line:#ecdcb4;
+  --blue:#2f68c4; --blue-bg:#eff4fc; --blue-line:#cfe0f7;
+  --amo:#f1f3f6; --amo-line:#dfe3e9; --amo-ink:#5c6472;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --z-strip:20; --z-veil:40; --z-modal:50; --z-toast:60;
+  font-size:15px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#e7eaef;color:var(--ink);line-height:1.45;overflow:hidden}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-align:left}
+.num{font-variant-numeric:tabular-nums}
+
+.amo{height:100vh;display:grid;grid-template-columns:64px 1fr;overflow:hidden}
+.rail{background:#fff;border-right:1px solid var(--amo-line);display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:3px;overflow:hidden}
+.rail .ri{width:44px;height:46px;border-radius:9px;display:grid;place-items:center;font-size:17px;color:#9aa2af;position:relative;flex:none}
+.rail .ri.on{background:var(--soft);color:var(--dark)}
+.rail .ri small{position:absolute;top:5px;right:6px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:7px;padding:1px 4px}
+.rail .ri span{position:absolute;bottom:3px;font-size:8.5px;color:#a8afba;letter-spacing:-.2px}
+.main{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+
+/* ═══ ПОЛОСА — единственный уровень, 56 px ═══ */
+#strip{flex:none;background:var(--card);border-bottom:1px solid var(--amo-line);box-shadow:0 1px 4px rgba(28,38,58,.06);overflow:hidden;height:56px;position:relative;z-index:var(--z-strip)}
+#strip.alarm{box-shadow:0 0 0 2px var(--red) inset,0 1px 4px rgba(28,38,58,.06)}
+#strip.off{box-shadow:0 0 0 2px var(--red-line) inset,0 1px 4px rgba(28,38,58,.06)}
+
+.mini{height:56px;display:flex;align-items:center;gap:10px;padding:0 12px;overflow:hidden}
+.mini .brand{display:flex;align-items:center;gap:8px;flex:none;padding-right:11px;border-right:1px solid var(--line)}
+.mini .lg{width:28px;height:28px;border-radius:8px;background:var(--dark);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:800;position:relative;flex:none}
+.mini .lg .dot{position:absolute;right:-2px;bottom:-2px;width:10px;height:10px;border-radius:50%;border:2px solid #fff;background:var(--faint)}
+.mini .lg .dot.on{background:var(--green)}
+.mini .lg .dot.brk{background:var(--orange)}
+.mini .lg .dot.call{background:var(--blue)}
+.mini .bt b{display:block;font-size:12.5px;line-height:1.15}
+.mini .bt span{font-size:10.5px;color:var(--mut)}
+
+/* центр полосы — единственная крупная зона: что делать сейчас */
+.mini .now{flex:1;min-width:0;display:flex;align-items:center;gap:9px;cursor:pointer;border-radius:9px;padding:6px 8px;transition:background .16s ease}
+.mini .now:hover{background:var(--soft)}
+.mini .nw{flex:none;font-size:10px;font-weight:700;letter-spacing:.03em;color:var(--faint);text-transform:uppercase}
+.mini .nm{font-size:15px;font-weight:800;white-space:nowrap;letter-spacing:-.01em}
+.mini .actnow{font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1;letter-spacing:-.01em}
+.mini .act{font-size:12.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.mini .why{flex:none;font-size:11.5px;font-weight:700;color:var(--gold);background:var(--gold-bg);border-radius:7px;padding:3px 8px;white-space:nowrap}
+.chip{font-size:11px;font-weight:700;border-radius:7px;padding:3px 8px;white-space:nowrap;flex:none}
+.chip.g{background:var(--green-bg);color:var(--green-d)}
+.chip.b{background:var(--blue-bg);color:var(--blue)}
+.chip.r{background:var(--red-bg);color:var(--red-d)}
+.chip.gold{background:var(--gold-bg);color:var(--gold)}
+.chip.n{background:var(--soft);color:var(--mut)}
+
+.tmr{flex:none;display:flex;align-items:center;gap:5px;font-size:13.5px;font-weight:800;color:var(--mut);background:var(--soft);border-radius:8px;padding:6px 10px;white-space:nowrap}
+.tmr.warn{background:var(--orange-bg);color:var(--orange)}
+.tmr.bad{background:var(--red-bg);color:var(--red-d)}
+
+.alrt{flex:none;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;border-radius:9px;padding:7px 10px;white-space:nowrap}
+/* приоритет места: сигнал важнее причины, причина важнее описания действия */
+.mini:has(.why) .act,.mini:has(.alrt) .act{display:none}
+.mini:has(.alrt) .why{display:none}
+.alrt.soon{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-line)}
+.alrt.hard{background:var(--red-bg);color:var(--red-d);border:1px solid var(--red-line)}
+@media (prefers-reduced-motion: no-preference){.alrt.hard{animation:pulse 1.6s infinite}}
+@keyframes pulse{0%,100%{opacity:1}55%{opacity:.62}}
+
+/* остаток дня — БЕЗ ИМЁН: видно дистанцию, выбирать нечего */
+.rest{flex:none;display:flex;flex-direction:column;gap:4px;padding:5px 11px;margin-left:2px;border-left:1px solid var(--line);border-radius:0 9px 9px 0;cursor:pointer;transition:background .16s ease}
+.rest:hover{background:var(--soft)}
+.rest .rl{font-size:11px;color:var(--mut);white-space:nowrap}
+.rest .rl b{font-weight:700;color:var(--ink)}
+.rest .bar{width:132px;height:4px;border-radius:3px;background:#e3e7ee;overflow:hidden}
+.rest .bar i{display:block;height:100%;width:100%;background:var(--green);border-radius:3px;transform-origin:left;transform:scaleX(0);transition:transform .3s var(--ease)}
+.rest.muted .rl{color:var(--red-d);font-weight:600}
+
+.btn{border-radius:9px;font-weight:700;font-size:12.5px;padding:8px 14px;transition:transform .15s var(--ease),background .18s ease,opacity .18s ease;flex:none;text-align:center}
+.btn:active{transform:scale(.97)}
+.btn.prim{background:var(--dark);color:#fff}
+.btn.ok{background:var(--green);color:#fff}
+.btn.sec{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.go{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--green)}
+.btn.go .pl{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:8px}
+.btn:focus-visible{outline:2px solid var(--dark);outline-offset:2px}
+.pend{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mut);background:var(--soft);border-radius:9px;padding:8px 12px;flex:none;white-space:nowrap}
+.pend b{color:var(--ink)} .pend i{font-style:normal;font-weight:800;color:var(--dark)}
+.pend.grace{background:var(--red-bg);color:var(--red-d)}
+.pend.grace b,.pend.grace i{color:var(--red-d)}
+.pend-lb{font-size:12.5px;color:var(--mut);background:var(--soft);border-radius:9px;padding:8px 12px;flex:none;white-space:nowrap}
+
+/* ═══ КАРТОЧКА СДЕЛКИ (контекст amoCRM) ═══ */
+.card-wrap{flex:1;display:grid;grid-template-columns:1fr 260px;min-height:0;overflow:hidden}
+.card-l{display:grid;grid-template-columns:400px 1fr;min-width:0;overflow:hidden}
+.pane{background:#fff;border-right:1px solid var(--amo-line);padding:14px 16px;overflow:hidden;color:var(--amo-ink)}
+.pane h3{font-size:17px;font-weight:700;color:#2a3140}
+.pane .id{margin-top:5px;font-size:11.5px;color:var(--faint);display:flex;gap:7px;align-items:center}
+.pane .id b{background:var(--soft);border-radius:5px;padding:1px 6px;font-size:10.5px;color:var(--mut)}
+.pane .stg{margin-top:11px;font-size:11.5px;color:var(--mut)}
+.pane .stg b{display:block;color:var(--ink);font-size:12.5px}
+.pane .bar{margin-top:7px;height:3px;background:#e2e6ec;border-radius:2px;overflow:hidden}
+.pane .bar i{display:block;height:100%;width:62%;background:#b9c0cb}
+.tabs{margin-top:12px;display:flex;gap:13px;font-size:12px;color:#9aa2af;border-bottom:1px solid var(--amo-line);padding-bottom:7px;overflow:hidden}
+.tabs b{color:var(--ink);border-bottom:2px solid var(--dark);padding-bottom:7px;margin-bottom:-8px}
+.fields{margin-top:11px;font-size:11.5px}
+.fld{display:flex;justify-content:space-between;gap:10px;padding:5px 0}
+.fld span{color:var(--faint)}
+.fld b{color:var(--amo-ink);font-weight:500}
+.feed{background:var(--amo);padding:14px 18px;overflow:hidden;color:var(--amo-ink)}
+.ev{background:#fff;border:1px solid var(--amo-line);border-radius:9px;padding:10px 12px;font-size:11.5px;margin-bottom:9px}
+.ev .h{color:var(--faint);font-size:10.5px}
+.ev .r{margin-top:3px}
+.ev.msg{background:#eef4fd;border-color:#d6e3f7}
+.wids{background:#fff;border-left:1px solid var(--amo-line);padding:12px 10px;overflow:hidden}
+.wids .wt{font-size:15px;font-weight:700;color:#2a3140;margin-bottom:9px}
+.wid{border-radius:8px;padding:9px 11px;font-size:11.5px;font-weight:600;margin-bottom:6px;color:#fff;display:flex;align-items:center;justify-content:space-between}
+.wid.dk{background:#1b2437}.wid.bl{background:#2f68c4}.wid.gr{background:#0b5540}
+.wid.lt{background:var(--soft);color:var(--amo-ink);box-shadow:inset 0 0 0 1px var(--amo-line)}
+.wid.yl{background:#f5cf22;color:#3a3204}
+.wid small{display:block;font-weight:400;font-size:9.5px;opacity:.7}
+
+/* ═══ ЭКРАН «ПЛАН ДНЯ» ═══ */
+.screen{position:fixed;inset:0;background:var(--bg);z-index:var(--z-modal);display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;transform:scale(.995);transition:opacity .22s var(--ease),transform .22s var(--ease)}
+.screen.on{opacity:1;pointer-events:auto;transform:none}
+.s-h{flex:none;background:#fff;border-bottom:1px solid var(--line)}
+.s-hi{max-width:1120px;margin:0 auto;width:100%;padding:15px 22px;display:flex;align-items:center;gap:14px}
+.s-hi h2{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.s-hi .vol{font-size:13px;color:var(--mut)}
+.s-hi .vol b{color:var(--ink);font-weight:700}
+.s-hi .x{margin-left:auto;width:34px;height:34px;border-radius:10px;background:var(--soft);color:var(--mut);display:grid;place-items:center;font-size:14px;flex:none}
+.s-hi .x:hover{background:#eceff4;color:var(--ink)}
+.s-b{flex:1;min-height:0;overflow-y:auto}
+.s-bi{max-width:1120px;margin:0 auto;width:100%;padding:18px 22px 24px;display:grid;grid-template-columns:minmax(0,1fr) 282px;gap:18px;align-items:start}
+.s-f{flex:none;background:#fff;border-top:1px solid var(--line)}
+.s-fi{max-width:1120px;margin:0 auto;width:100%;padding:13px 22px;display:flex;align-items:center;gap:12px}
+.s-fi .note{font-size:12px;color:var(--mut);max-width:62ch}
+.s-fi .btn{padding:11px 22px;font-size:14px}
+.s-fi .sp{margin-left:auto}
+
+.sec + .sec{margin-top:16px}
+.sec h3{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);padding:0 2px 8px}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+
+/* строки маршрута — витрина: клик раскрывает правило, а не поднимает задачу */
+.prow{width:100%;display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;align-items:center;gap:12px;padding:13px 16px;transition:background .16s ease}
+.prow + .prow,.prule + .prow{border-top:1px solid var(--line)}
+.prow:hover{background:var(--soft)}
+.prow .ico{width:34px;height:34px;border-radius:10px;background:var(--soft);display:grid;place-items:center;font-size:15px}
+.prow .tx b{display:block;font-size:14.5px;font-weight:700;line-height:1.25}
+.prow .tx span{font-size:12px;color:var(--mut)}
+.prow .cnt{font-size:19px;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;min-width:26px;text-align:right}
+.prow .cv{width:15px;text-align:center;font-size:10px;color:var(--faint);transition:transform .2s var(--ease)}
+.prow.opened .cv{transform:rotate(180deg)}
+.prow.cur{background:var(--dark)}
+.prow.cur:hover{background:#232d43}
+.prow.cur .ico{background:rgba(255,255,255,.13)}
+.prow.cur .tx b{color:#fff}
+.prow.cur .tx span{color:rgba(255,255,255,.7)}
+.prow.cur .cnt{color:#fff}
+.prow.cur .cv{color:rgba(255,255,255,.6)}
+.prow.done .ico{background:var(--green-bg)}
+.prow.done .tx b{color:var(--mut);font-weight:500}
+.prow.done .cnt{color:var(--green-d);font-size:15px}
+.prow.lock .ico{background:var(--red-bg)}
+.prow.lock .tx b{color:var(--mut)}
+.prow.lock .cnt{color:var(--red-d);font-size:15px}
+.prow.none .tx b{color:var(--mut);font-weight:500}
+.prow.none .cnt{color:var(--faint);font-size:15px}
+.prule{padding:0 16px 14px 62px;font-size:12.5px;line-height:1.45;color:var(--mut)}
+.prule b{color:var(--ink)}
+.prule.hid{display:none}
+
+/* ось обязательств ко времени */
+.axis{padding:20px 22px 16px;position:relative}
+.ax-track{position:relative;height:3px;background:#e3e7ee;border-radius:2px;margin:44px 0 0}
+.ax-band{position:absolute;top:-7px;height:17px;background:var(--purple-bg);border:1px solid var(--purple-line);border-radius:5px}
+.ax-band span{position:absolute;top:-19px;left:0;font-size:10.5px;font-weight:700;color:var(--purple);white-space:nowrap}
+.ax-now{position:absolute;top:-9px;width:2px;height:21px;background:var(--dark);border-radius:2px}
+.ax-now span{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:var(--dark);white-space:nowrap}
+.ax-pt{position:absolute;top:-6px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0}
+.ax-pt i{width:13px;height:13px;border-radius:50%;background:#fff;border:3px solid var(--gold);display:block}
+.ax-pt .lb{margin-top:7px;text-align:center;white-space:nowrap}
+.ax-pt .lb b{display:block;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.ax-pt .lb span{display:block;font-size:11.5px;color:var(--mut)}
+.ax-hrs{margin-top:52px;display:flex;justify-content:space-between;font-size:10.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+.ax-empty{padding:20px 22px;font-size:13px;color:var(--mut)}
+
+/* блок «Моё» — мотивация живёт здесь и только здесь */
+.mine{padding:14px 16px}
+.mrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 0;font-size:12.5px;color:var(--mut)}
+.mrow + .mrow{border-top:1px solid var(--line)}
+.mrow b{font-size:13.5px;color:var(--ink);font-weight:700}
+.mrow b.hl{color:var(--green-d)}
+.mrow .lives{font-size:14px;letter-spacing:1px}
+.mrow .qa{font-size:14px;font-weight:800}
+.qa.ok{color:var(--green-d)}.qa.mid{color:var(--gold)}.qa.low{color:var(--red-d)}
+.lives .off{opacity:.22}
+.mgoal{margin-top:11px;padding-top:11px;border-top:1px solid var(--line)}
+.mgoal .bar{height:6px;border-radius:4px;background:#e3e7ee;overflow:hidden;margin-top:6px}
+.mgoal .bar i{display:block;height:100%;background:var(--gold);border-radius:4px}
+.mnote{margin-top:11px;font-size:11.5px;color:var(--faint);line-height:1.45}
+.kran{margin-top:12px;font-size:12px;border-radius:9px;padding:8px 11px;background:var(--red-bg);color:var(--red-d);font-weight:600;line-height:1.35}
+.kran.open{background:var(--green-bg);color:var(--green-d)}
+
+/* сводка смены */
+.sum{padding:16px 18px}
+.sum .big{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.sum .big b{font-size:34px;font-weight:800;letter-spacing:-.02em}
+.sum .big span{font-size:14px;color:var(--mut)}
+.sum .g{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.scell{background:var(--soft);border-radius:11px;padding:11px 13px}
+.scell b{display:block;font-size:19px;font-weight:800;line-height:1.15}
+.scell span{font-size:11.5px;color:var(--mut)}
+.scell.gold b{color:var(--gold)}
+.scell.green b{color:var(--green-d)}
+.left-list{margin-top:16px;border-top:1px solid var(--line);padding-top:13px}
+.left-list .lh{font-size:12.5px;font-weight:700;margin-bottom:8px}
+.lrow{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:12.5px;color:var(--mut)}
+.lrow + .lrow{border-top:1px solid var(--line)}
+.lrow b{color:var(--ink);font-weight:700;font-size:13px}
+.lrow .w{margin-left:auto;font-size:11.5px;color:var(--faint);white-space:nowrap}
+
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,12px);opacity:0;pointer-events:none;background:var(--dark);color:#fff;border-radius:11px;padding:11px 15px;display:flex;align-items:center;gap:13px;z-index:var(--z-toast);transition:opacity .2s ease,transform .2s var(--ease);max-width:min(92vw,480px)}
+#toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast.bad{background:var(--red-d)}
+#toast b{font-size:13px}
+#toast span{display:block;font-size:11.5px;opacity:.78;margin-top:2px}
+
+.tip{position:fixed;left:12px;bottom:10px;font-size:11px;color:#7d8593;background:rgba(255,255,255,.94);border:1px solid var(--amo-line);border-radius:9px;padding:7px 11px;z-index:var(--z-strip);max-width:min(94vw,940px);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tip b{color:var(--ink)}
+.tip .btn{padding:5px 9px;font-size:11px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--amo-line);color:var(--mut)}
+
+@media (max-width:1180px){
+  .s-bi{grid-template-columns:minmax(0,1fr)}
+  .rest{display:none}
+}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+</style>
+</head>
+<body>
+
+<div class="amo">
+  <nav class="rail">
+    <div class="ri">👤<span>Аккаунт</span></div>
+    <div class="ri">🧭<span>Стол</span></div>
+    <div class="ri on">💼<span>Сделки</span></div>
+    <div class="ri">💬<small>1</small><span>imBox</span></div>
+    <div class="ri">✅<small>33</small><span>Задачи</span></div>
+    <div class="ri">📋<span>Списки</span></div>
+    <div class="ri">📄<span>Докум.</span></div>
+    <div class="ri">✉️<span>Почта</span></div>
+    <div class="ri">📊<span>Аналит.</span></div>
+    <div class="ri">⚙️<small>2</small><span>Sensei</span></div>
+  </nav>
+
+  <div class="main">
+    <div id="strip">
+      <div class="mini">
+        <div class="brand">
+          <div class="lg" id="mLg">ДН<span class="dot" id="mDot"></span></div>
+          <div class="bt"><b>Моя смена</b><span id="mSh">не начата</span></div>
+        </div>
+        <div class="now" id="mNow" onclick="openPlan()" title="Открыть план дня"></div>
+        <span id="mAlert"></span>
+        <button class="rest" id="mRest" onclick="openPlan()" title="Открыть план дня"></button>
+        <span id="mPrim"></span>
+      </div>
+    </div>
+
+    <div class="card-wrap">
+      <div class="card-l">
+        <div class="pane">
+          <h3 id="cName">Рассказова Ольга Васильевна</h3>
+          <div class="id">#25891966 <b id="cChip">ФССП</b></div>
+          <div class="stg">МПП 2 уровень<b><span id="cStage">Квал лиды</span> <span style="color:var(--faint);font-weight:400">(Сегодня)</span></b><div class="bar"><i></i></div></div>
+          <div class="tabs"><b>Основное</b><span>МПП</span><span>Анкета</span><span>Сбор доков</span><span>Суд</span></div>
+          <div class="fields">
+            <div class="fld"><span>Отв-ный</span><b>Никитина Анна</b></div>
+            <div class="fld"><span>Бюджет</span><b>0 ₽</b></div>
+            <div class="fld"><span>Статус активности</span><b>Выбрать</b></div>
+            <div class="fld"><span>Договор</span><b>…</b></div>
+            <div class="fld"><span>Дата ежемесячного платежа</span><b>…</b></div>
+            <div class="fld"><span>Размер платежа</span><b>…</b></div>
+            <div class="fld"><span>МПП 1 уровня</span><b>Никитина Анна</b></div>
+            <div class="fld"><span>МПП 2 уровня</span><b>Коканова Анна</b></div>
+            <div class="fld"><span>Руководитель</span><b>Смелов Никита</b></div>
+          </div>
+        </div>
+        <div class="feed">
+          <div class="ev"><div class="h">Сегодня 12:40 · исходящий +7 909 832-30-55</div><div class="r">Звонок 00:35 · <b>Недозвон</b></div></div>
+          <div class="ev"><div class="h">Сегодня 13:05 · исходящий +7 909 832-30-55</div><div class="r">Звонок 00:35 · <b>Недозвон</b></div></div>
+          <div class="ev msg"><div class="h">Сегодня 13:06 · Никитина Анна ✓ отправлено</div><div class="r">«Ольга Васильевна, у Вас все в порядке?»</div></div>
+          <div class="ev" style="background:#f0fbf4;border-color:#c9e9d6"><div class="h">Сегодня 13:32 · от Sensei для Коканова Анна</div><div class="r"><b>🔁 Новый лид 5.0</b></div></div>
+        </div>
+      </div>
+      <aside class="wids">
+        <div class="wt">Виджеты</div>
+        <div class="wid dk">sensei <span>⌄</span></div>
+        <div class="wid bl">Wappi Widget <span>▶</span></div>
+        <div class="wid lt">Платежи <span>⌄</span></div>
+        <div class="wid lt">Кнопки Salesbot</div>
+        <div class="wid dk">HyperScript <span>⌄</span></div>
+        <div class="wid gr">ОБНУЛЯТОР · Пульт<small>экспресс · первый звонок</small></div>
+        <div class="wid lt">Документы</div>
+        <div class="wid yl">Билайн <span>⌄</span></div>
+        <div class="wid lt">OkiDoki</div>
+        <div class="wid lt">ДОНУЛЯ</div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<!-- ЭКРАН «ПЛАН ДНЯ» — открывается сам при первом входе за день, потом на каждом перерыве -->
+<div class="screen" id="plan" role="dialog" aria-modal="true" aria-labelledby="planTitle">
+  <div class="s-h"><div class="s-hi">
+    <h2 id="planTitle">Понедельник, 27 июля</h2>
+    <span class="vol" id="pVol"></span>
+    <button class="x" onclick="closePlan()" aria-label="Закрыть план дня">✕</button>
+  </div></div>
+  <div class="s-b"><div class="s-bi">
+    <div>
+      <section class="sec">
+        <h3>Маршрут дня</h3>
+        <div class="panel" id="pRoute"></div>
+      </section>
+      <section class="sec">
+        <h3>Ко времени</h3>
+        <div class="panel" id="pAxis"></div>
+      </section>
+    </div>
+    <aside>
+      <section class="sec" style="margin:0">
+        <h3>Моё</h3>
+        <div class="panel mine" id="pMine"></div>
+      </section>
+    </aside>
+  </div></div>
+  <div class="s-f"><div class="s-fi">
+    <span class="note" id="pNote"></span>
+    <span class="sp"></span>
+    <button class="btn sec" id="pBreak" onclick="toggleBreak()">⏸ Перерыв</button>
+    <button class="btn prim go" id="pStart" onclick="startShift()"><span class="pl">▶</span>Начать смену</button>
+  </div></div>
+</div>
+
+<!-- СВОДКА СМЕНЫ -->
+<div class="screen" id="sum" role="dialog" aria-modal="true" aria-labelledby="sumTitle">
+  <div class="s-h"><div class="s-hi">
+    <h2 id="sumTitle">Смена закрыта</h2>
+    <span class="vol">итог дня уходит РОПу</span>
+    <button class="x" onclick="closeSum()" aria-label="Закрыть сводку">✕</button>
+  </div></div>
+  <div class="s-b"><div class="s-bi" style="grid-template-columns:minmax(0,1fr)">
+    <div class="panel sum" id="sumBody"></div>
+  </div></div>
+  <div class="s-f"><div class="s-fi">
+    <span class="note">Сводка уходит РОПу автоматически — она же становится входом в завтрашний план дня.</span>
+    <span class="sp"></span>
+    <button class="btn sec" onclick="closeSum()">Закрыть</button>
+  </div></div>
+</div>
+
+<div id="toast"><div><b id="tT"></b><span id="tS"></span></div><button class="btn ok" style="padding:7px 12px" onclick="hideToast()">Ок</button></div>
+
+<div class="tip"><b>Демо v5:</b> план дня открылся сам. Нажми «Начать смену» — план закроется, дальше работает полоса: конвейер сам открывает карточку, результат отмечается в Sensei. Списка на экране нет.
+  <button class="btn" onclick="demoRemind()">⏰ напоминание</button>
+  <button class="btn" onclick="demoStuck()">⏳ 60 минут</button>
+  <button class="btn" onclick="demoLead()">🆕 новый лид</button>
+  <button class="btn" onclick="toggleCall()">📞 разговор</button>
+  <button class="btn" onclick="openPlan()">📋 план дня</button>
+</div>
+
+<script>
+/* ═══ ДАННЫЕ (в бою приходят от Sensei) ═══ */
+var PHASES=[
+ {id:'msg',n:'Сообщения',ico:'💬',meta:'до 09:15 · жёсткое окно',timebox:'09:15',
+  forms:['сообщение','сообщения','сообщений'],
+  rule:'Пока не ответишь всем — к звонкам не переходим. <b>Первые 15 минут смены — только чаты.</b>'},
+ {id:'pay',n:'Оплаты',ico:'₽',meta:'прозвон',
+  forms:['оплата','оплаты','оплат'],
+  rule:'Порядок жёсткий: <b>просрочка без новой даты → сегодня → завтра</b>. Просрочка держит кран новых закрытым.'},
+ {id:'touch',n:'Касания',ico:'📞',meta:'цепочки дожима',
+  forms:['касание','касания','касаний'],
+  rule:'<b>Звонок, только потом смс.</b> Правило держит Sensei — сообщением задачу не закрыть.'},
+ {id:'new',n:'Новые лиды',ico:'🆕',meta:'под краном',
+  forms:['лид','лида','лидов'],
+  rule:'<b>Набор ≤5 минут.</b> Не взял — лид уходит другому менеджеру, и это видно РОПу.'},
+ {id:'sec',n:'Вторичка',ico:'♻️',meta:'часы дожима',
+  forms:['сделка','сделки','сделок'],
+  rule:'Тёплые из пула. Открываются последними — когда весь верх маршрута разобран.'}
+];
+
+var TASKS=[
+ {ph:'msg',id:'m1',why:'окно сообщений до 09:15 · ждёт с ночи',name:'Новикова Ольга',chip:{t:'на подписи',c:'g'},when:'08:41',bud:6,
+  sub:'Написала ночью, ждёт ответа',quote:'«Не приходит СМС для подписи, что делать?»',
+  act:'Ответь и доведи до подписи'},
+ {ph:'msg',id:'m2',why:'окно сообщений до 09:15 · новый лид в чате',name:'Гусев Артём',chip:{t:'новый лид',c:'n'},when:'09:03',bud:5,
+  sub:'Ответил боту',quote:'«Здравствуйте, а сколько это стоит?»',
+  act:'Ответь и переводи в звонок'},
+
+ {ph:'pay',id:'p1',why:'просрочка 2 дня без новой даты · держит кран новых закрытым',name:'Смирнов Олег',chip:{t:'добор 12 510 ₽',c:'r'},when:'просрочка 2 дня',bud:12,
+  sub:'Обещал 22-го, новой даты не назвал',act:'Бери деньги или дату числом',call:1},
+ {ph:'pay',id:'p2',why:'просрочка + второй перенос · дальше тёплый пул',name:'Алексеев Роман',chip:{t:'13 500 ₽',c:'r'},when:'просрочка 1 день',bud:12,
+  sub:'Двигает оплату второй раз',act:'Второй перенос — последний',call:1},
+ {ph:'pay',id:'p3',why:'клиент ждёт ровно в 16:00 · точка-время',name:'Иванова Мария',chip:{t:'13 500 ₽',c:'gold'},when:'🕐 16:00',bud:15,point:'16:00',
+  sub:'Договорились созвониться в 16:00 по оплате',act:'Доводи до СБП на линии — 15 секунд',call:1},
+ {ph:'pay',id:'p4',why:'платёж завтра · подтвердить, пока договорённость живая',name:'Кузнецов Павел',chip:{t:'добор 12 510 ₽',c:'b'},when:'завтра 10:00',bud:8,
+  sub:'Зарплата завтра',act:'Подтверди завтрашний платёж',call:1},
+
+ {ph:'touch',id:'t1',why:'горячий час подписи · открыла договор 28 минут назад',name:'Козлова Ирина',chip:{t:'договор открыт, не подписан',c:'g'},when:'⏱ 30 мин',bud:15,
+  sub:'Зашла на договор, до подписи не дошла',act:'Помоги подписать прямо сейчас',call:1},
+ {ph:'touch',id:'t2',why:'Д1 после сорванной подписи · договорились на 11:30',name:'Волков Андрей',chip:{t:'Д1 · получи КИ',c:'g'},when:'🕐 11:30',bud:15,point:'11:30',
+  sub:'Вчера сорвалась подпись, созвон в 11:30',act:'Получи КИ и составь юрзаключение',call:1},
+ {ph:'touch',id:'t3',why:'48 часов с последнего касания · цепочка требует хода',name:'Петров Дмитрий',chip:{t:'частичка 990 ₽',c:'b'},when:'касание 48 ч назад',bud:12,
+  sub:'Юрзаключение разобрали',act:'Предложи скидку и закрой на платёж сегодня',call:1},
+ {ph:'touch',id:'t4',why:'48 часов с последнего касания · кейс уже отправлен',name:'Ким Сергей',chip:{t:'частичка 1 500 ₽',c:'b'},when:'касание 48 ч назад',bud:12,
+  sub:'Кейс посмотрел, по оплате тянет',act:'Предложи заказать SIM — спецпредложение лично ему',call:1},
+
+ {ph:'sec',id:'s1',why:'часы дожима · тёплый из пула, 2 часа на разбор',name:'Орлов Никита',chip:{t:'тёплый пул',c:'n'},when:'часы дожима',bud:12,
+  sub:'Вернулся из пула',act:'Открой историю, говори про ЕГО ситуацию',call:1}
+];
+
+/* ═══ СОСТОЯНИЕ ═══ */
+var started=false,cur=0,done={},secLeft=176,tmr=null;
+var pend=null,cancels=0,onBreak=false,breakSec=0,onCall=false,openedId=null;
+var lives=5,qa=87,crosses=0;
+var BREAK_BUDGET=90*60;                    /* бюджет перерывов на смену */
+var taskSec=0,ropAlert=false;              /* живой таймер текущей задачи */
+var STUCK=60*60;                           /* 60 минут в задаче = жёсткий сигнал + РОП */
+var remind=null,leadSla=null;              /* напоминание T−10 · SLA нового лида 5 мин */
+var streakDays=4,planDone=12,planGoal=18,moneyToday=13500,waiting2nd=3;
+var SHIFT_START=9*60+12;                   /* демо-часы смены: 09:12 */
+var shiftMin=0;                            /* минут с начала смены (для оси «сейчас») */
+var openRule=-1;                           /* какое правило фазы раскрыто в плане */
+var byId={};TASKS.forEach(function(t){byId[t.id]=t});
+
+function inPh(p){return TASKS.filter(function(t){return t.ph===p})}
+function leftIn(p){return inPh(p).filter(function(t){return !done[t.id]})}
+function phDone(p){return leftIn(p).length===0}
+function allDone(){return TASKS.every(function(t){return done[t.id]})}
+function kranOpen(){return phDone('msg')&&phDone('pay')&&crosses<3}
+function locked(id){return (id==='new'||id==='sec')&&!kranOpen()}
+function focusTask(){var q=leftIn(PHASES[cur].id);return q.length?q[0]:null}
+function totalLeft(){return TASKS.filter(function(t){return !done[t.id]}).length}
+function doneCount(){return TASKS.length-totalLeft()}
+function isUrgent(t){return t&&(t.point||t.ph==='new')}
+function plural(n,f){var a=Math.abs(n)%100,b=a%10;
+  if(a>10&&a<20)return f[2];if(b>1&&b<5)return f[1];if(b===1)return f[0];return f[2]}
+function budLeft(){var m=0;TASKS.forEach(function(t){if(!done[t.id])m+=(t.bud||10)});return m}
+
+/* ═══════════ ПОЛОСА ═══════════ */
+function renderMini(){
+  document.getElementById('mSh').textContent=statusLabel();
+  document.getElementById('mDot').className='dot '+statusKey();
+  document.getElementById('strip').classList.toggle('off',!started);
+
+  var t=focusTask(),n=document.getElementById('mNow'),here=(openedId&&t&&openedId===t.id);
+  if(!started){
+    n.innerHTML='<span class="nw">Смена</span><span class="actnow" style="color:var(--red-d)">Не начата — открой план дня и нажми «Начать смену»</span>';
+  }else if(onBreak){
+    n.innerHTML='<span class="nw">Перерыв</span><span class="actnow">Конвейер не подаёт сделки</span>'
+      +'<span class="tmr'+(breakSec>BREAK_BUDGET?' warn':'')+'">⏸ '+fmt(breakSec)+' <span style="font-weight:500;opacity:.7">/ '+fmt(BREAK_BUDGET)+'</span></span>';
+  }else if(!t){
+    n.innerHTML='<span class="nw">Маршрут</span><span class="actnow">Пройден ✓ — можно закрывать смену</span>';
+  }else if(here){
+    /* сделка уже открыта на экране — имя не повторяем, полоса говорит ЧТО ДЕЛАТЬ */
+    n.innerHTML='<span class="nw">Что делать</span>'
+      +(t.why?'<span class="why" title="Почему эта задача первая: '+t.why+'">⚡ '+t.why.split(' · ')[0]+'</span>':'')
+      +'<span class="actnow">'+t.act+'</span>'
+      +'<span class="tmr '+tmrCls()+'">⏱ '+fmt(taskSec)+(t.bud?' <span style="font-weight:500;opacity:.7">/ '+t.bud+' мин</span>':'')+'</span>';
+  }else{
+    /* менеджер в другой сделке или подача ещё не сработала — тогда имя нужно */
+    n.innerHTML='<span class="nw">Следующая</span><span class="nm">'+t.name+'</span>'
+      +'<span class="chip '+t.chip.c+'">'+t.chip.t+'</span>'
+      +(t.why?'<span class="why" title="Почему эта задача первая: '+t.why+'">⚡ '+t.why.split(' · ')[0]+'</span>':'')
+      +'<span class="act">'+t.act+'</span>';
+  }
+
+  var a=document.getElementById('mAlert');
+  if(ropAlert)a.innerHTML='<span class="alrt hard" title="Больше часа в одной задаче. Уведомление ушло РОПу.">⏳ час в задаче · РОП</span>';
+  else if(leadSla!==null)a.innerHTML='<span class="alrt hard" title="Новый лид: набор ≤5 минут. Не позвонишь — уйдёт другому менеджеру.">🆕 лид · <span class="num">'+fmt(leadSla)+'</span></span>';
+  else if(remind)a.innerHTML='<span class="alrt soon" title="'+remind.name+' — '+remind.what+'. За 10 минут до точки новые лиды не выдаются.">⏰ '+remind.min+' мин · '+remind.name.split(' ')[0]+'</span>';
+  else a.innerHTML='';
+
+  renderRest();
+  renderPrim();
+}
+
+/* ОСТАТОК ДНЯ — без имён: видно дистанцию, выбирать нечего */
+function renderRest(){
+  var r=document.getElementById('mRest');
+  if(!started){r.className='rest muted';r.innerHTML='<span class="rl">план дня · '+TASKS.length+' '+plural(TASKS.length,['задача','задачи','задач'])+'</span>';return}
+  var p=PHASES[cur],tot=inPh(p.id).length,dn=tot-leftIn(p.id).length,nx='';
+  for(var i=cur+1;i<PHASES.length;i++){
+    var q=PHASES[i];if(locked(q.id))continue;
+    var l=leftIn(q.id).length;
+    if(l){nx=' · дальше '+l+' '+plural(l,q.forms);break}
+  }
+  r.className='rest';
+  r.innerHTML='<span class="rl">'+p.n.toLowerCase()+' <b>'+dn+' из '+tot+'</b>'+nx+'</span>'
+    +'<span class="bar"><i style="transform:scaleX('+(doneCount()/TASKS.length).toFixed(3)+')"></i></span>';
+}
+
+function renderPrim(){
+  var pr=document.getElementById('mPrim'),t=focusTask();
+  if(!started){pr.innerHTML='<button class="btn prim" onclick="openPlan()">Открыть план дня</button>';return}
+  if(onBreak){pr.innerHTML='<button class="btn ok" onclick="toggleBreak()">Вернуться в работу</button>';return}
+  if(onCall){pr.innerHTML='<span class="pend-lb">разговор идёт · конвейер ждёт</span>';return}
+  if(pend){
+    var pt=byId[pend.id];
+    pr.innerHTML='<span class="pend'+(pend.grace?' grace':'')+'">'+(pend.grace?'ждёт':'открываю')+' <b>'+(pt?pt.name.split(' ')[0]:'')+'</b> <i class="num">'+fmtSec(pend.left)+'</i></span>'
+      +(pend.canCancel?'<button class="btn sec" onclick="cancelPend()">Отмена</button>'
+                      :'<button class="btn prim" onclick="openDeal(\''+pend.id+'\')">Открыть</button>');
+    return;
+  }
+  if(!t){pr.innerHTML=allDone()?'<button class="btn ok" onclick="endShift()">Закончить смену</button>'
+    :'<button class="btn prim" onclick="nextPhase()">Дальше по маршруту →</button>';return}
+  if(openedId===t.id){
+    /* нормальный ход: карточка открыта, кнопок не надо — результат менеджер выбирает в Sensei */
+    pr.innerHTML='<span class="pend-lb" title="Результат задачи менеджер выбирает в Sensei — виджет его не дублирует">→ Sensei</span>'
+      +'<button class="btn sec" onclick="resultMarked(\''+t.id+'\')" title="Демо: имитирует выбор результата в Sensei">✓ демо: результат</button>';
+    return;
+  }
+  pr.innerHTML='<button class="btn prim" onclick="openDeal(\''+t.id+'\')">Вернуться к задаче →</button>';
+}
+
+function statusKey(){if(!started)return '';if(onBreak)return 'brk';if(onCall)return 'call';return 'on'}
+function statusLabel(){if(!started)return 'не начата';if(onBreak)return 'перерыв';if(onCall)return 'разговор';return 'на связи'}
+function tmrCls(){var t=focusTask();if(!t)return '';if(taskSec>=STUCK)return 'bad';if(t.bud&&taskSec>=t.bud*60)return 'warn';return ''}
+function livesHtml(){var h='';for(var i=1;i<=5;i++)h+='<span class="'+(i<=lives?'':'off')+'">❤</span>';return h}
+function qaCls(){return qa>=90?'ok':qa>=65?'mid':'low'}
+
+/* ═══════════ ЭКРАН «ПЛАН ДНЯ» ═══════════ */
+function renderPlan(){
+  /* объём округляем до получаса: «≈» рядом с точными минутами читается как враньё */
+  var left=totalLeft(),half=Math.max(1,Math.round(budLeft()/30)),h=Math.floor(half/2),m=(half%2)*30;
+  document.getElementById('pVol').innerHTML=(started?'Осталось <b>':'Сегодня <b>')+left+' '+plural(left,['задача','задачи','задач'])+'</b> · ≈ '
+    +(h?h+' '+plural(h,['час','часа','часов'])+(m?' 30 мин':''):m+' мин')+' работы';
+
+  /* маршрут — витрина: клик раскрывает правило фазы, задачу в работу не поднимает */
+  var r='';
+  PHASES.forEach(function(p,i){
+    var tot=inPh(p.id).length,lf=leftIn(p.id).length,lk=locked(p.id),empty=(tot===0),dn=(!empty&&lf===0);
+    var isCur=(i===cur&&started&&!dn&&!empty);
+    /* порядок важен: замок → пусто → разобрано. Иначе фаза без задач притворяется закрытой */
+    var meta=lk?'откроется, когда разберёшь сообщения и оплаты':(empty?'на сегодня нет':(dn?'разобрано':p.meta));
+    if(p.id==='pay'&&!dn&&!lk&&!empty)meta='есть просрочка без новой даты';
+    var cnt=lk?'🔒':(empty?'—':(dn?'✓':lf));
+    r+='<button class="prow'+(isCur?' cur':'')+(dn&&!lk?' done':'')+(lk?' lock':'')+(empty&&!lk?' none':'')+(openRule===i?' opened':'')+'" onclick="toggleRule('+i+')" aria-expanded="'+(openRule===i)+'">'
+      +'<span class="ico">'+p.ico+'</span>'
+      +'<span class="tx"><b>'+p.n+'</b><span>'+meta+'</span></span>'
+      +'<span class="cnt">'+cnt+'</span>'
+      +'<span class="cv">▾</span></button>';
+    if(p.rule)r+='<div class="prule'+(openRule===i?'':' hid')+'">'+p.rule+'</div>';
+  });
+  document.getElementById('pRoute').innerHTML=r;
+  renderAxis();
+
+  document.getElementById('pMine').innerHTML=
+     '<div class="mrow"><span>жизни</span><span class="lives">'+livesHtml()+'</span></div>'
+    +'<div class="mrow"><span>рейтинг ИИ</span><span class="qa '+qaCls()+'">'+qa+' <span style="font-weight:400;color:var(--faint);font-size:11px">порог 65 · идеал 90</span></span></div>'
+    +'<div class="mrow"><span>оплат сегодня</span><b class="hl">'+moneyToday.toLocaleString('ru-RU')+' ₽</b></div>'
+    +'<div class="mrow"><span>ждут 2-го платежа</span><b>'+waiting2nd+' '+plural(waiting2nd,['сделка','сделки','сделок'])+'</b></div>'
+    +'<div class="mrow"><span>смен подряд с зиро</span><b>'+streakDays+'</b></div>'
+    +'<div class="mrow"><span>перерыв</span><b'+(breakSec>BREAK_BUDGET?' style="color:var(--red-d)"':'')+'>'+fmt(breakSec)+' / '+fmt(BREAK_BUDGET)+'</b></div>'
+    +'<div class="mgoal"><div class="mrow" style="padding:0;border:0"><span>план месяца</span><b>'+planDone+' из '+planGoal+'</b></div>'
+    +'<div class="bar"><i style="width:'+(planDone/planGoal*100)+'%"></i></div></div>'
+    +'<div class="kran'+(kranOpen()?' open':'')+'">'+(kranOpen()?'✓ кран новых открыт'
+      :(crosses>=3?'⛔ кран закрыт: 3 просрочки за смену — разбор с РОПом'
+                  :'⛔ новые лиды и вторичка на паузе, пока не разобраны сообщения и оплаты'))+'</div>'
+    +'<div class="mnote">Вторая половина твоих денег приходит со вторым платежом клиента — поэтому '+waiting2nd+' сделки в подвесе это тоже твоё.</div>';
+
+  var st=document.getElementById('pStart'),bk=document.getElementById('pBreak'),nt=document.getElementById('pNote');
+  bk.style.display=started?'':'none';
+  bk.textContent=onBreak?'▶ В работу':'⏸ Перерыв';
+  bk.className='btn '+(onBreak?'ok':'sec');
+  if(!started){
+    st.innerHTML='<span class="pl">▶</span>Начать смену';st.className='btn prim go';
+    nt.textContent='Пока смена не начата, конвейер не подаёт сделки и время смены не идёт.';
+  }else if(allDone()){
+    st.innerHTML='Закончить смену';st.className='btn ok';
+    nt.textContent='Маршрут пройден — можно закрывать смену на зиро.';
+  }else{
+    st.innerHTML='Вернуться в работу';st.className='btn prim';
+    nt.textContent='Задачи подаёт конвейер: список выше — обзор дня, а не пульт. Взять задачу отсюда нельзя.';
+  }
+}
+
+/* ось обязательств ко времени: только задачи с точкой-временем */
+function renderAxis(){
+  var pts=TASKS.filter(function(t){return t.point&&!done[t.id]})
+    .map(function(t){return {min:hm(t.point),lb:t.point,who:t.name.split(' ')[0]}})
+    .sort(function(a,b){return a.min-b.min});
+  var box=document.getElementById('pAxis');
+  if(!pts.length){box.innerHTML='<div class="ax-empty">Обязательств ко времени на сегодня нет — весь день ведёт конвейер.</div>';return}
+
+  var A=9*60,B=20*60,W=B-A;                 /* шкала 09:00–20:00 */
+  function pos(m){return Math.max(0,Math.min(100,(m-A)/W*100))}
+  var now=SHIFT_START+shiftMin;
+  var h='<div class="axis"><div class="ax-track">';
+  h+='<div class="ax-band" style="left:'+pos(9*60)+'%;width:'+(pos(9*60+15)-pos(9*60))+'%"><span>09:00–09:15 сообщения</span></div>';
+  if(started)h+='<div class="ax-now" style="left:'+pos(now)+'%"><span>сейчас '+clock(now)+'</span></div>';
+  pts.forEach(function(p){
+    h+='<div class="ax-pt" style="left:'+pos(p.min)+'%"><i></i><span class="lb"><b>'+p.lb+'</b><span>'+p.who+'</span></span></div>';
+  });
+  h+='</div><div class="ax-hrs"><span>09:00</span><span>12:00</span><span>15:00</span><span>18:00</span><span>20:00</span></div></div>';
+  box.innerHTML=h;
+}
+function hm(s){var a=s.split(':');return (+a[0])*60+(+a[1])}
+function clock(m){return pad(Math.floor(m/60)%24)+':'+pad(m%60)}
+
+function toggleRule(i){openRule=(openRule===i?-1:i);renderPlan()}
+function openPlan(){document.getElementById('plan').classList.add('on');renderPlan()}
+function closePlan(){document.getElementById('plan').classList.remove('on')}
+function planOpen(){return document.getElementById('plan').classList.contains('on')}
+
+/* ═══════════ СВОДКА СМЕНЫ ═══════════ */
+function renderSum(){
+  var lf=TASKS.filter(function(t){return !done[t.id]});
+  var h='<div class="big"><b>'+doneCount()+' из '+TASKS.length+'</b><span>задач разобрано · начало 09:12 · конец '+clock(SHIFT_START+shiftMin)+'</span></div>'
+   +'<div class="g">'
+   +'<div class="scell green"><b>'+moneyToday.toLocaleString('ru-RU')+' ₽</b><span>оплат сегодня</span></div>'
+   +'<div class="scell"><b>'+waiting2nd+'</b><span>ждут 2-го платежа — вторые 50% твои</span></div>'
+   +'<div class="scell"><b>'+lives+' / 5</b><span>жизни на конец дня</span></div>'
+   +'<div class="scell '+(qa>=90?'green':'gold')+'"><b>'+qa+'</b><span>рейтинг ИИ</span></div>'
+   +'<div class="scell"><b>'+fmt(breakSec)+'</b><span>перерыв из '+fmt(BREAK_BUDGET)+'</span></div>'
+   +'<div class="scell'+(crosses?' gold':'')+'"><b>'+crosses+'</b><span>крестов за смену</span></div>'
+   +'</div>';
+  if(lf.length){
+    h+='<div class="left-list"><div class="lh">Осталось '+lf.length+' '+plural(lf.length,['задача','задачи','задач'])+' — уходит в завтрашний план дня</div>';
+    lf.forEach(function(t){
+      h+='<div class="lrow"><b>'+t.name+'</b><span class="chip '+t.chip.c+'">'+t.chip.t+'</span><span>'+t.act+'</span><span class="w">'+t.when+'</span></div>';
+    });
+    h+='</div>';
+  }else{
+    h+='<div class="left-list"><div class="lh" style="color:var(--green-d)">Зиро ✓ Ничего не осталось — серия смен продолжается.</div></div>';
+  }
+  document.getElementById('sumBody').innerHTML=h;
+}
+function openSum(){renderSum();document.getElementById('sum').classList.add('on')}
+function closeSum(){document.getElementById('sum').classList.remove('on')}
+
+/* ═══════════ ДЕЙСТВИЯ ═══════════ */
+function render(){renderMini();if(planOpen())renderPlan()}
+function resetTaskTimer(){taskSec=0;ropAlert=false;document.getElementById('strip').classList.remove('alarm')}
+
+function startShift(){
+  if(!started){
+    started=true;tmr=setInterval(tick,1000);resetTaskTimer();
+    closePlan();render();queueNext();
+    toast('Смена начата · 09:12','Опоздание 12 минут ушло РОПу. Первые 15 минут — только сообщения.');
+    return;
+  }
+  if(allDone()){endShift();return}
+  closePlan();
+  if(onBreak)toggleBreak();
+}
+function endShift(){
+  if(!allDone()){
+    toast('Ещё не зиро','Осталось задач: '+totalLeft()+'. Смену можно закрыть, но остаток уйдёт в завтрашний план и это увидит РОП.',1);
+  }
+  closePlan();openSum();
+}
+function nextPhase(){
+  for(var i=0;i<PHASES.length;i++){
+    var p=PHASES[i];
+    if(!phDone(p.id)&&!locked(p.id)){cur=i;resetTaskTimer();render();queueNext();toast('Дальше по маршруту','Этап: '+p.ico+' '+p.n);return}
+  }
+  toast('Маршрут пройден ✓','Все задачи разобраны — можно закрывать смену.');
+}
+
+/* ЦИКЛ: Sensei ставит задачу → виджет подаёт сделку и сам открывает карточку →
+   менеджер звонит → РЕЗУЛЬТАТ ОТМЕЧАЕТ В SENSEI → Sensei закрывает задачу и ставит следующую.
+   Виджет результат НЕ пишет: одно место отметки. Факт звонка фиксирует PBX. */
+function resultMarked(id){
+  toast('Sensei принял результат','Задача закрыта, следующая по цепочке поставлена. Подаю сделку.');
+  finishTask(id);
+}
+function finishTask(id){
+  var t=byId[id];
+  if(t&&t.bud){
+    if(taskSec>STUCK){lives=Math.max(0,lives-1);qa=Math.max(40,qa-6);crosses++;
+      toast('Задача закрыта, но с зависанием','Больше часа в одной задаче: −1 жизнь, рейтинг '+qa+'. РОП это видит.',1)}
+    else if(taskSec<=t.bud*60&&qa<100)qa=Math.min(100,qa+1);
+  }
+  leadSla=null;
+  done[id]=1;openedId=null;
+  if(phDone(PHASES[cur].id)){
+    var nx=cur+1;
+    while(nx<PHASES.length&&(phDone(PHASES[nx].id)||locked(PHASES[nx].id)))nx++;
+    if(nx<PHASES.length){cur=nx;toast('Этап закрыт ✓','Дальше: '+PHASES[nx].ico+' '+PHASES[nx].n)}
+    else if(allDone())toast('Маршрут пройден ✓','Все задачи разобраны — можно закрывать смену на зиро.');
+  }
+  resetTaskTimer();renderCard();render();queueNext();
+}
+
+/* конвейер */
+function queueNext(){
+  if(!started||onBreak||onCall){pend=null;render();return}
+  var t=focusTask();
+  if(!t){pend=null;render();return}
+  pend={id:t.id,left:3,canCancel:!isUrgent(t),grace:false};render();
+}
+function cancelPend(){
+  if(!pend||!pend.canCancel)return;
+  cancels++;pend={id:pend.id,left:60,canCancel:false,grace:true};
+  toast('Отложил на минуту','Сделка осталась первой в очереди. Через 60 секунд откроется без спроса — отменить ещё раз нельзя.'+(cancels>=3?' Третья отмена: РОП видит.':''));
+  render();
+}
+function openDeal(id){
+  var t=byId[id];pend=null;taskSec=0;ropAlert=false;openedId=id;
+  document.getElementById('strip').classList.remove('alarm');
+  renderCard();render();
+  toast('Карточка открыта: '+(t?t.name:''),'Виджет перевёл amoCRM в эту сделку. Дальше — звонок и результат в Sensei; кнопок нажимать не надо.');
+}
+/* рама карточки едет за конвейером — иначе непонятно, что виджет реально открыл сделку */
+function renderCard(){
+  var t=openedId?byId[openedId]:null;
+  document.getElementById('cName').textContent=t?t.name:'Рассказова Ольга Васильевна';
+  document.getElementById('cChip').textContent=t?t.chip.t:'ФССП';
+  document.getElementById('cStage').textContent=t?(t.ph==='msg'?'Квал лиды':t.ph==='pay'?'Подписан · не оплачен':t.ph==='touch'?'На подписи / частичка':'В работе'):'Квал лиды';
+}
+function toggleBreak(){
+  onBreak=!onBreak;
+  if(onBreak){pend=null;toast('Перерыв','Очередь не подаёт сделки. Бюджет смены '+fmt(BREAK_BUDGET)+', перерасход виден РОПу.');openPlan()}
+  else {closePlan();toast('Вернулся в работу','Конвейер снова подаёт сделки.');queueNext()}
+  render();
+}
+function toggleCall(){
+  onCall=!onCall;
+  if(onCall)pend=null;else queueNext();
+  toast(onCall?'Разговор идёт':'Разговор завершён',onCall?'Пока PBX видит активный звонок, конвейер молчит сам — отмена не нужна, крест не ставится.':'Конвейер продолжает подачу.');
+  render();
+}
+
+/* демо-триггеры */
+function demoRemind(){
+  if(!started){toast('Сначала начни смену','');return}
+  remind={min:10,name:'Иванова Мария',what:'оплата 13 500 ₽ в 16:00'};render();
+  toast('⏰ Напоминание','Через 10 минут звонок Ивановой по оплате. За 10 минут до точки система перестаёт выдавать тебе новых лидов.');
+}
+function demoStuck(){
+  if(!started||!focusTask()){toast('Нужна активная задача','');return}
+  taskSec=STUCK;ropAlert=true;document.getElementById('strip').classList.add('alarm');render();
+  toast('Ты в задаче больше часа','Иди дальше. Уведомление ушло РОПу: он проверит, чем занят сотрудник.',1);
+}
+function demoLead(){
+  if(!started){toast('Сначала начни смену','');return}
+  if(!kranOpen()){toast('Кран закрыт','Новый лид не выдаётся: сначала сообщения и оплаты.');return}
+  leadSla=300;render();
+  toast('🆕 Новый лид: Соколова Анна','Набор ≤5 минут. Не позвонишь — лид уйдёт другому менеджеру, и это увидит РОП.');
+}
+
+/* ═══════════ ТАКТ ═══════════ */
+function tick(){
+  if(onBreak){breakSec++;
+    if(breakSec===BREAK_BUDGET)toast('Бюджет перерывов исчерпан','Дальше время идёт в перерасход и попадёт в сводку РОПу.',1);
+    render();return;
+  }
+  if(onCall)return;
+
+  /* демо-часы смены: минута смены за минуту реального времени */
+  if(!window.__s)window.__s=0;
+  window.__s++;if(window.__s%60===0)shiftMin++;
+
+  if(started&&focusTask()){
+    taskSec++;
+    if(taskSec===STUCK&&!ropAlert){
+      ropAlert=true;document.getElementById('strip').classList.add('alarm');
+      toast('Ты в задаче больше часа','Иди дальше. Уведомление ушло РОПу: он проверит, чем занят сотрудник.',1);
+    }
+  }
+  if(leadSla!==null){
+    leadSla--;
+    if(leadSla<=0){leadSla=null;crosses++;qa=Math.max(40,qa-4);
+      toast('Лид ушёл другому менеджеру','Пять минут вышли. Крест в смену, рейтинг '+qa+'. РОП видит.',1)}
+  }
+  if(pend){pend.left--;if(pend.left<=0){openDeal(pend.id);return}}
+  if(!phDone('msg')&&secLeft>-3600)secLeft--;
+  render();
+}
+function fmt(s){return pad(Math.floor(s/60))+':'+pad(s%60)}
+function fmtSec(s){return s>=60?fmt(s):s+' с'}
+function pad(n){return (n<10?'0':'')+n}
+function toast(t,s,bad){document.getElementById('tT').textContent=t;document.getElementById('tS').textContent=s||'';
+  var el=document.getElementById('toast');el.className='on'+(bad?' bad':'');
+  clearTimeout(window.__t);window.__t=setTimeout(hideToast,5600)}
+function hideToast(){document.getElementById('toast').className=''}
+
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  if(document.getElementById('sum').classList.contains('on'))closeSum();
+  else if(planOpen()&&started)closePlan();
+});
+
+/* ПЕРВЫЙ ВХОД ЗА ДЕНЬ. В бою — по факту начатой смены на стороне Sensei;
+   в прототипе план дня просто открывается на загрузке. */
+renderCard();render();openPlan();
+</script>
+</body>
+</html>

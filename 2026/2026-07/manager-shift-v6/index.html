@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Виджет смены v6 · Плитки и три зоны · SALE 100.0</title>
+<meta name="description" content="Виджет смены менеджера v6 в amoCRM: тёмная полоса-плитки с данными смены, раскрытие в приоритетные задачи, три зоны (красная, жёлтая, обычная), обоснованное отклонение от рекомендации и подтверждение касания по факту.">
+<style>
+/* ═══ ВИДЖЕТ СМЕНЫ v6 (постановка Виктории 28.07 + эталон полосы-плиток)
+   ПРИНЦИП: «Сенсей ведёт менеджера по рабочему дню, сохраняя возможность ОБОСНОВАННО
+   ОТКЛОНИТЬСЯ от рекомендации, но не оставляя его один на один с хаосом CRM.»
+   Поэтому нигде нет глухой блокировки: есть рекомендация системы и есть кнопка
+   «Отклониться» — она требует ПРИЧИНУ, пишет её в карточку и показывает РОПу.
+
+   ТРИ ЗОНЫ:
+     КРАСНАЯ  обязательные — клиент написал · пропущенный входящий · договорённость на время ·
+              прислал документы · обещал оплатить сегодня · счёт просрочен · задача просрочена.
+              ПОКА НЕ ОБРАБОТАНА — НОВЫЕ ЛИДЫ ЗАБЛОКИРОВАНЫ.
+     ЖЁЛТАЯ   задачи дня — дожим · повторная консультация · запрос КИ · контроль оплаты ·
+              «клиент думает» · follow-up. До конца дня, но лиды не блокируют.
+     ОБЫЧНАЯ  рекомендуемые касания — давно нет контакта · низкий приоритет · не готов · прогрев.
+
+   ПОЛОСА = ПЛИТКИ ДАННЫХ (эталон заказчика), раскрывается в приоритетные задачи.
+   Тёмная намеренно: это системный слой над amoCRM, а не часть её интерфейса.
+   Цвет несёт смысл (заблокировано · время · конверсия · пропущенное), декоративных свечений нет.
+
+   КАСАНИЕ ЗАСЧИТЫВАЕТСЯ ПО ФАКТУ: недозвон 8 секунд — попытка, а не касание.
+   ПЕРЕНОС ОГРАНИЧЕН: разрешённые слоты, дата числом, второй перенос последний. ═══ */
+:root{
+  --bg:#eef1f5; --card:#fff; --line:#e4e8ee; --ink:#1f2633; --mut:#6c7686; --faint:#8a93a3; --soft:#f6f8fb;
+  --green:#0f9d58; --green-d:#0b7a45; --green-bg:#eefaf3; --green-line:#bfe8cf;
+  --dark:#1b2437;
+  --red:#e5484d; --red-d:#b23237; --red-bg:#fdf1f1; --red-line:#f5c6c8;
+  --purple:#7c5cd6; --purple-bg:#f5f2fd; --purple-line:#ddd2f5;
+  --orange:#e8792b; --orange-bg:#fdf4ec; --orange-line:#f5d3b3;
+  --gold:#9a7318; --gold-bg:#fbf6e9; --gold-line:#ecdcb4;
+  --blue:#2f68c4; --blue-bg:#eff4fc; --blue-line:#cfe0f7;
+  --amo:#f1f3f6; --amo-line:#dfe3e9; --amo-ink:#5c6472;
+  /* тёмная полоса */
+  --d-bg:#111826; --d-tile:#161d2c; --d-line:#242d3f; --d-ink:#eef1f6; --d-mut:#8b95a7;
+  --d-green:#35c98a; --d-gold:#f0b429; --d-cyan:#42b8d4; --d-purple:#a78bfa; --d-red:#f2555a; --d-blue:#4d9cf0;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --z-strip:20; --z-modal:50; --z-pop:55; --z-toast:60;
+  font-size:15px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#e7eaef;color:var(--ink);line-height:1.45;overflow:hidden}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-align:left}
+.num{font-variant-numeric:tabular-nums}
+
+.amo{height:100vh;display:grid;grid-template-columns:64px 1fr;overflow:hidden}
+.rail{background:#fff;border-right:1px solid var(--amo-line);display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:3px;overflow:hidden}
+.rail .ri{width:44px;height:46px;border-radius:9px;display:grid;place-items:center;font-size:17px;color:#9aa2af;position:relative;flex:none}
+.rail .ri.on{background:var(--soft);color:var(--dark)}
+.rail .ri small{position:absolute;top:5px;right:6px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:7px;padding:1px 4px}
+.rail .ri span{position:absolute;bottom:3px;font-size:8.5px;color:#a8afba;letter-spacing:-.2px}
+.main{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+
+/* ═══ ПОЛОСА-ПЛИТКИ ═══ */
+#strip{flex:none;background:var(--d-bg);color:var(--d-ink);overflow:hidden;position:relative;z-index:var(--z-strip);
+  border-bottom:1px solid var(--amo-line)}
+.bar{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));height:104px}
+.tile{padding:10px 13px;border-right:1px solid var(--d-line);background:var(--d-tile);display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0;overflow:hidden;cursor:pointer;transition:background .16s ease}
+.tile:last-child{border-right:0}
+.tile:hover{background:#1b2434}
+/* подписи переносятся: обрезанное «ПРОПУЩЕННЫЕ ЗВОН…» хуже двух строк */
+.tile .h{display:flex;align-items:flex-start;gap:6px;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--d-mut);line-height:1.2}
+.tile .h i{font-style:normal;font-size:11px;flex:none;line-height:1}
+.tile .v{font-size:23px;font-weight:800;letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .v small{font-size:13px;font-weight:700;color:var(--d-mut)}
+.tile .s{font-size:10px;color:var(--d-mut);line-height:1.32;overflow:hidden}
+.tile .s b{color:#c3ccdb;font-weight:600}
+.tile.gr .v{color:var(--d-green)} .tile.gr .h i{color:var(--d-green)}
+.tile.gd .v{color:var(--d-gold)} .tile.gd .h i{color:var(--d-gold)}
+.tile.cy .v{color:var(--d-cyan)} .tile.cy .h i{color:var(--d-cyan)}
+.tile.pu .v{color:var(--d-purple)} .tile.pu .h i{color:var(--d-purple)}
+.tile.rd .v{color:var(--d-red)} .tile.rd .h i{color:var(--d-red)}
+.tile.bl .v{color:var(--d-blue)} .tile.bl .h i{color:var(--d-blue)}
+.segs{display:flex;gap:3px;margin-top:1px}
+.segs i{flex:1;height:5px;border-radius:2px;background:#2b3548}
+.segs i.on{background:var(--d-green)}
+.badge{display:inline-flex;align-items:center;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:800;margin-left:6px}
+.badge.pu{background:rgba(167,139,250,.16);color:var(--d-purple)}
+.up{color:var(--d-green);font-weight:700}
+
+/* раскрытие: приоритетные задачи */
+/* раскрытие через grid-template-rows, а не max-height: не нужно угадывать высоту и нет дёрганья */
+.drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s var(--ease);border-top:1px solid transparent}
+#strip.open .drop{grid-template-rows:1fr;border-top-color:var(--d-line)}
+.drop > .drop-in{min-height:0;overflow:hidden}
+.drop-in{padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}
+#strip.open .drop-in{padding:14px 16px 15px}
+.dh{display:flex;align-items:baseline;gap:9px;padding-bottom:9px}
+.dh b{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+.dh span{font-size:11.5px;color:var(--d-mut)}
+.dh .more{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--d-cyan)}
+.drow{display:grid;grid-template-columns:24px minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;background:#0d1420;margin-bottom:6px}
+.drow.first{background:rgba(242,85,90,.13);box-shadow:inset 0 0 0 1px rgba(242,85,90,.3)}
+.drow .mk{width:24px;height:24px;border-radius:7px;background:#1d2637;display:grid;place-items:center;font-size:11px}
+.drow .tx{min-width:0}
+.drow .tx b{font-size:13px;font-weight:700}
+.drow .tx span{display:block;font-size:11px;color:var(--d-mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.drow .w{font-size:11px;color:var(--d-mut);white-space:nowrap}
+.drow .w.due{color:var(--d-red);font-weight:700}
+.dnext{background:#0d1420;border-radius:12px;padding:13px 15px;box-shadow:inset 0 0 0 1px var(--d-line)}
+.dnext .kb{font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--d-red)}
+.dnext h4{margin-top:4px;font-size:16px;font-weight:800;letter-spacing:-.01em}
+.dnext .sb{margin-top:3px;font-size:11.5px;color:var(--d-mut);line-height:1.4}
+.dnext .btns{margin-top:11px;display:flex;gap:7px;flex-wrap:wrap}
+.dbtn{border-radius:9px;font-weight:700;font-size:12px;padding:8px 13px;transition:transform .15s var(--ease),background .18s ease}
+.dbtn:active{transform:scale(.97)}
+.dbtn.go{background:var(--d-green);color:#06231a}
+.dbtn.gh{background:#1d2637;color:var(--d-ink)}
+.dbtn.dev{background:transparent;color:var(--d-gold);box-shadow:inset 0 0 0 1px rgba(240,180,41,.45)}
+.dnote{margin-top:10px;font-size:10.5px;color:var(--d-mut);line-height:1.4}
+
+/* ═══ КАРТОЧКА СДЕЛКИ ═══ */
+.card-wrap{flex:1;display:grid;grid-template-columns:1fr 260px;min-height:0;overflow:hidden}
+.card-l{display:grid;grid-template-columns:400px 1fr;min-width:0;overflow:hidden}
+.pane{background:#fff;border-right:1px solid var(--amo-line);padding:14px 16px;overflow:hidden;color:var(--amo-ink)}
+.pane h3{font-size:17px;font-weight:700;color:#2a3140}
+.pane .id{margin-top:5px;font-size:11.5px;color:var(--faint);display:flex;gap:7px;align-items:center}
+.pane .id b{background:var(--soft);border-radius:5px;padding:1px 6px;font-size:10.5px;color:var(--mut)}
+.pane .stg{margin-top:11px;font-size:11.5px;color:var(--mut)}
+.pane .stg b{display:block;color:var(--ink);font-size:12.5px}
+.pane .bar2{margin-top:7px;height:3px;background:#e2e6ec;border-radius:2px;overflow:hidden}
+.pane .bar2 i{display:block;height:100%;width:62%;background:#b9c0cb}
+.tabs{margin-top:12px;display:flex;gap:13px;font-size:12px;color:#9aa2af;border-bottom:1px solid var(--amo-line);padding-bottom:7px;overflow:hidden}
+.tabs b{color:var(--ink);border-bottom:2px solid var(--dark);padding-bottom:7px;margin-bottom:-8px}
+.fields{margin-top:11px;font-size:11.5px}
+.fld{display:flex;justify-content:space-between;gap:10px;padding:5px 0}
+.fld span{color:var(--faint)}
+.fld b{color:var(--amo-ink);font-weight:500}
+.feed{background:var(--amo);padding:14px 18px;overflow:hidden;color:var(--amo-ink)}
+.ev{background:#fff;border:1px solid var(--amo-line);border-radius:9px;padding:10px 12px;font-size:11.5px;margin-bottom:9px}
+.ev .h2{color:var(--faint);font-size:10.5px}
+.ev .r{margin-top:3px}
+.ev.msg{background:#eef4fd;border-color:#d6e3f7}
+.wids{background:#fff;border-left:1px solid var(--amo-line);padding:12px 10px;overflow:hidden}
+.wids .wt{font-size:15px;font-weight:700;color:#2a3140;margin-bottom:9px}
+.wid{border-radius:8px;padding:9px 11px;font-size:11.5px;font-weight:600;margin-bottom:6px;color:#fff;display:flex;align-items:center;justify-content:space-between}
+.wid.dk{background:#1b2437}.wid.bl{background:#2f68c4}.wid.gr{background:#0b5540}
+.wid.lt{background:var(--soft);color:var(--amo-ink);box-shadow:inset 0 0 0 1px var(--amo-line)}
+.wid.yl{background:#f5cf22;color:#3a3204}
+.wid small{display:block;font-weight:400;font-size:9.5px;opacity:.7}
+
+/* ═══ ЭКРАН «ПЛАН ДНЯ» ═══ */
+.screen{position:fixed;inset:0;background:var(--bg);z-index:var(--z-modal);display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;transform:scale(.995);transition:opacity .22s var(--ease),transform .22s var(--ease)}
+.screen.on{opacity:1;pointer-events:auto;transform:none}
+.s-h{flex:none;background:#fff;border-bottom:1px solid var(--line)}
+.s-hi{max-width:1180px;margin:0 auto;width:100%;padding:15px 22px;display:flex;align-items:center;gap:14px}
+.s-hi h2{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.s-hi .vol{font-size:13px;color:var(--mut)}
+.s-hi .vol b{color:var(--ink);font-weight:700}
+.s-hi .x{margin-left:auto;width:34px;height:34px;border-radius:10px;background:var(--soft);color:var(--mut);display:grid;place-items:center;font-size:14px;flex:none}
+.s-hi .x:hover{background:#eceff4;color:var(--ink)}
+.s-b{flex:1;min-height:0;overflow-y:auto}
+.s-bi{max-width:1180px;margin:0 auto;width:100%;padding:16px 22px 24px}
+.s-cols{margin-top:16px;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+.s-f{flex:none;background:#fff;border-top:1px solid var(--line)}
+.s-fi{max-width:1180px;margin:0 auto;width:100%;padding:13px 22px;display:flex;align-items:center;gap:12px}
+.s-fi .note{font-size:12px;color:var(--mut);max-width:62ch}
+.s-fi .btn{padding:11px 22px;font-size:14px}
+.s-fi .sp{margin-left:auto}
+
+.btn{border-radius:9px;font-weight:700;font-size:12.5px;padding:8px 14px;flex:none;text-align:center;transition:transform .15s var(--ease),background .18s ease}
+.btn:active{transform:scale(.97)}
+.btn.prim{background:var(--dark);color:#fff}
+.btn.ok{background:var(--green);color:#fff}
+.btn.sec{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.btn.danger{background:var(--red);color:#fff}
+.btn.go{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--green)}
+.btn.go .pl{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:8px}
+.btn:focus-visible{outline:2px solid var(--dark);outline-offset:2px}
+
+.sec{margin-top:16px}
+.sec h3{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);padding:0 2px 8px;display:flex;align-items:baseline;gap:8px}
+.sec h3 .dotm{width:8px;height:8px;border-radius:50%;flex:none;align-self:center}
+.sec h3 .dotm.r{background:var(--red)}
+.sec h3 .dotm.y{background:#e3b341}
+.sec h3 .dotm.g{background:#b9c0cb}
+.sec h3 .hint{font-weight:600;letter-spacing:0;text-transform:none;font-size:11px;color:var(--faint)}
+.sec h3 .n{margin-left:auto;font-size:13px;color:var(--ink);font-weight:800}
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.panel.zred{border-color:var(--red-line)}
+
+.trow{width:100%;display:grid;grid-template-columns:26px minmax(0,1fr) auto;align-items:center;gap:11px;padding:11px 15px;transition:background .16s ease}
+.trow + .trow{border-top:1px solid var(--line)}
+.trow .mk{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:12px;background:var(--soft)}
+.trow .tx{min-width:0}
+.trow .tx .l1{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.trow .tx b{font-size:14px;font-weight:700}
+.trow .tx .l2{font-size:11.5px;color:var(--mut);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .rt{display:flex;align-items:center;gap:9px;white-space:nowrap}
+.trow .w{font-size:11.5px;color:var(--faint)}
+.trow .w.due{color:var(--red-d);font-weight:700}
+.trow .att{font-size:10.5px;font-weight:700;color:var(--orange);background:var(--orange-bg);border-radius:6px;padding:2px 6px}
+.chip{font-size:11px;font-weight:700;border-radius:7px;padding:3px 8px;white-space:nowrap;flex:none}
+.chip.g{background:var(--green-bg);color:var(--green-d)}
+.chip.b{background:var(--blue-bg);color:var(--blue)}
+.chip.r{background:var(--red-bg);color:var(--red-d)}
+.chip.gold{background:var(--gold-bg);color:var(--gold)}
+.chip.n{background:var(--soft);color:var(--mut)}
+.panel.zred .trow.first{background:var(--red-bg)}
+.panel.zred .trow.wait{opacity:.78}
+button.trow{cursor:pointer}
+button.trow:hover{background:var(--soft)}
+.take{font-size:11.5px;font-weight:700;border-radius:8px;padding:6px 11px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
+button.trow:hover .take{background:var(--dark);color:#fff;box-shadow:none}
+.gate-note{padding:10px 15px;font-size:11.5px;color:var(--mut);background:var(--soft);border-top:1px solid var(--line);line-height:1.45}
+.gate-note b{color:var(--ink)}
+.gate-note.red{background:var(--red-bg);color:var(--red-d)}
+.gate-note.red b{color:var(--red-d)}
+.locked{padding:15px;font-size:12.5px;color:var(--mut);display:flex;align-items:center;gap:10px;line-height:1.4}
+.locked b{color:var(--red-d)}
+.done-note{padding:15px;font-size:12.5px;color:var(--green-d);font-weight:600}
+
+.cnts{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cnt{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 14px}
+.cnt b{display:block;font-size:24px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.cnt span{font-size:11.5px;color:var(--mut)}
+.cnt.red{background:var(--red-bg);border-color:var(--red-line)}
+.cnt.red b{color:var(--red-d)}
+.cnt.gold b{color:var(--gold)}
+.cnt.lock{opacity:.72}
+
+.axis{padding:18px 22px 14px}
+.ax-track{position:relative;height:3px;background:#e3e7ee;border-radius:2px;margin:40px 0 0}
+.ax-now{position:absolute;top:-9px;width:2px;height:21px;background:var(--dark);border-radius:2px}
+.ax-now span{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:var(--dark);white-space:nowrap}
+.ax-pt{position:absolute;top:-6px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center}
+.ax-pt i{width:13px;height:13px;border-radius:50%;background:#fff;border:3px solid var(--gold);display:block}
+.ax-pt.due i{border-color:var(--red)}
+.ax-pt.past i{border-color:#c4cad3}
+.ax-pt .lb{margin-top:7px;text-align:center;white-space:nowrap}
+.ax-pt .lb b{display:block;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.ax-pt .lb span{display:block;font-size:11.5px;color:var(--mut)}
+.ax-hrs{margin-top:48px;display:flex;justify-content:space-between;font-size:10.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+
+.tempo{padding:14px 16px}
+.tempo .big{display:flex;align-items:baseline;gap:9px}
+.tempo .big b{font-size:30px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.tempo .big span{font-size:12.5px;color:var(--mut)}
+.tempo .st{margin-top:9px;font-size:12.5px;font-weight:700;border-radius:9px;padding:8px 11px;background:var(--green-bg);color:var(--green-d)}
+.tempo .st.late{background:var(--red-bg);color:var(--red-d)}
+.tgrid{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tcell{background:var(--soft);border-radius:10px;padding:9px 11px}
+.tcell b{display:block;font-size:17px;font-weight:800;line-height:1.15;font-variant-numeric:tabular-nums}
+.tcell span{font-size:10.5px;color:var(--mut)}
+.mine{padding:14px 16px}
+.mrow{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 0;font-size:12.5px;color:var(--mut)}
+.mrow + .mrow{border-top:1px solid var(--line)}
+.mrow b{font-size:13.5px;color:var(--ink);font-weight:700}
+.mrow .lives{font-size:14px;letter-spacing:1px}
+.lives .off{opacity:.22}
+.qa{font-size:14px;font-weight:800}
+.qa.ok{color:var(--green-d)}.qa.mid{color:var(--gold)}.qa.low{color:var(--red-d)}
+.mgoal{margin-top:11px;padding-top:11px;border-top:1px solid var(--line)}
+.mgoal .bar3{height:6px;border-radius:4px;background:#e3e7ee;overflow:hidden;margin-top:6px}
+.mgoal .bar3 i{display:block;height:100%;background:var(--gold);border-radius:4px}
+.devlog{margin-top:12px;font-size:11.5px;color:var(--mut);background:var(--gold-bg);border-radius:9px;padding:9px 11px;line-height:1.4}
+.devlog b{color:var(--gold)}
+
+.sum{padding:16px 18px}
+.sum .big{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.sum .big b{font-size:32px;font-weight:800;letter-spacing:-.02em}
+.sum .big span{font-size:14px;color:var(--mut)}
+.sum .g{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px}
+.scell{background:var(--soft);border-radius:11px;padding:11px 13px}
+.scell b{display:block;font-size:19px;font-weight:800;line-height:1.15}
+.scell span{font-size:11.5px;color:var(--mut)}
+.scell.red b{color:var(--red-d)}
+.scell.green b{color:var(--green-d)}
+.debt{margin-top:16px;border-top:1px solid var(--line);padding-top:13px}
+.debt .lh{font-size:13px;font-weight:700;margin-bottom:8px;color:var(--red-d);line-height:1.45}
+.debt .lh.ok{color:var(--green-d)}
+.lrow{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:12.5px;color:var(--mut)}
+.lrow + .lrow{border-top:1px solid var(--line)}
+.lrow b{color:var(--ink);font-weight:700;font-size:13px}
+.lrow .w{margin-left:auto;font-size:11.5px;color:var(--faint);white-space:nowrap}
+
+#pop{position:fixed;z-index:var(--z-pop);background:#fff;border:1px solid var(--line);border-radius:13px;box-shadow:0 18px 44px rgba(15,25,45,.22);padding:12px;width:318px;display:none}
+#pop.on{display:block}
+#pop h4{font-size:13px;font-weight:800}
+#pop .sub{margin-top:3px;font-size:11.5px;color:var(--mut);line-height:1.4}
+#pop .slot{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border-radius:9px;font-size:12.5px;font-weight:600;background:var(--soft);margin-top:7px;transition:background .16s ease}
+#pop .slot:hover{background:var(--dark);color:#fff}
+#pop .slot span{font-size:11px;color:var(--faint)}
+#pop .slot:hover span{color:rgba(255,255,255,.7)}
+#pop .warn{margin-top:9px;font-size:11px;color:var(--red-d);background:var(--red-bg);border-radius:8px;padding:7px 9px;line-height:1.35}
+#pop .warn.gold{color:var(--gold);background:var(--gold-bg)}
+
+#toast{position:fixed;left:50%;bottom:66px;transform:translate(-50%,12px);opacity:0;pointer-events:none;background:var(--dark);color:#fff;border-radius:11px;padding:11px 15px;display:flex;align-items:center;gap:13px;z-index:var(--z-toast);transition:opacity .2s ease,transform .2s var(--ease);max-width:min(92vw,540px)}
+#toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast.bad{background:var(--red-d)}
+#toast.good{background:var(--green-d)}
+#toast b{font-size:13px}
+#toast span{display:block;font-size:11.5px;opacity:.8;margin-top:2px;line-height:1.4}
+
+.tip{position:fixed;left:12px;bottom:10px;font-size:11px;color:#7d8593;background:rgba(255,255,255,.94);border:1px solid var(--amo-line);border-radius:9px;padding:7px 11px;z-index:var(--z-strip);max-width:min(94vw,1010px);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tip b{color:var(--ink)}
+.tip .btn{padding:5px 9px;font-size:11px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--amo-line);color:var(--mut)}
+
+@media (max-width:1360px){.bar{grid-template-columns:repeat(4,minmax(0,1fr));height:auto}.tile{border-bottom:1px solid var(--d-line)}}
+@media (max-width:1100px){.s-cols{grid-template-columns:minmax(0,1fr)}.cnts{grid-template-columns:repeat(2,1fr)}.drop-in{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
+</style>
+</head>
+<body>
+
+<div class="amo">
+  <nav class="rail">
+    <div class="ri">👤<span>Аккаунт</span></div>
+    <div class="ri">🧭<span>Стол</span></div>
+    <div class="ri on">💼<span>Сделки</span></div>
+    <div class="ri">💬<small>1</small><span>imBox</span></div>
+    <div class="ri">✅<small>33</small><span>Задачи</span></div>
+    <div class="ri">📋<span>Списки</span></div>
+    <div class="ri">📄<span>Докум.</span></div>
+    <div class="ri">✉️<span>Почта</span></div>
+    <div class="ri">📊<span>Аналит.</span></div>
+    <div class="ri">⚙️<small>2</small><span>Sensei</span></div>
+  </nav>
+
+  <div class="main">
+    <div id="strip">
+      <div class="bar" id="bar"></div>
+      <div class="drop"><div class="drop-in">
+        <div>
+          <div class="dh"><b>Приоритетные задачи</b><span id="dhSub"></span>
+            <button class="more" onclick="openPlan()">Весь план дня →</button></div>
+          <div id="dList"></div>
+        </div>
+        <div id="dNext"></div>
+      </div></div>
+    </div>
+
+    <div class="card-wrap">
+      <div class="card-l">
+        <div class="pane">
+          <h3 id="cName">Рассказова Ольга Васильевна</h3>
+          <div class="id">#25891966 <b id="cChip">ФССП</b></div>
+          <div class="stg">МПП 2 уровень<b><span id="cStage">Квал лиды</span> <span style="color:var(--faint);font-weight:400">(Сегодня)</span></b><div class="bar2"><i></i></div></div>
+          <div class="tabs"><b>Основное</b><span>МПП</span><span>Анкета</span><span>Сбор доков</span><span>Суд</span></div>
+          <div class="fields">
+            <div class="fld"><span>Отв-ный</span><b>Никитина Анна</b></div>
+            <div class="fld"><span>Бюджет</span><b>0 ₽</b></div>
+            <div class="fld"><span>Статус активности</span><b>Выбрать</b></div>
+            <div class="fld"><span>Договор</span><b>…</b></div>
+            <div class="fld"><span>Дата ежемесячного платежа</span><b>…</b></div>
+            <div class="fld"><span>МПП 1 уровня</span><b>Никитина Анна</b></div>
+            <div class="fld"><span>МПП 2 уровня</span><b>Коканова Анна</b></div>
+            <div class="fld"><span>Руководитель</span><b>Смелов Никита</b></div>
+          </div>
+        </div>
+        <div class="feed">
+          <div class="ev"><div class="h2">Сегодня 12:40 · исходящий +7 909 832-30-55</div><div class="r">Звонок 00:35 · <b>Недозвон</b></div></div>
+          <div class="ev"><div class="h2">Сегодня 13:05 · исходящий +7 909 832-30-55</div><div class="r">Звонок 00:35 · <b>Недозвон</b></div></div>
+          <div class="ev msg"><div class="h2">Сегодня 13:06 · Никитина Анна ✓ отправлено</div><div class="r">«Ольга Васильевна, у Вас все в порядке?»</div></div>
+          <div class="ev" style="background:#f0fbf4;border-color:#c9e9d6"><div class="h2">Сегодня 13:32 · от Sensei для Коканова Анна</div><div class="r"><b>🔁 Новый лид 5.0</b></div></div>
+        </div>
+      </div>
+      <aside class="wids">
+        <div class="wt">Виджеты</div>
+        <div class="wid dk">sensei <span>⌄</span></div>
+        <div class="wid bl">Wappi Widget <span>▶</span></div>
+        <div class="wid lt">Платежи <span>⌄</span></div>
+        <div class="wid lt">Кнопки Salesbot</div>
+        <div class="wid dk">HyperScript <span>⌄</span></div>
+        <div class="wid gr">ОБНУЛЯТОР · Пульт<small>экспресс · первый звонок</small></div>
+        <div class="wid lt">Документы</div>
+        <div class="wid yl">Билайн <span>⌄</span></div>
+        <div class="wid lt">OkiDoki</div>
+        <div class="wid lt">ДОНУЛЯ</div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="plan" role="dialog" aria-modal="true" aria-labelledby="planTitle">
+  <div class="s-h"><div class="s-hi">
+    <h2 id="planTitle">Понедельник, 27 июля</h2>
+    <span class="vol" id="pVol"></span>
+    <button class="x" onclick="closePlan()" aria-label="Закрыть план дня">✕</button>
+  </div></div>
+  <div class="s-b"><div class="s-bi">
+    <div class="cnts" id="pCnts"></div>
+    <section class="sec"><h3>Ко времени <span class="hint">договорённости, которые нельзя забыть</span></h3>
+      <div class="panel" id="pAxis"></div></section>
+    <div class="s-cols">
+      <div>
+        <section class="sec"><h3><span class="dotm r"></span>Красная зона · обязательные <span class="hint">проигнорировать нельзя</span><span class="n" id="pRedN"></span></h3>
+          <div class="panel zred" id="pRed"></div></section>
+        <section class="sec"><h3>Новые лиды <span class="hint">пока красная не обработана — заблокированы</span><span class="n" id="pLeadN"></span></h3>
+          <div class="panel" id="pLead"></div></section>
+        <section class="sec"><h3><span class="dotm y"></span>Жёлтая зона · задачи дня <span class="hint">до конца дня, лиды не блокируют</span><span class="n" id="pYelN"></span></h3>
+          <div class="panel" id="pYel"></div></section>
+        <section class="sec"><h3><span class="dotm g"></span>Обычная зона · рекомендуемые касания <span class="hint">Sensei подкидывает после обязательной работы</span><span class="n" id="pGreyN"></span></h3>
+          <div class="panel" id="pGrey"></div></section>
+      </div>
+      <aside>
+        <section class="sec" style="margin-top:0"><h3>Результат дня</h3><div class="panel tempo" id="pTempo"></div></section>
+        <section class="sec"><h3>Моё</h3><div class="panel mine" id="pMine"></div></section>
+      </aside>
+    </div>
+  </div></div>
+  <div class="s-f"><div class="s-fi">
+    <span class="note" id="pNote"></span>
+    <span class="sp"></span>
+    <button class="btn sec" id="pBreak" onclick="toggleBreak()">⏸ Перерыв</button>
+    <button class="btn prim go" id="pStart" onclick="startShift()"><span class="pl">▶</span>Начать смену</button>
+  </div></div>
+</div>
+
+<div class="screen" id="sum" role="dialog" aria-modal="true" aria-labelledby="sumTitle">
+  <div class="s-h"><div class="s-hi">
+    <h2 id="sumTitle">Смена закрыта</h2>
+    <span class="vol">итог дня уходит РОПу</span>
+    <button class="x" onclick="closeSum()" aria-label="Закрыть сводку">✕</button>
+  </div></div>
+  <div class="s-b"><div class="s-bi"><div class="panel sum" id="sumBody"></div></div></div>
+  <div class="s-f"><div class="s-fi">
+    <span class="note">Сводка уходит РОПу автоматически и становится входом в завтрашний план дня.</span>
+    <span class="sp"></span>
+    <button class="btn sec" onclick="closeSum()">Закрыть</button>
+  </div></div>
+</div>
+
+<div id="pop"></div>
+<div id="toast"><div><b id="tT"></b><span id="tS"></span></div><button class="btn ok" style="padding:7px 12px" onclick="hideToast()">Ок</button></div>
+
+<div class="tip"><b>Демо v6:</b> клик по полосе раскрывает приоритетные задачи. Система ведёт, но «Отклониться» доступно всегда — с причиной, которую видит РОП.
+  <button class="btn" onclick="toggleDrop()">▾ раскрыть полосу</button>
+  <button class="btn" onclick="jumpTo(11*60+20)">🕚 11:20 · время Волкова</button>
+  <button class="btn" onclick="jumpTo(14*60)">🕑 14:00</button>
+  <button class="btn" onclick="jumpTo(18*60)">🕕 конец дня</button>
+  <button class="btn" onclick="toggleCall()">📞 разговор</button>
+  <button class="btn" onclick="openPlan()">📋 план дня</button>
+</div>
+
+<script>
+/* ═══ КЛАССЫ СИГНАЛОВ И ЗОНЫ ═══ */
+var KIND={
+  time     :{z:'red',ico:'🕐',lb:'договорённость на время',ord:1},
+  missed   :{z:'red',ico:'📵',lb:'пропущенный входящий',   ord:2},
+  msg      :{z:'red',ico:'💬',lb:'клиент написал',         ord:3},
+  docs     :{z:'red',ico:'📎',lb:'прислал документы',      ord:4},
+  paytoday :{z:'red',ico:'₽', lb:'обещал оплатить сегодня',ord:5},
+  invoice  :{z:'red',ico:'⏳',lb:'счёт просрочен',          ord:6},
+  overdue  :{z:'red',ico:'🔴',lb:'задача просрочена',       ord:7},
+  lead     :{z:'lead',ico:'🆕',lb:'новый лид',ord:8},
+  push     :{z:'yellow',ico:'📞',lb:'плановый дожим',        ord:9},
+  consult2 :{z:'yellow',ico:'🗣',lb:'повторная консультация',ord:10},
+  ki       :{z:'yellow',ico:'📄',lb:'запрос КИ',             ord:11},
+  paycheck :{z:'yellow',ico:'✅',lb:'контроль оплаты',       ord:12},
+  thinking :{z:'yellow',ico:'🤔',lb:'клиент думает',         ord:13},
+  followup :{z:'yellow',ico:'✉️',lb:'follow-up',             ord:14},
+  cold     :{z:'grey',ico:'🌙',lb:'давно нет контакта',ord:15},
+  low      :{z:'grey',ico:'·', lb:'низкий приоритет',  ord:16},
+  notready :{z:'grey',ico:'🕰',lb:'ещё не готов',      ord:17},
+  warm     :{z:'grey',ico:'♻️',lb:'плановый прогрев',  ord:18}
+};
+
+var TASKS=[
+ {id:'r1',kind:'time',at:'11:30',name:'Волков Андрей',chip:{t:'Д1 · получи КИ',c:'g'},bud:15,cons:1,
+  why:'договорились на 11:30 после сорванной подписи',act:'Позвонить',full:'Получи КИ и составь юрзаключение',call:1},
+ {id:'r2',kind:'time',at:'16:00',name:'Иванова Мария',chip:{t:'13 500 ₽',c:'gold'},bud:15,cons:1,
+  why:'клиент ждёт ровно в 16:00',act:'Позвонить',full:'Доводи до СБП на линии — 15 секунд',call:1},
+ {id:'r3',kind:'msg',name:'Новикова Ольга',chip:{t:'на подписи',c:'g'},bud:6,
+  why:'сообщение без ответа 18 минут',act:'Ответить',full:'Ответь и доведи до подписи'},
+ {id:'r4',kind:'missed',name:'Гусева Лариса',chip:{t:'новый лид',c:'n'},bud:5,cons:1,
+  why:'пропущенный входящий 7 минут назад',act:'Перезвонить',full:'Перезвони немедленно',call:1},
+ {id:'r5',kind:'paytoday',name:'Смирнов Олег',chip:{t:'добор 12 510 ₽',c:'r'},bud:12,
+  why:'обещал оплатить сегодня',act:'Позвонить',full:'Бери деньги или дату числом',call:1},
+ {id:'r6',kind:'docs',name:'Титова Елена',chip:{t:'КИ пришла',c:'b'},bud:10,
+  why:'прислала кредитную историю 40 минут назад',act:'Разобрать',full:'Разбери КИ и назначь презентацию',call:1},
+ {id:'r7',kind:'overdue',name:'Алексеев Роман',chip:{t:'13 500 ₽',c:'r'},bud:12,moved:1,
+  why:'задача просрочена на 2 дня · второй перенос',act:'Позвонить',full:'Второй перенос — последний',call:1},
+
+ {id:'n1',kind:'lead',name:'Соколова Анна',chip:{t:'новый лид',c:'n'},bud:5,cons:1,
+  why:'получен 12 минут назад · набор ≤5 минут',act:'Позвонить',full:'Набери и проведи консультацию',call:1},
+ {id:'n2',kind:'lead',name:'Гусев Артём',chip:{t:'новый лид',c:'n'},bud:5,cons:1,
+  why:'ответил боту, ждёт звонка',act:'Позвонить',full:'Ответь и переводи в звонок',call:1},
+
+ {id:'y1',kind:'push',name:'Петров Дмитрий',chip:{t:'частичка 990 ₽',c:'b'},bud:12,
+  why:'плановый дожим · касание 3 из 6',act:'Позвонить',full:'Предложи скидку и закрой на платёж сегодня',call:1},
+ {id:'y2',kind:'ki',name:'Крылов Игорь',chip:{t:'нет КИ',c:'n'},bud:10,
+  why:'запрос кредитной истории, второй заход',act:'Позвонить',full:'Объясни зачем КИ и дай инструкцию',call:1},
+ {id:'y3',kind:'paycheck',name:'Кузнецов Павел',chip:{t:'добор 12 510 ₽',c:'b'},bud:8,
+  why:'контроль оплаты · платёж завтра',act:'Позвонить',full:'Подтверди завтрашний платёж',call:1},
+ {id:'y4',kind:'thinking',name:'Ким Сергей',chip:{t:'частичка 1 500 ₽',c:'b'},bud:12,
+  why:'клиент думает после кейса',act:'Позвонить',full:'Предложи заказать SIM',call:1},
+ {id:'y5',kind:'consult2',name:'Белова Ирина',chip:{t:'консультация 2',c:'n'},bud:15,cons:1,
+  why:'повторная консультация по заключению',act:'Провести',full:'Разбор заключения и закрытие на договор',call:1},
+ {id:'y6',kind:'followup',name:'Зайцев Марк',chip:{t:'follow-up',c:'n'},bud:6,
+  why:'follow-up после отправки материалов',act:'Написать',full:'Уточни, посмотрел ли материалы'},
+
+ {id:'g1',kind:'cold',name:'Орлов Никита',chip:{t:'тёплый пул',c:'n'},bud:12,
+  why:'нет касания 9 дней',act:'Позвонить',full:'Открой историю, говори про ЕГО ситуацию',call:1},
+ {id:'g2',kind:'notready',name:'Лаптева Вера',chip:{t:'не готова',c:'n'},bud:10,
+  why:'просила не звонить до зарплаты',act:'Написать',full:'Мягкий прогрев без давления'},
+ {id:'g3',kind:'warm',name:'Сафонов Егор',chip:{t:'прогрев',c:'n'},bud:8,
+  why:'плановый прогрев базы',act:'Написать',full:'Отправь кейс и уточни ситуацию'},
+ {id:'g4',kind:'low',name:'Дьяков Пётр',chip:{t:'низкий приоритет',c:'n'},bud:8,
+  why:'низкий приоритет по скорингу',act:'Позвонить',full:'Короткое касание, если есть время',call:1}
+];
+
+/* ═══ СОСТОЯНИЕ ═══ */
+var started=false,done={},tmr=null,onBreak=false,breakSec=0,onCall=false;
+var openedId=null,workId=null,pend=null,cancels=0,seq=0;
+var taskSec=0,ropAlert=false,STUCK=60*60,BREAK_BUDGET=90*60;
+var lives=5,qa=87,crosses=0,senseiScore=94,devs=[];
+var nowMin=9*60+12, DAY_A=9*60, DAY_B=18*60, tickCount=0;
+var PLAN_CONS=4, LEAD_PLAN=8, consDone=0, leadsDone=0, sales=1, money=13500;
+var workSec=3*3600+42*60, talkSec=1*3600+38*60, idleSec=37*60;
+var streakDays=4,planDone=12,planGoal=18,waiting2nd=3;
+var CONV_TEAM=24.2;
+var byId={};TASKS.forEach(function(t){byId[t.id]=t});
+
+function alive(){return TASKS.filter(function(t){return !done[t.id]})}
+function zone(t){return KIND[t.kind].z}
+function inZone(z){return alive().filter(function(t){return zone(t)===z})}
+/* после недозвона задача остаётся в зоне, но 20 минут не подаётся: иначе конвейер
+   зациклится на одном номере, а попытки по канону разносятся во времени */
+function dueNow(t){
+  if(t.cool&&nowMin<t.cool)return false;
+  return t.kind!=='time'||nowMin>=hm(t.at)-15;
+}
+function redDue(){return inZone('red').filter(dueNow)}
+function ordered(l){return l.slice().sort(function(a,b){
+  var d=KIND[a.kind].ord-KIND[b.kind].ord;if(d)return d;
+  if(a.at&&b.at)return hm(a.at)-hm(b.at);return (a.seq||0)-(b.seq||0)})}
+function leadsOpen(){return redDue().length===0&&crosses<3}
+function yellowOpen(){return redDue().length===0&&inZone('lead').length===0}
+function greyOpen(){return yellowOpen()&&inZone('yellow').length===0}
+function overdueCount(){return alive().filter(function(t){
+  if(t.kind==='overdue'||t.kind==='invoice')return true;
+  return t.kind==='time'&&nowMin>hm(t.at)+15}).length}
+function missedCalls(){return alive().filter(function(t){return t.kind==='missed'}).length}
+function missedMsgs(){return alive().filter(function(t){return t.kind==='msg'}).length}
+function current(){
+  if(workId&&!done[workId])return byId[workId];
+  var r=ordered(redDue());if(r.length)return r[0];
+  if(leadsOpen()){var l=ordered(inZone('lead'));if(l.length)return l[0]}
+  if(yellowOpen()){var y=ordered(inZone('yellow'));if(y.length)return y[0]}
+  if(greyOpen()){var g=ordered(inZone('grey'));if(g.length)return g[0]}
+  return null;
+}
+function conv(){return leadsDone?(sales/leadsDone*100):31.4}
+function needBy(t){return Math.ceil(PLAN_CONS*Math.max(0,Math.min(1,(t-DAY_A)/(DAY_B-DAY_A))))}
+function behind(){return started&&consDone<needBy(nowMin)}
+function hm(s){var a=s.split(':');return (+a[0])*60+(+a[1])}
+function clock(m){return pad(Math.floor(m/60)%24)+':'+pad(m%60)}
+function hms(s){return pad(Math.floor(s/3600))+':'+pad(Math.floor(s/60)%60)+':'+pad(s%60)}
+
+/* ═══ ПОЛОСА-ПЛИТКИ ═══ */
+function renderBar(){
+  var totalDay=TASKS.length,dn=totalDay-alive().length;
+  var rd=redDue().length,segs='';
+  for(var i=0;i<8;i++)segs+='<i class="'+(i<Math.round(dn/totalDay*8)?'on':'')+'"></i>';
+  var d=conv()-CONV_TEAM;
+
+  document.getElementById('bar').innerHTML=
+   tile('gr','📋','Задачи дня',dn+' <small>/ '+totalDay+'</small>','<div class="segs">'+segs+'</div>',1)
+  +tile('gd','⏳','Осталось',rd+' <small>'+plural(rd,['действие','действия','действий'])+'</small>',
+        rd?'до разблокировки<br>новых лидов':'красная зона<br>закрыта',1)
+  +tile(leadsOpen()?'gr':'gd',leadsOpen()?'🔓':'🔒','Новые лиды',
+        '<span style="font-size:15px">'+(leadsOpen()?'открыты':'заблокированы')+'</span>',
+        leadsOpen()?'выдаются по SLA<br>5 минут':'после выполнения<br>'+rd+' '+plural(rd,['действия','действий','действий']),1)
+  +tile('cy','🕐','Время в работе',hms(workSec),'Из них разговоры <b>'+hms(talkSec)+'</b><br>Простой '+hms(idleSec),0)
+  +tile('gr','📈','Конверсия',conv().toFixed(1).replace('.',',')+'%',
+        'Средняя отдела '+CONV_TEAM.toString().replace('.',',')+'%<br><span class="up">'+(d>=0?'↑ +':'↓ ')+d.toFixed(1).replace('.',',')+'% к средней</span>',0)
+  +tile('pu','☆','Sensei score',senseiScore+'<span class="badge pu">A+</span>',
+        devs.length?devs.length+' '+plural(devs.length,['отклонение','отклонения','отклонений'])+' с причиной':'Отличная работа',0)
+  +tile('rd','📞','Пропущенные звонки',missedCalls(),'Нужно перезвонить',1)
+  +tile('bl','💬','Пропущенные сообщения',missedMsgs(),'Требуют ответа',1);
+
+  renderDrop();
+}
+function tile(c,ic,h,v,s,click){
+  return '<button class="tile '+c+'"'+(click?' onclick="toggleDrop()"':' onclick="openPlan()"')+'>'
+    +'<span class="h"><i>'+ic+'</i>'+h+'</span><span class="v">'+v+'</span><span class="s">'+s+'</span></button>';
+}
+
+function renderDrop(){
+  var red=ordered(inZone('red')),t=current();
+  document.getElementById('dhSub').textContent=red.length
+    ? red.length+' '+plural(red.length,['обязательное','обязательных','обязательных'])+' · порядок держит Sensei'
+    : 'красная зона закрыта — дальше день планируешь сам';
+
+  var h='';
+  (red.length?red:ordered(inZone('yellow'))).slice(0,4).forEach(function(x,i){
+    var wait=(x.kind==='time'&&!dueNow(x));
+    h+='<div class="drow'+(t&&x.id===t.id?' first':'')+'">'
+      +'<span class="mk">'+KIND[x.kind].ico+'</span>'
+      +'<span class="tx"><b>'+x.name+'</b><span>'+x.why+'</span></span>'
+      +'<span class="w'+(dueNow(x)&&x.at?' due':'')+'">'+(x.at?(wait?'в '+x.at:x.at):KIND[x.kind].lb)+'</span></div>';
+  });
+  document.getElementById('dList').innerHTML=h||'<div class="drow"><span class="mk">✓</span><span class="tx"><b>Пусто</b><span>обязательного и задач дня нет</span></span></div>';
+
+  var n=document.getElementById('dNext');
+  if(!started){n.innerHTML='<div class="dnext"><span class="kb">смена</span><h4>Не начата</h4>'
+    +'<div class="sb">Пока смена не начата, Sensei не подаёт сделки и время смены не идёт.</div>'
+    +'<div class="btns"><button class="dbtn go" onclick="openPlan()">Открыть план дня</button></div></div>';return}
+  if(onBreak){n.innerHTML='<div class="dnext"><span class="kb">перерыв</span><h4>'+fmt(breakSec)+' из '+fmt(BREAK_BUDGET)+'</h4>'
+    +'<div class="sb">Очередь не подаёт сделки. Перерасход виден РОПу.</div>'
+    +'<div class="btns"><button class="dbtn go" onclick="toggleBreak()">Вернуться в работу</button></div></div>';return}
+  if(!t){n.innerHTML='<div class="dnext"><span class="kb" style="color:var(--d-green)">всё разобрано</span><h4>Зиро</h4>'
+    +'<div class="sb">Все три зоны закрыты.</div>'
+    +'<div class="btns"><button class="dbtn go" onclick="endShift()">Закрыть смену</button></div></div>';return}
+
+  var open=(openedId===t.id);
+  n.innerHTML='<div class="dnext"><span class="kb"'+(zone(t)==='red'?'':' style="color:var(--d-mut)"')+'>'
+    +(zone(t)==='red'?'Следующее обязательное действие':'Следующее действие')+'</span>'
+    +'<h4>'+t.act+': '+t.name+'</h4>'
+    +'<div class="sb">'+t.why+'<br>'+t.full+(open?' · <b style="color:var(--d-cyan)">⏱ '+fmt(taskSec)+' из '+t.bud+' мин</b>':'')+'</div>'
+    +'<div class="btns">'
+    +(pend?'<span class="dbtn gh">открываю '+fmtSec(pend.left)+'</span>':'')
+    +(!open&&!pend?'<button class="dbtn go" onclick="openDeal(\''+t.id+'\')">Начать →</button>':'')
+    +(open?'<button class="dbtn go" onclick="talked(\''+t.id+'\')">✓ поговорил</button>'
+          +'<button class="dbtn gh" onclick="noAnswer(\''+t.id+'\')">✕ недозвон</button>':'')
+    +'<button class="dbtn dev" onclick="askDeviate(event,\''+t.id+'\')">Отклониться</button>'
+    +'</div>'
+    +'<div class="dnote">Касание засчитывается по факту звонка из PBX, а не по нажатию кнопки. Отклониться можно всегда — система попросит причину и покажет её РОПу.</div></div>';
+}
+function toggleDrop(){document.getElementById('strip').classList.toggle('open');renderBar()}
+
+/* ═══ ОБОСНОВАННОЕ ОТКЛОНЕНИЕ ═══ */
+function askDeviate(ev,id){
+  ev.stopPropagation();
+  var t=byId[id],p=document.getElementById('pop'),used=t.moved||0;
+  var h='<h4>Отклониться от рекомендации</h4>'
+   +'<div class="sub">Sensei ведёт по порядку, но решение за тобой. Выбери причину — она попадёт в карточку сделки и в сводку РОПу.</div>'
+   +'<button class="slot" onclick="deviate(\''+id+'\',\'later\')">Клиент просил позже<span>перенос</span></button>'
+   +'<button class="slot" onclick="deviate(\''+id+'\',\'noanswer\')">Не берёт трубку<span>попытка</span></button>'
+   +'<button class="slot" onclick="deviate(\''+id+'\',\'other\')">Работаю по другой срочной<span>вернусь</span></button>'
+   +'<button class="slot" onclick="deviate(\''+id+'\',\'broken\')">Нет данных или сбой<span>РОПу</span></button>'
+   +'<div class="warn gold">Отклонения не запрещены и не штрафуются. Они видны РОПу, чтобы понять, где система мешает работать.</div>';
+  p.innerHTML=h;p.classList.add('on');place(p,ev.currentTarget);
+}
+function deviate(id,reason){
+  var t=byId[id];closePop();
+  devs.push({id:id,r:reason,at:clock(nowMin)});
+  if(reason==='later'){askMoveDirect(id);return}
+  if(reason==='noanswer'){noAnswer(id);return}
+  if(reason==='other'){
+    workId=null;openedId=null;t.seq=++seq;resetTaskTimer();renderCard();render();openPlan();
+    toast('Отклонение зафиксировано','Причина «работаю по другой срочной» записана в карточку. Выбери задачу сам — Sensei вернёт эту в очередь.');return}
+  senseiScore=Math.max(60,senseiScore-1);
+  done[id]=1;workId=null;openedId=null;resetTaskTimer();renderCard();render();queueNext();
+  toast('Ушло РОПу','Причина «нет данных или сбой» записана. Задача снята с тебя и встала РОПу на разбор.',1);
+}
+function askMoveDirect(id){
+  var t=byId[id],p=document.getElementById('pop'),used=t.moved||0;
+  var slots=[{lb:'через 2 часа',at:nowMin+120,note:clock(nowMin+120)},
+             {lb:'сегодня, вторая половина',at:16*60,note:'16:00'},
+             {lb:'завтра, первым делом',at:10*60+1440,note:'завтра 10:00'}]
+            .filter(function(s){return s.at>nowMin});
+  var h='<h4>Когда вернуться к клиенту</h4>'
+   +'<div class="sub">Дата только числом. Дальше завтрашнего утра перенести нельзя — клиент в БФЛ остынет или уйдёт к конкурентам.</div>';
+  if(used>=2)h+='<div class="warn">Перенос исчерпан: двигали два раза. Дальше только результат — деньги или дата, иначе сделка уходит в пул.</div>';
+  else{slots.forEach(function(s){h+='<button class="slot" onclick="doMove(\''+id+'\','+s.at+')">'+s.lb+'<span>'+s.note+'</span></button>'});
+    h+='<div class="warn">Перенос '+(used+1)+' из 2. Второй перенос — последний.</div>'}
+  p.innerHTML=h;p.classList.add('on');
+  p.style.left=Math.max(10,Math.min(window.innerWidth-320,window.innerWidth/2-160))+'px';p.style.top='120px';
+}
+function place(p,el){
+  var r=el.getBoundingClientRect();
+  p.style.left=Math.max(10,Math.min(window.innerWidth-330,r.left-140))+'px';
+  p.style.top=(r.bottom+8)+'px';
+}
+function closePop(){document.getElementById('pop').classList.remove('on')}
+function doMove(id,at){
+  var t=byId[id];t.moved=(t.moved||0)+1;
+  if(at>=1440){done[id]=1;toast('Перенесено на завтра 10:00','Задача ушла в завтрашний план первой строкой. Перенос '+t.moved+' из 2.')}
+  else{t.kind='time';t.at=clock(at);t.why='перенос '+t.moved+' из 2 · договорились на '+t.at;
+    toast('Перенесено на '+t.at,'Дата записана числом. '+(t.moved>=2?'Перенос исчерпан: дальше только результат.':'Остался один перенос.'))}
+  closePop();workId=null;openedId=null;resetTaskTimer();renderCard();render();queueNext();
+}
+
+/* ═══ РЕЗУЛЬТАТ: КАСАНИЕ ПО ФАКТУ ═══ */
+function talked(id){
+  var t=byId[id];
+  if(t.cons){consDone++;if(t.kind==='lead'||t.kind==='missed')leadsDone++}
+  if(qa<100&&taskSec<=t.bud*60)qa=Math.min(100,qa+1);
+  var nx=peekNext(id);
+  toast('Касание подтверждено','Разговор состоялся, 3 мин 12 сек — подтвердил PBX. Sensei закрыл задачу.'
+    +(nx?' Следующее: '+nx.act.toLowerCase()+' — '+nx.name+'.':''),0,1);
+  done[id]=1;openedId=null;workId=null;resetTaskTimer();renderCard();render();queueNext();
+}
+function noAnswer(id){
+  var t=byId[id];t.att=(t.att||0)+1;t.seq=++seq;t.cool=nowMin+20;
+  if(t.att>=3){done[id]=1;
+    toast('Три попытки без ответа','Касание так и не засчитано. Задача уходит на решение: в пул или РОПу на разбор.',1)}
+  else toast('Касание НЕ засчитано','Нет ответа, звонок длился 8 секунд. Попытка '+t.att+' из 3, а не касание. Задача остаётся в зоне и вернётся в '+clock(t.cool)+'.',1);
+  closePop();workId=null;openedId=null;resetTaskTimer();renderCard();render();queueNext();
+}
+function peekNext(skip){
+  var had=done[skip];done[skip]=1;var w=workId;workId=null;
+  var n=current();workId=w;if(had)done[skip]=had;else delete done[skip];
+  return n;
+}
+
+/* ═══ ПЛАН ДНЯ ═══ */
+function renderPlan(){
+  var left=alive().length,mins=0;alive().forEach(function(t){mins+=(t.bud||10)});
+  var half=Math.max(1,Math.round(mins/30)),h=Math.floor(half/2),m=(half%2)*30;
+  document.getElementById('pVol').innerHTML=clock(nowMin)+' · осталось <b>'+left+' '+plural(left,['задача','задачи','задач'])+'</b> · ≈ '
+    +(h?h+' '+plural(h,['час','часа','часов'])+(m?' 30 мин':''):m+' мин');
+
+  var red=inZone('red'),rd=redDue(),ld=inZone('lead'),yel=inZone('yellow'),gr=inZone('grey');
+
+  document.getElementById('pCnts').innerHTML=
+     '<div class="cnt'+(red.length?' red':'')+'"><b>'+red.length+'</b><span>красная зона · обязательные</span></div>'
+    +'<div class="cnt"><b>'+yel.length+'</b><span>задачи до конца дня</span></div>'
+    +'<div class="cnt'+(leadsOpen()?'':' lock')+'"><b>'+(leadsOpen()?ld.length:'🔒')+'</b><span>'+(leadsOpen()?'новые лиды':'лиды заблокированы')+'</span></div>'
+    +'<div class="cnt'+(overdueCount()?' gold':'')+'"><b>'+overdueCount()+'</b><span>просрочено</span></div>';
+
+  var pts=alive().filter(function(x){return x.kind==='time'}).sort(function(a,b){return hm(a.at)-hm(b.at)});
+  var ax=document.getElementById('pAxis');
+  if(!pts.length)ax.innerHTML='<div class="locked">Обязательств ко времени не осталось.</div>';
+  else{
+    var A=9*60,B=20*60,W=B-A,pos=function(x){return Math.max(0,Math.min(100,(x-A)/W*100))};
+    var s='<div class="axis"><div class="ax-track">';
+    if(started)s+='<div class="ax-now" style="left:'+pos(nowMin)+'%"><span>сейчас '+clock(nowMin)+'</span></div>';
+    pts.forEach(function(x){
+      var cls=nowMin>hm(x.at)+15?'past':(dueNow(x)?'due':'');
+      s+='<div class="ax-pt '+cls+'" style="left:'+pos(hm(x.at))+'%"><i></i>'
+        +'<span class="lb"><b>'+x.at+'</b><span>'+x.name.split(' ')[0]+'</span></span></div>';
+    });
+    s+='</div><div class="ax-hrs"><span>09:00</span><span>12:00</span><span>15:00</span><span>18:00</span><span>20:00</span></div></div>';
+    ax.innerHTML=s;
+  }
+
+  document.getElementById('pRedN').textContent=red.length||'';
+  var rh='';
+  if(!red.length)rh='<div class="done-note">✓ Красная зона чиста. Новые лиды разблокированы.</div>';
+  else{var f=ordered(rd)[0];
+    ordered(red).forEach(function(x){rh+=row(x,(f&&x.id===f.id?'first':'')+(dueNow(x)?'':' wait'),false)});
+    rh+='<div class="gate-note red">Порядок держит Sensei, <b>выбрать отсюда нельзя</b>. Можно отклониться с причиной — она попадёт РОПу. Пока зона не обработана, новые лиды заблокированы.</div>'}
+  document.getElementById('pRed').innerHTML=rh;
+
+  document.getElementById('pLeadN').textContent=leadsOpen()?(ld.length||''):'🔒';
+  var lh='';
+  if(!ld.length)lh='<div class="done-note">✓ Новые лиды обработаны: '+leadsDone+' из '+LEAD_PLAN+'.</div>';
+  else if(!leadsOpen())lh='<div class="locked">🔒 <span><b>Заблокированы.</b> Сначала красная зона: '+rd.length+' '
+    +plural(rd.length,['действие','действия','действий'])+' требуют реакции сейчас.</span></div>';
+  else{ordered(ld).forEach(function(x){lh+=row(x,'',false)});
+    lh+='<div class="gate-note">Набор <b>≤ 5 минут</b>. Не взял — лид уходит другому менеджеру, и это видит РОП.</div>'}
+  document.getElementById('pLead').innerHTML=lh;
+
+  document.getElementById('pYelN').textContent=yel.length||'';
+  var yh='';
+  if(!yel.length)yh='<div class="done-note">✓ Задачи дня закрыты.</div>';
+  else{var yp=yellowOpen();
+    ordered(yel).forEach(function(x){yh+=row(x,'',yp)});
+    yh+=yp?'<div class="gate-note">Красная зона чиста — <b>здесь выбираешь сам</b>. Не выберешь, Sensei подаст следующее.</div>'
+          :'<div class="gate-note">Видно всегда, чтобы планировать день. Брать можно, когда закрыта красная зона и новые лиды. <b>Остаться на завтра эти задачи не должны.</b></div>'}
+  document.getElementById('pYel').innerHTML=yh;
+
+  document.getElementById('pGreyN').textContent=gr.length||'';
+  var gh='';
+  if(!gr.length)gh='<div class="done-note">✓ Рекомендуемые касания пройдены.</div>';
+  else{var gp=greyOpen();
+    ordered(gr).forEach(function(x){gh+=row(x,'',gp)});
+    gh+=gp?'<div class="gate-note">Обязательное закрыто — Sensei подкидывает касания отсюда. Взять можно любое.</div>'
+          :'<div class="gate-note">Негорячая база. Откроется, когда закрыты красная зона, лиды и задачи дня.</div>'}
+  document.getElementById('pGrey').innerHTML=gh;
+
+  var need=needBy(nowMin),late=behind();
+  document.getElementById('pTempo').innerHTML=
+     '<div class="big"><b>'+consDone+' / '+PLAN_CONS+'</b><span>консультаций за день</span></div>'
+    +'<div class="st'+(late?' late':'')+'">'+(!started?'День не начат'
+        :(late?'Отстаёшь: к '+clock(nowMin)+' нужно '+need:'В графике: к '+clock(nowMin)+' нужно '+need))+'</div>'
+    +'<div class="tgrid">'
+    +'<div class="tcell"><b>'+leadsDone+' / '+LEAD_PLAN+'</b><span>лидов обработано</span></div>'
+    +'<div class="tcell"><b>'+sales+'</b><span>'+plural(sales,['продажа','продажи','продаж'])+'</span></div>'
+    +'<div class="tcell"><b>'+conv().toFixed(1).replace('.',',')+'%</b><span>конверсия · отдел '+CONV_TEAM.toString().replace('.',',')+'%</span></div>'
+    +'<div class="tcell"><b>'+money.toLocaleString('ru-RU')+' ₽</b><span>оплат сегодня</span></div>'
+    +'</div>';
+
+  document.getElementById('pMine').innerHTML=
+     '<div class="mrow"><span>жизни</span><span class="lives">'+livesHtml()+'</span></div>'
+    +'<div class="mrow"><span>рейтинг ИИ</span><span class="qa '+qaCls()+'">'+qa+'</span></div>'
+    +'<div class="mrow"><span>Sensei score</span><b>'+senseiScore+'</b></div>'
+    +'<div class="mrow"><span>ждут 2-го платежа</span><b>'+waiting2nd+' '+plural(waiting2nd,['сделка','сделки','сделок'])+'</b></div>'
+    +'<div class="mrow"><span>смен подряд с зиро</span><b>'+streakDays+'</b></div>'
+    +'<div class="mrow"><span>перерыв</span><b'+(breakSec>BREAK_BUDGET?' style="color:var(--red-d)"':'')+'>'+fmt(breakSec)+' / '+fmt(BREAK_BUDGET)+'</b></div>'
+    +'<div class="mgoal"><div class="mrow" style="padding:0;border:0"><span>план месяца</span><b>'+planDone+' из '+planGoal+'</b></div>'
+    +'<div class="bar3"><i style="width:'+(planDone/planGoal*100)+'%"></i></div></div>'
+    +'<div class="devlog"><b>Отклонений за смену: '+devs.length+'</b><br>Отклонение не штраф. РОП смотрит их, чтобы понять, где система мешает работать.</div>';
+
+  var st=document.getElementById('pStart'),bk=document.getElementById('pBreak'),nt=document.getElementById('pNote');
+  bk.style.display=started?'':'none';
+  bk.textContent=onBreak?'▶ В работу':'⏸ Перерыв';bk.className='btn '+(onBreak?'ok':'sec');
+  if(!started){st.innerHTML='<span class="pl">▶</span>Начать смену';st.className='btn prim go';
+    nt.textContent='Пока смена не начата, Sensei не подаёт сделки и время смены не идёт.'}
+  else if(!alive().length){st.innerHTML='Закрыть смену';st.className='btn ok';nt.textContent='Зиро — все три зоны разобраны.'}
+  else if(nowMin>=DAY_B&&red.length){st.innerHTML='Закрыть с долгом';st.className='btn danger';
+    nt.textContent='Красная зона не закрыта: '+red.length+'. Серия обнулится, РОПу встанет задача, завтра долг пойдёт первым.'}
+  else{st.innerHTML='Вернуться в работу';st.className='btn prim';
+    nt.textContent=red.length?'Красная зона: '+red.length+'. Смена не закроется без долга, пока они не разобраны.'
+                             :'Красная зона чиста — дальше день планируешь сам.'}
+}
+function row(t,cls,pick){
+  var k=KIND[t.kind],cool=(t.cool&&nowMin<t.cool),wait=(t.kind==='time'&&!dueNow(t));
+  var rt=cool?'<span class="w">снова в '+clock(t.cool)+'</span>'
+       :(t.at?'<span class="w'+(dueNow(t)?' due':'')+' num">'+(wait?'в ':'')+t.at+'</span>'
+             :'<span class="w">'+k.lb+'</span>');
+  return '<'+(pick?'button':'div')+' class="trow '+cls+'"'+(pick?' onclick="takeTask(\''+t.id+'\')"':'')+'>'
+    +'<span class="mk">'+k.ico+'</span>'
+    +'<span class="tx"><span class="l1"><b>'+t.name+'</b><span class="chip '+t.chip.c+'">'+t.chip.t+'</span>'
+    +(t.att?'<span class="att">попытка '+t.att+' из 3</span>':'')+'</span>'
+    +'<span class="l2">'+t.why+'</span></span>'
+    +'<span class="rt">'+rt+(pick?'<span class="take">Взять →</span>':'')+'</span>'
+    +'</'+(pick?'button':'div')+'>';
+}
+function openPlan(){document.getElementById('plan').classList.add('on');renderPlan()}
+function closePlan(){document.getElementById('plan').classList.remove('on')}
+function planOpen(){return document.getElementById('plan').classList.contains('on')}
+
+/* ═══ СВОДКА ═══ */
+function renderSum(){
+  var lf=alive(),red=inZone('red'),yel=inZone('yellow');
+  var h='<div class="big"><b>'+(TASKS.length-lf.length)+' из '+TASKS.length+'</b><span>задач разобрано · 09:12 – '+clock(nowMin)+'</span></div>'
+   +'<div class="g">'
+   +'<div class="scell '+(consDone>=PLAN_CONS?'green':'red')+'"><b>'+consDone+' / '+PLAN_CONS+'</b><span>консультаций из плана</span></div>'
+   +'<div class="scell"><b>'+leadsDone+' / '+LEAD_PLAN+'</b><span>лидов обработано</span></div>'
+   +'<div class="scell green"><b>'+sales+'</b><span>'+plural(sales,['продажа','продажи','продаж'])+' · '+money.toLocaleString('ru-RU')+' ₽</span></div>'
+   +'<div class="scell"><b>'+conv().toFixed(1).replace('.',',')+'%</b><span>конверсия · отдел '+CONV_TEAM.toString().replace('.',',')+'%</span></div>'
+   +'<div class="scell '+(red.length?'red':'green')+'"><b>'+(red.length?'0':(streakDays+1))+'</b><span>серия смен с зиро</span></div>'
+   +'<div class="scell"><b>'+devs.length+'</b><span>отклонений с причиной</span></div>'
+   +'</div>';
+  if(red.length){
+    h+='<div class="debt"><div class="lh">Смена закрыта с долгом: красная зона '+red.length+'. РОПу поставлена задача на разбор, серия обнулена. Завтра эти встанут первыми и будут держать новые лиды заблокированными.</div>';
+    red.forEach(function(t){h+='<div class="lrow"><b>'+t.name+'</b><span class="chip '+t.chip.c+'">'+t.chip.t+'</span><span>'+t.why+'</span><span class="w">'+KIND[t.kind].lb+'</span></div>'});
+    h+='</div>';
+  }else if(yel.length){
+    h+='<div class="debt"><div class="lh">Красная зона закрыта, но '+yel.length+' '+plural(yel.length,['задача дня','задачи дня','задач дня'])
+      +' осталось. Они должны были закрыться сегодня — уходят в завтрашний план и видны РОПу.</div>';
+    yel.forEach(function(t){h+='<div class="lrow"><b>'+t.name+'</b><span class="chip '+t.chip.c+'">'+t.chip.t+'</span><span>'+t.why+'</span><span class="w">'+KIND[t.kind].lb+'</span></div>'});
+    h+='</div>';
+  }else if(lf.length){
+    h+='<div class="debt"><div class="lh ok">Обязательное и задачи дня закрыты. Осталось '+lf.length+' рекомендуемых касаний — это норма, они переходят на завтра.</div></div>';
+  }else h+='<div class="debt"><div class="lh ok">Зиро ✓ Все три зоны разобраны, серия смен продолжается.</div></div>';
+  document.getElementById('sumBody').innerHTML=h;
+}
+function openSum(){renderSum();document.getElementById('sum').classList.add('on')}
+function closeSum(){document.getElementById('sum').classList.remove('on')}
+
+/* ═══ ДЕЙСТВИЯ ═══ */
+function render(){renderBar();if(planOpen())renderPlan()}
+function resetTaskTimer(){taskSec=0;ropAlert=false}
+function livesHtml(){var h='';for(var i=1;i<=5;i++)h+='<span class="'+(i<=lives?'':'off')+'">❤</span>';return h}
+function qaCls(){return qa>=90?'ok':qa>=65?'mid':'low'}
+function startShift(){
+  if(!started){started=true;tmr=setInterval(tick,1000);resetTaskTimer();closePlan();
+    document.getElementById('strip').classList.add('open');render();queueNext();
+    toast('Смена начата · 09:12','Опоздание 12 минут ушло РОПу. Сначала красная зона — новые лиды заблокированы, пока не закроешь.');return}
+  if(!alive().length){endShift();return}
+  closePlan();if(onBreak)toggleBreak();
+}
+function endShift(){closePlan();if(inZone('red').length)streakDays=0;openSum()}
+function takeTask(id){
+  var t=byId[id],z=zone(t);
+  if(z==='yellow'&&!yellowOpen()){toast('Сначала обязательное','Красная зона и новые лиды идут первыми. Если нужно именно это — жми «Отклониться» и укажи причину.',1);return}
+  if(z==='grey'&&!greyOpen()){toast('Сначала задачи дня','Рекомендуемые касания открываются последними.',1);return}
+  workId=id;resetTaskTimer();closePlan();
+  pend={id:id,left:3,canCancel:true,grace:false};render();
+}
+function queueNext(){
+  if(!started||onBreak||onCall){pend=null;render();return}
+  var t=current();
+  if(!t){pend=null;render();return}
+  pend={id:t.id,left:3,canCancel:zone(t)!=='red'&&t.kind!=='lead',grace:false};render();
+}
+function openDeal(id){
+  var t=byId[id];pend=null;taskSec=0;ropAlert=false;openedId=id;workId=id;closePlan();
+  renderCard();render();
+  toast('Карточка открыта: '+t.name,'Sensei перевёл amoCRM в эту сделку. Дальше звонок; касание засчитается по факту из PBX.');
+}
+function renderCard(){
+  var t=openedId?byId[openedId]:null;
+  document.getElementById('cName').textContent=t?t.name:'Рассказова Ольга Васильевна';
+  document.getElementById('cChip').textContent=t?t.chip.t:'ФССП';
+  document.getElementById('cStage').textContent=t?(t.kind==='lead'||t.kind==='missed'?'Квал лиды':zone(t)==='red'?'Подписан · не оплачен':'На подписи / частичка'):'Квал лиды';
+}
+function toggleBreak(){
+  onBreak=!onBreak;
+  if(onBreak){pend=null;toast('Перерыв','Очередь не подаёт сделки. Бюджет смены 90:00, перерасход виден РОПу.')}
+  else{toast('Вернулся в работу','Sensei снова подаёт сделки.');queueNext()}
+  render();
+}
+function toggleCall(){
+  onCall=!onCall;if(onCall)pend=null;else queueNext();
+  toast(onCall?'Разговор идёт':'Разговор завершён',onCall?'Пока PBX видит активный звонок, конвейер молчит сам.':'Подача продолжается.');
+  render();
+}
+function jumpTo(m){
+  nowMin=m;queueNext();render();
+  var need=needBy(nowMin);
+  toast('Сейчас '+clock(nowMin),behind()?'К этому времени нужно '+need+' консультаций, у тебя '+consDone+'. Догоняй.'
+    :'Консультаций '+consDone+' при норме '+need+' — идёшь в графике.');
+}
+
+/* ═══ ТАКТ ═══ */
+function tick(){
+  tickCount++;
+  if(tickCount%5===0&&nowMin<20*60){nowMin++;if(!openedId&&!pend&&!onBreak&&!onCall)queueNext()}
+  if(onBreak){breakSec++;idleSec++;
+    if(breakSec===BREAK_BUDGET)toast('Бюджет перерывов исчерпан','Дальше перерасход попадёт в сводку РОПу.',1);
+    render();return}
+  if(onCall){talkSec++;workSec++;return}
+  workSec++;
+  if(started&&current()){
+    taskSec++;
+    if(taskSec===STUCK&&!ropAlert){ropAlert=true;
+      toast('Ты в задаче больше часа','Иди дальше. Уведомление ушло РОПу.',1)}
+  }else idleSec++;
+  if(pend){pend.left--;if(pend.left<=0){openDeal(pend.id);return}}
+  render();
+}
+function plural(n,f){var a=Math.abs(n)%100,b=a%10;
+  if(a>10&&a<20)return f[2];if(b>1&&b<5)return f[1];if(b===1)return f[0];return f[2]}
+function fmt(s){return pad(Math.floor(s/60))+':'+pad(s%60)}
+function fmtSec(s){return s>=60?fmt(s):s+' с'}
+function pad(n){return (n<10?'0':'')+n}
+function toast(t,s,bad,good){document.getElementById('tT').textContent=t;document.getElementById('tS').textContent=s||'';
+  var el=document.getElementById('toast');el.className='on'+(bad?' bad':(good?' good':''));
+  clearTimeout(window.__t);window.__t=setTimeout(hideToast,6200)}
+function hideToast(){document.getElementById('toast').className=''}
+
+document.addEventListener('click',function(e){
+  var p=document.getElementById('pop');
+  if(p.classList.contains('on')&&!p.contains(e.target))closePop();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  if(document.getElementById('pop').classList.contains('on'))closePop();
+  else if(document.getElementById('sum').classList.contains('on'))closeSum();
+  else if(planOpen()&&started)closePlan();
+});
+
+renderCard();render();openPlan();
+</script>
+</body>
+</html>
