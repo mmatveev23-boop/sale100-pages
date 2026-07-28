@@ -121,8 +121,11 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-a
 .drop{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s var(--ease);border-top:1px solid transparent}
 #strip.open .drop{grid-template-rows:1fr;border-top-color:var(--d-line)}
 .drop > .drop-in{min-height:0;overflow:hidden}
-.drop-in{padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}
-#strip.open .drop-in{padding:14px 16px 15px}
+/* панель раскрытия не должна съедать карточку сделки: обе колонки со своей прокруткой */
+.drop-in{padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) 336px;gap:16px;align-items:start}
+#strip.open .drop-in{padding:14px 16px 15px;max-height:322px}
+.drop-in > *{min-height:0}
+#dNext{overflow-y:auto;max-height:292px;padding-right:4px}
 .dh{display:flex;align-items:baseline;gap:9px;padding-bottom:9px}
 .dh b{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
 .dh span{font-size:11.5px;color:var(--d-mut)}
@@ -486,60 +489,97 @@ button.trow:hover .take{background:var(--dark);color:#fff;box-shadow:none}
 <script>
 /* ═══ КЛАССЫ СИГНАЛОВ И ЗОНЫ ═══ */
 var KIND={
-  time     :{z:'red',ico:'🕐',lb:'договорённость на время',ord:1},
-  missed   :{z:'red',ico:'📵',lb:'пропущенный входящий',   ord:2},
-  msg      :{z:'red',ico:'💬',lb:'клиент написал',         ord:3},
-  docs     :{z:'red',ico:'📎',lb:'прислал документы',      ord:4},
-  paytoday :{z:'red',ico:'₽', lb:'обещал оплатить сегодня',ord:5},
-  invoice  :{z:'red',ico:'⏳',lb:'счёт просрочен',          ord:6},
-  overdue  :{z:'red',ico:'🔴',lb:'задача просрочена',       ord:7},
-  lead     :{z:'lead',ico:'🆕',lb:'новый лид',ord:8},
-  push     :{z:'yellow',ico:'📞',lb:'плановый дожим',        ord:9},
-  consult2 :{z:'yellow',ico:'🗣',lb:'повторная консультация',ord:10},
-  ki       :{z:'yellow',ico:'📄',lb:'запрос КИ',             ord:11},
-  paycheck :{z:'yellow',ico:'✅',lb:'контроль оплаты',       ord:12},
-  thinking :{z:'yellow',ico:'🤔',lb:'клиент думает',         ord:13},
-  followup :{z:'yellow',ico:'✉️',lb:'follow-up',             ord:14},
-  cold     :{z:'grey',ico:'🌙',lb:'давно нет контакта',ord:15},
-  low      :{z:'grey',ico:'·', lb:'низкий приоритет',  ord:16},
-  notready :{z:'grey',ico:'🕰',lb:'ещё не готов',      ord:17},
-  warm     :{z:'grey',ico:'♻️',lb:'плановый прогрев',  ord:18}
+  /* КРАСНАЯ ЗОНА — утверждённый список заказчика «Задачи выше нового лида».
+     Порядок ord = порядок таблицы; close = что считается закрытием задачи. */
+  sign_help:{z:'red',ico:'✍️',ord:1,lb:'Помочь подписать договор',
+    trg:'клиент открыл страницу, но не подписал за 30 минут',
+    close:'подписал, состоялось касание или зафиксировано точное время возвращения'},
+  reply    :{z:'red',ico:'💬',ord:2,lb:'Ответить клиенту',
+    trg:'содержательное сообщение осталось без ответа 30 минут',
+    close:'менеджер ответил'},
+  ready    :{z:'red',ico:'🔥',ord:3,lb:'Клиент готов оплатить или подписать сейчас',
+    trg:'клиент прямо написал или сказал: «готов», «дайте ссылку», «давайте оплачивать»',
+    close:'оплатил, подписал либо согласован следующий шаг с датой'},
+  pay_help :{z:'red',ico:'🛠',ord:4,lb:'Помочь провести оплату или подпись',
+    trg:'ошибка оплаты, не приходит СМС, требуется подтверждение, клиент не понимает, что нажать',
+    close:'проблема решена или выбран другой способ'},
+  promise  :{z:'red',ico:'🕐',ord:5,lb:'Выполнить договорённость',
+    trg:'наступила точная дата и время звонка, оплаты или подписания',
+    close:'касание состоялось либо клиент выполнил действие'},
+  pay_miss :{z:'red',ico:'₽', ord:6,lb:'Срок оплаты сорван',
+    trg:'наступило обещанное время, но оплаты нет',
+    close:'оплатил, названа новая точная дата или получен отказ'},
+  handoff  :{z:'red',ico:'📤',ord:7,lb:'Передать оплаченного клиента в ОС',
+    trg:'полная оплата получена, но за 30 минут клиент не передан',
+    close:'передача в ОС подтверждена'},
+  risk_deal:{z:'red',ico:'⚠️',ord:8,lb:'Риск срыва сделки',
+    trg:'система обнаружила сигнал: конкурент, отказ, отмена, близкие отговаривают, передумал',
+    close:'риск отработан и зафиксирован результат'},
+  risk_pay :{z:'red',ico:'📉',ord:9,lb:'Риск неоплаты',
+    trg:'клиент сообщил, что денег не будет, изменил сумму или дату, платёж отклонён',
+    close:'оплата получена, проблема решена или согласована новая дата'},
+
+  lead     :{z:'lead',ico:'🆕',ord:10,lb:'новый лид',trg:'лид поступил в работу',close:'состоялся разговор'},
+
+  /* ЖЁЛТАЯ — задачи дня */
+  push     :{z:'yellow',ico:'📞',ord:11,lb:'плановый дожим',        trg:'подошёл шаг цепочки',close:'касание состоялось'},
+  consult2 :{z:'yellow',ico:'🗣',ord:12,lb:'повторная консультация',trg:'назначен второй разбор',close:'консультация проведена'},
+  ki       :{z:'yellow',ico:'📄',ord:13,lb:'запрос КИ',             trg:'нет кредитной истории',close:'КИ получена или отказ'},
+  paycheck :{z:'yellow',ico:'✅',ord:14,lb:'контроль оплаты',       trg:'платёж ожидается',close:'платёж подтверждён'},
+  thinking :{z:'yellow',ico:'🤔',ord:15,lb:'клиент думает',         trg:'взял паузу на решение',close:'решение получено'},
+  followup :{z:'yellow',ico:'✉️',ord:16,lb:'follow-up',             trg:'материалы отправлены',close:'реакция получена'},
+
+  /* ОБЫЧНАЯ — рекомендуемые касания */
+  cold     :{z:'grey',ico:'🌙',ord:17,lb:'давно нет контакта',trg:'долго без касания',close:'касание состоялось'},
+  low      :{z:'grey',ico:'·', ord:18,lb:'низкий приоритет',  trg:'низкий скоринг',   close:'касание состоялось'},
+  notready :{z:'grey',ico:'🕰',ord:19,lb:'ещё не готов',      trg:'просил не беспокоить',close:'касание состоялось'},
+  warm     :{z:'grey',ico:'♻️',ord:20,lb:'плановый прогрев',  trg:'шаг прогрева базы',close:'касание состоялось'}
 };
 
 var TASKS=[
- {id:'r1',kind:'time',at:'11:30',name:'Волков Андрей',chip:{t:'Д1 · получи КИ',c:'g'},bud:15,cons:1,
-  why:'договорились на 11:30 после сорванной подписи',act:'Позвонить',full:'Получи КИ и составь юрзаключение',call:1},
- {id:'r2',kind:'time',at:'16:00',name:'Иванова Мария',chip:{t:'13 500 ₽',c:'gold'},bud:15,cons:1,
-  why:'клиент ждёт ровно в 16:00',act:'Позвонить',full:'Доводи до СБП на линии — 15 секунд',call:1},
- {id:'r3',kind:'msg',name:'Новикова Ольга',chip:{t:'на подписи',c:'g'},bud:6,
-  why:'сообщение без ответа 18 минут',act:'Ответить',full:'Ответь и доведи до подписи'},
- {id:'r4',kind:'missed',name:'Гусева Лариса',chip:{t:'новый лид',c:'n'},bud:5,cons:1,
-  why:'пропущенный входящий 7 минут назад',act:'Перезвонить',full:'Перезвони немедленно',call:1},
- {id:'r5',kind:'paytoday',name:'Смирнов Олег',chip:{t:'добор 12 510 ₽',c:'r'},bud:12,
-  why:'обещал оплатить сегодня',act:'Позвонить',full:'Бери деньги или дату числом',call:1},
- {id:'r6',kind:'docs',name:'Титова Елена',chip:{t:'КИ пришла',c:'b'},bud:10,
-  why:'прислала кредитную историю 40 минут назад',act:'Разобрать',full:'Разбери КИ и назначь презентацию',call:1},
- {id:'r7',kind:'overdue',name:'Алексеев Роман',chip:{t:'13 500 ₽',c:'r'},bud:12,moved:1,
-  why:'задача просрочена на 2 дня · второй перенос',act:'Позвонить',full:'Второй перенос — последний',call:1},
+ /* ── КРАСНАЯ ЗОНА: девять типов из утверждённой таблицы ── */
+ {id:'r1',kind:'ready',name:'Гусев Артём',chip:{t:'договор готов',c:'g'},bud:8,cons:1,
+  why:'написал «дайте ссылку, готов оплачивать» 4 минуты назад',act:'Позвонить',full:'Дай ссылку на оплату и доведи до платежа на линии',call:1},
+ {id:'r2',kind:'pay_help',name:'Титова Елена',chip:{t:'13 500 ₽',c:'gold'},bud:10,
+  why:'платёж отклонён банком, не приходит СМС подтверждения',act:'Позвонить',full:'Разберись с платежом или предложи СБП другим способом',call:1},
+ {id:'r3',kind:'sign_help',name:'Козлова Ирина',chip:{t:'договор открыт, не подписан',c:'g'},bud:15,cons:1,
+  why:'открыла страницу договора 34 минуты назад и не подписала',act:'Позвонить',full:'Помоги подписать прямо сейчас или зафиксируй точное время возврата',call:1},
+ {id:'r4',kind:'reply',name:'Новикова Ольга',chip:{t:'на подписи',c:'g'},bud:6,
+  why:'сообщение без ответа 41 минуту: «Не приходит СМС для подписи»',act:'Ответить',full:'Ответь в чат и доведи до подписи'},
+ {id:'r5',kind:'promise',at:'11:30',name:'Волков Андрей',chip:{t:'Д1 · получи КИ',c:'g'},bud:15,cons:1,
+  why:'договорённость на 11:30 после сорванной подписи',act:'Позвонить',full:'Получи КИ и составь юрзаключение',call:1},
+ {id:'r6',kind:'promise',at:'16:00',name:'Иванова Мария',chip:{t:'13 500 ₽',c:'gold'},bud:15,cons:1,
+  why:'договорённость на 16:00 по оплате',act:'Позвонить',full:'Доводи до СБП на линии — 15 секунд',call:1},
+ {id:'r7',kind:'pay_miss',name:'Смирнов Олег',chip:{t:'добор 12 510 ₽',c:'r'},bud:12,
+  why:'обещал оплатить к 12:00, оплаты нет',act:'Позвонить',full:'Бери деньги или новую дату числом',call:1},
+ {id:'r8',kind:'handoff',name:'Алексеев Роман',chip:{t:'оплачено 13 500 ₽',c:'b'},bud:8,
+  why:'оплатил полностью 38 минут назад, в ОС не передан',act:'Передать',full:'Передай клиента в отдел сопровождения и подтверди передачу'},
+ {id:'r9',kind:'risk_deal',name:'Ким Сергей',chip:{t:'частичка 1 500 ₽',c:'b'},bud:15,
+  why:'сказал, что смотрит другую компанию',act:'Позвонить',full:'Отработай сравнение с конкурентом и зафиксируй результат',call:1},
+ {id:'r10',kind:'risk_pay',name:'Кузнецов Павел',chip:{t:'добор 12 510 ₽',c:'r'},bud:12,moved:1,
+  why:'написал, что денег до зарплаты не будет',act:'Позвонить',full:'Согласуй новую точную дату или частичное внесение',call:1},
 
+ /* ── НОВЫЕ ЛИДЫ ── */
  {id:'n1',kind:'lead',name:'Соколова Анна',chip:{t:'новый лид',c:'n'},bud:5,cons:1,
   why:'получен 12 минут назад · набор ≤5 минут',act:'Позвонить',full:'Набери и проведи консультацию',call:1},
- {id:'n2',kind:'lead',name:'Гусев Артём',chip:{t:'новый лид',c:'n'},bud:5,cons:1,
-  why:'ответил боту, ждёт звонка',act:'Позвонить',full:'Ответь и переводи в звонок',call:1},
+ {id:'n2',kind:'lead',name:'Гусева Лариса',chip:{t:'новый лид',c:'n'},bud:5,cons:1,
+  why:'ответила боту, ждёт звонка',act:'Позвонить',full:'Набери и проведи консультацию',call:1},
 
+ /* ── ЖЁЛТАЯ ЗОНА ── */
  {id:'y1',kind:'push',name:'Петров Дмитрий',chip:{t:'частичка 990 ₽',c:'b'},bud:12,
   why:'плановый дожим · касание 3 из 6',act:'Позвонить',full:'Предложи скидку и закрой на платёж сегодня',call:1},
  {id:'y2',kind:'ki',name:'Крылов Игорь',chip:{t:'нет КИ',c:'n'},bud:10,
   why:'запрос кредитной истории, второй заход',act:'Позвонить',full:'Объясни зачем КИ и дай инструкцию',call:1},
- {id:'y3',kind:'paycheck',name:'Кузнецов Павел',chip:{t:'добор 12 510 ₽',c:'b'},bud:8,
-  why:'контроль оплаты · платёж завтра',act:'Позвонить',full:'Подтверди завтрашний платёж',call:1},
- {id:'y4',kind:'thinking',name:'Ким Сергей',chip:{t:'частичка 1 500 ₽',c:'b'},bud:12,
-  why:'клиент думает после кейса',act:'Позвонить',full:'Предложи заказать SIM',call:1},
+ {id:'y3',kind:'paycheck',name:'Лебедев Антон',chip:{t:'платёж завтра',c:'b'},bud:8,
+  why:'контроль оплаты · платёж ожидается завтра',act:'Позвонить',full:'Подтверди завтрашний платёж',call:1},
+ {id:'y4',kind:'thinking',name:'Морозова Юлия',chip:{t:'частичка 990 ₽',c:'b'},bud:12,
+  why:'взяла паузу после кейса',act:'Позвонить',full:'Предложи заказать SIM',call:1},
  {id:'y5',kind:'consult2',name:'Белова Ирина',chip:{t:'консультация 2',c:'n'},bud:15,cons:1,
   why:'повторная консультация по заключению',act:'Провести',full:'Разбор заключения и закрытие на договор',call:1},
  {id:'y6',kind:'followup',name:'Зайцев Марк',chip:{t:'follow-up',c:'n'},bud:6,
-  why:'follow-up после отправки материалов',act:'Написать',full:'Уточни, посмотрел ли материалы'},
+  why:'материалы отправлены вчера',act:'Написать',full:'Уточни, посмотрел ли материалы'},
 
+ /* ── ОБЫЧНАЯ ЗОНА ── */
  {id:'g1',kind:'cold',name:'Орлов Никита',chip:{t:'тёплый пул',c:'n'},bud:12,
   why:'нет касания 9 дней',act:'Позвонить',full:'Открой историю, говори про ЕГО ситуацию',call:1},
  {id:'g2',kind:'notready',name:'Лаптева Вера',chip:{t:'не готова',c:'n'},bud:10,
@@ -549,6 +589,7 @@ var TASKS=[
  {id:'g4',kind:'low',name:'Дьяков Пётр',chip:{t:'низкий приоритет',c:'n'},bud:8,
   why:'низкий приоритет по скорингу',act:'Позвонить',full:'Короткое касание, если есть время',call:1}
 ];
+
 
 /* ═══ СОСТОЯНИЕ ═══ */
 var started=false,done={},tmr=null,onBreak=false,breakSec=0,onCall=false;
@@ -570,18 +611,20 @@ function inZone(z){return alive().filter(function(t){return zone(t)===z})}
    зациклится на одном номере, а попытки по канону разносятся во времени */
 function dueNow(t){
   if(t.cool&&nowMin<t.cool)return false;
-  return t.kind!=='time'||nowMin>=hm(t.at)-15;
+  return t.kind!=='promise'||nowMin>=hm(t.at)-15;
 }
 function redDue(){return inZone('red').filter(dueNow)}
+/* наступившая договорённость обгоняет всё внутри своей зоны: время назначено клиентом */
+function rank(t){return (t.kind==='promise'&&dueNow(t))?0:KIND[t.kind].ord}
 function ordered(l){return l.slice().sort(function(a,b){
-  var d=KIND[a.kind].ord-KIND[b.kind].ord;if(d)return d;
+  var d=rank(a)-rank(b);if(d)return d;
   if(a.at&&b.at)return hm(a.at)-hm(b.at);return (a.seq||0)-(b.seq||0)})}
 function leadsOpen(){return redDue().length===0&&crosses<3}
 function yellowOpen(){return redDue().length===0&&inZone('lead').length===0}
 function greyOpen(){return yellowOpen()&&inZone('yellow').length===0}
 function overdueCount(){return alive().filter(function(t){
-  if(t.kind==='overdue'||t.kind==='invoice')return true;
-  return t.kind==='time'&&nowMin>hm(t.at)+15}).length}
+  if(t.kind==='pay_miss'||t.kind==='risk_pay')return true;
+  return t.kind==='promise'&&nowMin>hm(t.at)+15}).length}
 function current(){
   if(workId&&!done[workId])return byId[workId];
   var r=ordered(redDue());if(r.length)return r[0];
@@ -664,7 +707,7 @@ function renderDrop(){
 
   var h='';
   list.forEach(function(x){
-    var wait=(x.kind==='time'&&!dueNow(x)),cool=(x.cool&&nowMin<x.cool);
+    var wait=(x.kind==='promise'&&!dueNow(x)),cool=(x.cool&&nowMin<x.cool);
     h+='<button class="drow'+(rec&&x.id===rec.id?' first':'')+(x.id===selId?' sel':'')+'" onclick="selectTask(\''+x.id+'\')">'
       +'<span class="mk">'+KIND[x.kind].ico+'</span>'
       +'<span class="tx"><b>'+x.name+'</b><span>'+x.why+'</span></span>'
@@ -689,7 +732,7 @@ function renderDetail(){
   if(!t){n.innerHTML=card('зона закрыта','Задач нет','Переключись на другую зону плиткой в полосе.','');return}
 
   var rec=current(),isRec=(rec&&rec.id===t.id),open=(openedId===t.id);
-  var wait=(t.kind==='time'&&!dueNow(t)),cool=(t.cool&&nowMin<t.cool);
+  var wait=(t.kind==='promise'&&!dueNow(t)),cool=(t.cool&&nowMin<t.cool);
   var srok=cool?'снова в '+clock(t.cool):(t.at?(wait?'ждёт '+t.at:t.at):'без точного времени');
 
   n.innerHTML='<div class="dnext">'
@@ -698,7 +741,8 @@ function renderDetail(){
     +'<h4>'+t.act+': '+t.name+'</h4>'
     +'<div class="sb">'+t.why+'</div>'
     +'<div class="kv">'
-      +'<div class="r2"><span>зона</span><b>'+ZLB[zone(t)].n.split(' · ')[0]+' · '+KIND[t.kind].lb+'</b></div>'
+      +'<div class="r2"><span>тип задачи</span><b>'+KIND[t.kind].lb+'</b></div>'
+      +'<div class="r2"><span>зона</span><b>'+ZLB[zone(t)].n.split(' · ')[0]+'</b></div>'
       +'<div class="r2"><span>сделка</span><b>'+t.chip.t+'</b></div>'
       +'<div class="r2"><span>срок</span><b>'+srok+'</b></div>'
       +'<div class="r2"><span>бюджет времени</span><b>'+t.bud+' мин'+(open?' · идёт '+fmt(taskSec):'')+'</b></div>'
@@ -706,6 +750,7 @@ function renderDetail(){
       +(t.moved?'<div class="r2"><span>переносы</span><b>'+t.moved+' из 2</b></div>':'')
     +'</div>'
     +'<div class="desc"><span class="lb">Что сделать · описание из Sensei</span>'+t.full+'</div>'
+    +'<div class="desc"><span class="lb">Закроется, когда</span>'+KIND[t.kind].close+'</div>'
     +'<div class="btns">'
       +(open?'<span class="dbtn gh">сделка открыта</span>'
             :'<button class="dbtn go" onclick="openDeal(\''+t.id+'\')">Перейти в сделку →</button>')
@@ -732,7 +777,7 @@ function selectTask(id){selId=id;renderBar()}
 /* ═══ РЕЗУЛЬТАТ: КАСАНИЕ ПО ФАКТУ ═══ */
 function talked(id){
   var t=byId[id];
-  if(t.cons){consDone++;if(t.kind==='lead'||t.kind==='missed')leadsDone++}
+  if(t.cons){consDone++;if(t.kind==='lead')leadsDone++}
   if(qa<100&&taskSec<=t.bud*60)qa=Math.min(100,qa+1);
   var nx=peekNext(id);
   toast('Касание подтверждено','Разговор состоялся, 3 мин 12 сек — подтвердил PBX. Sensei закрыл задачу.'
@@ -767,7 +812,7 @@ function renderPlan(){
     +'<div class="cnt'+(leadsOpen()?'':' lock')+'"><b>'+(leadsOpen()?ld.length:'🔒')+'</b><span>'+(leadsOpen()?'новые лиды':'лиды заблокированы')+'</span></div>'
     +'<div class="cnt'+(overdueCount()?' gold':'')+'"><b>'+overdueCount()+'</b><span>просрочено</span></div>';
 
-  var pts=alive().filter(function(x){return x.kind==='time'}).sort(function(a,b){return hm(a.at)-hm(b.at)});
+  var pts=alive().filter(function(x){return x.kind==='promise'}).sort(function(a,b){return hm(a.at)-hm(b.at)});
   var ax=document.getElementById('pAxis');
   if(!pts.length)ax.innerHTML='<div class="locked">Обязательств ко времени не осталось.</div>';
   else{
@@ -854,7 +899,7 @@ function renderPlan(){
                              :'Красная зона чиста — дальше день планируешь сам.'}
 }
 function row(t,cls,pick){
-  var k=KIND[t.kind],cool=(t.cool&&nowMin<t.cool),wait=(t.kind==='time'&&!dueNow(t));
+  var k=KIND[t.kind],cool=(t.cool&&nowMin<t.cool),wait=(t.kind==='promise'&&!dueNow(t));
   var rt=cool?'<span class="w">снова в '+clock(t.cool)+'</span>'
        :(t.at?'<span class="w'+(dueNow(t)?' due':'')+' num">'+(wait?'в ':'')+t.at+'</span>'
              :'<span class="w">'+k.lb+'</span>');
@@ -934,7 +979,7 @@ function renderCard(){
   var t=openedId?byId[openedId]:null;
   document.getElementById('cName').textContent=t?t.name:'Рассказова Ольга Васильевна';
   document.getElementById('cChip').textContent=t?t.chip.t:'ФССП';
-  document.getElementById('cStage').textContent=t?(t.kind==='lead'||t.kind==='missed'?'Квал лиды':zone(t)==='red'?'Подписан · не оплачен':'На подписи / частичка'):'Квал лиды';
+  document.getElementById('cStage').textContent=t?(t.kind==='lead'?'Квал лиды':zone(t)==='red'?'Подписан · не оплачен':'На подписи / частичка'):'Квал лиды';
 }
 function toggleBreak(){
   onBreak=!onBreak;
