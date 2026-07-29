@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Виджет смены v12 · Полоса над карточкой · SALE 100.0</title>
+<meta name="description" content="Виджет менеджера v12: тонкая полоса над карточкой сделки amoCRM. Задачу ставит Sensei в карточке, результат менеджер отмечает там же, а полоса держит рамку дня — отсчёт до новых лидов, нагрузку и лимит лидов.">
+<style>
+/* ═══ ВИДЖЕТ v12 — ПОЛОСА, И ТОЛЬКО ПОЛОСА (правка заказчика 28.07:
+   «зачем ты сделал слева колонку? у нас есть виджет для менеджера и есть задачи в Sensei,
+   при выборе результата мы даём новую сделку, виджет остаётся сверху»).
+
+   РАЗДЕЛЕНИЕ ОТВЕТСТВЕННОСТИ, КОТОРОЕ Я НАРУШИЛ В v11 И ВОССТАНАВЛИВАЮ ЗДЕСЬ:
+     amoCRM  — карточка сделки: клиент, поля, лента событий. Не наше.
+     Sensei  — задача внутри карточки и ВЫБОР РЕЗУЛЬТАТА. Не наше.
+     ВИДЖЕТ  — полоса сверху. Отвечает только на то, чего в карточке нет физически,
+               потому что карточка про одну сделку, а полоса про день.
+   Никакой очереди слева, никакой карточки сделки, никакого выбора результата у нас.
+   Список задач живёт на экране «Мой день» — он открывается по клику, а не висит всегда.
+
+   ЦИКЛ: Sensei ставит задачу → менеджер работает в карточке → выбирает результат в Sensei
+   → виджет открывает следующую сделку. Полоса при этом не меняется местом и не мигает.
+
+   Взято из макета Виктории то, что уместно в полосе: нагрузка с потолком, дневной лимит
+   лидов, эфирное время. Не взято: «Готово, когда» и выбор результата — это Sensei. ═══ */
+:root{
+  --line:#e4e8ee; --ink:#1f2633; --mut:#6c7686; --faint:#8a93a3; --soft:#f6f8fb;
+  --amo:#f1f3f6; --amo-line:#dfe3e9; --amo-ink:#5c6472;
+  --green:#0f9d58; --green-d:#0b7a45; --green-bg:#eefaf3; --green-line:#c6ecd8;
+  --red:#e5484d; --red-d:#b23237; --red-bg:#fdf1f1; --red-line:#f7ccce;
+  --gold:#9a7318; --gold-bg:#fbf6e9; --gold-line:#eddfb6;
+  --blue:#2f68c4; --blue-bg:#eff4fc;
+  --dark:#1b2437;
+  --ease:cubic-bezier(.22,1,.36,1);
+  font-size:15px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:#e7eaef;color:var(--ink);line-height:1.45;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;text-align:left}
+select{font:inherit;color:inherit}
+
+.amoapp{height:100vh;display:grid;grid-template-columns:64px 1fr;overflow:hidden}
+.rail{background:#fff;border-right:1px solid var(--amo-line);display:flex;flex-direction:column;
+  align-items:center;padding:10px 0;gap:3px;overflow:hidden}
+.rail .ri{width:44px;height:46px;border-radius:9px;display:grid;place-items:center;font-size:17px;
+  color:#9aa2af;position:relative;flex:none}
+.rail .ri.on{background:var(--soft);color:var(--dark)}
+.rail .ri small{position:absolute;top:5px;right:6px;background:var(--red);color:#fff;font-size:9px;
+  font-weight:700;border-radius:7px;padding:1px 4px}
+.rail .ri span{position:absolute;bottom:3px;font-size:8.5px;color:#a8afba;letter-spacing:-.2px}
+.main{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+
+/* ═══ ПОЛОСА — ЭТО ВЕСЬ НАШ ВИДЖЕТ ═══ */
+#bar{flex:none;height:60px;display:flex;align-items:center;background:#fff;
+  border-bottom:1px solid var(--amo-line);padding:0 6px 0 14px;gap:0}
+.who{flex:none;display:flex;align-items:center;gap:9px;padding-right:15px;white-space:nowrap}
+.who i{width:11px;height:11px;border-radius:50%;background:#9aa3b0;flex:none}
+.who.on i{background:var(--green)}
+.who b{font-size:13.5px;font-weight:800}
+.who span{font-size:11.5px;color:var(--mut)}
+
+/* главное: отсчёт до новых лидов */
+.flow{flex:none;display:flex;align-items:baseline;gap:9px;padding:8px 14px;border-radius:11px;
+  margin-right:16px;white-space:nowrap;transition:background .2s ease}
+.flow b{font-size:14.5px;font-weight:800}
+.flow span{font-size:11.5px}
+.flow.red{background:var(--red-bg);box-shadow:inset 0 0 0 1px var(--red-line)}
+.flow.red b{color:var(--red-d)} .flow.red span{color:#a4595c}
+.flow.yellow{background:var(--gold-bg);box-shadow:inset 0 0 0 1px var(--gold-line)}
+.flow.yellow b{color:var(--gold)} .flow.yellow span{color:#8a7434}
+.flow.green{background:var(--green-bg);box-shadow:inset 0 0 0 1px var(--green-line)}
+.flow.green b{color:var(--green-d)} .flow.green span{color:#4e7f63}
+.flow.grey{background:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
+.flow.grey b{color:var(--mut)} .flow.grey span{color:var(--faint)}
+
+/* что сейчас делает конвейер — короткая строка, без имени клиента: оно в карточке ниже */
+.doing{flex:1;min-width:0;display:flex;align-items:center;gap:9px;padding-right:14px}
+.doing .dk{flex:none;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint)}
+.doing .dv{font-size:13px;font-weight:600;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.doing .dv b{color:var(--ink);font-weight:700}
+.doing .tm{flex:none;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;
+  background:var(--soft);border-radius:8px;padding:6px 10px}
+.doing .tm.over{background:var(--red-bg);color:var(--red-d)}
+
+.mtr{flex:none;display:flex;align-items:center;gap:18px;padding:0 16px;border-left:1px solid var(--line)}
+.mtr .m{white-space:nowrap}
+.mtr .ml{display:block;font-size:9.5px;color:var(--faint);letter-spacing:.04em;text-transform:uppercase}
+.mtr .mv{display:block;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
+.mtr .mv small{font-size:11px;font-weight:700;color:var(--mut)}
+.mtr .mv.warn{color:var(--red-d)}
+.tb{flex:none;display:flex;align-items:center;gap:8px;padding-left:14px}
+.btn{border-radius:9px;font-weight:700;font-size:12.5px;padding:9px 15px;white-space:nowrap;
+  transition:transform .15s var(--ease),background .18s ease}
+.btn:active{transform:scale(.97)}
+.btn.dark{background:var(--dark);color:#fff}
+.btn.green{background:var(--green);color:#fff}
+.btn.red{background:var(--red);color:#fff}
+.btn.ghost{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* ═══ НИЖЕ — ЧУЖОЕ: КАРТОЧКА amoCRM И ВИДЖЕТ SENSEI В НЕЙ ═══ */
+.card{flex:1;display:grid;grid-template-columns:1fr 320px;min-height:0;overflow:hidden}
+.cl{display:grid;grid-template-columns:400px 1fr;min-width:0;overflow:hidden}
+.pane{background:#fff;border-right:1px solid var(--amo-line);padding:15px 17px;overflow-y:auto;color:var(--amo-ink)}
+.pane h3{font-size:18px;font-weight:700;color:#2a3140}
+.pane .id{margin-top:5px;font-size:11.5px;color:var(--faint);display:flex;gap:8px;align-items:center}
+.chip{font-size:11px;font-weight:700;border-radius:7px;padding:3px 9px;white-space:nowrap}
+.chip.g{background:var(--green-bg);color:var(--green-d)}
+.chip.b{background:var(--blue-bg);color:var(--blue)}
+.chip.n{background:var(--soft);color:var(--mut)}
+.pane .stg{margin-top:12px;font-size:11.5px;color:var(--mut)}
+.pane .stg b{display:block;color:var(--ink);font-size:13px}
+.tabs{margin-top:13px;display:flex;gap:14px;font-size:12px;color:#9aa2af;border-bottom:1px solid var(--amo-line);padding-bottom:8px}
+.tabs b{color:var(--ink);border-bottom:2px solid var(--dark);padding-bottom:8px;margin-bottom:-9px}
+.fields{margin-top:12px;font-size:11.5px}
+.fld{display:flex;justify-content:space-between;gap:10px;padding:6px 0}
+.fld span{color:var(--faint)} .fld b{color:var(--amo-ink);font-weight:500}
+.feed{background:var(--amo);padding:15px 18px;overflow-y:auto;color:var(--amo-ink)}
+.fh{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:10px}
+.ev{background:#fff;border:1px solid var(--amo-line);border-radius:10px;padding:11px 13px;margin-bottom:9px}
+.ev.sig{background:#fff6f6;border-color:var(--red-line)}
+.ev .h{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--faint)}
+.ev.sig .h{color:var(--red-d)}
+.ev .t{margin-top:3px;font-size:12.5px;line-height:1.45}
+
+/* правая колонка amoCRM с виджетами; наш — не здесь, наш сверху */
+.wids{background:#fff;border-left:1px solid var(--amo-line);padding:13px 12px;overflow-y:auto}
+.wt{font-size:14px;font-weight:700;color:#2a3140;margin-bottom:10px}
+.wid{border-radius:9px;padding:10px 12px;font-size:11.5px;font-weight:600;margin-bottom:7px;color:#fff}
+.wid.dk{background:#1b2437}.wid.bl{background:#2f68c4}.wid.gr{background:#0b5540}
+.wid.lt{background:var(--soft);color:var(--amo-ink);box-shadow:inset 0 0 0 1px var(--amo-line)}
+
+/* виджет Sensei — ЧУЖОЙ. Показан, чтобы было видно, где живёт задача и результат */
+.sensei{border:1px solid #cfc4f0;background:#f8f6ff;border-radius:12px;padding:13px 14px;margin-bottom:10px}
+.sensei .sh{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:800;letter-spacing:.05em;
+  text-transform:uppercase;color:#6c4fd0}
+.sensei h4{margin-top:7px;font-size:15px;font-weight:800;color:var(--ink);line-height:1.3}
+.sensei .sw{margin-top:5px;font-size:12px;color:var(--mut);line-height:1.45}
+.sensei .dw{margin-top:9px;background:#fff;border-radius:9px;padding:9px 11px;font-size:11.5px;line-height:1.45;color:var(--amo-ink)}
+.sensei .dw b{display:block;font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:3px}
+.sensei select{width:100%;margin-top:10px;border:1px solid #d8cef5;border-radius:9px;padding:9px 10px;font-size:12.5px;background:#fff}
+.sensei .sb{width:100%;margin-top:8px;text-align:center;border-radius:9px;background:#6c4fd0;color:#fff;
+  font-size:12.5px;font-weight:700;padding:10px}
+.sensei .note{margin-top:8px;font-size:10.5px;color:#7a6aa8;line-height:1.4}
+
+/* ═══ ЭКРАН «МОЙ ДЕНЬ» — список задач живёт здесь, а не в постоянной колонке ═══ */
+#day{position:fixed;inset:0;background:#f2f4f8;z-index:50;display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;transition:opacity .2s ease}
+#day.on{opacity:1;pointer-events:auto}
+.dayh{flex:none;background:#fff;border-bottom:1px solid var(--line)}
+.dayi{max-width:880px;margin:0 auto;width:100%;padding:18px 22px;display:flex;align-items:center;gap:13px}
+.dayi h2{font-size:20px;font-weight:800}
+.dayi .s{font-size:13px;color:var(--mut)}
+.dayi .x{margin-left:auto;width:34px;height:34px;border-radius:10px;background:var(--soft);color:var(--mut);
+  display:grid;place-items:center;font-size:14px}
+.dayb{flex:1;min-height:0;overflow-y:auto}
+.daybi{max-width:880px;margin:0 auto;width:100%;padding:18px 22px 26px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:11px}
+.cell{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px 14px}
+.cell .cl2{font-size:11px;color:var(--faint)}
+.cell .cv{margin-top:3px;font-size:21px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.cell .cs{margin-top:2px;font-size:11px;color:var(--mut)}
+.cell.ok .cv{color:var(--green-d)} .cell.bad .cv{color:var(--red-d)}
+.sec{margin-top:18px}
+.sec h3{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);
+  padding:0 2px 8px;display:flex;align-items:baseline;gap:8px}
+.sec h3 b{margin-left:auto;color:var(--ink);font-size:13px}
+.sec h3 em{font-style:normal;font-weight:600;letter-spacing:0;text-transform:none;font-size:11px}
+.list{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+.row{width:100%;display:flex;align-items:center;gap:12px;padding:12px 15px;transition:background .15s ease}
+.row + .row{border-top:1px solid var(--line)}
+.row:hover{background:var(--soft)}
+.row .nm{flex:none;font-size:14px;font-weight:700;white-space:nowrap}
+.row .tk{flex:1;min-width:0;font-size:12.5px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .dl{flex:none;font-size:11.5px;color:var(--faint);white-space:nowrap}
+.row .dl.late{color:var(--red-d);font-weight:700}
+.list.now .row .nm{color:var(--red-d)}
+.emp{padding:14px 15px;font-size:12.5px;color:var(--green-d);font-weight:600}
+.rules{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+.rules h4{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:9px}
+.rules .r{display:flex;gap:10px;padding:7px 0;font-size:12.5px;line-height:1.5}
+.rules .r + .r{border-top:1px solid var(--line)}
+.rules .r i{font-style:normal;flex:none;width:11px;height:11px;border-radius:50%;margin-top:5px}
+.rules .r.red i{background:var(--red)} .rules .r.yellow i{background:#e0a916}
+.rules .r.green i{background:var(--green)} .rules .r.grey i{background:#9aa3b0}
+.dayf{flex:none;background:#fff;border-top:1px solid var(--line)}
+.dayfi{max-width:880px;margin:0 auto;width:100%;padding:14px 22px;display:flex;align-items:center;gap:12px}
+.dayfi .note{font-size:12.5px;color:var(--mut)}
+.sp{flex:1}
+
+#lead{position:fixed;top:74px;left:50%;transform:translate(-50%,-14px);opacity:0;pointer-events:none;
+  background:var(--dark);color:#fff;border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:18px;
+  box-shadow:0 16px 40px rgba(15,25,45,.3);z-index:60;transition:opacity .22s ease,transform .22s var(--ease)}
+#lead.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#lead .lt{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#ff9ba0}
+#lead h4{margin-top:2px;font-size:17px;font-weight:800}
+#lead .cd{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:#ff9ba0;text-align:center}
+#lead .cd small{display:block;font-size:9.5px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.05em;text-transform:uppercase}
+
+#toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,12px);opacity:0;pointer-events:none;
+  background:var(--dark);color:#fff;border-radius:11px;padding:12px 16px;z-index:70;max-width:min(92vw,560px);
+  transition:opacity .2s ease,transform .2s var(--ease);font-size:12.5px;line-height:1.5}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast b{display:block;font-size:13.5px;margin-bottom:2px}
+.tip{position:fixed;left:12px;bottom:12px;font-size:11px;color:#7d8593;background:rgba(255,255,255,.96);
+  border:1px solid var(--amo-line);border-radius:9px;padding:7px 11px;z-index:40;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.tip b{color:var(--ink)}
+.tip button{padding:5px 9px;font-size:11px;border-radius:7px;background:var(--soft);
+  box-shadow:inset 0 0 0 1px var(--amo-line);color:var(--mut)}
+@media (max-width:1240px){.mtr .m.hide{display:none}}
+@media (prefers-reduced-motion: reduce){*{transition-duration:.01ms !important}}
+</style>
+</head>
+<body>
+
+<div class="amoapp">
+  <nav class="rail">
+    <div class="ri">👤<span>Аккаунт</span></div>
+    <div class="ri">🧭<span>Стол</span></div>
+    <div class="ri on">💼<span>Сделки</span></div>
+    <div class="ri">💬<small>1</small><span>imBox</span></div>
+    <div class="ri">✅<small>33</small><span>Задачи</span></div>
+    <div class="ri">📋<span>Списки</span></div>
+    <div class="ri">📄<span>Докум.</span></div>
+    <div class="ri">✉️<span>Почта</span></div>
+    <div class="ri">📊<span>Аналит.</span></div>
+    <div class="ri">⚙️<small>2</small><span>Sensei</span></div>
+  </nav>
+
+  <div class="main">
+    <!-- ↓↓↓ ЭТО ВЕСЬ НАШ ВИДЖЕТ ↓↓↓ -->
+    <div id="bar"></div>
+    <!-- ↑↑↑ дальше — обычная карточка amoCRM с чужими виджетами ↑↑↑ -->
+
+    <div class="card">
+      <div class="cl">
+        <div class="pane">
+          <h3 id="cName">—</h3>
+          <div class="id"><span id="cDeal">—</span><span class="chip g" id="cStage">—</span></div>
+          <div class="stg">Воронка клоузера<b id="cFunnel">—</b></div>
+          <div class="tabs"><b>Основное</b><span>МПП</span><span>Анкета</span><span>Сбор доков</span><span>Суд</span></div>
+          <div class="fields" id="cFields"></div>
+        </div>
+        <div class="feed"><div class="fh">История общения</div><div id="cFeed"></div></div>
+      </div>
+      <aside class="wids">
+        <div class="wt">Виджеты сделки</div>
+        <div class="sensei" id="sensei"></div>
+        <div class="wid bl">Wappi Widget</div>
+        <div class="wid lt">Платежи</div>
+        <div class="wid dk">HyperScript</div>
+        <div class="wid gr">ОБНУЛЯТОР · Пульт</div>
+        <div class="wid lt">Документы</div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div id="lead">
+  <div><span class="lt">🆕 новый лид</span><h4 id="ldName">—</h4></div>
+  <div class="cd"><span id="ldTime">05:00</span><small>на первый звонок</small></div>
+  <button class="btn red" onclick="takeLead()">📞 Взять</button>
+</div>
+
+<div id="day">
+  <div class="dayh"><div class="dayi">
+    <div><h2 id="dTitle">Мой день</h2><div class="s" id="dSub"></div></div>
+    <button class="x" onclick="closeDay()" aria-label="Закрыть">✕</button>
+  </div></div>
+  <div class="dayb"><div class="daybi" id="dBody"></div></div>
+  <div class="dayf"><div class="dayfi">
+    <span class="note" id="dNote"></span><span class="sp"></span>
+    <button class="btn ghost" onclick="closeDay()">Закрыть</button>
+    <button class="btn green" id="dMain" onclick="mainAction()">Начать работу</button>
+  </div></div>
+</div>
+
+<div id="toast"></div>
+
+<div class="tip"><b>Демо v12:</b>
+  <button onclick="demoLead()">🆕 новый лид</button>
+  <button onclick="setTime(13*60)">🕐 13:00</button>
+  <button onclick="openDay()">📋 мой день</button>
+</div>
+
+<script>
+/* ═══ ДАННЫЕ. Задачи ставит Sensei — здесь они лежат только чтобы прототип работал. ═══ */
+var T=[
+ {id:1,g:'now',name:'Анна Соколова',deal:'#20152541',stage:'Договор подписан',chip:'g',
+  sum:'199 000 ₽',first:'13 500 ₽',funnel:'Подписан · не оплачен',
+  task:'Помочь завершить платёж',
+  why:'Клиент открыл страницу оплаты, платёж не прошёл. Нужно подключиться сразу.',
+  when:'Разговор от 1 минуты + СМС-резюме или подтверждённый диалог.',
+  feed:[{t:'sig',h:'Сигнал системы · только что',x:'Клиент открыл страницу оплаты, платёж не прошёл.'},
+        {t:'msg',h:'Вчера 18:42 · WhatsApp',x:'Отправлены условия и ссылка. Клиент: «Посмотрю утром и напишу».'},
+        {t:'call',h:'Вчера 18:31 · исходящий',x:'Разговор 08:14 · договорённость зафиксирована.'}]},
+ {id:2,g:'now',name:'Олег Смирнов',deal:'#20152488',stage:'Договор на подписи',chip:'g',
+  sum:'189 000 ₽',first:'13 500 ₽',funnel:'На подписи',
+  task:'Отработать: согласие не подписано',
+  why:'МОС отправил «Согласие на процедуру» 4 часа назад, клиент не подписал.',
+  when:'Согласие подписано либо подтверждённый контакт с точным временем следующего шага.',
+  feed:[{t:'sig',h:'Сигнал системы · 4 часа назад',x:'Согласие отправлено, подписи нет.'},
+        {t:'call',h:'Сегодня 10:04 · исходящий',x:'Без ответа. Попытка 1 из 3.'}]},
+ {id:3,g:'now',name:'Мария Орлова',deal:'#20152410',stage:'Частичный платёж',chip:'b',
+  sum:'199 000 ₽',first:'990 ₽',funnel:'Частичка · дожим оплаты',
+  task:'Ответить клиенту',
+  why:'Сообщение без ответа 32 минуты: вопрос по договору.',
+  when:'Ответ менеджера или разговор от 1 минуты. Эмодзи и «спасибо» не засчитываются.',
+  feed:[{t:'msg',h:'Сегодня 13:06 · WhatsApp',x:'«А если я потеряю работу, что будет с платежами?»'}]},
+
+ {id:4,g:'today',name:'Павел Волков',deal:'#20152377',stage:'Принимает решение',chip:'n',
+  sum:'199 000 ₽',first:'13 500 ₽',funnel:'Принимает решение',dl:'11:00',
+  task:'Связаться по договорённости',
+  why:'Последнее подтверждённое касание было 48 часов назад.',
+  when:'Разговор в согласованное время и СМС-резюме.',
+  feed:[{t:'call',h:'27 июля 15:20 · исходящий',x:'Разговор 06:02 · обещал ответ в среду.'}]},
+ {id:5,g:'today',name:'Ирина Зайцева',deal:'#20152350',stage:'Частичный платёж',chip:'b',
+  sum:'189 000 ₽',first:'1 500 ₽',funnel:'Частичка · дожим оплаты',dl:'15:00',
+  task:'Проверить обещанную оплату',
+  why:'Сегодня согласованный разговор о следующей части платежа.',
+  when:'Зафиксирован результат или следующая точная договорённость.',
+  feed:[{t:'call',h:'Вчера 12:10 · исходящий',x:'Разговор 04:41 · обещала внести сегодня.'}]},
+
+ {id:6,g:'wait',name:'Елена Котова',deal:'#20152301',stage:'Принимает решение',chip:'n',
+  sum:'199 000 ₽',first:'13 500 ₽',funnel:'Принимает решение',
+  task:'Вернуться к решению клиента',
+  why:'Клиент обещал ответ после разговора с супругом.',
+  when:'Зафиксирован результат или следующая точная договорённость.',
+  feed:[{t:'call',h:'26 июля 11:30 · исходящий',x:'Разговор 09:12 · советуется с семьёй.'}]},
+ {id:7,g:'wait',name:'Сергей Козлов',deal:'#20152288',stage:'Принимает решение',chip:'n',
+  sum:'189 000 ₽',first:'990 ₽',funnel:'Принимает решение',
+  task:'Разобрать юридическое заключение',
+  why:'Заключение отправлено, клиент сравнивает с другой компанией.',
+  when:'Разговор от 1 минуты + СМС-резюме.',
+  feed:[{t:'msg',h:'25 июля 16:05 · WhatsApp',x:'«Посмотрю и сравню, отвечу на неделе».'}]}
+];
+var RULES=[
+ {c:'red',   t:'Красный — лидов нет',       x:'Есть срочные задачи или нагрузка выше потолка. Разбери их — и лиды пойдут.'},
+ {c:'yellow',t:'Жёлтый — лиды через раз',   x:'Есть просроченные касания на сегодня. Каждый второй лид пропускается.'},
+ {c:'green', t:'Зелёный — лиды идут',       x:'Срочных задач и просроченных касаний нет.'},
+ {c:'grey',  t:'Серый — вне распределения', x:'Смена не начата или завершена. Утром статус считается заново.'}
+];
+
+var CAP=20, LEAD_DAY=8, AIR_PLAN=240, CARRY=9;
+var started=false, done={}, openId=null, now=9*60+12, shiftSec=0, taskSec=0, air=0;
+var leadsGiven=0, leadsLost=0, cons=0, leadTick=0, lead=null, tmr=null, pend=null;
+var G={now:'Сейчас',today:'Сегодня',wait:'Принимает решение'};
+
+function live(){return T.filter(function(t){return !done[t.id]})}
+function grp(g){return live().filter(function(t){return t.g===g})}
+function late(){return grp('today').filter(function(t){return t.dl&&now>hm(t.dl)})}
+function load(){return live().length+CARRY}
+function color(){
+  if(!started)return 'grey';
+  if(load()>CAP||grp('now').length)return 'red';
+  if(late().length)return 'yellow';
+  return 'green';
+}
+function first(){var a=grp('now');if(a.length)return a[0];var b=grp('today');if(b.length)return b[0];
+  var c=grp('wait');return c.length?c[0]:null}
+function cur(){return openId?byId(openId):null}
+
+/* ═══ ПОЛОСА ═══ */
+function drawBar(){
+  var c=color(),n=grp('now').length,f1,f2;
+  if(c==='grey'){f1='Не в очереди';f2=started?'смена завершена':'смена не начата'}
+  else if(load()>CAP){f1='Лидов нет';f2='перегруз '+load()+' из '+CAP}
+  else if(c==='red'){f1='Осталось '+n;f2='и пойдут лиды'}
+  else if(c==='yellow'){var k=late().length;f1='Лиды через раз';f2=k+' '+pl(k,'просроченное касание','просроченных касания','просроченных касаний')}
+  else{f1='Лиды идут';f2='всё в сроке'}
+
+  /* ярлык меняется вместе со смыслом — так строка короткая и не режется */
+  var t=cur(),dk,dv;
+  if(!started){dk='старт';dv='система сама откроет первую сделку'}
+  else if(pend){dk='открываю';dv='<b>'+byId(pend.id).name+'</b> · '+pend.left+' с'}
+  else if(!t){dk='очередь';dv='выполнена'}
+  else{var nx=nextAfter(t.id);dk='дальше';dv=nx?'<b>'+nx.name+'</b>':'задач больше нет'}
+
+  document.getElementById('bar').innerHTML=
+    '<div class="who'+(started?' on':'')+'"><i></i><div><b>'+(started?'В работе':'Не в работе')+'</b>'
+      +'<span> · '+(started?hms(shiftSec):'смена не начата')+'</span></div></div>'
+    +'<button class="flow '+c+'" onclick="openDay()"><b>'+f1+'</b><span>'+f2+'</span></button>'
+    +'<div class="doing"><span class="dk">'+dk+'</span><span class="dv">'+dv+'</span>'
+      +(t&&started&&!pend?'<span class="tm'+(taskSec>15*60?' over':'')+'">'+mmss(taskSec)+'</span>':'')+'</div>'
+    +'<div class="mtr">'
+      +m('Нагрузка',load()+' <small>/'+CAP+'</small>',load()>CAP?'warn':'')
+      +m('Лиды сегодня',leadsGiven+' <small>/'+LEAD_DAY+'</small>','','hide')
+      +m('Эфирное время',Math.round(air/60)+' <small>/'+AIR_PLAN+'</small>','','hide')
+    +'</div><div class="tb">'
+      +'<button class="btn ghost" onclick="openDay()">Мой день</button>'
+      +(started?'<button class="btn '+(grp('now').length+grp('today').length?'red':'green')+'" onclick="finish()">Завершить день</button>'
+               :'<button class="btn green" onclick="start()">▶ Начать работу</button>')
+    +'</div>';
+}
+function m(l,v,cls,hide){return '<div class="m '+(hide||'')+'"><span class="ml">'+l+'</span><span class="mv '+(cls||'')+'">'+v+'</span></div>'}
+function nextAfter(id){var l=live().filter(function(x){return x.id!==id});
+  var a=l.filter(function(x){return x.g==='now'});if(a.length)return a[0];
+  var b=l.filter(function(x){return x.g==='today'});if(b.length)return b[0];
+  var c=l.filter(function(x){return x.g==='wait'});return c.length?c[0]:null}
+
+/* ═══ КАРТОЧКА amoCRM + ВИДЖЕТ SENSEI (чужое, показано для контекста) ═══ */
+function drawCard(){
+  var t=cur();
+  if(!t){
+    document.getElementById('cName').textContent='Сделка не открыта';
+    document.getElementById('cDeal').textContent='—';
+    document.getElementById('cStage').textContent='—';
+    document.getElementById('cFunnel').textContent='—';
+    document.getElementById('cFields').innerHTML='';
+    document.getElementById('cFeed').innerHTML='<div class="ev"><div class="t">Система откроет сделку сама, как только начнётся работа.</div></div>';
+    document.getElementById('sensei').innerHTML='<div class="sh">⚙ SENSEI</div>'
+      +'<h4 style="font-size:13px;font-weight:600;color:var(--mut)">Активной задачи нет</h4>';
+    return;
+  }
+  document.getElementById('cName').textContent=t.name;
+  document.getElementById('cDeal').textContent='Сделка '+t.deal;
+  var st=document.getElementById('cStage');st.textContent=t.stage;st.className='chip '+t.chip;
+  document.getElementById('cFunnel').textContent=t.funnel;
+  document.getElementById('cFields').innerHTML=
+     fld('Продукт','Банкротство физического лица')+fld('Стоимость',t.sum)+fld('Первый платёж',t.first)
+    +fld('Ответственный','Скоробогатый Владислав')+fld('Телефон','+7 911 224-18-42');
+  document.getElementById('cFeed').innerHTML=t.feed.map(function(e){
+    return '<div class="ev'+(e.t==='sig'?' sig':'')+'"><div class="h">'+e.h+'</div><div class="t">'+e.x+'</div></div>'}).join('');
+
+  /* ЗАДАЧА И РЕЗУЛЬТАТ — В SENSEI. Наш виджет их не дублирует и не перехватывает. */
+  document.getElementById('sensei').innerHTML=
+     '<div class="sh">⚙ SENSEI · задача</div>'
+    +'<h4>'+t.task+'</h4><div class="sw">'+t.why+'</div>'
+    +'<div class="dw"><b>Готово, когда</b>'+t.when+'</div>'
+    +'<select id="pick"><option value="">Выберите результат…</option>'
+      +'<option value="ok">✅ Связались</option><option value="time">📅 Договорились на время</option>'
+      +'<option value="no">📵 Не дозвонился</option><option value="err">⚠️ Ошибка системы</option></select>'
+    +'<button class="sb" onclick="saveResult()">Сохранить результат</button>'
+    +'<div class="note">Результат засчитается после проверки события. Виджет сверху получит сигнал и откроет следующую сделку.</div>';
+}
+function fld(k,v){return '<div class="fld"><span>'+k+'</span><b>'+v+'</b></div>'}
+
+/* ═══ ЭКРАН «МОЙ ДЕНЬ» ═══ */
+function drawDay(){
+  var c=color();
+  document.getElementById('dTitle').textContent=
+    c==='red'?(load()>CAP?'Перегруз':'Сначала срочное'):c==='yellow'?'Есть просроченные касания':
+    c==='green'?'Всё в сроке':'Смена не идёт';
+  document.getElementById('dSub').textContent=
+    c==='red'?(load()>CAP?'Пока клиентов больше '+CAP+', новых лидов не будет':'Разбери срочные — и лиды пойдут'):
+    c==='yellow'?'Каждый второй лид пропускается, пока есть просрочка':
+    c==='green'?'Новые лиды приходят полностью':'Начни работу, чтобы попасть в распределение';
+
+  var h='<div class="grid">'
+    +cell('Срочно',grp('now').length,grp('now').length?'лиды остановлены':'чисто',grp('now').length?'bad':'ok')
+    +cell('Сегодня',grp('today').length,late().length?late().length+' просрочено':'в сроке',late().length?'bad':'')
+    +cell('Принимает решение',grp('wait').length,'касаемся последними','')
+    +cell('Нагрузка',load()+' / '+CAP,load()>CAP?'перегруз':'есть запас',load()>CAP?'bad':'')
+    +cell('Лиды сегодня',leadsGiven+' / '+LEAD_DAY,leadsLost?leadsLost+' упущено':'лимит дня',leadsLost?'bad':'')
+    +cell('Эфирное время',Math.round(air/60)+' / '+AIR_PLAN,'мин разговоров','')
+    +'</div>';
+  ['now','today','wait'].forEach(function(g){
+    var l=grp(g),ic=g==='now'?'🔥':g==='today'?'🤝':'🎯';
+    h+='<div class="sec"><h3>'+ic+' '+G[g]+' <em>'+(g==='now'?'пока есть — лидов нет'
+      :g==='today'?'просрочил — лиды через раз':'касаемся последними')+'</em><b>'+l.length+'</b></h3><div class="list'+(g==='now'?' now':'')+'">';
+    if(!l.length)h+='<div class="emp">✓ пусто</div>';
+    else l.forEach(function(t){
+      var lt=(t.dl&&now>hm(t.dl));
+      h+='<button class="row" onclick="openDeal('+t.id+')"><span class="nm">'+t.name+'</span>'
+        +'<span class="tk">'+t.task+'</span>'
+        +'<span class="dl'+(lt?' late':'')+'">'+(t.dl?(lt?'просрочено с '+t.dl:'до '+t.dl):t.stage)+'</span></button>';
+    });
+    h+='</div></div>';
+  });
+  h+='<div class="rules"><h4>Почему лиды идут или не идут</h4>';
+  RULES.forEach(function(r){h+='<div class="r '+r.c+'"><i></i><div><b>'+r.t+'</b><br>'+r.x+'</div></div>'});
+  h+='</div>';
+  document.getElementById('dBody').innerHTML=h;
+
+  var mn=document.getElementById('dMain'),nt=document.getElementById('dNote');
+  var debt=grp('now').length+grp('today').length;
+  if(!started){mn.textContent='Начать работу';mn.className='btn green';nt.textContent='Пока смена не начата, сделки не подаются.'}
+  else if(!live().length){mn.textContent='Завершить день';mn.className='btn green';nt.textContent='Очередь выполнена.'}
+  else if(debt){mn.textContent='Завершить с долгом';mn.className='btn red';
+    nt.textContent='Осталось '+debt+' на сегодня — итог уйдёт РОПу на разбор.'}
+  else{mn.textContent='Вернуться в работу';mn.className='btn dark';nt.textContent='Срочного и просроченного нет.'}
+}
+function cell(l,v,s,cls){return '<div class="cell '+(cls||'')+'"><div class="cl2">'+l+'</div>'
+  +'<div class="cv">'+v+'</div><div class="cs">'+s+'</div></div>'}
+function openDay(){document.getElementById('day').classList.add('on');drawDay()}
+function closeDay(){document.getElementById('day').classList.remove('on')}
+function mainAction(){
+  if(!started){start();return}
+  if(!live().length||grp('now').length+grp('today').length){finish();return}
+  closeDay();
+}
+
+/* ═══ ЦИКЛ ═══ */
+function draw(){drawBar();drawCard();if(document.getElementById('day').classList.contains('on'))drawDay()}
+function start(){
+  started=true;if(!tmr)tmr=setInterval(tick,1000);closeDay();
+  var t=first();if(t)queue(t.id);draw();
+  say('Работа начата','Система сама откроет первую сделку по приоритету. Искать никого не нужно.');
+}
+/* подача: виджет переводит amoCRM в нужную сделку сам */
+function queue(id){pend={id:id,left:3};drawBar()}
+function openDeal(id){pend=null;openId=id;taskSec=0;closeDay();draw();
+  say('Сделка открыта: '+byId(id).name,'Задача от Sensei — в карточке справа. Результат отмечаешь там же.')}
+/* результат выбран В SENSEI → виджет подаёт следующую сделку */
+function saveResult(){
+  var t=cur();if(!t)return;
+  var v=document.getElementById('pick').value;
+  if(!v){say('Не выбран результат','Sensei не закроет задачу без результата.');return}
+  if(v==='err'){done[t.id]=1;after('Ошибка отправлена РОПу','Задача снята с вас, РОП разберёт, почему она была поставлена.');return}
+  if(v==='no'){
+    t.att=(t.att||0)+1;
+    if(t.att>=3){done[t.id]=1;after('Три попытки без ответа','Клиент переходит в «Недозвон», обязательная СМС отправлена.')}
+    else{openId=null;var nx=first();if(nx)queue(nx.id);draw();
+      say('Недозвон · попытка '+t.att+' из 3','PBX подтвердила исходящий. Следующая попытка поставлена автоматически.')}
+    return}
+  if(v==='time'){done[t.id]=1;after('Договорённость зафиксирована','До согласованного времени клиент не считается просроченным.');return}
+  cons++;air+=Math.round(2.6*60);done[t.id]=1;
+  after('Касание подтверждено','PBX: разговор 2 мин 34 сек. Sensei закрыл задачу.');
+}
+function after(a,b){
+  openId=null;var nx=first();if(nx)queue(nx.id);draw();
+  say(a,b+(nx?' Открываю следующую сделку: '+nx.name+'.':' Очередь выполнена.'));
+}
+function finish(){
+  var debt=grp('now').length+grp('today').length;
+  started=false;openId=null;pend=null;closeDay();draw();
+  say(debt?'День завершён с долгом':'День завершён · очередь выполнена',
+      debt?'Осталось '+debt+' на сегодня. Итоги сохранены для разбора с РОПом.'
+          :'Консультаций '+cons+', эфирное время '+Math.round(air/60)+' мин.');
+}
+
+/* ═══ НОВЫЙ ЛИД ═══ */
+function demoLead(){
+  if(!started){say('Сначала начни работу','');return}
+  if(color()==='red'){say('Лид не выдан','Пока есть срочные задачи, новые лиды не поступают.');return}
+  if(color()==='yellow'){leadTick++;if(leadTick%2===0){say('Лид ушёл мимо','Жёлтый статус: каждый второй лид пропускается.');return}}
+  if(leadsGiven>=LEAD_DAY){say('Дневной лимит исчерпан','Выдано '+LEAD_DAY+' лидов за смену.');return}
+  lead={name:'Наталья Иванова',left:300};
+  document.getElementById('ldName').textContent=lead.name;
+  document.getElementById('ldTime').textContent=mmss(300);
+  document.getElementById('lead').classList.add('on');
+}
+function takeLead(){
+  document.getElementById('lead').classList.remove('on');leadsGiven++;
+  var t={id:100+leadsGiven,g:'now',name:lead.name,deal:'#2015'+(2600+leadsGiven),stage:'Новый лид',chip:'n',
+    sum:'199 000 ₽',first:'13 500 ₽',funnel:'Квал лиды',
+    task:'Позвонить новому клиенту',why:'Первый звонок нужно начать в течение 5 минут.',
+    when:'Разговор от 1 минуты. Назначение уже вошло в дневной лимит.',
+    feed:[{t:'sig',h:'Сигнал системы · только что',x:'Лид назначен на вас.'}]};
+  T.push(t);lead=null;openDeal(t.id);
+  say('Лид взят: '+t.name,'Назначение вошло в дневной лимит ('+leadsGiven+' из '+LEAD_DAY+'), даже если звонок не состоится.');
+}
+function loseLead(){
+  document.getElementById('lead').classList.remove('on');leadsLost++;lead=null;draw();
+  say('Лид ушёл другому менеджеру','Пять минут вышли. Упущено за смену: '+leadsLost+' — это видно РОПу.');
+}
+
+/* ═══ ТАКТ ═══ */
+function tick(){
+  if(lead){lead.left--;document.getElementById('ldTime').textContent=mmss(lead.left);
+    if(lead.left<=0){loseLead();return}}
+  if(!started)return;
+  shiftSec++;
+  if(pend){pend.left--;if(pend.left<=0){openDeal(pend.id);return}}
+  if(openId)taskSec++;
+  if(now<20*60&&shiftSec%5===0)now++;
+  drawBar();
+}
+function setTime(mn){now=mn;draw();say('Сейчас '+clock(now),'')}
+
+/* ═══ МЕЛОЧЬ ═══ */
+function byId(id){for(var i=0;i<T.length;i++)if(T[i].id===id)return T[i];return null}
+function hm(s){var a=s.split(':');return (+a[0])*60+(+a[1])}
+function clock(m){return pad(Math.floor(m/60)%24)+':'+pad(m%60)}
+function mmss(s){return pad(Math.floor(s/60))+':'+pad(s%60)}
+function hms(s){return pad(Math.floor(s/3600))+':'+pad(Math.floor(s/60)%60)+':'+pad(s%60)}
+function pad(n){return (n<10?'0':'')+n}
+function pl(n,a,b,c){var x=Math.abs(n)%100,y=x%10;return (x>10&&x<20)?c:(y>1&&y<5)?b:(y===1)?a:c}
+function say(a,b){var e=document.getElementById('toast');e.innerHTML='<b>'+a+'</b>'+(b||'');
+  e.className='on';clearTimeout(window.__t);window.__t=setTimeout(function(){e.className=''},5400)}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDay()});
+draw();openDay();
+</script>
+</body>
+</html>
