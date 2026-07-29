@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Виджет смены v10 · Одна строка · SALE 100.0</title>
+<meta name="description" content="Виджет смены менеджера v10 в amoCRM: одна строка — что делать сейчас, сколько осталось до новых лидов и одна кнопка. Всё остальное на экране «Мой день» за один клик.">
+<style>
+/* ═══ ВИДЖЕТ СМЕНЫ v10 — ЧИСТЫЙ ЛИСТ (заказчик 28.07: «я как менеджер не понимаю,
+   на что мне фокусироваться · он должен быть простым, а ты делаешь его сложным»).
+
+   ПРАВИЛО, КОТОРОЕ Я СЕБЕ ПОСТАВИЛ И НЕ НАРУШАЮ:
+   в полосе РОВНО ТРИ ЭЛЕМЕНТА и ни одним больше —
+     1) что делать сейчас (одна фраза, крупно),
+     2) сколько осталось до новых лидов (единственная мотивация),
+     3) одна кнопка.
+   Ни плашек, ни вкладок, ни счётчиков, ни зон, ни жизней, ни рейтинга.
+   Всё остальное живёт на ОДНОМ экране «Мой день», который открывается по клику.
+
+   Два состояния имеют право прервать работу: новый лид с отсчётом 5 минут
+   и конец смены с долгом. Больше ничто не всплывает. ═══ */
+:root{
+  --line:#e4e8ee; --ink:#1f2633; --mut:#6c7686; --faint:#8a93a3; --soft:#f6f8fb; --card:#fff;
+  --amo:#f1f3f6; --amo-line:#dfe3e9; --amo-ink:#5c6472;
+  --green:#0f9d58; --green-d:#0b7a45; --green-bg:#eefaf3;
+  --red:#e5484d; --red-d:#b23237; --red-bg:#fdf1f1;
+  --gold:#9a7318; --gold-bg:#fbf6e9;
+  --blue:#2f68c4; --blue-bg:#eff4fc;
+  --dark:#1b2437;
+  --ease:cubic-bezier(.22,1,.36,1);
+  font-size:15px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:#e7eaef;color:var(--ink);line-height:1.45;overflow:hidden}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-align:left}
+.num{font-variant-numeric:tabular-nums}
+
+.amo{height:100vh;display:grid;grid-template-columns:64px 1fr;overflow:hidden}
+.rail{background:#fff;border-right:1px solid var(--amo-line);display:flex;flex-direction:column;
+  align-items:center;padding:10px 0;gap:3px;overflow:hidden}
+.rail .ri{width:44px;height:46px;border-radius:9px;display:grid;place-items:center;font-size:17px;
+  color:#9aa2af;position:relative;flex:none}
+.rail .ri.on{background:var(--soft);color:var(--dark)}
+.rail .ri small{position:absolute;top:5px;right:6px;background:var(--red);color:#fff;font-size:9px;
+  font-weight:700;border-radius:7px;padding:1px 4px}
+.rail .ri span{position:absolute;bottom:3px;font-size:8.5px;color:#a8afba;letter-spacing:-.2px}
+.main{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+
+/* ═══ ПОЛОСА: ОДНА СТРОКА, ТРИ ЭЛЕМЕНТА ═══ */
+#bar{flex:none;height:60px;display:flex;align-items:center;gap:16px;padding:0 16px;cursor:pointer;
+  border-bottom:1px solid var(--amo-line);transition:background .2s ease}
+#bar.red{background:#fff1f1} #bar.yellow{background:#fdf6e6} #bar.green{background:#eefaf3}
+#bar.grey{background:#f4f6f9}
+#bar:hover{filter:brightness(.985)}
+
+/* 1 — что делать сейчас */
+.what{flex:1;min-width:0;display:flex;align-items:center;gap:11px}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+#bar.red .dot{background:var(--red)} #bar.yellow .dot{background:#e0a916}
+#bar.green .dot{background:var(--green)} #bar.grey .dot{background:#9aa3b0}
+.what .txt{min-width:0}
+.what .t1{font-size:17px;font-weight:800;letter-spacing:-.01em;line-height:1.2;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.what .t2{margin-top:1px;font-size:12.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* 2 — сколько осталось до лидов */
+.leads{flex:none;text-align:right;padding-right:2px;white-space:nowrap}
+.leads .l1{font-size:13.5px;font-weight:700}
+.leads .l2{margin-top:1px;font-size:11.5px;color:var(--mut)}
+#bar.red .leads .l1{color:var(--red-d)} #bar.yellow .leads .l1{color:var(--gold)}
+#bar.green .leads .l1{color:var(--green-d)} #bar.grey .leads .l1{color:var(--mut)}
+
+/* 3 — одна кнопка */
+.go{flex:none;border-radius:10px;font-size:14px;font-weight:800;padding:11px 20px;white-space:nowrap;
+  background:var(--dark);color:#fff;transition:transform .15s var(--ease)}
+.go:active{transform:scale(.97)}
+.go.red{background:var(--red)} .go.green{background:var(--green)}
+.go.ghost{background:transparent;color:var(--mut);box-shadow:inset 0 0 0 1px var(--line);font-weight:700}
+.tmr{flex:none;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--mut);white-space:nowrap}
+.tmr.over{color:var(--red-d)}
+
+/* новый лид — единственное, что имеет право перебить */
+#lead{position:fixed;top:74px;left:50%;transform:translate(-50%,-14px);opacity:0;pointer-events:none;
+  background:var(--dark);color:#fff;border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:16px;
+  box-shadow:0 18px 44px rgba(15,25,45,.32);z-index:60;transition:opacity .22s ease,transform .22s var(--ease)}
+#lead.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#lead .lt{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#ff9ba0}
+#lead h4{margin-top:2px;font-size:17px;font-weight:800}
+#lead .cd{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:#ff9ba0}
+#lead .cd small{display:block;font-size:10px;font-weight:600;color:rgba(255,255,255,.55);letter-spacing:.04em;text-transform:uppercase}
+
+/* ═══ ЭКРАН «МОЙ ДЕНЬ» ═══ */
+#day{position:fixed;inset:0;background:#f2f4f8;z-index:50;display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;transition:opacity .2s ease}
+#day.on{opacity:1;pointer-events:auto}
+.dh{flex:none;background:#fff;border-bottom:1px solid var(--line)}
+.dhi{max-width:900px;margin:0 auto;width:100%;padding:18px 22px;display:flex;align-items:center;gap:14px}
+.dhi .dot{width:16px;height:16px}
+#day.red .dot{background:var(--red)} #day.yellow .dot{background:#e0a916}
+#day.green .dot{background:var(--green)} #day.grey .dot{background:#9aa3b0}
+.dhi h2{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.dhi .sub{font-size:13px;color:var(--mut)}
+.dhi .x{margin-left:auto;width:34px;height:34px;border-radius:10px;background:var(--soft);color:var(--mut);
+  display:grid;place-items:center;font-size:14px;flex:none}
+.db{flex:1;min-height:0;overflow-y:auto}
+.dbi{max-width:900px;margin:0 auto;width:100%;padding:18px 22px 26px}
+.sec{margin-top:18px}
+.sec:first-child{margin-top:0}
+.sec h3{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);
+  padding:0 2px 8px;display:flex;align-items:baseline;gap:8px}
+.sec h3 b{margin-left:auto;color:var(--ink);font-size:14px}
+.sec h3 em{font-style:normal;font-weight:600;letter-spacing:0;text-transform:none;font-size:11.5px;color:var(--faint)}
+.list{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{width:100%;display:flex;align-items:center;gap:12px;padding:13px 16px;transition:background .15s ease}
+.row + .row{border-top:1px solid var(--line)}
+.row:hover{background:var(--soft)}
+.row .nm{font-size:14.5px;font-weight:700;white-space:nowrap}
+.row .wy{font-size:12.5px;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.row .dl{font-size:12px;color:var(--faint);white-space:nowrap}
+.row .dl.late{color:var(--red-d);font-weight:700}
+.list.now .row .nm{color:var(--red-d)}
+.empty{padding:16px;font-size:13px;color:var(--green-d);font-weight:600}
+.foot{margin-top:20px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;
+  display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.foot .f{display:flex;flex-direction:column;gap:2px}
+.foot .fl{font-size:11px;color:var(--faint)}
+.foot .fv{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.foot .fv.late{color:var(--red-d)}
+.foot .fv.ok{color:var(--green-d)}
+.foot .lives{font-size:14px;letter-spacing:1.5px;color:var(--red)}
+.foot .lives .off{opacity:.25}
+.df{flex:none;background:#fff;border-top:1px solid var(--line)}
+.dfi{max-width:900px;margin:0 auto;width:100%;padding:14px 22px;display:flex;align-items:center;gap:12px}
+.dfi .note{font-size:12.5px;color:var(--mut)}
+.dfi .sp{margin-left:auto}
+.btn{border-radius:10px;font-weight:700;font-size:13.5px;padding:11px 20px;white-space:nowrap;
+  transition:transform .15s var(--ease)}
+.btn:active{transform:scale(.97)}
+.btn.dark{background:var(--dark);color:#fff}
+.btn.green{background:var(--green);color:#fff}
+.btn.red{background:var(--red);color:#fff}
+.btn.ghost{background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+
+/* карточка сделки — контекст amoCRM */
+.card{flex:1;display:grid;grid-template-columns:1fr 260px;min-height:0;overflow:hidden}
+.cl{display:grid;grid-template-columns:400px 1fr;min-width:0;overflow:hidden}
+.pane{background:#fff;border-right:1px solid var(--amo-line);padding:14px 16px;overflow:hidden;color:var(--amo-ink)}
+.pane h3{font-size:17px;font-weight:700;color:#2a3140}
+.pane .id{margin-top:5px;font-size:11.5px;color:var(--faint)}
+.pane .stg{margin-top:11px;font-size:11.5px;color:var(--mut)}
+.pane .stg b{display:block;color:var(--ink);font-size:12.5px}
+.tabs{margin-top:12px;display:flex;gap:13px;font-size:12px;color:#9aa2af;border-bottom:1px solid var(--amo-line);padding-bottom:7px}
+.tabs b{color:var(--ink);border-bottom:2px solid var(--dark);padding-bottom:7px;margin-bottom:-8px}
+.fields{margin-top:11px;font-size:11.5px}
+.fld{display:flex;justify-content:space-between;gap:10px;padding:5px 0}
+.fld span{color:var(--faint)} .fld b{color:var(--amo-ink);font-weight:500}
+.feed{background:var(--amo);padding:14px 18px;overflow:hidden;color:var(--amo-ink)}
+.ev{background:#fff;border:1px solid var(--amo-line);border-radius:9px;padding:10px 12px;font-size:11.5px;margin-bottom:9px}
+.ev .h{color:var(--faint);font-size:10.5px}
+.wids{background:#fff;border-left:1px solid var(--amo-line);padding:12px 10px;overflow:hidden}
+.wids .wt{font-size:15px;font-weight:700;color:#2a3140;margin-bottom:9px}
+.wid{border-radius:8px;padding:9px 11px;font-size:11.5px;font-weight:600;margin-bottom:6px;color:#fff}
+.wid.dk{background:#1b2437}.wid.bl{background:#2f68c4}.wid.gr{background:#0b5540}
+.wid.lt{background:var(--soft);color:var(--amo-ink);box-shadow:inset 0 0 0 1px var(--amo-line)}
+
+#toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,12px);opacity:0;pointer-events:none;
+  background:var(--dark);color:#fff;border-radius:11px;padding:11px 16px;z-index:70;max-width:min(92vw,520px);
+  transition:opacity .2s ease,transform .2s var(--ease);font-size:12.5px;line-height:1.45}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast b{display:block;font-size:13.5px;margin-bottom:2px}
+.tip{position:fixed;left:12px;bottom:64px;font-size:11px;color:#7d8593;background:rgba(255,255,255,.95);
+  border:1px solid var(--amo-line);border-radius:9px;padding:7px 11px;z-index:40;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.tip b{color:var(--ink)}
+.tip button{padding:5px 9px;font-size:11px;border-radius:7px;background:var(--soft);
+  box-shadow:inset 0 0 0 1px var(--amo-line);color:var(--mut)}
+@media (prefers-reduced-motion: reduce){*{transition-duration:.01ms !important}}
+</style>
+</head>
+<body>
+
+<div class="amo">
+  <nav class="rail">
+    <div class="ri">👤<span>Аккаунт</span></div>
+    <div class="ri">🧭<span>Стол</span></div>
+    <div class="ri on">💼<span>Сделки</span></div>
+    <div class="ri">💬<small>1</small><span>imBox</span></div>
+    <div class="ri">✅<small>33</small><span>Задачи</span></div>
+    <div class="ri">📋<span>Списки</span></div>
+    <div class="ri">📄<span>Докум.</span></div>
+    <div class="ri">✉️<span>Почта</span></div>
+    <div class="ri">📊<span>Аналит.</span></div>
+    <div class="ri">⚙️<small>2</small><span>Sensei</span></div>
+  </nav>
+
+  <div class="main">
+    <div id="bar" onclick="openDay()"></div>
+
+    <div class="card">
+      <div class="cl">
+        <div class="pane">
+          <h3 id="cName">Рассказова Ольга Васильевна</h3>
+          <div class="id">#25891966</div>
+          <div class="stg">МПП 2 уровень<b id="cStage">Квал лиды</b></div>
+          <div class="tabs"><b>Основное</b><span>МПП</span><span>Анкета</span><span>Сбор доков</span><span>Суд</span></div>
+          <div class="fields">
+            <div class="fld"><span>Отв-ный</span><b>Никитина Анна</b></div>
+            <div class="fld"><span>Бюджет</span><b>0 ₽</b></div>
+            <div class="fld"><span>Договор</span><b>…</b></div>
+            <div class="fld"><span>Дата платежа</span><b>…</b></div>
+            <div class="fld"><span>Руководитель</span><b>Смелов Никита</b></div>
+          </div>
+        </div>
+        <div class="feed">
+          <div class="ev"><div class="h">Сегодня 12:40 · исходящий</div>Звонок 00:35 · <b>Недозвон</b></div>
+          <div class="ev"><div class="h">Сегодня 13:06 · Никитина Анна</div>«Ольга Васильевна, у Вас все в порядке?»</div>
+          <div class="ev"><div class="h">Сегодня 13:32 · Sensei</div><b>🔁 Новый лид 5.0</b></div>
+        </div>
+      </div>
+      <aside class="wids">
+        <div class="wt">Виджеты</div>
+        <div class="wid dk">sensei</div>
+        <div class="wid bl">Wappi Widget</div>
+        <div class="wid lt">Платежи</div>
+        <div class="wid dk">HyperScript</div>
+        <div class="wid gr">ОБНУЛЯТОР · Пульт</div>
+        <div class="wid lt">Документы</div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div id="lead">
+  <div><span class="lt">🆕 новый лид</span><h4 id="ldName">Соколова Анна</h4></div>
+  <div class="cd"><span id="ldTime">05:00</span><small>на набор</small></div>
+  <button class="go red" onclick="takeLead()">📞 Позвонить</button>
+</div>
+
+<div id="day">
+  <div class="dh"><div class="dhi">
+    <span class="dot"></span>
+    <div><h2 id="dTitle">Мой день</h2><div class="sub" id="dSub"></div></div>
+    <button class="x" onclick="closeDay()" aria-label="Закрыть">✕</button>
+  </div></div>
+  <div class="db"><div class="dbi" id="dBody"></div></div>
+  <div class="df"><div class="dfi">
+    <span class="note" id="dNote"></span>
+    <span class="sp"></span>
+    <button class="btn ghost" id="dBreak" onclick="toggleBreak()">Перерыв</button>
+    <button class="btn green" id="dMain" onclick="mainAction()">Начать смену</button>
+  </div></div>
+</div>
+
+<div id="toast"></div>
+
+<div class="tip"><b>Демо v10:</b>
+  <button onclick="demoResult()">✓ результат в Sensei</button>
+  <button onclick="demoLead()">🆕 новый лид</button>
+  <button onclick="setTime(13*60)">🕐 13:00</button>
+  <button onclick="setTime(18*60)">🕕 конец дня</button>
+  <button onclick="openDay()">📋 мой день</button>
+</div>
+
+<script>
+/* ═══ ДАННЫЕ. Три группы — и всё.
+   СЕЙЧАС   — пока они есть, новых лидов нет.
+   СЕГОДНЯ  — срок внутри дня; просрочил — лиды идут через раз.
+   РЕШАЕТ   — статус «принимает решение», касаемся последними, лидов не блокируют. ═══ */
+var T=[
+ {id:1,g:'now',  name:'Гусев Артём',    why:'написал «дайте ссылку, готов оплачивать»', act:'Позвонить', bud:8,  cons:1},
+ {id:2,g:'now',  name:'Титова Елена',   why:'платёж отклонён банком, не идёт СМС',       act:'Позвонить', bud:10},
+ {id:3,g:'now',  name:'Козлова Ирина',  why:'открыла договор 34 минуты назад, не подписала', act:'Позвонить', bud:15, cons:1},
+ {id:4,g:'now',  name:'Новикова Ольга', why:'сообщение без ответа 41 минуту',            act:'Ответить',  bud:6},
+ {id:5,g:'now',  name:'Волков Андрей',  why:'договорённость на 11:30',                    act:'Позвонить', bud:15, at:'11:30', cons:1},
+ {id:6,g:'now',  name:'Смирнов Олег',   why:'обещал оплатить к 12:00, оплаты нет',        act:'Позвонить', bud:12},
+
+ {id:7, g:'today',name:'Петров Дмитрий', why:'48 часов на связь истекли',      act:'Позвонить', bud:12, dl:'11:00'},
+ {id:8, g:'today',name:'Крылов Игорь',   why:'запрос кредитной истории',        act:'Позвонить', bud:10, dl:'12:00'},
+ {id:9, g:'today',name:'Лебедев Антон',  why:'контроль оплаты',                 act:'Позвонить', bud:8,  dl:'15:00'},
+ {id:10,g:'today',name:'Белова Ирина',   why:'повторная консультация',          act:'Провести',  bud:15, dl:'16:00', cons:1},
+ {id:11,g:'today',name:'Зайцев Марк',    why:'follow-up по материалам',         act:'Написать',  bud:6,  dl:'17:00'},
+ {id:12,g:'today',name:'Орлов Никита',   why:'плановый дожим',                  act:'Позвонить', bud:12, dl:'18:00'},
+
+ {id:13,g:'wait',name:'Ким Сергей',     why:'взял паузу до пятницы',           act:'Позвонить', bud:12},
+ {id:14,g:'wait',name:'Морозова Юлия',  why:'советуется с семьёй',             act:'Позвонить', bud:12},
+ {id:15,g:'wait',name:'Лаптева Вера',   why:'ждёт зарплату',                   act:'Написать',  bud:10},
+ {id:16,g:'wait',name:'Сафонов Егор',   why:'сравнивает с другой компанией',   act:'Позвонить', bud:12},
+ {id:17,g:'wait',name:'Дьяков Пётр',    why:'обещал ответить на неделе',       act:'Написать',  bud:8}
+];
+var CARRY=8;          /* сделки со сроком на другие дни — в полосе не показываем, но это нагрузка */
+var CAP=30;           /* потолок сделок в работе */
+var PLAN=4;           /* план консультаций на день */
+
+/* ═══ СОСТОЯНИЕ ═══ */
+var started=false, onBreak=false, done={}, openId=null, wrap=null, tmr=null;
+var now=9*60+12, shiftSec=0, taskSec=0, cons=0, lives=5, leadTick=0, lost=0;
+var lead=null;        /* активный новый лид с отсчётом */
+var G={now:'Сейчас', today:'Сегодня', wait:'Решает'};
+
+function live(){return T.filter(function(t){return !done[t.id]})}
+function grp(g){return live().filter(function(t){return t.g===g})}
+function ready(t){return t.g!=='now'||!t.at||now>=hm(t.at)-15}
+function nowList(){return grp('now').filter(ready)}
+function lateList(){return grp('today').filter(function(t){return t.dl&&now>hm(t.dl)})}
+function load(){return live().length+CARRY}
+
+/* ═══ ЦВЕТ = ПОТОК ЛИДОВ. Единственный рычаг. ═══ */
+function color(){
+  if(!started||onBreak)return 'grey';
+  if(load()>CAP||nowList().length)return 'red';
+  if(lateList().length)return 'yellow';
+  return 'green';
+}
+function next(){
+  var a=nowList();if(a.length)return sortBy(a)[0];
+  var b=grp('today');if(b.length)return sortBy(b)[0];
+  var c=grp('wait');if(c.length)return c[0];
+  return null;
+}
+function sortBy(l){return l.slice().sort(function(x,y){
+  if(x.at&&y.at)return hm(x.at)-hm(y.at);
+  if(x.dl&&y.dl)return hm(x.dl)-hm(y.dl);
+  return x.id-y.id})}
+
+/* ═══ ПОЛОСА: ЧТО ДЕЛАТЬ · СКОЛЬКО ДО ЛИДОВ · ОДНА КНОПКА ═══ */
+function draw(){
+  var b=document.getElementById('bar');
+  b.className=color();
+  b.innerHTML=what()+leadsInfo()+action();
+  if(document.getElementById('day').classList.contains('on'))drawDay();
+}
+function what(){
+  var t1,t2;
+  if(!started){t1='Смена не начата';t2='Сегодня '+live().length+' '+pl(live().length,'задача','задачи','задач')}
+  else if(onBreak){t1='Перерыв';t2='Задачи не подаются'}
+  else if(wrap){var w=byId(wrap.id);t1='Разобрана: '+w.name;t2='Отметь результат в Sensei и жми «Дальше»'}
+  else{
+    var t=next();
+    if(!t){t1='Всё разобрано';t2='Можно закрывать смену'}
+    else if(openId===t.id){t1=t.act+' — '+t.why;t2='Сделка открыта · результат отмечаешь в Sensei'}
+    else{t1=t.act+': '+t.name;t2=t.why}   /* двоеточие, а не падеж: фамилии мы не склоняем */
+  }
+  return '<div class="what"><span class="dot"></span><div class="txt">'
+    +'<div class="t1" title="'+esc(t1)+'">'+t1+'</div><div class="t2">'+t2+'</div></div></div>';
+}
+function leadsInfo(){
+  if(!started||onBreak)return '';
+  var l1,l2,c=color();
+  if(c==='red'&&load()>CAP){l1='Лидов нет';l2='перегруз '+load()+' из '+CAP}
+  else if(c==='red'){var n=nowList().length;l1='Осталось '+n;l2='и пойдут лиды'}
+  else if(c==='yellow'){l1='Лиды через раз';l2=lateList().length+' просрочено на сегодня'}
+  else {l1='Лиды идут';l2='всё в сроке'}
+  return '<div class="leads"><div class="l1">'+l1+'</div><div class="l2">'+l2+'</div></div>';
+}
+function action(){
+  if(!started)return '<button class="go green" onclick="event.stopPropagation();start()">Начать смену</button>';
+  if(onBreak)return '<button class="go green" onclick="event.stopPropagation();toggleBreak()">В работу</button>';
+  if(wrap)return '<button class="go" onclick="event.stopPropagation();endWrap()">Дальше →</button>';
+  var t=next();
+  if(!t)return '<button class="go green" onclick="event.stopPropagation();finish()">Закончить смену</button>';
+  if(openId===t.id)return '<span class="tmr'+(taskSec>t.bud*60?' over':'')+'">'+mmss(taskSec)+'</span>';
+  return '<button class="go '+(color()==='red'?'red':'')+'" onclick="event.stopPropagation();openTask('+t.id+')">'
+    +t.act+' →</button>';
+}
+
+/* ═══ ЭКРАН «МОЙ ДЕНЬ» — всё остальное, за один клик ═══ */
+function drawDay(){
+  var c=color(),d=document.getElementById('day');
+  d.className='on '+c;
+  document.getElementById('dTitle').textContent=
+    c==='red'?(load()>CAP?'Перегруз':'Сначала срочное'):c==='yellow'?'Есть просроченные':c==='green'?'Всё в сроке':'Смена не идёт';
+  document.getElementById('dSub').textContent=
+    c==='red'?(load()>CAP?'Разбери вторичку — пока сделок больше '+CAP+', лидов не будет'
+                        :'Пока есть срочные, новых лидов не дают'):
+    c==='yellow'?'Просроченные задачи на сегодня — лиды идут через раз':
+    c==='green'?'Новые лиды приходят полностью':'Начни смену, чтобы пошли задачи';
+
+  var h='';
+  h+=section('now','Сейчас','пока они есть — лидов нет');
+  h+=section('today','Сегодня','просрочил — лиды через раз');
+  h+=section('wait','Решает','касаемся последними');
+  h+='<div class="foot">'
+    +f('Нагрузка',load()+' / '+CAP,load()>CAP?'late':'')
+    +f('Консультации',cons+' из '+PLAN,cons>=PLAN?'ok':'')
+    +f('Смена',started?hms(shiftSec):'—','')
+    +f('Лидов упущено',lost,lost?'late':'')
+    +'<div class="f"><span class="fl">Жизни</span><span class="lives">'+hearts()+'</span></div>'
+    +'</div>';
+  document.getElementById('dBody').innerHTML=h;
+
+  var m=document.getElementById('dMain'),n=document.getElementById('dNote'),bk=document.getElementById('dBreak');
+  bk.style.display=started?'':'none';
+  bk.textContent=onBreak?'В работу':'Перерыв';
+  var debt=nowList().length+grp('today').length;
+  if(!started){m.textContent='Начать смену';m.className='btn green';n.textContent='Пока смена не начата, задачи не подаются.'}
+  else if(!live().length){m.textContent='Закончить смену';m.className='btn green';n.textContent='Зиро — всё разобрано.'}
+  else if(debt){m.textContent='Закончить с долгом';m.className='btn red';
+    n.textContent='Осталось '+debt+' на сегодня — смена закроется с долгом, РОП это увидит.'}
+  else{m.textContent='Вернуться в работу';m.className='btn dark';n.textContent='Срочного и сегодняшнего нет.'}
+}
+function section(g,title,hint){
+  var l=sortBy(grp(g)),h='<div class="sec"><h3>'+title+' <em>'+hint+'</em><b>'+l.length+'</b></h3><div class="list'+(g==='now'?' now':'')+'">';
+  if(!l.length)h+='<div class="empty">✓ пусто</div>';
+  else l.forEach(function(t){
+    var late=(t.dl&&now>hm(t.dl));
+    h+='<button class="row" onclick="openTask('+t.id+')"><span class="nm">'+t.name+'</span>'
+      +'<span class="wy">'+t.act.toLowerCase()+' · '+t.why+'</span>'
+      +'<span class="dl'+(late?' late':'')+'">'+(t.at?'в '+t.at:(t.dl?(late?'просрочено с '+t.dl:'до '+t.dl):'—'))+'</span></button>';
+  });
+  return h+'</div></div>';
+}
+function f(l,v,cls){return '<div class="f"><span class="fl">'+l+'</span><span class="fv '+cls+'">'+v+'</span></div>'}
+function openDay(){document.getElementById('day').classList.add('on');drawDay()}
+function closeDay(){document.getElementById('day').classList.remove('on')}
+function mainAction(){
+  if(!started){start();return}
+  if(!live().length||nowList().length+grp('today').length){finish();return}
+  closeDay();
+}
+
+/* ═══ ДЕЙСТВИЯ ═══ */
+function start(){
+  started=true;tmr=setInterval(tick,1000);closeDay();draw();
+  say('Смена начата','Сначала срочные — пока они есть, новых лидов не дают.');
+}
+function openTask(id){
+  var t=byId(id);if(!t)return;
+  openId=t.id;taskSec=0;closeDay();card(t);draw();
+  say('Открыл: '+t.name,'Дальше звонок. Результат отмечаешь в Sensei — виджет его не дублирует.');
+}
+/* результат отмечен в Sensei → постобработка: карточка НЕ переключается, пока не нажал «Дальше» */
+function demoResult(){
+  if(!openId){say('Нет открытой сделки','Сначала открой задачу из полосы.');return}
+  var t=byId(openId);
+  if(t.cons)cons++;
+  if(taskSec>60*60)lives=Math.max(0,lives-1);
+  done[t.id]=1;wrap={id:t.id};draw();
+  say('Sensei принял результат','Сделка остаётся на экране. Допиши и жми «Дальше».');
+}
+function endWrap(){wrap=null;openId=null;card(null);draw();var t=next();if(t)say('Следующая: '+t.name,t.why)}
+function toggleBreak(){onBreak=!onBreak;closeDay();draw();say(onBreak?'Перерыв':'В работе',onBreak?'Задачи не подаются.':'Задачи снова идут.')}
+function finish(){
+  var debt=nowList().length+grp('today').length;
+  closeDay();
+  say(debt?'Смена закрыта с долгом':'Смена закрыта · зиро',
+      debt?'Осталось '+debt+' на сегодня. Задача РОПу на разбор, серия обнулена.'
+          :'Всё разобрано. Консультаций '+cons+' из '+PLAN+'.');
+}
+
+/* ═══ НОВЫЙ ЛИД — единственное, что перебивает ═══ */
+function demoLead(){
+  if(!started){say('Сначала начни смену','');return}
+  if(color()==='red'){say('Лид не выдан','Пока есть срочные, новые лиды не приходят.');return}
+  if(color()==='yellow'){leadTick++;if(leadTick%2===0){say('Лид ушёл мимо','Жёлтый статус: лиды идут через раз.');return}}
+  lead={name:'Соколова Анна',left:300};
+  document.getElementById('ldName').textContent=lead.name;
+  document.getElementById('lead').classList.add('on');drawLead();
+}
+function drawLead(){if(lead)document.getElementById('ldTime').textContent=mmss(lead.left)}
+function takeLead(){
+  document.getElementById('lead').classList.remove('on');
+  var t={id:99,g:'now',name:lead.name,why:'новый лид, первый звонок',act:'Позвонить',bud:5,cons:1};
+  T.push(t);lead=null;openTask(99);
+}
+function loseLead(){
+  document.getElementById('lead').classList.remove('on');lost++;lead=null;draw();
+  say('Лид ушёл другому менеджеру','Пять минут вышли. Это записано и видно РОПу — упущено за смену: '+lost+'.');
+}
+
+/* ═══ ТАКТ ═══ */
+function tick(){
+  if(lead){lead.left--;drawLead();if(lead.left<=0){loseLead();return}}
+  if(onBreak){draw();return}
+  shiftSec++;
+  if(now<20*60&&shiftSec%5===0)now++;
+  if(openId&&!wrap)taskSec++;
+  draw();
+}
+function setTime(m){now=m;draw();say('Сейчас '+clock(now),'')}
+
+/* ═══ МЕЛОЧЬ ═══ */
+function byId(id){for(var i=0;i<T.length;i++)if(T[i].id===id)return T[i];return null}
+function card(t){
+  document.getElementById('cName').textContent=t?t.name:'Рассказова Ольга Васильевна';
+  document.getElementById('cStage').textContent=t?(t.g==='now'?'Горячая · срочно':t.g==='today'?'В работе · сегодня':'Принимает решение'):'Квал лиды';
+}
+function hearts(){var h='';for(var i=1;i<=5;i++)h+='<span class="'+(i<=lives?'':'off')+'">'+(i<=lives?'❤':'♡')+'</span>';return h}
+function hm(s){var a=s.split(':');return (+a[0])*60+(+a[1])}
+function clock(m){return pad(Math.floor(m/60)%24)+':'+pad(m%60)}
+function mmss(s){return pad(Math.floor(s/60))+':'+pad(s%60)}
+function hms(s){return pad(Math.floor(s/3600))+':'+pad(Math.floor(s/60)%60)+':'+pad(s%60)}
+function pad(n){return (n<10?'0':'')+n}
+function pl(n,a,b,c){var x=Math.abs(n)%100,y=x%10;return (x>10&&x<20)?c:(y>1&&y<5)?b:(y===1)?a:c}
+function esc(s){return String(s).replace(/"/g,'&quot;')}
+function say(t,s){var e=document.getElementById('toast');e.innerHTML='<b>'+t+'</b>'+(s||'');
+  e.className='on';clearTimeout(window.__t);window.__t=setTimeout(function(){e.className=''},5200)}
+
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDay()});
+card(null);draw();openDay();
+</script>
+</body>
+</html>
