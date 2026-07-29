@@ -66,7 +66,7 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-a
 #strip{flex:none;background:#fff;padding:10px 12px;border-bottom:1px solid var(--amo-line);
   position:relative;z-index:var(--z-strip);color:var(--d-ink)}
 .bar{background:var(--d-bg);border-radius:16px;padding:10px;display:grid;gap:10px;
-  grid-template-columns:206px minmax(0,1fr) 132px 178px 344px;height:152px}
+  grid-template-columns:206px minmax(0,1fr) 214px 176px 196px;height:152px}
 #strip.alarm .bar{outline:2px solid var(--d-red);outline-offset:-2px}
 
 .card{background:var(--d-tile);border-radius:12px;padding:12px 14px;min-width:0;overflow:hidden;
@@ -124,64 +124,48 @@ button.card:hover{background:#1b2434}
 .now.calm .go{background:var(--d-green);color:#06231a;box-shadow:0 6px 20px rgba(53,201,138,.3)}
 .now .go.wait{background:#1d2637;color:var(--d-ink);box-shadow:none;font-weight:700}
 
-/* ── срочные ── */
-.urg .v{font-size:30px;font-weight:800;letter-spacing:-.025em;line-height:1;font-variant-numeric:tabular-nums;color:var(--d-gold)}
-.urg .v small{font-size:14px;font-weight:700;color:var(--d-mut)}
-.segs{display:flex;gap:4px}
-.segs i{flex:1;height:5px;border-radius:3px;background:#2b3548}
-.segs i.on{background:var(--d-gold)}
+/* ── задачи дня: общее число, прогресс и три зоны ── */
+.tsk .v{font-size:26px;font-weight:800;letter-spacing:-.025em;line-height:1;font-variant-numeric:tabular-nums}
+.tsk .v small{font-size:13px;font-weight:700;color:var(--d-mut)}
+.segs{display:flex;gap:3px}
+.segs i{flex:1;height:4px;border-radius:2px;background:#2b3548}
 .segs i.done{background:var(--d-green)}
-.urg .s{font-size:10.5px;color:var(--d-mut);line-height:1.35}
+.zchips{display:flex;gap:6px;margin-top:2px}
+.zchip{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;border-radius:8px;padding:6px 4px;
+  background:#151d2b;color:var(--d-ink);font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;
+  transition:background .16s ease,box-shadow .16s ease}
+.zchip i{width:8px;height:8px;border-radius:50%;flex:none}
+.zchip.z-red i{background:var(--d-red)} .zchip.z-yellow i{background:var(--d-gold)} .zchip.z-grey i{background:var(--d-green)}
+.zchip:hover{background:#1d2634}
+.zchip.on{box-shadow:inset 0 0 0 1.5px currentColor}
+.zchip.z-red.on{background:rgba(242,85,90,.18);color:#ff9ba0}
+.zchip.z-yellow.on{background:rgba(240,180,41,.18);color:#f5cd6d}
+.zchip.z-grey.on{background:rgba(53,201,138,.18);color:#7fe0b4}
 
 /* ── новые лиды ── */
-.lds .v{font-size:17px;font-weight:800;letter-spacing:-.01em;color:var(--d-purple);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lds .v{font-size:16px;font-weight:800;letter-spacing:-.01em;color:var(--d-purple);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lds.open .v{color:var(--d-green)}
-.lds .s{font-size:10.5px;color:var(--d-mut);line-height:1.35}
+.lds .s{font-size:10.5px;color:var(--d-mut);line-height:1.35;overflow:hidden}
 .pill{align-self:flex-start;background:rgba(167,139,250,.18);color:var(--d-purple);border-radius:8px;
   padding:5px 11px;font-size:11.5px;font-weight:700;white-space:nowrap}
 .lds.open .pill{background:rgba(53,201,138,.16);color:var(--d-green)}
 
-/* ── результат дня ── */
-.res{display:flex;flex-direction:column;justify-content:center;gap:8px}
-.res .row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:end}
-.res .cell{min-width:0;overflow:hidden;border-left:1px solid var(--d-line);padding-left:10px}
-.res .cell:first-child{border-left:0;padding-left:0}
-.res .cl{font-size:10px;color:var(--d-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.res .cv{margin-top:3px;font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.res .cv small{font-size:12px;font-weight:700;color:var(--d-mut)}
-.res .cv.gr{color:var(--d-green)} .res .cv.pu{color:var(--d-purple)} .res .cv.rd{color:var(--d-red)}
-.res .mb{margin-top:5px;height:4px;border-radius:3px;background:#2b3548;overflow:hidden}
-.res .mb i{display:block;height:100%;border-radius:3px;background:var(--d-green);transform-origin:left;transition:transform .3s var(--ease)}
-.res .mb i.late{background:var(--d-red)}
-.res .lives{font-size:11.5px;letter-spacing:1.2px;color:var(--d-red);white-space:nowrap}
-.res .lives .off{opacity:.3;color:var(--d-mut)}
+/* ── темп дня ── */
+.tmp .tline{display:flex;align-items:baseline;gap:8px;min-width:0}
+.tmp .tline b{font-size:24px;font-weight:800;letter-spacing:-.025em;line-height:1;font-variant-numeric:tabular-nums;color:var(--d-green)}
+.tmp .tline b.late{color:var(--d-red)}
+.tmp .tline b small{font-size:12px;font-weight:700;color:var(--d-mut)}
+.tmp .tl{font-size:10.5px;color:var(--d-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mb{height:4px;border-radius:3px;background:#2b3548;overflow:hidden}
+.mb i{display:block;height:100%;width:100%;border-radius:3px;background:var(--d-green);transform-origin:left;transition:transform .3s var(--ease)}
+.mb i.late{background:var(--d-red)}
+.tmp .s{font-size:10.5px;color:var(--d-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tmp .s.late{color:#e8a0a5;font-weight:600}
+.tmp .tfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:2px}
+.tmp .lives{font-size:12px;letter-spacing:1.2px;color:var(--d-red);white-space:nowrap}
+.tmp .lives .off{opacity:.3;color:var(--d-mut)}
+.tmp .sc{font-size:10.5px;font-weight:700;color:var(--d-purple);white-space:nowrap}
 
-/* УЗКИЕ ЭКРАНЫ. Жертвуем в порядке ценности: сначала уходят цифры, которые есть в плане дня
-   (продажи, конверсия, задачи), последними — консультации и Sensei score с жизнями.
-   Карточка «Сейчас» не сжимается никогда: это единственное, ради чего полоса существует. */
-@media (max-width:1400px){
-  .bar{grid-template-columns:198px minmax(0,1fr) 126px 172px 296px}
-  .res .row{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .res .cell.sales{display:none}
-}
-@media (max-width:1290px){
-  .bar{grid-template-columns:192px minmax(0,1fr) 118px 162px 190px}
-  .res .row{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .res .cell.conv{display:none}
-  /* центру отдаём всё, что можно отнять: имя клиента резать нельзя */
-  .now h3{font-size:16px}
-  .now .go{min-width:110px;font-size:13.5px;padding:12px 14px}
-  .ctl .sp2{font-size:9.5px}
-  .lds .v{font-size:15px}
-}
-@media (max-width:1180px){
-  .bar{grid-template-columns:186px minmax(0,1fr) 116px 156px}
-  .res{display:none}
-}
-@media (max-width:1040px){
-  .bar{grid-template-columns:180px minmax(0,1fr) 150px;height:auto}
-  .urg{display:none}
-}
 .badge{display:inline-flex;align-items:center;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:800;margin-left:6px}
 .badge.pu{background:rgba(167,139,250,.16);color:var(--d-purple)}
 /* ЖИЗНИ: гейт качества, 5 сердец. Видны в полосе всегда — снятая жизнь не должна теряться из виду */
@@ -197,15 +181,12 @@ button.card:hover{background:#1b2434}
 #strip.open .drop-in{padding:14px 16px 15px;max-height:322px}
 .drop-in > *{min-height:0}
 #dNext{overflow-y:auto;max-height:292px;padding-right:4px}
-.dh{display:flex;align-items:center;gap:11px;padding-bottom:9px;flex-wrap:wrap}
-.tabs2{display:flex;gap:6px}
-.tab2{border-radius:9px;padding:6px 12px;font-size:12px;font-weight:700;background:#151d2b;color:var(--d-mut);
-  white-space:nowrap;transition:background .16s ease,color .16s ease}
-.tab2 b{font-weight:800;margin-left:3px}
-.tab2:hover{background:#1c2534;color:var(--d-ink)}
-.tab2.t-red.on{background:rgba(242,85,90,.22);color:#ff9ba0}
-.tab2.t-yellow.on{background:rgba(240,180,41,.2);color:#f5cd6d}
-.tab2.t-grey.on{background:rgba(53,201,138,.18);color:#7fe0b4}
+.dh{display:flex;align-items:center;gap:12px;padding-bottom:9px;flex-wrap:wrap}
+.ztitle{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;white-space:nowrap}
+.ztitle i{width:9px;height:9px;border-radius:50%;flex:none}
+.ztitle.z-red i{background:var(--d-red)}
+.ztitle.z-yellow i{background:var(--d-gold)}
+.ztitle.z-grey i{background:var(--d-green)}
 .dh b{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
 .dh span{font-size:11.5px;color:var(--d-mut)}
 .dh .more{margin-left:auto;font-size:11.5px;font-weight:700;color:var(--d-cyan)}
@@ -427,7 +408,24 @@ button.trow:hover .take{background:var(--dark);color:#fff;box-shadow:none}
 .tip b{color:var(--ink)}
 .tip .btn{padding:5px 9px;font-size:11px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--amo-line);color:var(--mut)}
 
-@media (max-width:1100px){.s-cols{grid-template-columns:minmax(0,1fr)}.cnts{grid-template-columns:repeat(2,1fr)}.drop-in{grid-template-columns:minmax(0,1fr)}}
+/* УЗКИЕ ЭКРАНЫ. Карточка «Сейчас» не сжимается никогда: это единственное, ради чего полоса есть.
+   Уходит сначала темп (он же в плане дня), потом лиды. Задачи с зонами остаются до последнего —
+   без них менеджер не видит, сколько у него работы. */
+@media (max-width:1330px){
+  .bar{grid-template-columns:196px minmax(0,1fr) 200px 164px 176px}
+  .now h3{font-size:17px}
+  .ctl .sp2{font-size:9.5px}
+}
+@media (max-width:1200px){
+  .bar{grid-template-columns:190px minmax(0,1fr) 194px 158px}
+  .tmp{display:none}
+  .now h3{font-size:16px}
+  .now .go{min-width:110px;font-size:13.5px;padding:12px 14px}
+}
+@media (max-width:1060px){
+  .bar{grid-template-columns:184px minmax(0,1fr) 188px}
+  .lds{display:none}
+}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
 </style>
 </head>
@@ -727,7 +725,7 @@ function hm2(s){return pad(Math.floor(s/3600))+':'+pad(Math.floor(s/60)%60)}
 
 /* ═══ ПОЛОСА-ПЛИТКИ ═══ */
 function renderBar(){
-  document.getElementById('bar').innerHTML=ctlCard()+nowCard()+urgentCard()+leadsCard()+resultCard();
+  document.getElementById('bar').innerHTML=ctlCard()+nowCard()+tasksCard()+leadsCard()+tempoCard();
   renderDrop();
 }
 
@@ -797,51 +795,54 @@ function nowCard(){
 }
 function callIcon(t){return t.call?'<span>📞</span>':'<span>✉</span>'}
 
-/* ── СРОЧНЫЕ: сколько обязательного разобрано за смену ── */
-function urgentCard(){
-  var left=redDue().length,total=redTotal,done=Math.max(0,total-inZone('red').length),segs='';
-  for(var i=0;i<Math.max(total,1);i++)segs+='<i class="'+(i<done?'done':(i<total-0?'on':''))+'"></i>';
-  return '<button class="card urg" onclick="openZone(\'red\')">'
-    +'<span class="h"><i>⏳</i>срочные</span>'
-    +'<span class="v">'+done+' <small>из '+total+'</small></span>'
+/* ── ЗАДАЧИ ДНЯ: сколько всего, сколько разобрано и по каким зонам.
+      Три чипа-зоны — это и счётчики, и переключатели списка. Зелёные видны наравне с красными. ── */
+function tasksCard(){
+  var total=TASKS.length,dn=total-alive().length,segs='';
+  var op=dropOpen();
+  for(var i=0;i<10;i++)segs+='<i class="'+(i<Math.round(dn/total*10)?'done':'')+'"></i>';
+  return '<div class="card tsk">'
+    +'<span class="h"><i>📋</i>задачи дня</span>'
+    +'<span class="v">'+dn+' <small>из '+total+'</small></span>'
     +'<span class="segs">'+segs+'</span>'
-    +'<span class="s">'+(left?'Ещё '+left+' '+plural(left,['обязательное','обязательных','обязательных'])
-                                +' '+plural(left,['действие','действия','действий'])
-                             :'Обязательное закрыто')+'</span></button>';
+    +'<span class="zchips">'
+      +zchip('red','Красные')+zchip('yellow','Жёлтые')+zchip('grey','Зелёные')
+    +'</span></div>';
+}
+function zchip(z,name){
+  var n=inZone(z).length,act=(selZone===z&&dropOpen());
+  return '<button class="zchip z-'+z+(act?' on':'')+'" onclick="openZone(\''+z+'\')" title="'+name+': '+n+'">'
+    +'<i></i>'+n+'</button>';
 }
 
-/* ── НОВЫЕ ЛИДЫ: блокировка как явное обещание ── */
+/* ── НОВЫЕ ЛИДЫ ── */
 function leadsCard(){
   var open=leadsOpen(),wait=inZone('lead').length,need=redDue().length;
   return '<button class="card lds'+(open?' open':'')+'" onclick="openZone(\'red\')">'
     +'<span class="h"><i>'+(open?'🔓':'🔒')+'</i>новые лиды</span>'
     +'<span class="v">'+(open?'Открыты':'Заблокированы')+'</span>'
     +'<span class="s">'+(open?'Выдаются по SLA 5 минут'
-        :'Выполни '+need+' '+plural(need,['срочное','срочных','срочных'])+'<br>и откроются '+wait+' '+plural(wait,['новый лид','новых лида','новых лидов']))+'</span>'
+        :'Сначала '+need+' '+plural(need,['срочная задача','срочные задачи','срочных задач']))+'</span>'
     +(wait?'<span class="pill">+'+wait+' '+plural(wait,['лид ждёт','лида ждут','лидов ждут'])+'</span>':'')
     +'</button>';
 }
 
-/* ── РЕЗУЛЬТАТ ДНЯ: усилие и исход в одном ряду ── */
-function resultCard(){
-  var totalDay=TASKS.length,dn=totalDay-alive().length,need=needBy(nowMin),late=behind();
-  return '<button class="card res" onclick="openPlan()">'
-    +'<span class="h"><i>📊</i>результат дня</span>'
-    +'<span class="row">'
-      +cell('Задачи',dn+' <small>/'+totalDay+'</small>','',dn/totalDay,0)
-      +cell('Консультации',consDone+' <small>/'+PLAN_CONS+'</small>','',consDone/PLAN_CONS,late)
-      +cell('Продажи',sales,'','',null,'','sales')
-      +cell('Конверсия',conv().toFixed(0)+'%','gr','',null,'','conv')
-      +cell('Sensei Score',senseiScore+'<span class="badge pu">A+</span>','pu','',null,
-            '<span class="lives">'+livesHtml()+'</span>')
-    +'</span></button>';
+/* ── ТЕМП ДНЯ: две цифры, ради которых менеджер работает, и гейт качества ── */
+function tempoCard(){
+  var need=needBy(nowMin),late=behind();
+  return '<button class="card tmp" onclick="openPlan()">'
+    +'<span class="h"><i>🎯</i>темп дня</span>'
+    +'<span class="tline"><b class="'+(late?'late':'')+'">'+consDone+' <small>из '+PLAN_CONS+'</small></b>'
+      +'<span class="tl">консультации</span></span>'
+    +'<span class="mb"><i class="'+(late?'late':'')+'" style="transform:scaleX('+Math.min(1,consDone/PLAN_CONS).toFixed(2)+')"></i></span>'
+    +'<span class="s'+(late?' late':'')+'">'+(!started?'день не начат'
+        :(late?'к '+clock(nowMin)+' нужно '+need:'идёшь в графике'))+'</span>'
+    +'<span class="tfoot"><span class="lives">'+livesHtml()+'</span>'
+      +'<span class="sc">Sensei '+senseiScore+'</span></span>'
+    +'</button>';
 }
-function cell(lb,v,cls,frac,late,extra,mark){
-  return '<span class="cell '+(mark||'')+'"><span class="cl">'+lb+'</span>'
-    +'<span class="cv '+(cls||'')+'">'+v+'</span>'
-    +(frac!==''&&frac!=null?'<span class="mb"><i class="'+(late?'late':'')+'" style="transform:scaleX('+Math.min(1,frac).toFixed(2)+')"></i></span>':'')
-    +(extra||'')+'</span>';
-}
+
+
 
 var ZLB={red:{n:'Красные · обязательные',s:'порядок держит Sensei, новые лиды заблокированы'},
          yellow:{n:'Жёлтые · задачи дня',s:'должны закрыться до конца дня'},
@@ -851,12 +852,10 @@ function renderDrop(){
   if(selId&&done[selId])selId=null;
   if(!selId||!byId[selId]||zone(byId[selId])!==selZone)selId=list.length?list[0].id:null;
 
-  document.getElementById('dTabs').innerHTML=['red','yellow','grey'].map(function(z){
-    return '<button class="tab2 t-'+z+(selZone===z?' on':'')+'" onclick="openZone(\''+z+'\')">'
-      +ZLB[z].n.split(' · ')[0]+' <b>'+inZone(z).length+'</b></button>'}).join('');
+  document.getElementById('dTabs').innerHTML='<span class="ztitle z-'+selZone+'"><i></i>'+ZLB[selZone].n+'</span>';
   document.getElementById('dhSub').textContent=list.length
-    ? list.length+' '+plural(list.length,['задача','задачи','задач'])+' · '+ZLB[selZone].s
-    : 'зона закрыта';
+    ? list.length+' из '+alive().length+' задач дня · '+ZLB[selZone].s
+    : 'зона закрыта · переключись чипом в полосе';
 
   var h='';
   list.forEach(function(x){
