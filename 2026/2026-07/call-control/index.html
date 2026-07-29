@@ -137,10 +137,35 @@
 .note-line{font-size:12.5px;color:var(--muted);line-height:1.5}
 .note-line b{color:var(--ink)}
 
+/* плеер записи */
+.player{padding:10px 15px 11px;border-bottom:1px solid var(--line);background:var(--card2);display:flex;flex-direction:column;gap:8px}
+.pl-row{display:flex;align-items:center;gap:10px}
+.pl-play{flex:none;width:34px;height:34px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-size:13px;box-shadow:0 8px 16px -10px rgba(15,107,79,.8);transition:.15s var(--ease)}
+.pl-play:hover{background:var(--green-ink)}
+.pl-play:active{transform:scale(.94)}
+.pl-time{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+.pl-time s{color:var(--faint);font-weight:400;text-decoration:none}
+.pl-speed{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:4px 8px;transition:.15s var(--ease)}
+.pl-speed:hover{border-color:#D2C8B2;color:var(--ink)}
+.pl-speed[aria-pressed="true"]{background:var(--pine);border-color:var(--pine);color:var(--gold-bright)}
+.pl-track{position:relative;height:26px;cursor:pointer;border-radius:6px}
+.pl-track .rail{position:absolute;left:0;right:0;top:11px;height:4px;background:var(--line2);border-radius:2px}
+.pl-track .done{position:absolute;left:0;top:11px;height:4px;background:var(--green);border-radius:2px}
+.pl-track .mk{position:absolute;top:5px;width:2px;height:16px;border-radius:1px;background:var(--gold);transform:translateX(-1px)}
+.pl-track .mk.gap{background:var(--brick);height:20px;top:3px;width:3px}
+.pl-track .head{position:absolute;top:6px;width:3px;height:14px;background:var(--pine);border-radius:2px;box-shadow:0 0 0 3px rgba(11,59,46,.14)}
+.pl-legend{display:flex;gap:12px;font-size:10.5px;color:var(--faint)}
+.pl-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.pl-legend i.q{background:var(--gold)}
+.pl-legend i.g{background:var(--brick)}
+.pl-note{font-size:10.5px;color:var(--gold-ink);background:var(--gold-soft);border-radius:6px;padding:4px 8px;line-height:1.35}
+
 /* транскрипт */
 .tr-panel{position:sticky;top:14px;max-height:calc(100vh - 28px);display:flex;flex-direction:column}
+.rep.now{background:var(--green-soft);box-shadow:0 0 0 1px rgba(15,107,79,.35)}
 /* в одну колонку липкая запись мешает: отпускаем её и ограничиваем высоту списка реплик */
 @media (max-width:1000px){.tr-panel{position:static;max-height:none}.tr-body{max-height:60vh}}
+@media (max-width:520px){.pl-play{width:42px;height:42px;font-size:15px}.pl-track{height:32px}.pl-track .rail,.pl-track .done{top:14px}}
 .tr-h{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
 .tr-h b{font-size:13px}
 .tr-h .qcheck{font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px}
@@ -231,6 +256,18 @@ dialog.pop-dialog::backdrop{background:rgba(8,42,33,.62)}
       <div class="tr-h">
         <b>Запись разговора</b>
         <span class="qcheck" id="qcheck">—</span>
+      </div>
+      <div class="player">
+        <div class="pl-row">
+          <button type="button" class="pl-play" id="plPlay" aria-label="Слушать запись">▶</button>
+          <span class="pl-time"><span id="plNow">0:00</span><s id="plTotal">/ 0:00</s></span>
+          <button type="button" class="pl-speed" id="plSpeed" aria-pressed="false">×4</button>
+        </div>
+        <div class="pl-track" id="plTrack" role="slider" aria-label="Позиция в записи" tabindex="0">
+          <span class="rail"></span><span class="done" id="plDone"></span><span class="head" id="plHead"></span>
+        </div>
+        <div class="pl-legend"><span><i class="q"></i>цитаты вердикта</span><span><i class="g"></i>пропуски</span></div>
+        <div class="pl-note" id="plNote"></div>
       </div>
       <div class="tr-body" id="trBody"></div>
     </section>
@@ -532,10 +569,9 @@ function renderStep() {
   document.getElementById('stepPanel').innerHTML = h;
 }
 
-/* ── транскрипт с маркерами пропусков ── */
-function renderTranscript() {
-  var rows = TRANSCRIPT.map(function (r) { return { kind: 'rep', t: r.t, r: r }; });
-
+/* ── где в записи зияют пропуски (нужно и транскрипту, и дорожке плеера) ── */
+function gapMarkers() {
+  var out = [];
   // маркер пропуска ставим в конце того шага, где пункт должен был прозвучать
   // (пункты с непринятой цитатой сюда не идут: вопрос был задан, подвела не запись, а доказательство)
   var byStep = {};
@@ -551,8 +587,14 @@ function renderTranscript() {
       var next = ANCHORS.filter(function (x) { return x.n > +n; })[0];
       pos = next ? next.from - 1 : TRANSCRIPT[TRANSCRIPT.length - 1].t;
     }
-    rows.push({ kind: 'gap', t: pos, step: +n, items: byStep[n] });
+    out.push({ kind: 'gap', t: pos, step: +n, items: byStep[n] });
   });
+  return out;
+}
+
+/* ── транскрипт: реплики + маркеры пропусков ── */
+function renderTranscript() {
+  var rows = TRANSCRIPT.map(function (r) { return { kind: 'rep', t: r.t, r: r }; }).concat(gapMarkers());
 
   rows.sort(function (a, b) { return a.t - b.t; });
 
@@ -579,6 +621,122 @@ function focusTime(t) {
   body.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
 }
 
+/* ═══ ПЛЕЕР ЗАПИСИ ═══
+   Если CALL.audio задан — играет настоящий файл (телефония на бою).
+   Файла нет — бегунок идёт по таймкодам расшифровки: механика прослушивания
+   видна целиком (следование за репликой, переходы по цитатам, метки пропусков),
+   а на бою меняется только источник звука. Плашка об этом говорит прямо. */
+var PL = { t: 0, playing: false, speed: 1, timer: null, audio: null, follow: true };
+
+function plDuration() { return (PL.audio && PL.audio.duration) || CALL.duration_s; }
+
+function plMarkers() {
+  var qs = [], seen = {};
+  function add(q) {
+    if (!q) return;
+    var r = locateQuote(q);
+    if (r.found && !seen[r.t]) { seen[r.t] = 1; qs.push(r.t); }
+  }
+  Object.keys(VERDICT.diagnostics.items).forEach(function (k) { add(VERDICT.diagnostics.items[k].quote); });
+  Object.keys(LADDER_LABELS).forEach(function (k) { add(VERDICT.money_ladder[k].quote); });
+  VERDICT.objections.items.forEach(function (o) { add(o.quote); });
+  VERDICT.compliance_flags.forEach(function (f) { add(f.quote); });
+  return { quotes: qs, gaps: gapMarkers().map(function (g) { return g.t; }) };
+}
+
+function plDrawTrack() {
+  var track = document.getElementById('plTrack');
+  track.querySelectorAll('.mk').forEach(function (m) { m.remove(); });
+  var d = plDuration(), m = plMarkers();
+  m.quotes.forEach(function (t) {
+    track.insertAdjacentHTML('beforeend', '<span class="mk" style="left:' + (t / d * 100) + '%" title="цитата вердикта · ' + mmss(t) + '"></span>');
+  });
+  m.gaps.forEach(function (t) {
+    track.insertAdjacentHTML('beforeend', '<span class="mk gap" style="left:' + (t / d * 100) + '%" title="здесь пропущены вопросы · ' + mmss(t) + '"></span>');
+  });
+}
+
+function plPaint() {
+  var d = plDuration(), pct = Math.min(PL.t / d * 100, 100);
+  document.getElementById('plDone').style.width = pct + '%';
+  document.getElementById('plHead').style.left = pct + '%';
+  document.getElementById('plNow').textContent = mmss(Math.floor(PL.t));
+  // текущая реплика = последняя, чей таймкод уже прошёл
+  var cur = null;
+  for (var i = 0; i < TRANSCRIPT.length; i++) if (TRANSCRIPT[i].t <= PL.t) cur = TRANSCRIPT[i].t; else break;
+  var body = document.getElementById('trBody');
+  body.querySelectorAll('.rep.now').forEach(function (x) { x.classList.remove('now'); });
+  if (cur === null) return;
+  var el = body.querySelector('.rep[data-t="' + cur + '"]');
+  if (!el) return;
+  el.classList.add('now');
+  if (PL.playing && PL.follow) {
+    var top = el.offsetTop - body.clientHeight / 2 + el.clientHeight / 2;
+    body.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
+  }
+}
+
+function plStop() {
+  PL.playing = false;
+  if (PL.timer) { clearInterval(PL.timer); PL.timer = null; }
+  if (PL.audio) PL.audio.pause();
+  document.getElementById('plPlay').textContent = '▶';
+  document.getElementById('plPlay').setAttribute('aria-label', 'Слушать запись');
+}
+
+function plPlay() {
+  if (PL.t >= plDuration()) PL.t = 0;
+  PL.playing = true;
+  document.getElementById('plPlay').textContent = '⏸';
+  document.getElementById('plPlay').setAttribute('aria-label', 'Пауза');
+  if (PL.audio) { PL.audio.playbackRate = PL.speed; PL.audio.play(); return; }
+  PL.timer = setInterval(function () {
+    PL.t += 0.25 * PL.speed;
+    if (PL.t >= plDuration()) { PL.t = plDuration(); plPaint(); plStop(); return; }
+    plPaint();
+  }, 250);
+}
+
+function plSeek(t) {
+  PL.t = Math.max(0, Math.min(t, plDuration()));
+  if (PL.audio) PL.audio.currentTime = PL.t;
+  plPaint();
+}
+
+function plInit() {
+  if (CALL.audio) {
+    PL.audio = new Audio(CALL.audio);
+    PL.audio.addEventListener('timeupdate', function () { PL.t = PL.audio.currentTime; plPaint(); });
+    PL.audio.addEventListener('ended', plStop);
+    PL.audio.addEventListener('loadedmetadata', function () { document.getElementById('plTotal').textContent = '/ ' + mmss(Math.floor(plDuration())); plDrawTrack(); });
+    document.getElementById('plNote').hidden = true;
+  } else {
+    document.getElementById('plNote').textContent = 'Файл записи не подключён — бегунок идёт по таймкодам расшифровки. На бою здесь играет запись из телефонии, разметка та же.';
+  }
+  document.getElementById('plTotal').textContent = '/ ' + mmss(CALL.duration_s);
+  plDrawTrack();
+  plPaint();
+
+  document.getElementById('plPlay').addEventListener('click', function () { PL.playing ? plStop() : plPlay(); });
+  document.getElementById('plSpeed').addEventListener('click', function () {
+    PL.speed = PL.speed === 1 ? 4 : 1;
+    this.setAttribute('aria-pressed', PL.speed === 4);
+    if (PL.audio) PL.audio.playbackRate = PL.speed;
+  });
+  var track = document.getElementById('plTrack');
+  track.addEventListener('click', function (e) {
+    var r = track.getBoundingClientRect();
+    plSeek((e.clientX - r.left) / r.width * plDuration());
+  });
+  track.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') { plSeek(PL.t + 5); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { plSeek(PL.t - 5); e.preventDefault(); }
+    if (e.key === ' ' || e.key === 'Enter') { PL.playing ? plStop() : plPlay(); e.preventDefault(); }
+  });
+  // ручная прокрутка расшифровки во время игры = «не тащи меня», следование отключается
+  document.getElementById('trBody').addEventListener('wheel', function () { PL.follow = false; }, { passive: true });
+}
+
 /* ── события ── */
 document.addEventListener('click', function (e) {
   var st = e.target.closest('.st[data-step]');
@@ -588,11 +746,16 @@ document.addEventListener('click', function (e) {
     return;
   }
   var tc = e.target.closest('.tc[data-t]');
-  if (tc) { focusTime(+tc.getAttribute('data-t')); return; }
+  if (tc) {
+    var t = +tc.getAttribute('data-t');
+    focusTime(t); PL.follow = true; plSeek(t);   // цитата в разборе = позиция в записи
+    return;
+  }
   var rep = e.target.closest('.rep[data-t]');
   if (rep) {
     document.querySelectorAll('.rep.hl').forEach(function (x) { x.classList.remove('hl'); });
     rep.classList.add('hl');
+    plSeek(+rep.getAttribute('data-t'));
   }
 });
 
@@ -610,6 +773,7 @@ document.getElementById('breakQuote').addEventListener('click', function () {
   }
   totals = computeTotals(VERDICT);
   renderTop(); renderStrip(); renderStep(); renderTranscript();
+  plDrawTrack(); plPaint();   // метки на дорожке зависят от того, какие цитаты подтверждены
 });
 
 /* попап менеджера в модалке */
@@ -629,7 +793,7 @@ dlg.addEventListener('close', function () {
 dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
 
 /* ── старт ── */
-renderTop(); renderStrip(); renderStep(); renderTranscript();
+renderTop(); renderStrip(); renderStep(); renderTranscript(); plInit();
 </script>
 </body>
 </html>
