@@ -61,6 +61,8 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-a
 /* ═══ ПОЛОСА-ПЛИТКИ ═══ */
 #strip{flex:none;background:var(--d-bg);color:var(--d-ink);overflow:hidden;position:relative;z-index:var(--z-strip);
   border-bottom:1px solid var(--amo-line)}
+/* час в одной задаче — рамка по всей полосе, её нельзя не заметить */
+#strip.alarm{outline:2px solid var(--d-red);outline-offset:-2px}
 /* слева — управление сменой, дальше плитки; три плитки-зоны работают как переключатели списка */
 .bar{display:grid;grid-template-columns:246px 1.15fr .82fr .82fr .82fr .95fr .95fr .95fr;height:104px}
 .ctl{padding:6px 14px;border-right:1px solid var(--d-line);background:#0d1420;display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0;overflow:hidden}
@@ -114,6 +116,10 @@ button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;text-a
 .zg .v,.zg .h i{color:var(--d-green)}
 .badge{display:inline-flex;align-items:center;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:800;margin-left:6px}
 .badge.pu{background:rgba(167,139,250,.16);color:var(--d-purple)}
+/* ЖИЗНИ: гейт качества, 5 сердец. Видны в полосе всегда — снятая жизнь не должна теряться из виду */
+.tile .lives{font-size:12.5px;letter-spacing:1.5px;color:var(--d-red)}
+.tile .lives .off{opacity:.28;color:var(--d-mut)}
+.tile.lost .s{color:#e8a0a5}   /* тревога только на строке жизней: сам балл может быть хорошим */
 .up{color:var(--d-green);font-weight:700}
 
 /* раскрытие: приоритетные задачи */
@@ -479,6 +485,7 @@ button.trow:hover .take{background:var(--dark);color:#fff;box-shadow:none}
   <button class="btn" onclick="toggleDrop()">▾ раскрыть полосу</button>
   <button class="btn" onclick="var t=current();if(t)talked(t.id)">✓ демо: результат в Sensei</button>
   <button class="btn" onclick="var t=current();if(t)noAnswer(t.id)">✕ демо: недозвон</button>
+  <button class="btn" onclick="demoStuck()">⏳ демо: час в задаче</button>
   <button class="btn" onclick="jumpTo(11*60+20)">🕚 11:20 · время Волкова</button>
   <button class="btn" onclick="jumpTo(14*60)">🕑 14:00</button>
   <button class="btn" onclick="jumpTo(18*60)">🕕 конец дня</button>
@@ -658,7 +665,9 @@ function renderBar(){
         leadsOpen()?'по SLA 5 минут':'после '+rd+' '+plural(rd,['действия','действий','действий']),1)
   +tile('gr','📈','Конверсия',conv().toFixed(1).replace('.',',')+'%',
         'Средняя отдела '+CONV_TEAM.toString().replace('.',',')+'%<br><span class="up">'+(d>=0?'↑ +':'↓ ')+d.toFixed(1).replace('.',',')+'% к средней</span>',0)
-  +tile('pu','☆','Sensei score',senseiScore+'<span class="badge pu">A+</span>','Отличная работа',0);
+  +tile(lives<5?'pu lost':'pu','☆','Sensei score',senseiScore+'<span class="badge pu">A+</span>',
+        '<span class="lives">'+livesHtml()+'</span> '
+        +(lives===5?'жизни целы':'осталось '+lives+' из 5'+(crosses?' · крестов '+crosses:'')),0);
 
   renderDrop();
 }
@@ -775,17 +784,26 @@ function selectTask(id){selId=id;renderBar()}
    и приводит в нужную сделку; результат, перенос и отклонение менеджер отмечает внутри Sensei. */
 
 /* ═══ РЕЗУЛЬТАТ: КАСАНИЕ ПО ФАКТУ ═══ */
+/* ГЕЙТ КАЧЕСТВА: час в одной задаче стоит жизни и креста, уложился в бюджет — рейтинг вверх */
+function stuckPenalty(){
+  if(taskSec<STUCK)return false;
+  lives=Math.max(0,lives-1);crosses++;qa=Math.max(40,qa-6);senseiScore=Math.max(60,senseiScore-3);
+  toast('Минус жизнь: час в одной задаче','Осталось жизней '+lives+' из 5, рейтинг '+qa+'. Крест за смену и уведомление РОПу.',1);
+  return true;
+}
 function talked(id){
   var t=byId[id];
   if(t.cons){consDone++;if(t.kind==='lead')leadsDone++}
-  if(qa<100&&taskSec<=t.bud*60)qa=Math.min(100,qa+1);
+  var pen=stuckPenalty();
+  if(!pen&&qa<100&&taskSec<=t.bud*60)qa=Math.min(100,qa+1);
   var nx=peekNext(id);
-  toast('Касание подтверждено','Разговор состоялся, 3 мин 12 сек — подтвердил PBX. Sensei закрыл задачу.'
+  if(!pen)toast('Касание подтверждено','Разговор состоялся, 3 мин 12 сек — подтвердил PBX. Sensei закрыл задачу.'
     +(nx?' Следующее: '+nx.act.toLowerCase()+' — '+nx.name+'.':''),0,1);
   done[id]=1;openedId=null;workId=null;resetTaskTimer();renderCard();render();queueNext();
 }
 function noAnswer(id){
   var t=byId[id];t.att=(t.att||0)+1;t.seq=++seq;t.cool=nowMin+20;
+  if(stuckPenalty()){workId=null;openedId=null;resetTaskTimer();renderCard();render();queueNext();return}
   if(t.att>=3){done[id]=1;
     toast('Три попытки без ответа','Касание так и не засчитано. Задача уходит на решение: в пул или РОПу на разбор.',1)}
   else toast('Касание НЕ засчитано','Нет ответа, звонок длился 8 секунд. Попытка '+t.att+' из 3, а не касание. Задача остаётся в зоне и вернётся в '+clock(t.cool)+'.',1);
@@ -946,8 +964,10 @@ function closeSum(){document.getElementById('sum').classList.remove('on')}
 
 /* ═══ ДЕЙСТВИЯ ═══ */
 function render(){renderBar();if(planOpen())renderPlan()}
-function resetTaskTimer(){taskSec=0;ropAlert=false}
-function livesHtml(){var h='';for(var i=1;i<=5;i++)h+='<span class="'+(i<=lives?'':'off')+'">❤</span>';return h}
+function resetTaskTimer(){taskSec=0;ropAlert=false;document.getElementById('strip').classList.remove('alarm')}
+/* потраченная жизнь = пустое сердце, а не просто бледное: на скриншоте и боковым зрением
+   разница по прозрачности не читается */
+function livesHtml(){var h='';for(var i=1;i<=5;i++)h+='<span class="'+(i<=lives?'':'off')+'">'+(i<=lives?'❤':'♡')+'</span>';return h}
 function qaCls(){return qa>=90?'ok':qa>=65?'mid':'low'}
 function startShift(){
   if(!started){started=true;tmr=setInterval(tick,1000);resetTaskTimer();closePlan();
@@ -1013,10 +1033,16 @@ function tick(){
   if(started&&current()){
     taskSec++;
     if(taskSec===STUCK&&!ropAlert){ropAlert=true;
-      toast('Ты в задаче больше часа','Иди дальше. Уведомление ушло РОПу.',1)}
+      document.getElementById('strip').classList.add('alarm');
+      toast('Ты в задаче больше часа','Закрой её или иди дальше — на закрытии спишется жизнь. Уведомление ушло РОПу.',1)}
   }else idleSec++;
   if(pend){pend.left--;if(pend.left<=0){openDeal(pend.id);return}}
   render();
+}
+function demoStuck(){
+  if(!started||!current()){toast('Нужна активная задача','Начни смену — тогда пойдёт таймер задачи.');return}
+  taskSec=STUCK;ropAlert=true;document.getElementById('strip').classList.add('alarm');render();
+  toast('Час в одной задаче','Полоса в красной рамке. Закроешь задачу — спишется жизнь и встанет крест.',1);
 }
 function plural(n,f){var a=Math.abs(n)%100,b=a%10;
   if(a>10&&a<20)return f[2];if(b>1&&b<5)return f[1];if(b===1)return f[0];return f[2]}
