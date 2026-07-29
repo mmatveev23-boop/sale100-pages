@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Попап менеджера после звонка — ДОНУЛЯ</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="popup.css">
+<style>
+/* Витрина попапа: показываем ровно то, что менеджер видит в карточке amoCRM
+   сразу после звонка. Фон — приглушённая имитация CRM, не часть продукта. */
+body{min-height:100vh;background:var(--pine)}
+.stage{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:28px 16px}
+@media (max-width:520px){.stage{justify-content:flex-start;gap:12px;padding:12px 12px 24px}}
+.stage-note{max-width:520px;color:rgba(255,255,255,.72);font-size:12.5px;line-height:1.5;text-align:center}
+.stage-note b{color:#fff}
+.stage-note a{color:var(--gold-bright)}
+.crm-hint{position:fixed;inset:0;background:
+  linear-gradient(180deg,rgba(11,59,46,.92) 0%,rgba(8,42,33,.96) 100%),
+  repeating-linear-gradient(180deg,rgba(255,255,255,.045) 0 1px,transparent 1px 42px);
+  z-index:0}
+.stage>*{position:relative;z-index:1}
+</style>
+</head>
+<body>
+<div class="crm-hint" aria-hidden="true"></div>
+<div class="stage">
+  <div id="popRoot"></div>
+  <p class="stage-note">
+    Так попап всплывает <b>в карточке сделки amoCRM</b> сразу после звонка. Обязательные кнопки видны без скролла,
+    линия не встаёт: не ответил — оценка примется сама. Переключатель сверху показывает три исхода
+    (обычный · продолжение · отказ). <a href="index.html">Полный разбор звонка →</a>
+  </p>
+</div>
+<script src="verdict.js"></script>
+<script src="popup.js"></script>
+<script>
+  renderPopup(document.getElementById('popRoot'), {
+    onFull: function () { window.location.href = 'index.html'; }
+  });
+</script>
+</body>
+</html>

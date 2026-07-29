@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Контроль звонка · гейт и качество по скрипту — ДОНУЛЯ</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="popup.css">
+<style>
+/* ═══ КОНТРОЛЬ ЗВОНКА · РАЗБОР ОДНОГО ЗВОНКА ПО СКРИПТУ ═══
+   Гейт 16 пунктов и качество (эмпатия 20 · возражения 25 · лестница 40 · шаг 15)
+   посажены на шаги скрипта site/script/. Все итоги считает код из verdict.js:
+   балл суммой блоков, гейт через collected_count, цитаты — программной проверкой
+   по транскрипту (находки №1 и №3 аудита site/qa/). ═══ */
+
+.wrap{max-width:1220px;margin:0 auto;padding:22px 16px 72px}
+
+/* ── шапка ── */
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:22px 24px;box-shadow:var(--shadow)}
+.hdr .brand{display:flex;align-items:center;gap:11px;margin-bottom:13px}
+.hdr .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--gold-bright)}
+.hdr .brand b{font-size:15px}
+.hdr .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:25px;line-height:1.16;letter-spacing:-.02em;font-weight:800;text-wrap:balance}
+.hdr .lede{margin-top:9px;font-size:14px;color:rgba(255,255,255,.8);max-width:70ch}
+.hdr .lede b{color:#fff}
+.hdr .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.tag{font-size:11px;font-weight:700;border-radius:999px;padding:4px 11px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.82)}
+.tag.demo{background:rgba(244,199,117,.16);border:1px dashed var(--gold-bright);color:var(--gold-bright)}
+
+/* ── светофор ── */
+.top{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);margin-top:16px;overflow:hidden}
+.top-fact{display:flex;flex-wrap:wrap;gap:6px 16px;padding:12px 18px;background:var(--card2);border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+.top-fact b{color:var(--ink);font-weight:700}
+.top-grid{display:grid;grid-template-columns:minmax(280px,1.15fr) 1fr;gap:18px;padding:16px 18px}
+@media (max-width:820px){.top-grid{grid-template-columns:1fr}}
+
+.score-big{display:flex;align-items:flex-end;gap:11px}
+.score-big .v{font-size:56px;font-weight:800;line-height:.9;letter-spacing:-.035em}
+.score-big .of{font-size:15px;font-weight:700;color:var(--faint);padding-bottom:7px}
+.score-big .band{margin-left:auto;text-align:right;font-size:11.5px;color:var(--muted);line-height:1.4;padding-bottom:4px}
+.score-big .band b{display:block;font-size:13px;color:var(--ink)}
+.seg-rows{display:flex;flex-direction:column;gap:5px;margin-top:12px}
+.seg-row{display:grid;grid-template-columns:96px 1fr 52px;align-items:center;gap:9px;font-size:12px}
+.seg-row .nm{color:var(--muted)}
+.seg-row .tr{height:8px;background:var(--line2);border-radius:3px;overflow:hidden}
+.seg-row .tr i{display:block;height:100%;width:100%;background:var(--green);border-radius:3px;transform-origin:left center;transition:transform .5s var(--ease)}
+.seg-row.zero .tr i{background:var(--brick)}
+.seg-row.part .tr i{background:var(--gold)}
+.seg-row .vv{text-align:right;font-weight:700}
+.seg-row .vv s{color:var(--faint);font-weight:400;text-decoration:none}
+
+.verdicts{display:flex;flex-direction:column;gap:8px}
+.vchip{display:flex;gap:10px;align-items:flex-start;border-radius:var(--r-md);padding:10px 12px;font-size:12.5px;line-height:1.4}
+.vchip .ic{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:800}
+.vchip b{display:block;font-size:13px}
+.vchip.bad{background:var(--brick-soft);color:var(--brick-ink)}
+.vchip.bad .ic{background:var(--brick);color:#fff}
+.vchip.warn{background:var(--gold-soft);color:var(--gold-ink)}
+.vchip.warn .ic{background:var(--gold);color:#fff}
+.vchip.ok{background:var(--green-soft);color:var(--green-ink)}
+.vchip.ok .ic{background:var(--green);color:#fff}
+.vchip.flat{background:var(--card2);border:1px solid var(--line)}
+.vchip.flat .ic{background:var(--pine);color:var(--gold-bright)}
+
+.main-err{display:flex;gap:12px;align-items:baseline;padding:13px 18px;border-top:1px solid var(--line);background:linear-gradient(90deg,rgba(168,68,46,.07),transparent 70%)}
+.main-err .lbl{flex:none;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--brick-ink)}
+.main-err .txt{font-size:15.5px;font-weight:700;line-height:1.32;text-wrap:pretty}
+
+/* ── полоса шагов ── */
+.strip-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:22px 2px 9px}
+.strip-h h2{font-size:16px;font-weight:800;letter-spacing:-.01em}
+.strip-h .hint{font-size:11.5px;color:var(--faint)}
+.strip{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+@media (max-width:900px){.strip{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:520px){.strip{grid-template-columns:repeat(2,1fr)}}
+.st{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:9px 9px 8px;text-align:left;transition:.16s var(--ease);position:relative;min-height:82px;display:flex;flex-direction:column;gap:5px}
+.st:hover{border-color:#CFC4AC;transform:translateY(-1px)}
+.st .n{font-size:10.5px;font-weight:800;color:var(--faint);letter-spacing:.04em}
+.st .t{font-size:12.5px;font-weight:700;line-height:1.24}
+.st .dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:auto}
+.st .dots i{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.st .dots i.miss{background:var(--brick)}
+.st .dots i.crit{background:var(--brick);box-shadow:0 0 0 2px rgba(168,68,46,.24)}
+.st .dots i.na{background:transparent;border:1.5px solid var(--faint)}
+.st .dots i.gold{background:var(--gold)}
+.st .dots i.none{background:var(--line)}
+.st[aria-expanded="true"]{background:var(--pine);border-color:var(--pine);box-shadow:var(--shadow-sm)}
+.st[aria-expanded="true"] .n{color:var(--gold-bright)}
+.st[aria-expanded="true"] .t{color:#fff}
+.st[aria-expanded="true"] .dots i.none{background:rgba(255,255,255,.28)}
+.st[aria-expanded="true"]::after{content:"";position:absolute;left:50%;bottom:-7px;width:12px;height:12px;background:var(--pine);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.st.flag::before{content:"⚠";position:absolute;top:6px;right:7px;font-size:11px;color:var(--gold)}
+
+/* ── тело: разбор + транскрипт ── */
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:16px;margin-top:14px;align-items:start}
+@media (max-width:1000px){.cols{grid-template-columns:1fr}}
+
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden}
+.panel-h{padding:14px 18px 12px;border-bottom:1px solid var(--line)}
+.panel-h .kicker{font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--green-ink)}
+.panel-h h3{font-size:18px;font-weight:800;letter-spacing:-.015em;margin-top:3px}
+.panel-h .goal{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.45;max-width:72ch}
+.panel-h .dur{font-size:11.5px;color:var(--faint);font-weight:600;margin-top:5px}
+
+.sect{padding:13px 18px;border-bottom:1px solid var(--line2)}
+.sect:last-child{border-bottom:none}
+.sect-t{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--faint);margin-bottom:9px}
+.sect-t b{color:var(--ink)}
+
+/* строки пунктов */
+.item{display:grid;grid-template-columns:26px 1fr auto;gap:10px;padding:8px 0;border-top:1px dashed var(--line2);align-items:start}
+.sect .item:first-of-type{border-top:none}
+.item .no{font-size:12px;font-weight:800;color:var(--faint);text-align:right;padding-top:1px}
+.item .nm{font-size:13.5px;font-weight:700;line-height:1.3}
+.item .val{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.item .val em{font-style:normal;color:var(--brick-ink);font-weight:700}
+.item q{display:block;font-size:12.5px;color:var(--green-ink);margin-top:4px;line-height:1.4}
+.item .badq{display:block;font-size:12px;font-weight:700;color:var(--brick);margin-top:4px}
+.item .st-ic{flex:none;font-size:12px;font-weight:800;border-radius:7px;padding:3px 8px;white-space:nowrap;align-self:start}
+.st-ok{background:var(--green-soft);color:var(--green-ink)}
+.st-no{background:var(--brick);color:#fff}
+.st-na{background:#EDEBE5;color:var(--muted)}
+.st-gold{background:var(--gold-soft);color:var(--gold-ink)}
+.crit-tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.04em;background:var(--brick);color:#fff;border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+.tc{font-size:11.5px;font-weight:700;color:var(--green-ink);background:var(--green-soft);border-radius:6px;padding:2px 7px;margin-left:6px;cursor:pointer;transition:.14s var(--ease)}
+.tc:hover{background:var(--green);color:#fff}
+.standard{font-size:12px;color:var(--muted);background:var(--card2);border:1px solid var(--line2);border-radius:var(--r-sm);padding:8px 10px;margin-top:6px;line-height:1.45}
+.standard b{color:var(--ink);font-weight:700}
+
+.empathy-sig{display:flex;flex-wrap:wrap;gap:5px}
+.sig{font-size:11.5px;font-weight:600;background:var(--green-soft);color:var(--green-ink);border-radius:999px;padding:4px 10px}
+.sig.off{background:#EDEBE5;color:var(--muted)}
+
+.note-line{font-size:12.5px;color:var(--muted);line-height:1.5}
+.note-line b{color:var(--ink)}
+
+/* транскрипт */
+.tr-panel{position:sticky;top:14px;max-height:calc(100vh - 28px);display:flex;flex-direction:column}
+/* в одну колонку липкая запись мешает: отпускаем её и ограничиваем высоту списка реплик */
+@media (max-width:1000px){.tr-panel{position:static;max-height:none}.tr-body{max-height:60vh}}
+.tr-h{padding:12px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tr-h b{font-size:13px}
+.tr-h .qcheck{font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px}
+.qcheck.ok{background:var(--green-soft);color:var(--green-ink)}
+.qcheck.bad{background:var(--brick);color:#fff}
+.tr-body{overflow-y:auto;padding:10px 15px 16px;display:flex;flex-direction:column;gap:9px;scroll-behavior:smooth}
+.rep{display:grid;grid-template-columns:38px 1fr;gap:9px;font-size:12.5px;line-height:1.45;border-radius:var(--r-sm);padding:4px 6px 5px;transition:background .3s var(--ease)}
+.rep .t{font-size:11px;font-weight:700;color:var(--faint);padding-top:2px;font-variant-numeric:tabular-nums}
+.rep .who{font-size:10.5px;font-weight:800;letter-spacing:.05em;display:block;margin-bottom:1px}
+.rep.m .who{color:var(--pine)}
+.rep.c .who{color:var(--gold-ink)}
+.rep.hl{background:var(--gold-soft);box-shadow:0 0 0 1px rgba(201,154,51,.4)}
+.gap{display:flex;gap:8px;align-items:flex-start;background:var(--brick-soft);color:var(--brick-ink);border-radius:var(--r-sm);padding:8px 10px;font-size:12px;line-height:1.4;font-weight:600}
+.gap .ic{font-weight:800}
+
+/* подвал */
+.foot{display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:16px;margin-top:16px;align-items:start}
+@media (max-width:1000px){.foot{grid-template-columns:1fr}}
+.acts{display:flex;flex-wrap:wrap;gap:9px;padding:14px 18px}
+details.tech{border-top:1px solid var(--line2)}
+details.tech summary{padding:11px 18px;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--muted);list-style:none}
+details.tech summary::-webkit-details-marker{display:none}
+details.tech summary::before{content:"▸ ";color:var(--faint)}
+details.tech[open] summary::before{content:"▾ "}
+details.tech .in{padding:0 18px 16px}
+pre.json{background:#0C2B22;color:#CFE6DA;border-radius:var(--r-md);padding:13px;font-size:11.5px;line-height:1.5;overflow-x:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.qtable{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.qtable td{padding:5px 8px;border-bottom:1px solid var(--line2);vertical-align:top}
+.qtable td:first-child{white-space:nowrap;font-weight:700;color:var(--muted)}
+.qtable .bad{color:var(--brick);font-weight:700}
+
+dialog.pop-dialog{border:none;background:none;padding:0;margin:auto;width:min(520px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:visible}
+dialog.pop-dialog::backdrop{background:rgba(8,42,33,.62)}
+
+.pgfoot{margin-top:20px;font-size:11.5px;color:var(--faint);line-height:1.6;text-align:center}
+.pgfoot a{color:var(--green-ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hdr">
+    <div class="brand">
+      <div class="lg">ДН</div>
+      <div><b>ДОНУЛЯ</b><small>КОНТРОЛЬ КАЧЕСТВА ЗВОНКОВ</small></div>
+    </div>
+    <h1>Контроль звонка: гейт и качество по нашему скрипту</h1>
+    <p class="lede">ИИ слушает каждую консультацию и раскладывает её <b>по шагам скрипта</b>: собран ли гейт из 16 пунктов
+      и как менеджер продавал — эмпатия, возражения, лестница денег, шаг с датой.
+      Каждый вердикт стоит на <b>дословной цитате из записи</b> — цитата не нашлась, вердикт по пункту не принимается.</p>
+    <div class="tags">
+      <span class="tag demo">ДЕМО-ЗВОНОК · КЛИЕНТ ВЫМЫШЛЕН</span>
+      <span class="tag">промт <span id="tagVer"></span></span>
+      <span class="tag">балл = эмпатия 20 + возражения 25 + лестница 40 + шаг 15</span>
+      <span class="tag">гейт = все 16 или N/A</span>
+      <span class="tag">комплаенс: режим «фиксируем»</span>
+    </div>
+  </header>
+
+  <section class="top">
+    <div class="top-fact" id="fact"></div>
+    <div class="top-grid">
+      <div>
+        <div class="score-big">
+          <div class="v num" id="scoreV">—</div><div class="of">/ 100</div>
+          <div class="band"><b class="num">порог 65 · идеал 90</b>ниже 65 — рейтинг вниз</div>
+        </div>
+        <div class="seg-rows" id="segRows"></div>
+      </div>
+      <div class="verdicts" id="verdicts"></div>
+    </div>
+    <div class="main-err">
+      <span class="lbl">ГЛАВНОЕ</span>
+      <span class="txt">Имущество и сделки за 3 года не спрошены — цена названа раньше, чем проверены критичные для суда риски.</span>
+    </div>
+  </section>
+
+  <div class="strip-h">
+    <h2>Звонок по шагам скрипта</h2>
+    <span class="hint">точки под шагом — его пункты гейта · клик открывает шаг</span>
+  </div>
+  <nav class="strip" id="strip" aria-label="Шаги скрипта"></nav>
+
+  <div class="cols">
+    <section class="panel" id="stepPanel"></section>
+
+    <section class="panel tr-panel">
+      <div class="tr-h">
+        <b>Запись разговора</b>
+        <span class="qcheck" id="qcheck">—</span>
+      </div>
+      <div class="tr-body" id="trBody"></div>
+    </section>
+  </div>
+
+  <div class="foot">
+    <section class="panel">
+      <div class="sect">
+        <div class="sect-t">ЧТО ДЕЛАТЬ ДАЛЬШЕ · <b>next_best_action</b></div>
+        <p class="note-line" id="nba"></p>
+      </div>
+      <div class="sect">
+        <div class="sect-t">ИТОГ ИИ · <b>summary</b></div>
+        <p class="note-line" id="summary"></p>
+      </div>
+      <div class="acts">
+        <button type="button" class="btn btn-primary" id="openPop">Показать попап менеджера</button>
+        <a class="btn btn-ghost" href="popup.html">Попап отдельной страницей</a>
+      </div>
+      <details class="tech">
+        <summary>Проверка цитат: как система защищается от выдуманных доказательств</summary>
+        <div class="in">
+          <p class="note-line">Каждая цитата вердикта ищется в транскрипте программно. Не найдена — пункт помечается
+            <b>«цитата не подтверждена»</b> и вердикт по нему не принимается: ИИ не может обосновать балл фразой,
+            которой в звонке не было.</p>
+          <div id="qtable"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="breakQuote" style="margin-top:10px">Подменить одну цитату на несуществующую</button>
+        </div>
+      </details>
+      <details class="tech">
+        <summary>Вердикт ИИ как есть (контракт промта — для программиста)</summary>
+        <div class="in"><pre class="json" id="jsonOut"></pre></div>
+      </details>
+    </section>
+
+    <section class="panel">
+      <div class="sect">
+        <div class="sect-t">ЧТО ЭТА СТРАНИЦА <b>НЕ</b> ДЕЛАЕТ</div>
+        <p class="note-line">
+          Гейт не двигает статусы: <b>деньги сильнее гейта</b> — частичка, подпись или оплата закрепляют лид независимо от оценки.<br><br>
+          Гейт решает судьбу только пустого лида: ✓ — закреплён, ✕ — задача «добери диагностику».<br><br>
+          Презентацию охраняет продукт (счёт только с последнего экрана), поэтому шаг 7 — не гейт и не балл, а отдельное поле.<br><br>
+          Комплаенс сейчас в режиме «фиксируем»: флаг уходит РОПу, балл не обнуляется.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <p class="pgfoot">
+    Источник рубрики: <b>docs/ai-qa-consultation-prompt.md</b> · шаги: <a href="../script/">скрипт менеджера</a> ·
+    свод правил §0/§6. Демо-данные, персональные данные реальных клиентов на страницу не попадают.
+  </p>
+</div>
+
+<dialog class="pop-dialog" id="popDialog"><div id="popMount"></div></dialog>
+
+<script src="verdict.js"></script>
+<script src="popup.js"></script>
+<script>
+/* ── состояние ── */
+var activeStep = 2;             // открыт шаг диагностики: там главный провал
+var totals = computeTotals(VERDICT);
+var savedQuote = null;          // для демонстрации проверки цитат
+
+/* ── привязка возражений и комплаенса к шагам по таймкоду ──
+   Границы шага = от первой его цитаты до первой цитаты следующего шага, у которого цитаты есть. */
+function stepAnchors() {
+  var anchored = [];
+  SCRIPT_STEPS.forEach(function (s) {
+    var ts = [];
+    s.gate.forEach(function (k) {
+      var it = VERDICT.diagnostics.items[k];
+      if (it && it.quote) { var r = locateQuote(it.quote); if (r.found) ts.push(r.t); }
+    });
+    s.ladder.forEach(function (k) {
+      var q = VERDICT.money_ladder[k].quote;
+      if (q) { var r = locateQuote(q); if (r.found) ts.push(r.t); }
+    });
+    if (ts.length) anchored.push({ n: s.n, from: Math.min.apply(null, ts), last: Math.max.apply(null, ts) });
+  });
+  anchored.forEach(function (a, i) { a.to = anchored[i + 1] ? anchored[i + 1].from : 1e9; });
+  return anchored;
+}
+var ANCHORS = stepAnchors();
+
+function stepByTime(t) {
+  for (var i = 0; i < ANCHORS.length; i++) if (t >= ANCHORS[i].from && t < ANCHORS[i].to) return ANCHORS[i].n;
+  return ANCHORS.length ? ANCHORS[0].n : 1;
+}
+function objectionsOfStep(n) {
+  return VERDICT.objections.items.map(function (o, i) {
+    var r = locateQuote(o.quote);
+    return { o: o, i: i, t: r.t, step: r.found ? stepByTime(r.t) : null };
+  }).filter(function (x) { return x.step === n; });
+}
+function flagsOfStep(n) {
+  return VERDICT.compliance_flags.filter(function (f) {
+    var r = locateQuote(f.quote);
+    return r.found && stepByTime(r.t) === n;
+  });
+}
+
+/* ── шапка-светофор ── */
+function renderTop() {
+  document.getElementById('tagVer').textContent = CALL.prompt_version;
+  document.getElementById('fact').innerHTML =
+    '<span><b>' + CALL.client + '</b> · сделка #' + CALL.lead_id + '</span>' +
+    '<span>менеджер <b>' + CALL.manager + '</b></span>' +
+    '<span>' + CALL.date + ', ' + CALL.time + '</span>' +
+    '<span>длительность <b class="num">' + mmss(CALL.duration_s) + '</b></span>' +
+    '<span>тип <b>консультация</b></span>' +
+    '<span>реплик <b class="num">' + TRANSCRIPT.length + '</b></span>';
+
+  document.getElementById('scoreV').textContent = totals.score;
+
+  document.getElementById('segRows').innerHTML = totals.parts.map(function (p) {
+    var pct = Math.round(p.val / p.max * 100);
+    var cls = p.val === 0 ? 'zero' : (pct < 70 ? 'part' : '');
+    return '<div class="seg-row ' + cls + '"><span class="nm">' + p.label + '</span>' +
+      '<span class="tr"><i style="transform:scaleX(' + (pct / 100) + ')"></i></span>' +
+      '<span class="vv num">' + p.val + '<s>/' + p.max + '</s></span></div>';
+  }).join('');
+
+  var v = [];
+  if (totals.gatePassed) {
+    v.push(['ok', '✓', 'Консультация состоялась', 'Гейт ' + totals.collected + '/16 — лид закреплён, окна ответственности пошли.']);
+  } else {
+    var miss = totals.missing.map(function (k) { return GATE_LABELS[k].n; }).join(', ');
+    v.push(['bad', '✕', 'Консультация НЕ состоялась · гейт ' + totals.collected + '/16',
+      'Не собраны пункты ' + miss + '. Пустой лид не закрепляется — задача «добери диагностику».']);
+  }
+  if (VERDICT.compliance_flags.length) {
+    v.push(['warn', '⚠', 'Комплаенс: ' + VERDICT.compliance_flags.length + ' флаг · класс ' + VERDICT.compliance_flags[0].class_id,
+      VERDICT.compliance_flags[0].class + '. Режим «фиксируем»: балл не обнуляется, флаг у РОПа.']);
+  } else {
+    v.push(['ok', '✓', 'Комплаенс чист', 'Красных линий в записи нет.']);
+  }
+  var lc = VERDICT.lead_check;
+  if (lc.normal_lead && !lc.valid_close_reason) {
+    v.push(['flat', '🔒', 'Лид закрыть нельзя', 'Клиент живой и наш, оснований для закрытия в записи нет. Закроют — лид вернётся в работу, закрывшему придёт разбор.']);
+  } else {
+    v.push(['flat', '🔓', 'Право закрыть есть', lc.close_reason_quote || 'Основание в записи зафиксировано.']);
+  }
+  if (!VERDICT.diagnostics.presentation_led.led) {
+    v.push(['flat', '7', 'Презентация в этом звонке не проводилась',
+      'Норма: клиент звонил с того же телефона. Счёт и оплата всё равно недоступны без прохода по экранам — их охраняет продукт.']);
+  }
+  document.getElementById('verdicts').innerHTML = v.map(function (x) {
+    return '<div class="vchip ' + x[0] + '"><span class="ic">' + x[1] + '</span><span><b>' + x[2] + '</b>' + x[3] + '</span></div>';
+  }).join('');
+
+  var q = totals.quotes;
+  var el = document.getElementById('qcheck');
+  el.className = 'qcheck ' + (q.bad.length ? 'bad' : 'ok');
+  el.textContent = q.bad.length ? ('цитаты: ' + q.bad.length + ' не подтверждены') : ('цитаты ' + q.ok + '/' + q.total + ' подтверждены');
+
+  document.getElementById('nba').textContent = VERDICT.next_best_action;
+  document.getElementById('summary').textContent = VERDICT.summary;
+  document.getElementById('jsonOut').textContent = JSON.stringify(VERDICT, null, 2);
+
+  document.getElementById('qtable').innerHTML = '<table class="qtable"><tbody>' +
+    (q.bad.length
+      ? q.bad.map(function (b) { return '<tr><td class="bad">не найдена</td><td>' + b.where + ' — «' + b.quote + '»</td></tr>'; }).join('')
+      : '<tr><td>' + q.ok + ' из ' + q.total + '</td><td>все цитаты вердикта найдены в записи — вердикт принят целиком</td></tr>') +
+    '</tbody></table>';
+}
+
+/* ── полоса шагов ── */
+function renderStrip() {
+  document.getElementById('strip').innerHTML = SCRIPT_STEPS.map(function (s) {
+    var dots = s.gate.map(function (k) {
+      var it = VERDICT.diagnostics.items[k], g = GATE_LABELS[k];
+      if (totals.rejected.indexOf(k) !== -1) return '<i class="miss" title="' + g.n + ' ' + g.label + ' — цитата не подтверждена"></i>';
+      if (!it || !it.asked) return '<i class="' + (g.critical ? 'crit' : 'miss') + '" title="' + g.n + ' ' + g.label + ' — не спрошено"></i>';
+      if (it.value === 'N/A') return '<i class="na" title="' + g.n + ' ' + g.label + ' — N/A"></i>';
+      return '<i title="' + g.n + ' ' + g.label + '"></i>';
+    });
+    s.ladder.forEach(function (k) {
+      var st = VERDICT.money_ladder[k];
+      dots.push('<i class="' + (st.passed ? 'gold' : 'miss') + '" title="' + LADDER_LABELS[k].n + ' ' + LADDER_LABELS[k].label + (st.passed ? '' : ' — незачёт') + '"></i>');
+    });
+    if (!dots.length) dots.push('<i class="none" title="в этом шаге нет пунктов гейта"></i>');
+    var flagged = flagsOfStep(s.n).length ? ' flag' : '';
+    return '<button type="button" class="st' + flagged + '" data-step="' + s.n + '" aria-expanded="' + (s.n === activeStep) + '">' +
+      '<span class="n">ШАГ ' + s.n + '</span><span class="t">' + s.title + '</span>' +
+      '<span class="dots">' + dots.join('') + '</span></button>';
+  }).join('');
+}
+
+/* ── раскрытый шаг ── */
+function gateItemHTML(k) {
+  var it = VERDICT.diagnostics.items[k], g = GATE_LABELS[k];
+  var st, body = '';
+  if (totals.rejected.indexOf(k) !== -1) {
+    // цитата не найдена в записи — вердикт по пункту аннулирован, в гейт не идёт
+    return '<div class="item"><span class="no num">' + g.n + '</span><div><div class="nm">' + g.label + '</div>' +
+      '<div class="val">ИИ отметил «' + it.value + '», но доказательства в записи нет.</div>' + quoteHTML(it.quote) +
+      '</div><span class="st-ic st-no">не принято</span></div>';
+  }
+  if (!it || !it.asked) {
+    st = '<span class="st-ic st-no">не спрошено</span>';
+    body = '<div class="val"><em>' + (g.critical ? 'Пропуск — ' + g.critical + '. Добрать в следующем звонке.' : 'Пропуск — добрать в следующем звонке.') + '</em></div>';
+  } else if (it.value === 'N/A') {
+    st = '<span class="st-ic st-na">N/A</span>';
+    body = '<div class="val">Неприменимо в этом звонке — за это не наказываем.</div>' + quoteHTML(it.quote);
+  } else {
+    st = '<span class="st-ic st-ok">✓ собрано</span>';
+    body = '<div class="val">' + it.value + (it.source === 'chat' ? ' <em>· из переписки</em>' : '') + '</div>' + quoteHTML(it.quote);
+  }
+  return '<div class="item"><span class="no num">' + g.n + '</span><div><div class="nm">' + g.label +
+    (g.critical ? '<span class="crit-tag">' + g.critical.toUpperCase() + '</span>' : '') + '</div>' + body + '</div>' + st + '</div>';
+}
+
+function quoteHTML(q) {
+  if (!q) return '';
+  var r = locateQuote(q);
+  if (!r.found) return '<span class="badq">⚠ цитата не подтверждена записью — вердикт по пункту не принят</span>';
+  return '<q>«' + q + '»<button type="button" class="tc" data-t="' + r.t + '">' + mmss(r.t) + ' ▸</button></q>';
+}
+
+function ladderItemHTML(k) {
+  var st = VERDICT.money_ladder[k], L = LADDER_LABELS[k];
+  var chip = st.passed ? '<span class="st-ic st-ok">✓ ' + L.weight + '/' + L.weight + '</span>' : '<span class="st-ic st-no">0 / ' + L.weight + '</span>';
+  var extra = '';
+  if (k === 'price_and_ask' && st.passed) {
+    extra = st.canon_price
+      ? '<div class="val">Цена каноничная — 13 500 ₽/мес.</div>'
+      : '<div class="val"><em>Цена не по канону — флаг РОПу («устно ≠ договор»), балл не режем.</em></div>';
+  }
+  return '<div class="item"><span class="no">' + L.n + '</span><div><div class="nm">' + L.label + '</div>' +
+    extra + quoteHTML(st.quote) +
+    '<div class="standard"><b>Эталон:</b> ' + L.standard + '</div></div>' + chip + '</div>';
+}
+
+function renderStep() {
+  var s = SCRIPT_STEPS.filter(function (x) { return x.n === activeStep; })[0];
+  var h = '<div class="panel-h"><div class="kicker">ШАГ ' + s.n + ' ИЗ 8</div><h3>' + s.title + ' — ' + s.sub + '</h3>' +
+    '<p class="goal">' + s.goal + '</p><div class="dur">по скрипту: ' + s.dur + '</div></div>';
+
+  if (s.gate.length) {
+    var got = s.gate.filter(function (k) { var it = VERDICT.diagnostics.items[k]; return it && it.asked; }).length;
+    h += '<div class="sect"><div class="sect-t">ГЕЙТ ЭТОГО ШАГА · <b>' + got + ' из ' + s.gate.length + '</b></div>' +
+      s.gate.map(gateItemHTML).join('') + '</div>';
+  }
+
+  if (s.ladder.length) {
+    var lsum = s.ladder.reduce(function (a, k) { return a + (VERDICT.money_ladder[k].passed ? LADDER_LABELS[k].weight : 0); }, 0);
+    var lmax = s.ladder.reduce(function (a, k) { return a + LADDER_LABELS[k].weight; }, 0);
+    h += '<div class="sect"><div class="sect-t">ЛЕСТНИЦА ДЕНЕГ · <b>' + lsum + ' из ' + lmax + ' баллов</b></div>' +
+      s.ladder.map(ladderItemHTML).join('') + '</div>';
+  }
+
+  if (s.empathy.length) {
+    var sigs = VERDICT.empathy.signals;
+    h += '<div class="sect"><div class="sect-t">ЭМПАТИЯ В ЭТОМ ШАГЕ · сигналы <b>' + s.empathy.join(', ') + '</b></div><div class="empathy-sig">' +
+      s.empathy.map(function (letter) {
+        var found = sigs.filter(function (x) { return x.indexOf(letter + ' ·') === 0; })[0];
+        return found
+          ? '<span class="sig">✓ ' + found + '</span>'
+          : '<span class="sig off">✕ сигнал ' + letter + ' не зафиксирован</span>';
+      }).join('') + '</div></div>';
+  }
+
+  var objs = objectionsOfStep(s.n);
+  if (objs.length) {
+    h += '<div class="sect"><div class="sect-t">ВОЗРАЖЕНИЯ В ЭТОМ ШАГЕ · всего по звонку <b>' + VERDICT.objections.score + ' из 25</b></div>' +
+      objs.map(function (x) {
+        var chip = x.o.handled ? '<span class="st-ic st-ok">✓ отработано</span>' : '<span class="st-ic st-no">не отработано</span>';
+        var why = x.o.handled ? '' : '<div class="val"><em>Сдался без изоляции: не спросил «над чем именно сомневаетесь» и не назначил время.</em></div>';
+        return '<div class="item"><span class="no">' + (x.i + 1) + '</span><div><div class="nm">«' + x.o.objection + '»</div>' +
+          why + quoteHTML(x.o.quote) + '</div>' + chip + '</div>';
+      }).join('') + '</div>';
+  }
+
+  var flags = flagsOfStep(s.n);
+  if (flags.length) {
+    h += '<div class="sect"><div class="sect-t">КОМПЛАЕНС · <b>красная линия</b></div>' +
+      flags.map(function (f) {
+        return '<div class="item"><span class="no">' + f.class_id + '</span><div><div class="nm">' + f.class + '</div>' +
+          '<div class="val"><em>Так предлагать нельзя.</em> Режим «фиксируем и учим»: флаг у РОПа, балл не обнуляется.</div>' +
+          quoteHTML(f.quote) + '</div><span class="st-ic st-gold">флаг</span></div>';
+      }).join('') + '</div>';
+  }
+
+  if (s.presentation) {
+    var p = VERDICT.diagnostics.presentation_led;
+    h += '<div class="sect"><div class="sect-t">ПРЕЗЕНТАЦИЯ · <b>отдельное поле, не гейт и не балл</b></div>' +
+      '<div class="item"><span class="no">—</span><div><div class="nm">Вёл клиента по экранам в этом звонке</div>' +
+      '<div class="val">' + (p.led ? 'Да — экраны проговорены голосом.' :
+        'Нет. Это не нарушение: клиент звонил с того же телефона, и шаг с датой зафиксирован. Счёт и оплата всё равно недоступны без прохода по презентации — их охраняет продукт.') + '</div>' +
+      quoteHTML(p.quote) + '</div><span class="st-ic ' + (p.led ? 'st-ok' : 'st-na') + '">' + (p.led ? '✓ вёл' : 'не вёл') + '</span></div></div>';
+  }
+
+  if (!s.gate.length && !s.ladder.length && !s.empathy.length && !objs.length && !flags.length && !s.presentation) {
+    h += '<div class="sect"><div class="sect-t">ЭТОТ ШАГ ИИ НЕ ОЦЕНИВАЕТ</div>' +
+      '<p class="note-line">В шаге нет пунктов гейта и ступеней балла. Он работает на доверие: если клиент возразит «а вы кто такие» — возражение попадёт в блок возражений того шага, где прозвучит.</p></div>';
+  }
+
+  document.getElementById('stepPanel').innerHTML = h;
+}
+
+/* ── транскрипт с маркерами пропусков ── */
+function renderTranscript() {
+  var rows = TRANSCRIPT.map(function (r) { return { kind: 'rep', t: r.t, r: r }; });
+
+  // маркер пропуска ставим в конце того шага, где пункт должен был прозвучать
+  // (пункты с непринятой цитатой сюда не идут: вопрос был задан, подвела не запись, а доказательство)
+  var byStep = {};
+  totals.missing.filter(function (k) { return totals.rejected.indexOf(k) === -1; }).forEach(function (k) {
+    var st = SCRIPT_STEPS.filter(function (s) { return s.gate.indexOf(k) !== -1; })[0];
+    if (!st) return;
+    (byStep[st.n] = byStep[st.n] || []).push(GATE_LABELS[k]);
+  });
+  Object.keys(byStep).forEach(function (n) {
+    var a = ANCHORS.filter(function (x) { return x.n === +n; })[0];
+    var pos = a ? a.last + 1 : 0;
+    if (!a) { // шаг без цитат — ставим перед началом следующего шага с цитатами
+      var next = ANCHORS.filter(function (x) { return x.n > +n; })[0];
+      pos = next ? next.from - 1 : TRANSCRIPT[TRANSCRIPT.length - 1].t;
+    }
+    rows.push({ kind: 'gap', t: pos, step: +n, items: byStep[n] });
+  });
+
+  rows.sort(function (a, b) { return a.t - b.t; });
+
+  document.getElementById('trBody').innerHTML = rows.map(function (row) {
+    if (row.kind === 'gap') {
+      var names = row.items.map(function (g) { return g.n + ' · ' + g.label.split(/[(,]/)[0].trim(); }).join(' · ');
+      return '<div class="gap"><span class="ic">✕</span><span>Здесь, в шаге ' + row.step + ', вопросов не было: ' + names + '</span></div>';
+    }
+    var r = row.r;
+    return '<div class="rep ' + r.who + '" data-t="' + r.t + '">' +
+      '<span class="t">' + mmss(r.t) + '</span>' +
+      '<span><span class="who">' + (r.who === 'm' ? 'МЕНЕДЖЕР' : 'КЛИЕНТ') + '</span>' + r.text + '</span></div>';
+  }).join('');
+}
+
+/* ── подсветка реплики по таймкоду ── */
+function focusTime(t) {
+  var body = document.getElementById('trBody');
+  var el = body.querySelector('.rep[data-t="' + t + '"]');
+  if (!el) return;
+  body.querySelectorAll('.rep.hl').forEach(function (x) { x.classList.remove('hl'); });
+  el.classList.add('hl');
+  var top = el.offsetTop - body.clientHeight / 2 + el.clientHeight / 2;
+  body.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
+}
+
+/* ── события ── */
+document.addEventListener('click', function (e) {
+  var st = e.target.closest('.st[data-step]');
+  if (st) {
+    activeStep = +st.getAttribute('data-step');
+    renderStrip(); renderStep();
+    return;
+  }
+  var tc = e.target.closest('.tc[data-t]');
+  if (tc) { focusTime(+tc.getAttribute('data-t')); return; }
+  var rep = e.target.closest('.rep[data-t]');
+  if (rep) {
+    document.querySelectorAll('.rep.hl').forEach(function (x) { x.classList.remove('hl'); });
+    rep.classList.add('hl');
+  }
+});
+
+/* демонстрация защиты от выдуманных цитат */
+document.getElementById('breakQuote').addEventListener('click', function () {
+  var item = VERDICT.diagnostics.items['2_debt'];
+  if (savedQuote === null) {
+    savedQuote = item.quote;
+    item.quote = 'клиент сказал, что долг около девятисот тысяч';
+    this.textContent = 'Вернуть настоящую цитату';
+  } else {
+    item.quote = savedQuote;
+    savedQuote = null;
+    this.textContent = 'Подменить одну цитату на несуществующую';
+  }
+  totals = computeTotals(VERDICT);
+  renderTop(); renderStrip(); renderStep(); renderTranscript();
+});
+
+/* попап менеджера в модалке */
+var dlg = document.getElementById('popDialog');
+var popCtl = null;
+document.getElementById('openPop').addEventListener('click', function () {
+  dlg.showModal();
+  popCtl = renderPopup(document.getElementById('popMount'), {
+    onClose: function () { dlg.close(); },
+    onFull: function () { dlg.close(); }
+  });
+});
+dlg.addEventListener('close', function () {
+  if (popCtl) { popCtl.destroy(); popCtl = null; }
+  document.getElementById('popMount').innerHTML = '';
+});
+dlg.addEventListener('click', function (e) { if (e.target === dlg) dlg.close(); });
+
+/* ── старт ── */
+renderTop(); renderStrip(); renderStep(); renderTranscript();
+</script>
+</body>
+</html>

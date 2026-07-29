@@ -1,0 +1,29 @@
+/* Палитра и база проекта (PRODUCT.md, identity-preservation): Golos Text, сосна, золото, бумага, кирпич.
+   Общий файл для страницы разбора и попапа менеджера. */
+:root{
+  --paper:#F6F2E9; --card:#FFFFFF; --card2:#FBF8F1; --line:#E3DCCB; --line2:#EFE9DC;
+  --ink:#16231D; --muted:#4F5A54; --faint:#7C857F;
+  --pine:#0B3B2E; --pine2:#0F4A39; --green:#0F6B4F; --green-ink:#0B5540; --green-soft:#E4EFE7;
+  --gold:#C99A33; --gold-bright:#F4C775; --gold-soft:#F7EDD6; --gold-ink:#7E5810;
+  --brick:#A8442E; --brick-soft:#F6E3DC; --brick-ink:#8A3521;
+  --shadow:0 18px 44px -18px rgba(11,59,46,.28);
+  --shadow-sm:0 6px 18px -10px rgba(22,35,29,.16);
+  --shadow-pop:0 32px 80px -24px rgba(11,59,46,.45);
+  --r-lg:20px; --r-md:14px; --r-sm:10px;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --z-sticky:20; --z-backdrop:60; --z-modal:70; --z-toast:80;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"Golos Text",system-ui,-apple-system,sans-serif;
+  background:var(--paper); color:var(--ink);
+  font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+.num{font-variant-numeric:tabular-nums}
+q{quotes:none} /* кавычки ставим в тексте сами — браузерные добавили бы вторые */
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}

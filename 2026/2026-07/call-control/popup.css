@@ -1,0 +1,130 @@
+/* ═══ ПОПАП МЕНЕДЖЕРА ПОСЛЕ ЗВОНКА (в карточке amoCRM) ═══
+   Правка аудита №6: 1–1,5 экрана, обязательные кнопки видны без скролла (sticky-футер).
+   Правка аудита №5: ACW-гейт не вешает линию — авто-приём по таймеру (fail-open),
+   кнопки взаимоисключающие, вместо ✕ — «Позже».
+   Правка аудита №9: спор без ручного ввода таймкода — пункт выбирается чипом. */
+
+.pop{
+  width:100%; max-width:520px; background:var(--card); border-radius:var(--r-lg);
+  box-shadow:var(--shadow-pop); overflow:hidden; display:flex; flex-direction:column;
+  max-height:min(760px,92vh);
+}
+
+/* ── шапка ── */
+.pop-top{background:linear-gradient(165deg,var(--pine2) 0%,var(--pine) 100%);color:#fff;padding:14px 18px 15px}
+.pop-top .row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pop-top .who{font-size:13.5px;font-weight:700}
+.pop-top .meta{font-size:11.5px;color:rgba(255,255,255,.62);margin-top:2px}
+.pop-later{font-size:11.5px;font-weight:600;color:rgba(255,255,255,.72);padding:5px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.24);transition:background .15s var(--ease)}
+.pop-later:hover{background:rgba(255,255,255,.1);color:#fff}
+
+/* демо-переключатель состояний */
+.pop-states{display:flex;gap:4px;margin-top:12px;background:rgba(0,0,0,.22);padding:3px;border-radius:9px}
+.pop-states button{flex:1;font-size:11px;font-weight:600;color:rgba(255,255,255,.66);padding:5px 4px;border-radius:7px;transition:.15s var(--ease)}
+.pop-states button[aria-pressed="true"]{background:rgba(255,255,255,.94);color:var(--pine)}
+.pop-states button:not([aria-pressed="true"]):hover{color:#fff;background:rgba(255,255,255,.1)}
+
+/* ── тело ── */
+/* прокрутка тела: нижняя кромка тает, чтобы обрезанный блок читался как «есть ещё», а не как баг */
+.pop-body{padding:16px 18px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;
+  -webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 26px),transparent 100%);
+  mask-image:linear-gradient(180deg,#000 calc(100% - 26px),transparent 100%)}
+.pop-body:not([data-scrollable="1"]){-webkit-mask-image:none;mask-image:none}
+
+/* балл */
+.pop-score{display:flex;align-items:flex-end;gap:12px}
+.pop-score .big{font-size:44px;font-weight:800;line-height:.92;letter-spacing:-.03em}
+.pop-score .of{font-size:14px;font-weight:700;color:var(--faint);padding-bottom:5px}
+.pop-score .goal{margin-left:auto;text-align:right;font-size:11.5px;color:var(--muted);line-height:1.35;padding-bottom:3px}
+.pop-score .goal b{display:block;font-size:13px;color:var(--ink)}
+
+.bar{display:flex;gap:3px;height:9px;margin-top:2px}
+.bar .seg{position:relative;background:var(--line2);border-radius:3px;overflow:hidden}
+.bar .seg i{position:absolute;inset:0 auto 0 0;background:var(--green);border-radius:3px}
+.bar .seg.zero i{background:var(--brick)}
+.bar .seg.part i{background:var(--gold)}
+.bar-legend{display:flex;gap:3px;font-size:10.5px;color:var(--faint);margin-top:5px}
+.bar-legend span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-legend b{color:var(--ink);font-weight:700}
+
+/* плашки */
+.plate{border-radius:var(--r-md);padding:11px 13px;font-size:13px;line-height:1.42}
+.plate .h{font-weight:800;font-size:12.5px;display:flex;align-items:center;gap:7px}
+.plate .h .ic{font-size:14px}
+.plate p{margin-top:4px}
+.plate.bad{background:var(--brick-soft);color:var(--brick-ink)}
+.plate.warn{background:var(--gold-soft);color:var(--gold-ink)}
+.plate.good{background:var(--green-soft);color:var(--green-ink)}
+.plate.flat{background:var(--card2);border:1px solid var(--line);color:var(--ink)}
+.plate.gray{background:#EEEDE9;color:#3F443F}
+.plate q{display:block;margin-top:5px;font-style:italic;opacity:.85;font-size:12.5px}
+
+/* чипы недобора */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.chip{font-size:11.5px;font-weight:600;background:rgba(168,68,46,.1);color:var(--brick-ink);border:1px solid rgba(168,68,46,.24);border-radius:999px;padding:3px 9px}
+.chip.crit{background:var(--brick);color:#fff;border-color:var(--brick)}
+.chip.pick{background:var(--card);border:1px solid var(--line);color:var(--muted);cursor:pointer;transition:.15s var(--ease)}
+.chip.pick:hover{border-color:var(--green);color:var(--green-ink)}
+.chip.pick[aria-pressed="true"]{background:var(--pine);border-color:var(--pine);color:#fff}
+
+/* главная ошибка */
+.pop-main{background:var(--card2);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 13px}
+.pop-main .lbl{font-size:10.5px;font-weight:800;letter-spacing:.1em;color:var(--brick-ink)}
+.pop-main .txt{font-size:14.5px;font-weight:700;line-height:1.34;margin-top:5px}
+
+/* что сделать */
+.todo{list-style:none;display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.todo li{display:flex;gap:8px;font-size:13px;line-height:1.4}
+.todo li b{flex:none;width:18px;height:18px;border-radius:6px;background:var(--pine);color:var(--gold-bright);font-size:10.5px;font-weight:800;display:grid;place-items:center;margin-top:1px}
+
+/* примечание */
+.note-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:12.5px;font-weight:700}
+.note-h span{font-size:11px;font-weight:600;color:var(--faint)}
+textarea.note{width:100%;margin-top:6px;min-height:104px;resize:vertical;font-family:inherit;font-size:12.5px;line-height:1.5;color:var(--ink);background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 11px;transition:border-color .15s var(--ease)}
+textarea.note:hover{border-color:#D7CEBA}
+textarea.note:focus{outline:none;border-color:var(--green);background:var(--card)}
+
+/* спор */
+.dispute{border:1px dashed var(--gold);background:var(--gold-soft);border-radius:var(--r-md);padding:12px 13px}
+.dispute .h{font-size:12.5px;font-weight:800;color:var(--gold-ink)}
+.dispute .sub{font-size:11.5px;color:var(--gold-ink);opacity:.85;margin-top:3px}
+.dispute textarea{width:100%;margin-top:8px;min-height:64px;resize:vertical;font-family:inherit;font-size:12.5px;line-height:1.45;background:var(--card);border:1px solid #E2CFA3;border-radius:var(--r-sm);padding:9px 10px}
+.dispute textarea:focus{outline:none;border-color:var(--gold)}
+.dispute .err{font-size:11.5px;font-weight:700;color:var(--brick);margin-top:6px;display:none}
+.dispute.invalid .err{display:block}
+.dispute .acts{display:flex;gap:8px;margin-top:9px}
+
+/* ── футер ── */
+.pop-foot{border-top:1px solid var(--line);background:var(--card);padding:11px 18px 13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.btn{font-size:13px;font-weight:700;border-radius:11px;padding:10px 15px;transition:.15s var(--ease);border:1px solid transparent;white-space:nowrap}
+.btn-primary{background:var(--green);color:#fff;box-shadow:0 8px 18px -10px rgba(15,107,79,.7)}
+.btn-primary:hover{background:var(--green-ink)}
+.btn-primary:active{transform:translateY(1px)}
+.btn-ghost{background:var(--card);border-color:var(--line);color:var(--muted)}
+.btn-ghost:hover{border-color:#D2C8B2;color:var(--ink)}
+.btn-sm{font-size:12px;padding:7px 12px;border-radius:9px}
+.btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.btn:disabled:hover{background:var(--green);border-color:var(--line)}
+.pop-foot .timer{margin-left:auto;font-size:11px;color:var(--faint);text-align:right;line-height:1.35;max-width:170px}
+.pop-foot .timer b{display:block;color:var(--gold-ink);font-size:12px}
+.pop-foot .full{width:100%;font-size:11.5px;font-weight:600;color:var(--green-ink);text-decoration:underline;text-underline-offset:2px;text-align:left}
+
+/* результат действия */
+.pop-done{padding:16px 18px;display:flex;gap:11px;align-items:flex-start}
+.pop-done .ic{flex:none;width:30px;height:30px;border-radius:50%;background:var(--green-soft);color:var(--green-ink);display:grid;place-items:center;font-size:15px;font-weight:800}
+.pop-done b{display:block;font-size:13.5px}
+.pop-done p{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.45}
+
+.demo-tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.12em;background:rgba(244,199,117,.18);border:1px dashed var(--gold-bright);color:var(--gold-bright);border-radius:999px;padding:2px 8px}
+
+@media (max-width:520px){
+  /* на телефоне попап занимает экран целиком, но не больше: кнопки обязаны остаться видимыми */
+  .pop{max-width:100%;border-radius:14px;max-height:calc(100dvh - 24px)}
+  .pop-score .big{font-size:38px}
+  .pop-foot{padding:10px 14px 12px}
+  .pop-foot .timer{max-width:120px;font-size:10.5px}
+  .pop-body{padding:14px 14px 16px}
+  .pop-top{padding:12px 14px 13px}
+  /* четыре подписи не влезают в ряд на 375 — раскладываем 2×2 (flex из инлайн-стиля в grid не действует) */
+  .bar-legend{display:grid;grid-template-columns:1fr 1fr;gap:2px 12px}
+}
