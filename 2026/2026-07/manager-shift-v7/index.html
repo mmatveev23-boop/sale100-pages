@@ -85,6 +85,7 @@ button.card:hover{background:#1b2434}
 .ctl .st.off{color:var(--d-mut)} .ctl .st.off i{background:#4a5468}
 .ctl .st.brk{color:var(--d-gold)} .ctl .st.brk i{background:var(--d-gold)}
 .ctl .st.call{color:var(--d-blue)} .ctl .st.call i{background:var(--d-blue)}
+.ctl .st.acw{color:var(--d-purple)} .ctl .st.acw i{background:var(--d-purple)}
 .ctl .t{flex:none;font-size:29px;font-weight:800;letter-spacing:-.025em;line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
 .ctl .t.na{font-size:17px;color:var(--d-mut)}
 .ctl .sp2{flex:none;font-size:10.5px;color:var(--d-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -102,6 +103,10 @@ button.card:hover{background:#1b2434}
   grid-template-rows:auto auto auto;column-gap:14px;align-items:center}
 .now.calm{background:#101a17;border-color:rgba(53,201,138,.38)}
 .now.idle{background:var(--d-tile);border-color:var(--d-line)}
+.now.acw{background:#141327;border-color:rgba(167,139,250,.42)}
+.now.acw .h{color:var(--d-purple)}
+.now.acw .go{background:var(--d-purple);color:#150f2e;box-shadow:0 6px 20px rgba(167,139,250,.28)}
+.now .late.acwlate{color:var(--d-gold)}
 .now .h{grid-column:1/2;color:var(--d-red)}
 .now.calm .h{color:var(--d-green)} .now.idle .h{color:var(--d-mut)}
 .now h3{grid-column:1/2;font-size:18px;font-weight:800;letter-spacing:-.02em;line-height:1.15;
@@ -139,10 +144,10 @@ button.card:hover{background:#1b2434}
 /* ── результат дня ── */
 .res{display:flex;flex-direction:column;justify-content:center;gap:8px}
 .res .row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;align-items:end}
-.res .cell{min-width:0;border-left:1px solid var(--d-line);padding-left:10px}
+.res .cell{min-width:0;overflow:hidden;border-left:1px solid var(--d-line);padding-left:10px}
 .res .cell:first-child{border-left:0;padding-left:0}
 .res .cl{font-size:10px;color:var(--d-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.res .cv{margin-top:3px;font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.res .cv{margin-top:3px;font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .res .cv small{font-size:12px;font-weight:700;color:var(--d-mut)}
 .res .cv.gr{color:var(--d-green)} .res .cv.pu{color:var(--d-purple)} .res .cv.rd{color:var(--d-red)}
 .res .mb{margin-top:5px;height:4px;border-radius:3px;background:#2b3548;overflow:hidden}
@@ -150,12 +155,36 @@ button.card:hover{background:#1b2434}
 .res .mb i.late{background:var(--d-red)}
 .res .lives{font-size:11.5px;letter-spacing:1.2px;color:var(--d-red);white-space:nowrap}
 .res .lives .off{opacity:.3;color:var(--d-mut)}
+
+/* УЗКИЕ ЭКРАНЫ. Жертвуем в порядке ценности: сначала уходят цифры, которые есть в плане дня
+   (продажи, конверсия, задачи), последними — консультации и Sensei score с жизнями.
+   Карточка «Сейчас» не сжимается никогда: это единственное, ради чего полоса существует. */
+@media (max-width:1400px){
+  .bar{grid-template-columns:198px minmax(0,1fr) 126px 172px 296px}
+  .res .row{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .res .cell.sales{display:none}
+}
+@media (max-width:1290px){
+  .bar{grid-template-columns:192px minmax(0,1fr) 118px 162px 190px}
+  .res .row{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .res .cell.conv{display:none}
+  /* центру отдаём всё, что можно отнять: имя клиента резать нельзя */
+  .now h3{font-size:16px}
+  .now .go{min-width:110px;font-size:13.5px;padding:12px 14px}
+  .ctl .sp2{font-size:9.5px}
+  .lds .v{font-size:15px}
+}
+@media (max-width:1180px){
+  .bar{grid-template-columns:186px minmax(0,1fr) 116px 156px}
+  .res{display:none}
+}
+@media (max-width:1040px){
+  .bar{grid-template-columns:180px minmax(0,1fr) 150px;height:auto}
+  .urg{display:none}
+}
 .badge{display:inline-flex;align-items:center;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:800;margin-left:6px}
 .badge.pu{background:rgba(167,139,250,.16);color:var(--d-purple)}
 /* ЖИЗНИ: гейт качества, 5 сердец. Видны в полосе всегда — снятая жизнь не должна теряться из виду */
-.tile .lives{font-size:12.5px;letter-spacing:1.5px;color:var(--d-red)}
-.tile .lives .off{opacity:.28;color:var(--d-mut)}
-.tile.lost .s{color:#e8a0a5}   /* тревога только на строке жизней: сам балл может быть хорошим */
 .up{color:var(--d-green);font-weight:700}
 
 /* раскрытие: приоритетные задачи */
@@ -398,7 +427,6 @@ button.trow:hover .take{background:var(--dark);color:#fff;box-shadow:none}
 .tip b{color:var(--ink)}
 .tip .btn{padding:5px 9px;font-size:11px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--amo-line);color:var(--mut)}
 
-@media (max-width:1360px){.bar{grid-template-columns:repeat(4,minmax(0,1fr));height:auto}.tile{border-bottom:1px solid var(--d-line)}}
 @media (max-width:1100px){.s-cols{grid-template-columns:minmax(0,1fr)}.cnts{grid-template-columns:repeat(2,1fr)}.drop-in{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion: reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important}}
 </style>
@@ -649,6 +677,10 @@ var taskSec=0,ropAlert=false,STUCK=60*60,BREAK_BUDGET=90*60;
 var lives=5,qa=87,crosses=0,senseiScore=94;
 var selZone='red',selId=null;           /* какая зона раскрыта в полосе и какая задача выбрана */
 var redTotal=0;                         /* сколько обязательного было на старте смены — знаменатель «2 из 4» */
+/* ПОСТОБРАБОТКА (ACW). Между «отметил результат» и «получил следующую сделку» есть пауза:
+   карточка НЕ переключается, пока менеджер сам не нажмёт «Дальше». Иначе он теряет из виду
+   сделку, которую только что вёл. Состояние из канона v4, при переборе полосы было потеряно. */
+var acw=null,ACW_BUDGET=30;
 var nowMin=9*60+12, DAY_A=9*60, DAY_B=18*60, tickCount=0;
 var PLAN_CONS=4, LEAD_PLAN=8, consDone=0, leadsDone=0, sales=1, money=13500;
 var shiftSec=0, talkSec=0, idleSec=0;   /* время смены идёт только после «Начать смену» */
@@ -700,8 +732,8 @@ function renderBar(){
 }
 
 /* ── УПРАВЛЕНИЕ СМЕНОЙ ── */
-function statusKey(){if(!started)return 'off';if(onBreak)return 'brk';if(onCall)return 'call';return 'on'}
-function statusLabel(){if(!started)return 'не начата';if(onBreak)return 'перерыв';if(onCall)return 'разговор';return 'онлайн'}
+function statusKey(){if(!started)return 'off';if(onBreak)return 'brk';if(onCall)return 'call';if(acw)return 'acw';return 'on'}
+function statusLabel(){if(!started)return 'не начата';if(onBreak)return 'перерыв';if(onCall)return 'разговор';if(acw)return 'постобработка';return 'онлайн'}
 function ctlCard(){
   var red=inZone('red').length,k=statusKey();
   var h='<div class="card ctl"><div class="top">'
@@ -728,6 +760,15 @@ function nowCard(){
     +'<h3>'+fmt(breakSec)+' из '+fmt(BREAK_BUDGET)+'</h3>'
     +'<div class="why">Очередь не подаёт сделки, перерасход виден РОПу</div><div class="late ok">&nbsp;</div>'
     +'<button class="go wait" onclick="toggleBreak()">Вернуться в работу</button></div>';
+  if(acw){
+    var w=byId[acw.id],over=acw.sec>ACW_BUDGET;
+    return '<div class="now acw"><div class="h"><i>✓</i>постобработка</div>'
+      +'<h3 title="Разобрана: '+w.name+'">Разобрана: '+w.name+'</h3>'
+      +'<div class="why">Sensei принял результат, задача закрыта. Сделка остаётся на экране, пока не нажмёшь «Дальше».</div>'
+      +'<div class="late'+(over?' acwlate':' ok')+'">Постобработка '+fmt(acw.sec)+' из '+fmt(ACW_BUDGET)
+        +(over?' · перерасход виден РОПу':'')+'</div>'
+      +'<button class="go" onclick="finishAcw()">Дальше →</button></div>';
+  }
   var t=current();
   if(!t)return '<div class="now calm"><div class="h"><i>✓</i>зиро</div>'
     +'<h3>Все зоны разобраны</h3>'
@@ -789,14 +830,14 @@ function resultCard(){
     +'<span class="row">'
       +cell('Задачи',dn+' <small>/'+totalDay+'</small>','',dn/totalDay,0)
       +cell('Консультации',consDone+' <small>/'+PLAN_CONS+'</small>','',consDone/PLAN_CONS,late)
-      +cell('Продажи',sales,'','',null)
-      +cell('Конверсия',conv().toFixed(0)+'%','gr','',null)
+      +cell('Продажи',sales,'','',null,'','sales')
+      +cell('Конверсия',conv().toFixed(0)+'%','gr','',null,'','conv')
       +cell('Sensei Score',senseiScore+'<span class="badge pu">A+</span>','pu','',null,
             '<span class="lives">'+livesHtml()+'</span>')
     +'</span></button>';
 }
-function cell(lb,v,cls,frac,late,extra){
-  return '<span class="cell"><span class="cl">'+lb+'</span>'
+function cell(lb,v,cls,frac,late,extra,mark){
+  return '<span class="cell '+(mark||'')+'"><span class="cl">'+lb+'</span>'
     +'<span class="cv '+(cls||'')+'">'+v+'</span>'
     +(frac!==''&&frac!=null?'<span class="mb"><i class="'+(late?'late':'')+'" style="transform:scaleX('+Math.min(1,frac).toFixed(2)+')"></i></span>':'')
     +(extra||'')+'</span>';
@@ -902,7 +943,16 @@ function talked(id){
   var nx=peekNext(id);
   if(!pen)toast('Касание подтверждено','Разговор состоялся, 3 мин 12 сек — подтвердил PBX. Sensei закрыл задачу.'
     +(nx?' Следующее: '+nx.act.toLowerCase()+' — '+nx.name+'.':''),0,1);
-  done[id]=1;openedId=null;workId=null;resetTaskTimer();renderCard();render();queueNext();
+  done[id]=1;workId=null;resetTaskTimer();
+  acw={id:id,sec:0};            /* карточку НЕ закрываем: openedId остаётся на разобранной сделке */
+  render();
+}
+/* выход из постобработки — только по кнопке. Перерасход считается крестом за смену */
+function finishAcw(){
+  if(!acw)return;
+  if(acw.sec>ACW_BUDGET){crosses++;
+    toast('Постобработка затянулась','Больше '+fmt(ACW_BUDGET)+' на разбор: крест за смену. Три креста закрывают выдачу новых лидов.',1)}
+  acw=null;openedId=null;renderCard();render();queueNext();
 }
 function noAnswer(id){
   var t=byId[id];t.att=(t.att||0)+1;t.seq=++seq;t.cool=nowMin+20;
@@ -1088,7 +1138,7 @@ function takeTask(id){
   pend={id:id,left:3,canCancel:true,grace:false};render();
 }
 function queueNext(){
-  if(!started||onBreak||onCall){pend=null;render();return}
+  if(!started||onBreak||onCall||acw){pend=null;render();return}
   var t=current();
   if(!t){pend=null;render();return}
   pend={id:t.id,left:3,canCancel:zone(t)!=='red'&&t.kind!=='lead',grace:false};render();
@@ -1133,6 +1183,9 @@ function tick(){
     render();return}
   if(onCall){talkSec++;shiftSec++;render();return}
   if(started)shiftSec++;
+  if(acw){acw.sec++;
+    if(acw.sec===ACW_BUDGET+1)toast('Бюджет постобработки вышел','Дальше время идёт в перерасход. Закончил — жми «Дальше».',1);
+    render();return}
   if(started&&current()){
     taskSec++;
     if(taskSec===STUCK&&!ropAlert){ropAlert=true;
