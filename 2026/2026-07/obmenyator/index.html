@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ОБМЕНЯТОР — приёмы не остаются в одной голове · ДОНУЛЯ</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ ОБМЕНЯТОР · программа обмена приёмами внутри ДоНуля ═══
+   Аудитория — менеджеры. Задача текста: снять рамку «одолжение» и рамку «клеймо».
+   Механика: Sandvik/Saouma/Seegert/Stanton, QJE 2020 (RCT AEARCTR-0002332), ветка Structured-Meetings.
+   Параметры прикрепления (≥20% наставник · <15% и стажёры прикрепляются · 3 недели) — решение владельца 30.07.
+   Палитра и шрифт — канон проекта (PRODUCT.md). ═══ */
+:root{
+  --paper:#F6F2E9;--card:#FFFFFF;--card2:#FBF8F1;--line:#E3DCCB;--line2:#EFE9DC;
+  --ink:#16231D;--muted:#4F5A54;--faint:#7C857F;
+  --pine:#0B3B2E;--pine2:#0F4A39;--green:#0F6B4F;--green-ink:#0B5540;--green-soft:#E4EFE7;
+  --gold:#C99A33;--gold-bright:#F4C775;--gold-soft:#F7EDD6;--gold-ink:#7E5810;
+  --brick:#A8442E;--brick-soft:#F6E3DC;--brick-ink:#8A3521;
+  --shadow:0 18px 44px -18px rgba(11,59,46,.28);--shadow-sm:0 6px 18px -10px rgba(22,35,29,.16);
+  --r-lg:22px;--r-md:14px;--r-sm:10px;--ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:900px;margin:0 auto;padding:22px 16px 80px}
+h2{font-size:23px;font-weight:800;letter-spacing:-.02em;line-height:1.2;text-wrap:balance}
+h3{font-size:17px;font-weight:800;letter-spacing:-.01em}
+p{text-wrap:pretty}
+.sect{margin-top:34px}
+.sect>h2+p{margin-top:10px;color:var(--muted)}
+
+/* шапка */
+.hdr{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:26px 26px 28px;box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:11px;margin-bottom:16px}
+.brand .lg{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--gold-bright)}
+.brand b{font-size:15px}
+.brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hdr h1{font-size:38px;line-height:1.04;letter-spacing:-.035em;font-weight:800}
+.hdr h1 span{color:var(--gold-bright)}
+.hdr .lede{margin-top:14px;font-size:17px;color:rgba(255,255,255,.86);max-width:62ch}
+.hdr .lede b{color:#fff}
+.hdr .one{margin-top:18px;padding:14px 16px;border-radius:var(--r-md);background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);font-size:15px;line-height:1.5}
+.hdr .one b{color:var(--gold-bright)}
+
+/* карточки */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:20px 22px;box-shadow:var(--shadow-sm)}
+.card+.card{margin-top:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.grid2{grid-template-columns:1fr}}
+
+/* три принципа */
+.pr{display:flex;gap:14px;align-items:flex-start}
+.pr .n{flex:none;width:30px;height:30px;border-radius:9px;background:var(--pine);color:var(--gold-bright);display:grid;place-items:center;font-weight:800;font-size:14px}
+.pr h3{margin-bottom:5px}
+.pr p{font-size:15px;color:var(--muted)}
+.pr p b{color:var(--ink)}
+.pr+.pr{margin-top:18px;padding-top:18px;border-top:1px solid var(--line2)}
+
+/* правило прикрепления */
+.roles{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:14px}
+@media (max-width:760px){.roles{grid-template-columns:1fr}}
+.role{border-radius:var(--r-md);padding:15px 16px;border:1px solid var(--line)}
+.role .pct{font-size:27px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.role .lbl{font-size:12px;font-weight:800;letter-spacing:.08em;margin-top:7px}
+.role p{font-size:13.5px;margin-top:7px;line-height:1.45}
+.role.top{background:var(--green-soft);border-color:#CFE2D5}
+.role.top .pct,.role.top .lbl{color:var(--green-ink)}
+.role.mid{background:var(--card2)}
+.role.mid .pct,.role.mid .lbl{color:var(--muted)}
+.role.low{background:var(--gold-soft);border-color:#E8D9B4}
+.role.low .pct,.role.low .lbl{color:var(--gold-ink)}
+
+/* шаги */
+.steps{counter-reset:s;margin-top:6px}
+.step{position:relative;padding:16px 0 16px 60px;border-bottom:1px solid var(--line2)}
+.step:last-child{border-bottom:none}
+.step::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:15px;width:38px;height:38px;border-radius:11px;background:var(--pine);color:var(--gold-bright);display:grid;place-items:center;font-weight:800;font-size:16px}
+.step .when{font-size:11.5px;font-weight:800;letter-spacing:.09em;color:var(--gold-ink);background:var(--gold-soft);border-radius:999px;padding:3px 10px;display:inline-block}
+.step h3{margin:8px 0 5px}
+.step p{font-size:15px;color:var(--muted)}
+.step p b{color:var(--ink)}
+.step .who{font-size:12.5px;font-weight:700;color:var(--faint);margin-top:6px}
+
+/* лист */
+.sheet{background:var(--card);border:2px solid var(--pine);border-radius:var(--r-lg);overflow:hidden;margin-top:14px}
+.sheet-h{background:var(--pine);color:#fff;padding:14px 18px;display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sheet-h b{font-size:16px}
+.sheet-h span{font-size:12px;color:rgba(255,255,255,.7)}
+.f{padding:13px 18px;border-bottom:1px dashed var(--line)}
+.f:last-child{border-bottom:none}
+.f .q{font-size:13.5px;font-weight:700}
+.f .hint{font-size:12.5px;color:var(--faint);margin-top:3px}
+.f .line{height:26px;border-bottom:1px solid var(--line);margin-top:9px}
+.f.key{background:var(--gold-soft)}
+.f.key .q{color:var(--gold-ink);font-size:15px}
+.f.key .must{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.08em;background:var(--gold);color:#fff;border-radius:5px;padding:2px 7px;margin-left:7px;vertical-align:2px}
+
+/* приём vs не приём */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media (max-width:760px){.vs{grid-template-columns:1fr}}
+.vs>div{border-radius:var(--r-md);padding:16px 17px}
+.vs .yes{background:var(--green-soft);border:1px solid #CFE2D5}
+.vs .no{background:var(--brick-soft);border:1px solid #EAD0C6}
+.vs h3{font-size:14px;letter-spacing:.02em}
+.vs .yes h3{color:var(--green-ink)}
+.vs .no h3{color:var(--brick-ink)}
+.vs ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:9px}
+.vs li{font-size:14px;line-height:1.45;padding-left:20px;position:relative}
+.vs .yes li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:800}
+.vs .no li::before{content:"✕";position:absolute;left:0;color:var(--brick);font-weight:800}
+.vs li i{font-style:normal;color:var(--muted);display:block;font-size:12.5px;margin-top:2px}
+
+/* выгоды */
+.gain{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line2)}
+.gain:last-child{border-bottom:none}
+.gain .ic{flex:none;width:26px;height:26px;border-radius:8px;background:var(--gold-soft);color:var(--gold-ink);display:grid;place-items:center;font-weight:800;font-size:13px}
+.gain b{display:block;font-size:15px}
+.gain p{font-size:14px;color:var(--muted);margin-top:3px}
+
+/* нет-список */
+.nots{display:flex;flex-direction:column;gap:11px;margin-top:12px}
+.not{display:flex;gap:11px;align-items:flex-start;font-size:14.5px;line-height:1.45}
+.not .x{flex:none;width:24px;height:24px;border-radius:7px;background:var(--brick);color:#fff;display:grid;place-items:center;font-weight:800;font-size:12px}
+.not b{font-weight:700}
+.not span{color:var(--muted)}
+
+/* цифры */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+@media (max-width:760px){.stats{grid-template-columns:1fr 1fr}}
+.stat{background:var(--card2);border:1px solid var(--line);border-radius:var(--r-md);padding:14px}
+.stat .v{font-size:26px;font-weight:800;letter-spacing:-.03em;color:var(--green-ink);line-height:1}
+.stat .t{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.35}
+.src{font-size:12.5px;color:var(--faint);margin-top:13px;line-height:1.5}
+.src b{color:var(--muted)}
+
+/* FAQ */
+details.q{background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);margin-top:9px;overflow:hidden}
+details.q summary{padding:14px 17px;font-size:15.5px;font-weight:700;cursor:pointer;list-style:none;display:flex;gap:10px;align-items:flex-start;transition:background .15s var(--ease)}
+details.q summary::-webkit-details-marker{display:none}
+details.q summary::before{content:"?";flex:none;width:22px;height:22px;border-radius:7px;background:var(--pine);color:var(--gold-bright);display:grid;place-items:center;font-size:12px;font-weight:800;margin-top:1px}
+details.q summary:hover{background:var(--card2)}
+details.q[open] summary{background:var(--card2);border-bottom:1px solid var(--line2)}
+details.q .a{padding:14px 17px 16px 49px;font-size:15px;color:var(--muted);line-height:1.55}
+details.q .a b{color:var(--ink)}
+details.q .a p+p{margin-top:10px}
+
+/* недели */
+.tl{margin-top:14px}
+.tl-row{display:grid;grid-template-columns:96px 1fr;gap:14px;padding:13px 0;border-top:1px solid var(--line2)}
+.tl-row:first-child{border-top:none}
+.tl-row .w{font-size:13px;font-weight:800;color:var(--gold-ink)}
+.tl-row p{font-size:14.5px}
+.tl-row p b{font-weight:700}
+
+.foot{margin-top:34px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--faint);line-height:1.6}
+.foot a{color:var(--green-ink)}
+
+@media print{
+  body{background:#fff}
+  .hdr,.sect:not(.print-sheet),.foot{display:none}
+  .print-sheet{margin:0}
+  .sheet{border-color:#000;box-shadow:none}
+  .f .line{border-color:#666}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hdr">
+    <div class="brand">
+      <div class="lg">ДН</div>
+      <div><b>ДОНУЛЯ</b><small>ПРОГРАММА ОБМЕНА ПРИЁМАМИ</small></div>
+    </div>
+    <h1><span>ОБМЕНЯТОР</span><br>приёмы не остаются<br>в одной голове</h1>
+    <p class="lede">Раз в неделю сильный отдаёт <b>один рабочий приём</b>, слабый забирает его и применяет
+      в следующем звонке. Приём записывается на лист, лист сдаётся, а машина проверяет, появился ли приём в разговоре.</p>
+    <div class="one">Главное, что нужно понять с первой минуты: <b>это не одолжение и не благотворительность.
+      Это принцип работы компании</b> — такой же, как звонить по скрипту и фиксировать следующий шаг с датой.</div>
+  </header>
+
+  <section class="sect">
+    <h2>Зачем мы это вводим</h2>
+    <p>Разрыв между сильным и слабым менеджером — это не разница в старании. Это разница в наборе рабочих
+      формулировок, которых нет ни в скрипте, ни в учебнике.</p>
+    <div class="card" style="margin-top:14px">
+      <div class="pr">
+        <div class="n">1</div>
+        <div>
+          <h3>У топов в голове десятки приёмов, которых нет на бумаге</h3>
+          <p>Как развернуть «дорого», когда у человека четыре займа. Что сказать, когда клиент уходит советоваться
+            с женой. В какой момент назвать госплатежи, чтобы это не сломало разговор. <b>Ни один скрипт этого не содержит</b> —
+            это накопленный опыт конкретных людей.</p>
+        </div>
+      </div>
+      <div class="pr">
+        <div class="n">2</div>
+        <div>
+          <h3>Само это знание не расходится</h3>
+          <p>Не потому, что топы жадные. А потому, что <b>к ним не подходят</b>: спросить — значит признать,
+            что не умеешь. В исследовании, на котором построена программа, продавцы сами оценивали, что разговор
+            с сильным коллегой поднял бы им продажи, — и всё равно не подходили.</p>
+        </div>
+      </div>
+      <div class="pr">
+        <div class="n">3</div>
+        <div>
+          <h3>Один РОП не может разобрать звонки пятнадцати человек</h3>
+          <p>Пятнадцать менеджеров дают около 45 часов записи в день. Даже если РОП слушает по два часа каждый день,
+            он охватит около 4%. <b>Значит учить друг друга должны сами менеджеры</b>, а машина — проверять, что приём дошёл до звонка.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Почему это не одолжение</h2>
+    <p>Три причины, по которым помощь коллеге в ДоНуля ничего у тебя не отнимает.</p>
+    <div class="card" style="margin-top:14px">
+      <div class="pr">
+        <div class="n">₽</div>
+        <div>
+          <h3>Лиды распределяет система, а не борьба за клиента</h3>
+          <p>Ты не отдаёшь коллеге своего клиента — заявки приходят из конвейера. Приём, который ты отдал,
+            <b>не стоит тебе ни одной сделки</b>. Это главное отличие от рынка, где продавцы дерутся за одного покупателя
+            и делиться действительно невыгодно.</p>
+        </div>
+      </div>
+      <div class="pr">
+        <div class="n">≡</div>
+        <div>
+          <h3>Это назначенная работа, а не просьба</h3>
+          <p>Тебя не спрашивают «хочешь помочь». Тебе говорят, кто твой партнёр на эти три недели, — так же,
+            как говорят про смену. <b>Отказ помогать не обсуждается, потому что помощь не запрашивается как милость.</b>
+            Обсуждается только то, насколько толковый приём ты передал.</p>
+        </div>
+      </div>
+      <div class="pr">
+        <div class="n">⇄</div>
+        <div>
+          <h3>Роли меняются, и ты будешь в обеих</h3>
+          <p>Конверсия — это снимок месяца, а не звание. Кто-то сегодня 14%, а через месяц 23% — и тогда прикрепляют
+            уже к нему. <b>В Обменяторе не бывает «вечных наставников» и «вечных подшефных».</b></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Кто с кем работает</h2>
+    <p>Роль на ближайшие три недели определяет одна цифра — <b>конверсия из консультации в оплату</b>.
+      Цифры видят только менеджер и РОП; публичного рейтинга нет.</p>
+    <div class="roles">
+      <div class="role top">
+        <div class="pct num">20% +</div>
+        <div class="lbl">НАСТАВНИК</div>
+        <p>К тебе прикрепляют менеджера или стажёра на три недели. Ты отдаёшь по одному приёму в неделю
+          и сам приносишь свой трудный звонок.</p>
+      </div>
+      <div class="role mid">
+        <div class="pct num">15–20%</div>
+        <div class="lbl">БЕЗ ПРИКРЕПЛЕНИЯ</div>
+        <p>Работаешь в паре с таким же — обмениваетесь на равных. Прикрепление не нужно, ритм тот же.</p>
+      </div>
+      <div class="role low">
+        <div class="pct num">до 15%</div>
+        <div class="lbl">ПРИКРЕПЛЁН</div>
+        <p>Стажёры — сразу здесь. Три недели с наставником, потом пересмотр по факту конверсии.</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <p style="font-size:14.5px;color:var(--muted)">Пары назначает РОП <b>в понедельник</b> и объявляет в чате. Пара живёт
+        <b>три недели</b>, потом состав пересматривается. Выбирать партнёра самому нельзя: пары друзей работают хуже —
+        в исследовании на сдельной работе сильные рядом с друзьями снижали усилие на 10%.</p>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Механика по шагам</h2>
+    <p>Одна неделя Обменятора занимает у менеджера сорок минут. Из них тридцать — разговор.</p>
+    <div class="card" style="margin-top:14px;padding-top:6px;padding-bottom:6px">
+      <div class="steps">
+        <div class="step">
+          <span class="when">ПОНЕДЕЛЬНИК</span>
+          <h3>РОП объявляет пары</h3>
+          <p>Список в чате: кто с кем на три недели. Никаких обсуждений и обменов партнёрами.</p>
+          <div class="who">РОП · 5 минут</div>
+        </div>
+        <div class="step">
+          <span class="when">ДО ВТОРНИКА</span>
+          <h3>Каждый заполняет свой лист — сам, до разговора</h3>
+          <p>Берёшь <b>свой самый трудный звонок за неделю</b>, открываешь разбор, находишь момент, где всё пошло не так.
+            Выписываешь номер сделки, таймкод и свою дословную фразу из расшифровки. Потом пишешь, как, по-твоему,
+            надо было. <b>Это делается до встречи</b> — иначе разговор уйдёт в «ну, тяжёлый клиент был».</p>
+          <div class="who">каждый · 10 минут</div>
+        </div>
+        <div class="step">
+          <span class="when">ВТОРНИК — СРЕДА</span>
+          <h3>Разговор в паре, тридцать минут</h3>
+          <p>Показываешь напарнику свой момент и спрашиваешь: <b>«а ты в этом месте что говоришь?»</b>
+            Он отвечает конкретной формулировкой. Потом меняетесь: он показывает свой трудный звонок.
+            Темы разговора никто не задаёт, единственное правило — <b>говорить про недавние звонки</b>, а не про продажи вообще.</p>
+          <div class="who">пара · 30 минут</div>
+        </div>
+        <div class="step">
+          <span class="when">ТАМ ЖЕ</span>
+          <h3>Записываешь на свой лист один приём напарника</h3>
+          <p>Дословно и в формате <b>«если клиент говорит… — я говорю…», плюс когда применишь</b>. Например:
+            «если клиент скажет „надо посоветоваться с женой“ — предложу набрать её втроём прямо сейчас;
+            <b>применю в первом же звонке в среду</b>». Обещание без срока не работает: в исследованиях план
+            без даты и времени не давал ничего, а с датой и временем — давал.</p>
+          <p style="margin-top:8px">Один приём. Не три и не список идей. И приём должен быть <b>от напарника,
+            а не из скрипта</b> — то, что и так написано в скрипте, ты знаешь без обмена.</p>
+          <div class="who">каждый · 2 минуты</div>
+        </div>
+        <div class="step">
+          <span class="when">СРЕДА</span>
+          <h3>Сдал лист</h3>
+          <p>Лист уходит РОПу. Его <b>не оценивают и не разбирают на планёрке</b> — это отметка, что обмен состоялся,
+            и источник для библиотеки приёмов.</p>
+          <div class="who">каждый · 1 минута</div>
+        </div>
+        <div class="step">
+          <span class="when">ЧЕТВЕРГ</span>
+          <h3>Обед за сданные листы и «звонок недели»</h3>
+          <p>Кто сдал — обедает за счёт компании. Там же двадцать минут на всех: слушаем один сильный
+            и один провальный звонок недели. Без имён провалившегося, если он сам не захочет.</p>
+          <div class="who">все · 20 минут</div>
+        </div>
+        <div class="step">
+          <span class="when">ДАЛЬШЕ</span>
+          <h3>Машина проверяет, появился ли приём в звонках</h3>
+          <p>Приём с листа становится <b>целевым поведением</b>: ИИ ищет его в твоих следующих пяти консультациях
+            и показывает в разборе — «обещал спросить про имущество до цены → спросил ✓». Три раза подряд —
+            приём закрыт, берёшь следующий.</p>
+          <div class="who">автоматически</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect print-sheet">
+    <h2>Лист рефлексии</h2>
+    <p>Один лист на человека в неделю. Заполняется от руки или в заметке — как удобнее.</p>
+    <div class="sheet">
+      <div class="sheet-h">
+        <b>ОБМЕНЯТОР · лист недели</b>
+        <span>менеджер ____________ · напарник ____________ · неделя ____</span>
+      </div>
+      <div class="f">
+        <div class="q">1. Мой самый трудный звонок этой недели</div>
+        <div class="hint">Сделка № и таймкод момента, где всё пошло не так</div>
+        <div class="line"></div>
+      </div>
+      <div class="f">
+        <div class="q">2. Что я сказал в этом моменте</div>
+        <div class="hint">Дословно, копипастом из расшифровки — не по памяти</div>
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+      <div class="f">
+        <div class="q">3. Как, по-моему, надо было</div>
+        <div class="hint">Своя версия, до разговора с напарником</div>
+        <div class="line"></div>
+      </div>
+      <div class="f key">
+        <div class="q">4. Один приём, который посоветовал напарник<span class="must">ОБЯЗАТЕЛЬНО</span></div>
+        <div class="hint">Дословно и в формате «если клиент говорит… — я говорю…». Ровно один.</div>
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+      <div class="f">
+        <div class="q">5. Где применю</div>
+        <div class="hint">Признак звонка, в котором этот приём сработает</div>
+        <div class="line"></div>
+      </div>
+    </div>
+    <p class="src">Четвёртый пункт — единственный, ради которого существует весь лист.
+      В исследовании ровно этот вопрос стоял на листе дословно: «напиши одну вещь, которую партнёр посоветовал попробовать».</p>
+  </section>
+
+  <section class="sect">
+    <h2>Что считается приёмом, а что нет</h2>
+    <p>Разница не в вежливости, а в том, можно ли это произнести в следующем звонке.</p>
+    <div class="vs">
+      <div class="yes">
+        <h3>ЭТО ПРИЁМ</h3>
+        <ul>
+          <li>«Если клиент говорит „надо посоветоваться с женой“ — я предлагаю набрать её сейчас втроём, это пять минут»</li>
+          <li>«Госплатежи 50 000 называю сразу после цены, отдельной фразой „это не нам“ — тогда не воспринимается как скрытый платёж»</li>
+          <li>«Про имущество спрашиваю до цены. Спросишь после — человек думает, что ищем, с чего взять деньги»</li>
+          <li>«На „я подумаю“ спрашиваю: „над чем именно — над суммой или над процедурой?“ — и дальше отвечаю только на это»</li>
+        </ul>
+      </div>
+      <div class="no">
+        <h3>ЭТО НЕ ПРИЁМ</h3>
+        <ul>
+          <li>«Работай с возражениями лучше»<i>непонятно, что сказать в звонке</i></li>
+          <li>«Будь увереннее, не мямли»<i>это про личность, а не про действие</i></li>
+          <li>«Слушай клиента внимательно»<i>верно и бесполезно</i></li>
+          <li>«Не сдавайся, дожимай»<i>лозунг</i></li>
+        </ul>
+      </div>
+    </div>
+    <p class="src">Это не вкусовщина: в исследовании листы разложили на две группы. Записи с конкретным знанием
+      («следуй потоку звонка и предложи продукт», «получил „нет“ — отработай и спроси, почему») давали устойчивый прирост.
+      Записи вида «оставайся позитивным», «будь увереннее» — <b>не давали ничего</b>.</p>
+  </section>
+
+  <section class="sect">
+    <h2>Что получает наставник</h2>
+    <div class="card">
+      <div class="gain">
+        <div class="ic">1</div>
+        <div><b>Свои недели обмена на равных</b>
+          <p>Ты не только отдаёшь. Свой трудный звонок ты приносишь на каждой встрече, и в исследовании
+            зафиксировано: сильные растут именно в паре с сильными. Раз в три недели состав меняется.</p></div>
+      </div>
+      <div class="gain">
+        <div class="ic">2</div>
+        <div><b>Приём уходит в библиотеку под твоим именем</b>
+          <p>Из листов собирается библиотека приёмов компании и сценарии тренажёра. Твоя формулировка
+            становится стандартом, по которому учатся остальные.</p></div>
+      </div>
+      <div class="gain">
+        <div class="ic">3</div>
+        <div><b>Ступень к тимлиду</b>
+          <p>У нас один РОП на пятнадцать человек. Следующим станет тот, кто умеет разобрать звонок и объяснить,
+            что делать. Обменятор — единственное место, где это видно.</p></div>
+      </div>
+      <div class="gain">
+        <div class="ic">4</div>
+        <div><b>Твои собственные цифры не пострадают</b>
+          <p>Это проверено, а не обещано: в исследовании продажи сильных <b>не просели</b> ни во время программы,
+            ни после. Тридцать минут в неделю берутся из простоя между звонками, а не из времени сделок.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Чего в Обменяторе нет</h2>
+    <div class="nots">
+      <div class="not"><span class="x">✕</span><div><b>Нет денег за результат напарника.</b>
+        <span>Проверено: когда паре платили за общий прирост, эффект был только во время акции и полностью исчезал после.
+        Деньгами покупается усилие, а не знание.</span></div></div>
+      <div class="not"><span class="x">✕</span><div><b>Нет публичного рейтинга менеджеров.</b>
+        <span>В отдельном опыте на 1754 продавцах <b>снятие</b> публичного ранга подняло продажи на 11%. Конверсию видят только ты и РОП.</span></div></div>
+      <div class="not"><span class="x">✕</span><div><b>Лист не оценивают.</b>
+        <span>Это не отчёт о работе и не повод для разбора. Сдал — обмен состоялся. Программа ломается, как только превращается в отчётность.</span></div></div>
+      <div class="not"><span class="x">✕</span><div><b>Нет вечного шефства.</b>
+        <span>Три недели, потом пересмотр. Ни «вечных наставников», ни «вечных подшефных».</span></div></div>
+      <div class="not"><span class="x">✕</span><div><b>Участие не под угрозой.</b>
+        <span>Не сдал лист — не пошёл на обед. Никаких лишений лидов и штрафов: в исследовании при полностью
+        необязательном участии листы сдавали больше 80% людей.</span></div></div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Откуда это взято</h2>
+    <p>Программа не придумана нами. Это единственная известная схема обучения продавцов, чей эффект пережил
+      остановку программы, и она проверена на 653 продавцах в кол-центре входящих продаж.</p>
+    <div class="stats">
+      <div class="stat"><div class="v">+24%</div><div class="t">выручки на звонок во время программы</div></div>
+      <div class="stat"><div class="v">+23%</div><div class="t">в первые два месяца <b>после</b> её окончания</div></div>
+      <div class="stat"><div class="v">80%+</div><div class="t">сдавали листы при необязательном участии</div></div>
+      <div class="stat"><div class="v">0</div><div class="t">просадка у сильных и рост текучести</div></div>
+    </div>
+    <p class="src"><b>Источник:</b> Sandvik, Saouma, Seegert, Stanton, «Workplace Knowledge Flows»,
+      Quarterly Journal of Economics, 2020 (регистрация опыта AEARCTR-0002332). Четыре недели программы,
+      двадцать недель наблюдения после. Максимальный прирост — у слабых в паре с сильными.
+      <b>Честная оговорка:</b> это один опыт, США, звонки короче наших консультаций, и эффект со временем затухает —
+      к пятому-шестому месяцу он статистически неотличим от нуля. Именно поэтому у нас Обменятор — постоянный ритм,
+      а не месячная акция.</p>
+  </section>
+
+  <section class="sect">
+    <h2>Первые три недели</h2>
+    <div class="card">
+      <div class="tl">
+        <div class="tl-row"><div class="w">НЕДЕЛЯ 1</div>
+          <p><b>Знакомство с механикой.</b> Пары объявлены, все заполняют лист и проводят первый разговор.
+            Задача недели одна — <b>сдать лист</b>. Качество приёмов пока не спрашиваем.</p></div>
+        <div class="tl-row"><div class="w">НЕДЕЛЯ 2</div>
+          <p><b>Учимся формулировать приём.</b> РОП показывает на обеде два-три листа с сильными приёмами
+            и два слабых — без имён. Начинает работать библиотека.</p></div>
+        <div class="tl-row"><div class="w">НЕДЕЛЯ 3</div>
+          <p><b>Замыкаем петлю.</b> В разборе звонка появляется строка «обещал → сделал»: видно, дошёл ли приём
+            до реального разговора. Пересматриваем состав пар по конверсии.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sect">
+    <h2>Вопросы, которые задают первыми</h2>
+
+    <details class="q"><summary>Мне попался слабый — я потеряю время и деньги</summary>
+      <div class="a"><p>Тридцать минут в неделю. Они берутся из простоя между звонками, а не из времени, когда ты продаёшь.
+        В исследовании специально проверяли: <b>продажи сильных не просели</b> — ни во время программы, ни в течение
+        полугода после.</p>
+        <p>И даже в самом плохом расчёте, если помощь коллеге сдвинет твою позицию по комиссии, потеря составит
+        меньше 10% выплаты. Против этого — приёмы, которые ты сам заберёшь в свои недели с равным.</p></div></details>
+
+    <details class="q"><summary>Я и так топ. Зачем мне это?</summary>
+      <div class="a"><p>Потому что ты приносишь на встречу <b>свой</b> трудный звонок, а не только слушаешь чужие.
+        Разброс внутри команды огромный и он не связан со стажем: у людей с опытом выше среднего разброс такой же,
+        как у новичков. Значит и у тебя есть моменты, где кто-то другой говорит лучше.</p>
+        <p>Плюс твоя формулировка попадает в библиотеку и в тренажёр под твоим именем — это то, по чему потом
+        учится вся команда. И это единственная видимая заявка на роль тимлида.</p></div></details>
+
+    <details class="q"><summary>Меня прикрепили — значит, я плохой?</summary>
+      <div class="a"><p>Прикрепление — это доступ, а не диагноз. Конверсия ниже 15% почти никогда не означает,
+        что человек не умеет продавать: обычно не хватает трёх-четырёх формулировок в конкретных местах разговора.
+        Их невозможно найти в учебнике, потому что они живут в головах у коллег.</p>
+        <p>Цифры не публикуются: кто с кем в паре — видно, конверсия — нет. Через три недели состав пересматривается,
+        и роли меняются в обе стороны.</p></div></details>
+
+    <details class="q"><summary>Это слежка? Меня будут разбирать по записям?</summary>
+      <div class="a"><p>Звонок для листа <b>выбираешь ты сам</b> — свой самый трудный. Никто не приносит на встречу
+        твою запись без твоего ведома.</p>
+        <p>Лист не оценивают, на планёрке не разбирают, в рейтинг он не идёт. Единственное, что попадает
+        в систему, — приём, который ты решил применить.</p></div></details>
+
+    <details class="q"><summary>А если напарник отказывается или сливает встречу?</summary>
+      <div class="a"><p>Скажи РОПу: он один раз поможет сформулировать приём и, если нужно, поменяет пару.
+        Никаких последствий ни для кого. Пустой лист означает, что <b>обмен не сработал</b>, а не что кто-то виноват.</p></div></details>
+
+    <details class="q"><summary>А если на этой неделе физически некогда?</summary>
+      <div class="a"><p>Встречу можно перенести <b>ровно один раз</b> внутри недели. Второй перенос просто закрывает неделю
+        без обмена и без последствий: горящая воронка важнее ритуала, и Обменятор никогда не отменяет ни SLA по новому лиду,
+        ни золотой час.</p></div></details>
+
+    <details class="q"><summary>Что будет, если не сдам лист?</summary>
+      <div class="a"><p>Не пойдёшь на обед в четверг. Лиды не снимают, штрафов нет, в рейтинг это не идёт.
+        Обменятор держится на том, что он полезен, а не на том, что за него наказывают.</p></div></details>
+
+    <details class="q"><summary>Почему нельзя выбрать напарника самому?</summary>
+      <div class="a"><p>Потому что выберут друзей, а это работает хуже. На сдельной работе замерили:
+        рядом с друзьями сильные <b>снижают</b> усилие примерно на 10%. Пары назначает РОП, состав меняется каждые три недели.</p></div></details>
+
+    <details class="q"><summary>Мы будем отрабатывать звонки друг на друге?</summary>
+      <div class="a"><p>Нет. Обменятор — это <b>передача приёма</b>, а не тренировка. Ты приносишь свой момент и забираешь
+        одну формулировку.</p>
+        <p>Отрабатывать вслух нужно в тренажёре — там ИИ играет клиента и разбирает, что получилось.
+        Практика друг на друге без разбора со стороны, по данным, результата не даёт.</p></div></details>
+  </section>
+
+  <p class="foot">
+    ОБМЕНЯТОР · программа обмена приёмами ДоНуля. Механика по протоколу Sandvik, Saouma, Seegert, Stanton (QJE 2020);
+    параметры прикрепления — решение владельца от 30.07.2026. Рядом: <a href="../script/">скрипт</a> ·
+    <a href="../manager-training/">учебник</a> · <a href="../trainer/">тренажёр</a> · <a href="../call-control/">разбор звонка</a>.
+  </p>
+</div>
+</body>
+</html>
