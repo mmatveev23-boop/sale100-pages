@@ -37,10 +37,9 @@ p{text-wrap:pretty}
 
 /* шапка — минимум */
 .hero{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow)}
-.hero .brand{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.hero .lg{width:34px;height:34px;border-radius:9px;background:var(--green);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--gold-bright)}
-.hero .brand b{font-size:14px}
-.hero .brand small{display:block;font-size:11px;color:rgba(255,255,255,.62);letter-spacing:.13em;margin-top:2px}
+.hero .brand{display:flex;flex-direction:column;align-items:flex-start;gap:7px;margin-bottom:14px}
+.hero .brandlogo{height:30px;width:auto}
+.hero .brand small{font-size:11px;color:rgba(255,255,255,.62);letter-spacing:.13em}
 .hero h1{font-size:24px;line-height:1.16;letter-spacing:-.02em;font-weight:800;text-wrap:balance}
 .hero p{margin-top:8px;font-size:15px;color:rgba(255,255,255,.85)}
 .hero p b{color:#fff}
@@ -156,8 +155,7 @@ p{text-wrap:pretty}
 
   <header class="hero">
     <div class="brand">
-      <div class="lg">ДН</div>
-      <div><b>ДоНуля</b><small>СПИСАНИЕ ДОЛГА ПО 127-ФЗ</small></div>
+      <img class="brandlogo" src="img/logo-w.svg" alt="ДоНуля — списание долгов">
     </div>
     <h1>Ирина Сергеевна, ваш договор готов</h1>
     <p>Осталась оплата первого платежа — <b>она и подписывает договор</b>.
