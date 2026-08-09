@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Один день менеджера — как устроена твоя работа · ДоНуля</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ ОДИН ДЕНЬ МЕНЕДЖЕРА (запрос владельца 30.07: «вот я менеджер и пришёл работать —
+   мне надо понять работу, а я не понимаю»). Работа рассказана ОТ СТУЛА МЕНЕДЖЕРА, не от архитектуры:
+   ни одного термина воронки, ни одного окна наизусть. Правки владельца учтены: после частички
+   добор ведёт МЕНЕДЖЕР, юрист сопровождения — после полной оплаты (≤24 ч).
+   Целевая модель: оферта-ссылка включается после юриста и токена. ═══ */
+:root{
+  --paper:#F6F2E9;--card:#FFFFFF;--card2:#FBF8F1;--line:#E3DCCB;--line2:#EFE9DC;
+  --ink:#16231D;--muted:#4F5A54;--faint:#5C665F;
+  --pine:#0B3B2E;--pine2:#0F4A39;--green:#0F6B4F;--green-ink:#0B5540;--green-soft:#E4EFE7;
+  --gold:#C99A33;--gold-bright:#F4C775;--gold-soft:#F7EDD6;--gold-ink:#7E5810;
+  --brick:#A8442E;--brick-soft:#F6E3DC;--brick-ink:#8A3521;
+  --shadow:0 18px 44px -18px rgba(11,59,46,.28);--shadow-sm:0 6px 18px -10px rgba(22,35,29,.16);
+  --r-lg:22px;--r-md:15px;--r-sm:11px;--ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:680px;margin:0 auto;padding:20px 16px 70px}
+p{text-wrap:pretty}
+
+.hero{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:24px;padding:24px 22px;box-shadow:var(--shadow)}
+.hero .brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.hero .lg{width:36px;height:36px;border-radius:10px;background:var(--green);display:grid;place-items:center;font-size:12.5px;font-weight:800;color:var(--gold-bright)}
+.hero .brand b{font-size:14.5px}
+.hero .brand small{display:block;font-size:10px;color:rgba(255,255,255,.55);letter-spacing:.14em;margin-top:2px}
+.hero h1{font-size:28px;line-height:1.12;letter-spacing:-.025em;font-weight:800;text-wrap:balance}
+.hero .lede{margin-top:12px;font-size:16px;color:rgba(255,255,255,.87);line-height:1.5}
+.hero .lede b{color:var(--gold-bright)}
+.hero .one{margin-top:14px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.16);border-radius:var(--r-md);padding:12px 14px;font-size:15px;line-height:1.5}
+.hero .one b{color:#fff}
+
+/* сцены */
+.scene{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);overflow:hidden}
+.sc-h{display:flex;align-items:center;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line2)}
+.sc-h .n{flex:none;width:34px;height:34px;border-radius:10px;background:var(--pine);color:var(--gold-bright);display:grid;place-items:center;font-weight:800;font-size:15px}
+.sc-h h2{font-size:18.5px;font-weight:800;letter-spacing:-.015em;line-height:1.2}
+.sc-b{padding:14px 18px 17px}
+.sc-b p{font-size:15.5px;line-height:1.55}
+.sc-b p+p{margin-top:9px}
+.sc-b b{font-weight:700}
+.say{margin-top:10px;background:var(--gold-soft);border-radius:var(--r-md);padding:11px 14px;font-size:14.5px;line-height:1.5;color:var(--gold-ink)}
+.say b{color:var(--ink)}
+.note{margin-top:10px;font-size:13.5px;color:var(--muted);background:var(--card2);border:1px solid var(--line2);border-radius:var(--r-sm);padding:10px 12px;line-height:1.5}
+.tasks{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.tasks li{display:flex;gap:9px;font-size:14.5px;line-height:1.45;align-items:flex-start}
+.tasks .tag{flex:none;font-size:11px;font-weight:800;border-radius:6px;padding:3px 8px;margin-top:1px;white-space:nowrap}
+.tag.hot{background:var(--brick);color:#fff}
+.tag.norm{background:var(--green-soft);color:var(--green-ink)}
+
+/* правила */
+.rules{margin-top:16px;background:var(--pine);color:#fff;border-radius:var(--r-lg);padding:20px 18px;box-shadow:var(--shadow)}
+.rules h2{font-size:19px;font-weight:800;letter-spacing:-.015em}
+.rules p.sub{margin-top:5px;font-size:13.5px;color:rgba(255,255,255,.7)}
+.rules ol{margin:13px 0 0;padding-left:0;list-style:none;counter-reset:r;display:flex;flex-direction:column;gap:9px}
+.rules li{position:relative;padding-left:34px;font-size:14.5px;line-height:1.45;color:rgba(255,255,255,.9)}
+.rules li::before{counter-increment:r;content:counter(r);position:absolute;left:0;top:1px;width:24px;height:24px;border-radius:7px;background:rgba(244,199,117,.18);color:var(--gold-bright);display:grid;place-items:center;font-size:12.5px;font-weight:800}
+.rules li b{color:#fff}
+
+/* чего не знать */
+.dont{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:18px}
+.dont h2{font-size:18px;font-weight:800}
+.dont p{margin-top:8px;font-size:15px;color:var(--muted);line-height:1.55}
+.dont p b{color:var(--ink)}
+
+.foot{margin-top:22px;text-align:center;font-size:12px;color:var(--faint);line-height:1.6}
+.foot a{color:var(--green-ink)}
+.badge{margin-bottom:10px;text-align:center}
+.badge span{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.1em;background:var(--gold-soft);border:1px dashed var(--gold);color:var(--gold-ink);border-radius:999px;padding:5px 13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="badge"><span>ЦЕЛЕВАЯ МОДЕЛЬ · ОФЕРТА-ССЫЛКА ВКЛЮЧАЕТСЯ ПОСЛЕ ЮРИСТА</span></div>
+
+  <header class="hero">
+    <div class="brand">
+      <div class="lg">ДН</div>
+      <div><b>ДОНУЛЯ</b><small>КАК УСТРОЕНА ТВОЯ РАБОТА</small></div>
+    </div>
+    <h1>Один день менеджера</h1>
+    <p class="lede">Твоя работа — <b>говорить с людьми в долгах и помогать им начать списание</b>.
+      Всё остальное — очереди, сроки, напоминания, статусы — делает система.</p>
+    <div class="one">Весь день — одно правило: <b>делай верхнюю задачу виджета</b>.
+      Ты никогда не выбираешь, кому звонить, и ничего не держишь в голове.</div>
+  </header>
+
+  <section class="scene">
+    <div class="sc-h"><span class="n">1</span><h2>Пришёл — нажал «Начать работу»</h2></div>
+    <div class="sc-b">
+      <p>Виджет открывает первую задачу и <b>сам открывает карточку клиента</b>. У каждой задачи написано,
+        что сделать и почему она первая. Сделал — система даёт следующую.</p>
+      <p><b>Новый лид — это всегда громко:</b> у тебя 5 минут взять его в работу, иначе он уйдёт другому.
+        Взял — звонишь сразу.</p>
+    </div>
+  </section>
+
+  <section class="scene">
+    <div class="sc-h"><span class="n">2</span><h2>Звонок — разговор через выгоду</h2></div>
+    <div class="sc-b">
+      <p>Слушаешь историю человека. Скрипт ведёт по шагам, <b>чек-лист из 16 вопросов</b> прямо на экране —
+        проговорил, галка встала. Обнулятор считает его цифры.</p>
+      <div class="say"><b>Суть каждого разговора одна:</b> «Сейчас вы платите 41 000 в месяц — и 35 000 из них
+        проценты, долг не тает. Будет 13 500 — и долг закрыт насовсем. Потянете?»</div>
+      <p>Дальше человек либо готов, либо думает, либо ему нужно посчитать по кредитной истории —
+        для каждого случая система сама поставит следующий шаг. Твоё дело — разговор.</p>
+    </div>
+  </section>
+
+  <section class="scene">
+    <div class="sc-h"><span class="n">3</span><h2>Клиент сказал «готов» — одна кнопка</h2></div>
+    <div class="sc-b">
+      <p>Ты ждёшь от клиента одну фразу: <b>«готов оплатить»</b> — или дату в ближайшие три дня.
+        Услышал — жмёшь кнопку <b>«Клиент готов»</b>. Всё.</p>
+      <p>Система сама отправляет ему страницу: его цифры, его договор и кнопка оплаты <b>1 000 ₽</b>.
+        Оплата и есть подписание — никаких кодов и бумаг. У страницы срок — 3 дня.</p>
+      <div class="note">Жми, только если клиент правда это сказал: звонок записан, и система сверяет.
+        Шлёшь ссылки всем подряд — твоя конверсия это покажет за неделю, а лид, чей срок сгорел,
+        уйдёт в общий пул — доведёт другой, и деньги будут его.</div>
+    </div>
+  </section>
+
+  <section class="scene">
+    <div class="sc-h"><span class="n">4</span><h2>Не оплатил сразу? Ничего не запоминай</h2></div>
+    <div class="sc-b">
+      <p>Система смотрит на его страницу и <b>сама говорит, когда звонить</b>:</p>
+      <ul class="tasks">
+        <li><span class="tag hot">СРОЧНО</span><span>«Бросил оплату на кнопке» — звони в 15 минут:
+          «вижу, оплата не прошла — помочь? Карта или СБП, две минуты».</span></li>
+        <li><span class="tag norm">задача</span><span>«Открыл, не оплатил 30+ минут» — напомни: «осталась одна кнопка».</span></li>
+        <li><span class="tag norm">задача</span><span>«Сказал — с зарплаты» — назови дату вслух, внеси в сделку:
+          система позвонит тебе в этот день. И предложи: «1 000 сегодня — в зачёт, чтобы цена и подарок закрепились».</span></li>
+      </ul>
+      <p>Три дня система дожимает вместе с тобой: звонки по плану, сообщения шлёт сама. Дальше — пул,
+        и это нормально: не каждый готов сейчас.</p>
+    </div>
+  </section>
+
+  <section class="scene">
+    <div class="sc-h"><span class="n">5</span><h2>Оплатил — деньги и передача</h2></div>
+    <div class="sc-b">
+      <p><b>Оплатил 1 000</b> — договор заключён, цена и SIM-подарок зафиксированы.
+        <b>Добор до 13 500 — твоя работа:</b> дата добора вслух и в сделку, система напомнит в её день.
+        Ты ведёшь клиента до полной оплаты.</p>
+      <p><b>Оплатил 13 500</b> — заполняешь анкету передачи, клиенту говоришь:
+        «ваш личный юрист свяжется в течение 24 часов, запишите номер». Это <b>твои первые 50%</b>.</p>
+      <p><b>Вторые 50%</b> — когда пройдёт его второй платёж. Поэтому клиент, доведённый до конца,
+        дороже трёх новых ссылок.</p>
+    </div>
+  </section>
+
+  <section class="scene">
+    <div class="sc-h"><span class="n">6</span><h2>Конец смены</h2></div>
+    <div class="sc-b">
+      <p>«Закончить работу» открывается, когда все задачи дня разобраны — исходом или датой.
+        Отчёт РОПу улетает сам. Что-то горит или непонятно — кнопка <b>«Передать РОПу»</b>:
+        это нормально. Ненормально — тишина.</p>
+    </div>
+  </section>
+
+  <section class="rules">
+    <h2>Десять правил — всё, что нужно знать наизусть</h2>
+    <p class="sub">Остальное система скажет сама — задачей с подписью.</p>
+    <ol>
+      <li><b>Делай верхнюю задачу виджета.</b> Новый лид — звонок немедленно.</li>
+      <li>У лида <b>3 дня от разговора до денег</b> — не успел, уйдёт другому вместе с деньгами.</li>
+      <li>Диагностика = <b>чек-лист 16 на экране</b>: проговори всё или отметь «не применимо».</li>
+      <li>Цена: <b>«13 500 в месяц — потянете?»</b> Полную сумму — только на прямой вопрос. Госплатежи 50 000 — отдельно и сразу.</li>
+      <li>«С зарплаты» → <b>дата вслух + «1 000 сегодня — в зачёт»</b>.</li>
+      <li><b>«Клиент готов» жми, только если он САМ сказал</b> «готов оплатить» или назвал дату до 3 дней.</li>
+      <li>Оплата = подпись. <b>SIM закрепляется любым платежом</b>, едет после 13 500.</li>
+      <li>Закрыть лида можно <b>только с его фразой-причиной</b>. Молчание — не отказ: отпусти, система вернёт.</li>
+      <li><b>Красные линии не говорим никогда</b>: займ на оплату, «скроем от БКИ», «процедура запущена» до денег.</li>
+      <li>Проблема → <b>«Передать РОПу»</b>, не тишина.</li>
+    </ol>
+  </section>
+
+  <section class="dont">
+    <h2>Чего тебе знать НЕ нужно</h2>
+    <p>Статусы воронки, окна «48 часов», «2 часа», потолки, каденции касаний, лимиты переносов —
+      <b>всё это живёт внутри системы</b>. Каждый срок придёт к тебе готовой задачей, на которой написано,
+      что сделать и сколько времени осталось. Если задачи нет — значит, сейчас ничего делать не надо.</p>
+  </section>
+
+  <p class="foot">
+    Дальше глубже: <a href="../script/">скрипт разговора</a> · <a href="../trainer/">тренажёр</a> ·
+    <a href="../manager-training/">учебник</a>. Схемы и правила системы (воронка, свод) — документы РОПа,
+    менеджеру они не нужны.
+  </p>
+</div>
+</body>
+</html>
