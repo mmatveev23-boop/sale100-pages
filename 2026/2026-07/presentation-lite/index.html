@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Условия и первый платёж — 2 минуты · ДоНуля</title>
+<title>Ваш договор готов — осталась оплата · ДоНуля</title>
 <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ═══ ОФЕРТА-СТРАНИЦА «УСЛОВИЯ КРУПНО + ОДНО ДЕЙСТВИЕ» (макет, ДЕМО-клиент) ═══
@@ -45,7 +45,7 @@ p{text-wrap:pretty}
 .hero p{margin-top:8px;font-size:15px;color:rgba(255,255,255,.85)}
 .hero p b{color:#fff}
 .hero .mgr{display:flex;gap:11px;align-items:center;margin-top:14px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-md);padding:11px 13px}
-.hero .mgr .ava{flex:none;width:44px;height:44px;border-radius:50%;background:var(--pine2);overflow:hidden;display:grid;place-items:center;border:2px solid rgba(244,199,117,.5)}
+.hero .mgr .ava{flex:none;width:48px;height:48px;border-radius:50%;object-fit:cover;object-position:50% 18%;border:2px solid rgba(244,199,117,.55)}
 /* в бою вместо силуэта — реальное фото менеджера из движка (решение владельца 30.07: лица ставим) */
 .hero .mgr p{margin-top:0;font-size:13.5px;line-height:1.45;color:rgba(255,255,255,.85)}
 
@@ -101,12 +101,14 @@ p{text-wrap:pretty}
 .term.guar{background:var(--green-soft)}
 .term.guar .k{color:var(--green-ink)}
 .term.guar .v{font-size:17.5px;line-height:1.35}
-details.full{border-top:1px solid var(--line)}
-details.full summary{padding:13px 18px;font-size:14.5px;font-weight:700;color:var(--green-ink);cursor:pointer;list-style:none}
-details.full summary::-webkit-details-marker{display:none}
-details.full summary::before{content:"▸ "}
-details.full[open] summary::before{content:"▾ "}
-details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-height:1.55}
+/* договор-PDF: выделенная карточка документа (просьба владельца «напиши или выдели») */
+.doc{display:flex;gap:13px;align-items:center;padding:15px 18px;border-top:1px solid var(--line);background:var(--gold-soft);text-decoration:none;color:inherit;transition:background .15s var(--ease)}
+.doc:hover{background:#F3E5C4}
+.doc-ic{flex:none;width:40px;height:48px;background:#fff;border:1.5px solid var(--brick);border-radius:8px;display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--brick);letter-spacing:.04em}
+.doc-tx{flex:1;min-width:0}
+.doc-tx b{display:block;font-size:15px;line-height:1.3}
+.doc-tx i{display:block;font-style:normal;font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
+.doc-btn{flex:none;background:var(--green);color:#fff;font-size:14px;font-weight:700;border-radius:10px;padding:10px 16px}
 
 .foot{margin-top:20px;text-align:center;font-size:11.5px;color:var(--faint);line-height:1.6}
 
@@ -141,11 +143,12 @@ details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-h
       <div class="lg">ДН</div>
       <div><b>ДоНуля</b><small>СПИСАНИЕ ДОЛГА ПО 127-ФЗ</small></div>
     </div>
-    <h1>Ирина Сергеевна, ваш расчёт готов</h1>
-    <p><b>Выгода, первый платёж и все условия договора</b> — на одной странице.</p>
+    <h1>Ирина Сергеевна, ваш договор готов</h1>
+    <p>Осталась оплата первого платежа — <b>она и подписывает договор</b>.
+      Выгода и все условия — ниже, на этой же странице.</p>
     <div class="mgr">
-      <span class="ava" aria-hidden="true"><svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="14" r="7" fill="#F4C775"/><path d="M6 36c2-8 8-11 14-11s12 3 14 11" fill="#F4C775"/></svg></span>
-      <p><b>Дарья, ваш менеджер.</b> Отправила расчёт сегодня в 14:32 — я на связи до 20:00:
+      <img class="ava" src="img/manager.jpg" alt="Виктория, менеджер">
+      <p><b>Виктория, ваш менеджер.</b> Подготовила ваш договор сегодня в 14:32 — я на связи до 20:00:
         позвоните или напишите мне, отвечу быстро.</p>
     </div>
   </header>
@@ -192,7 +195,8 @@ details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-h
       <b>Михаил Александрович</b> — он ведёт ваше дело: сверит данные, ответит на вопросы
       и запросит документы. Передумали после разговора с ним — вернём платёж.</div>
     <p class="quiet">Оплачивая, вы принимаете условия договора-оферты — полный текст ниже, в условиях.
-      Расчёт действителен <b>3 дня</b>: дальше долг подрастёт на проценты, и цифры пересчитаем заново.</p>
+      Договор и цена действительны <b>3 дня</b>: дальше долг подрастёт на проценты,
+      и цифры в договоре придётся пересчитывать заново.</p>
   </section>
 
   <section class="terms">
@@ -224,17 +228,19 @@ details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-h
       <span class="v">Юрист проверит ваше дело до подачи. Найдём препятствие — вернём всё, что вы заплатили нам</span>
       <span class="note">Имущество, залоги и сделки за 3 года проверяем до суда. Берём только те дела, которые проходят.</span>
     </div>
-    <details class="full">
-      <summary>Полный текст договора-оферты — прочитать здесь</summary>
-      <div class="txt">В бою здесь открывается полный текст оферты (тот же документ, что подписывают в обычном
-        порядке) и кнопка «Скачать PDF». Показ полного текста до оплаты обязателен — это условие акцепта.</div>
-    </details>
+    <a class="doc" href="dogovor-oferta.pdf" target="_blank" rel="noopener">
+      <span class="doc-ic" aria-hidden="true">PDF</span>
+      <span class="doc-tx"><b>Договор-оферта № 482119-Д — полный текст</b>
+        <i>Откройте и сохраните себе. Оплата подтверждает согласие именно с этим документом.</i></span>
+      <span class="doc-btn">Открыть</span>
+    </a>
   </section>
 
   <!-- кнопки «Набрать/Написать/Полная презентация» убраны (решение владельца 30.07:
        страница только закрывает — договор и оплата); контакт Дарьи остаётся в её карточке в шапке -->
   <p class="foot">ООО «ДоНуля» · ИНН · ОГРН · работаем с 2015 года · 127-ФЗ «О несостоятельности (банкротстве)»<br>
-    Макет оферта-страницы. Запуск — после оферта-версии договора от юриста; цифры клиента в бою приходят из движка.</p>
+    Макет оферта-страницы. Запуск — после оферта-версии договора от юриста.
+    В бою страница полностью формируется из Обнулятора: цифры клиента, договор, менеджер и юрист — из пульта сделки.</p>
 </div>
 
 <div class="fab">
