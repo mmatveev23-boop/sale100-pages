@@ -73,9 +73,6 @@ p{text-wrap:pretty}
 /* платёж — сразу за выгодой; кнопка живёт в плавающей панели */
 .pay .expl{font-size:15px;color:var(--muted);margin-top:8px;line-height:1.5}
 .pay .expl b{color:var(--ink)}
-.alt-sum{margin-top:12px;font-size:14.5px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.ghost{font:inherit;font-size:15px;font-weight:700;color:var(--green-ink);background:var(--card);border:1.5px solid var(--green);border-radius:11px;padding:11px 16px;min-height:44px;cursor:pointer;transition:.15s var(--ease)}
-.ghost:hover{background:var(--green-soft)}
 .then{margin-top:12px;background:var(--card2);border:1px solid var(--line2);border-radius:var(--r-md);padding:12px 14px;font-size:14px;color:var(--muted);line-height:1.55}
 .then b{color:var(--ink)}
 /* доверие банка: платёж идёт на счёт в Сбере */
@@ -190,7 +187,9 @@ p{text-wrap:pretty}
           чек ФНС придёт по СМС автоматически.</p>
       </div>
     </div>
-    <p class="alt-sum">Удобнее сразу месяц? <button type="button" class="ghost num">Оплатить 13 500 ₽</button></p>
+    <!-- вторая кнопка «Оплатить 13 500» убрана (решение владельца 30.07: одно действие).
+         Сумма единственной кнопки приходит из Обнулятора по договорённости звонка:
+         по умолчанию частичка 1 000 ₽; если в консультации согласован месяц — движок ставит 13 500. -->
     <div class="then"><b>Что будет после оплаты:</b> в течение часа вам позвонит юрист
       <b>Михаил Александрович</b> — он ведёт ваше дело: сверит данные, ответит на вопросы
       и запросит документы. Передумали после разговора с ним — вернём платёж.</div>
