@@ -108,13 +108,7 @@ details.full summary::before{content:"▸ "}
 details.full[open] summary::before{content:"▾ "}
 details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-height:1.55}
 
-.help{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.help a{display:block;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 10px;font-size:14px;font-weight:700;color:var(--green-ink);text-decoration:none;transition:.15s var(--ease)}
-.help a:hover{border-color:#CFC4AC}
-.help a small{display:block;font-size:11.5px;font-weight:400;color:var(--faint);margin-top:2px}
-.help a.wide{grid-column:1/-1}
-.valid{margin-top:13px;text-align:center;font-size:13px;color:var(--faint)}
-.foot{margin-top:18px;text-align:center;font-size:11.5px;color:var(--faint);line-height:1.6}
+.foot{margin-top:20px;text-align:center;font-size:11.5px;color:var(--faint);line-height:1.6}
 
 /* ── ПЛАВАЮЩАЯ КНОПКА (объёмная, под ней чисто — решение владельца) ── */
 .fab{position:fixed;left:0;right:0;bottom:0;z-index:var(--z-fab);
@@ -237,12 +231,8 @@ details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-h
     </details>
   </section>
 
-  <div class="help">
-    <a href="#" onclick="return false"><span>📞 Набрать Дарью</span><small>если удобнее голосом</small></a>
-    <a href="#" onclick="return false"><span>💬 Написать Дарье</span><small>WhatsApp или Telegram</small></a>
-    <a href="#" onclick="return false" class="wide"><span>Полная презентация</span><small>все условия по экранам</small></a>
-  </div>
-
+  <!-- кнопки «Набрать/Написать/Полная презентация» убраны (решение владельца 30.07:
+       страница только закрывает — договор и оплата); контакт Дарьи остаётся в её карточке в шапке -->
   <p class="foot">ООО «ДоНуля» · ИНН · ОГРН · работаем с 2015 года · 127-ФЗ «О несостоятельности (банкротстве)»<br>
     Макет оферта-страницы. Запуск — после оферта-версии договора от юриста; цифры клиента в бою приходят из движка.</p>
 </div>
@@ -265,7 +255,7 @@ details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-h
   function setPay() {
     mode = 'pay';
     btn.innerHTML = 'Оплатить первый платёж <span class="num" style="white-space:nowrap">1 000 ₽</span>' +
-      '<small>на счёт в Сбер <span class="sb"><img src="img/sber-logo.png" alt="Сбер"></span></small>';
+      '<small>на счёт в <span class="sb"><img src="img/sber-logo.png" alt="Сбер"></span></small>';
   }
   function setTerms() {
     mode = 'terms';
