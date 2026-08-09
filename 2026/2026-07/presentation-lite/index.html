@@ -27,7 +27,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:18px;line-height:1.55;-webkit-font-smoothing:antialiased;
   /* запас снизу под плавающую кнопку: панель до ~175px, реквизиты не должны прятаться */
-  padding-bottom:calc(178px + env(safe-area-inset-bottom))}
+  padding-bottom:calc(132px + env(safe-area-inset-bottom))}
 .num{font-variant-numeric:tabular-nums}
 .wrap{max-width:560px;margin:0 auto;padding:14px 14px 24px}
 p{text-wrap:pretty}
@@ -116,21 +116,23 @@ details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-h
 .valid{margin-top:13px;text-align:center;font-size:13px;color:var(--faint)}
 .foot{margin-top:18px;text-align:center;font-size:11.5px;color:var(--faint);line-height:1.6}
 
-/* ── ПЛАВАЮЩАЯ КНОПКА ── */
+/* ── ПЛАВАЮЩАЯ КНОПКА (объёмная, под ней чисто — решение владельца) ── */
 .fab{position:fixed;left:0;right:0;bottom:0;z-index:var(--z-fab);
-  background:linear-gradient(180deg,rgba(246,242,233,0) 0%,var(--paper) 26%);
-  padding:18px 14px calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(246,242,233,0) 0%,var(--paper) 30%);
+  padding:16px 14px calc(12px + env(safe-area-inset-bottom));
   pointer-events:none} /* градиент не должен глотать тапы по ссылкам под ним */
 .fab-in{max-width:560px;margin:0 auto;pointer-events:auto}
-.fab .cta{display:block;width:100%;background:var(--green);color:#fff;font:inherit;font-size:18px;font-weight:800;border:none;border-radius:14px;padding:15px;cursor:pointer;box-shadow:0 14px 30px -12px rgba(11,59,46,.65);transition:.15s var(--ease);text-align:center}
-.fab .cta:hover{background:var(--green-ink)}
-.fab .cta:active{transform:translateY(1px)}
-.fab .cta small{display:block;font-size:12px;font-weight:600;color:rgba(255,255,255,.8);margin-top:2px}
-.fab .accept{margin-top:6px;text-align:center;font-size:13px;color:var(--faint);line-height:1.5}
-.fab-bank{font-weight:700;color:#1B7E2F;white-space:nowrap}
-.fab-bank img{height:15px;width:auto;vertical-align:-3px;margin-right:4px}
+.fab .cta{display:block;width:100%;color:#fff;font:inherit;font-size:18.5px;font-weight:800;border:none;border-radius:16px;padding:14px 15px 15px;cursor:pointer;text-align:center;
+  background:linear-gradient(180deg,#149068 0%,var(--green) 42%,var(--green-ink) 100%);
+  box-shadow:0 5px 0 #073D2C, 0 18px 30px -12px rgba(11,59,46,.55), inset 0 1px 0 rgba(255,255,255,.25);
+  transition:transform .12s var(--ease), box-shadow .12s var(--ease)}
+.fab .cta:hover{filter:brightness(1.05)}
+.fab .cta:active{transform:translateY(4px);box-shadow:0 1px 0 #073D2C, 0 10px 18px -10px rgba(11,59,46,.5), inset 0 1px 0 rgba(255,255,255,.25)}
+.fab .cta small{display:block;font-size:13.5px;font-weight:700;color:rgba(255,255,255,.92);margin-top:4px}
+.fab .cta .sb{display:inline-block;background:#fff;border-radius:7px;padding:3px 8px 2px;margin-left:6px;vertical-align:-4px}
+.fab .cta .sb img{height:14px;width:auto;display:block}
 /* ландшафт / маленькая высота: панель не должна съедать треть экрана */
-@media (max-height:480px){.fab{padding-top:10px}.fab .cta{padding:11px}.fab .cta small{display:none}.fab .accept{display:none}}
+@media (max-height:480px){.fab{padding-top:8px}.fab .cta{padding:10px}.fab .cta small{display:none}}
 @media print{.fab{position:static;background:none;padding:10px 0}.demo{display:none}body{padding-bottom:0}}
 @media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}html{scroll-behavior:auto}}
 </style>
@@ -195,7 +197,8 @@ details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-h
     <div class="then"><b>Что будет после оплаты:</b> в течение часа вам позвонит юрист
       <b>Михаил Александрович</b> — он ведёт ваше дело: сверит данные, ответит на вопросы
       и запросит документы. Передумали после разговора с ним — вернём платёж.</div>
-    <p class="quiet">Расчёт действителен <b>3 дня</b>: дальше долг подрастёт на проценты, и цифры пересчитаем заново.</p>
+    <p class="quiet">Оплачивая, вы принимаете условия договора-оферты — полный текст ниже, в условиях.
+      Расчёт действителен <b>3 дня</b>: дальше долг подрастёт на проценты, и цифры пересчитаем заново.</p>
   </section>
 
   <section class="terms">
@@ -247,8 +250,6 @@ details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-h
 <div class="fab">
   <div class="fab-in">
     <button class="cta" type="button" id="fabBtn"></button>
-    <p class="accept" id="fabAccept" hidden><span class="fab-bank"><img src="img/sber-logo.png" alt="Сбер"> платёж на счёт в Сбере · защищено банком</span><br>
-      Оплачивая, вы принимаете условия договора-оферты (полный текст — на этой странице)</p>
   </div>
 </div>
 
@@ -258,20 +259,17 @@ details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-h
    аудитории читается давлением (бэклог №7, docs/presentation-lite-improvements). */
 (function () {
   var btn = document.getElementById('fabBtn');
-  var accept = document.getElementById('fabAccept');
   var terms = document.querySelector('.terms');
   var mode = 'terms';
 
   function setPay() {
     mode = 'pay';
-    btn.innerHTML = 'Внести первый платёж — <span class="num" style="white-space:nowrap">1 000 ₽</span>' +
-      '<small>идёт в зачёт цены</small>';
-    accept.hidden = false;
+    btn.innerHTML = 'Оплатить первый платёж <span class="num" style="white-space:nowrap">1 000 ₽</span>' +
+      '<small>на счёт в Сбер <span class="sb"><img src="img/sber-logo.png" alt="Сбер"></span></small>';
   }
   function setTerms() {
     mode = 'terms';
     btn.innerHTML = 'Посмотреть условия договора ↓<small>цена, гарантия, полный текст — один экран</small>';
-    accept.hidden = true;
   }
 
   btn.addEventListener('click', function () {
