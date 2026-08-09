@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Условия и первый платёж — 2 минуты · ДоНуля</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ ОФЕРТА-СТРАНИЦА «УСЛОВИЯ КРУПНО + ОДНО ДЕЙСТВИЕ» (макет, ДЕМО-клиент) ═══
+   Запрос заказчика 30.07: «как с офертой: на странице условие и одно действие — оплатить.
+   Условия договора прям крупно, в чём выгода, и оплата первого платежа».
+   Юрмодель: публичная оферта, оплата = акцепт (ст. 438 ГК) — ссылка оплаты в оферта-ветке
+   разрешена каноном изначально; СМС-подпись не нужна, подписью служит сам платёж.
+   БЛОКЕР ЗАПУСКА: оферта-версия договора + гринлайт юриста (вопросы — docs/short-close-link-analysis §5).
+   Не вырезается: полный текст оферты до оплаты, госплатежи 50 000 отдельно, цена под ключ,
+   гарантия возврата, реквизиты. Сумма и цифры клиента в бою — из движка. ═══ */
+:root{
+  --paper:#F6F2E9;--card:#FFFFFF;--card2:#FBF8F1;--line:#E3DCCB;--line2:#EFE9DC;
+  --ink:#16231D;--muted:#4F5A54;--faint:#7C857F;
+  --pine:#0B3B2E;--pine2:#0F4A39;--green:#0F6B4F;--green-ink:#0B5540;--green-soft:#E4EFE7;
+  --gold:#C99A33;--gold-bright:#F4C775;--gold-soft:#F7EDD6;--gold-ink:#7E5810;
+  --brick:#A8442E;--brick-soft:#F6E3DC;--brick-ink:#8A3521;
+  --shadow:0 18px 44px -18px rgba(11,59,46,.28);--shadow-sm:0 6px 18px -10px rgba(22,35,29,.16);
+  --r-lg:22px;--r-md:15px;--r-sm:11px;--ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:18px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 56px}
+p{text-wrap:pretty}
+
+.demo{position:sticky;top:8px;z-index:5;margin-bottom:10px;text-align:center}
+.demo span{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.1em;background:var(--gold-soft);border:1px dashed var(--gold);color:var(--gold-ink);border-radius:999px;padding:5px 13px}
+
+/* шапка — минимум */
+.hero{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:var(--r-lg);padding:22px 20px;box-shadow:var(--shadow)}
+.hero .brand{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.hero .lg{width:34px;height:34px;border-radius:9px;background:var(--green);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--gold-bright)}
+.hero .brand b{font-size:14px}
+.hero .brand small{display:block;font-size:9.5px;color:rgba(255,255,255,.55);letter-spacing:.13em;margin-top:2px}
+.hero h1{font-size:25px;line-height:1.16;letter-spacing:-.02em;font-weight:800;text-wrap:balance}
+.hero p{margin-top:9px;font-size:15.5px;color:rgba(255,255,255,.85)}
+.hero p b{color:#fff}
+
+/* УСЛОВИЯ — крупно */
+.terms{margin-top:14px;background:var(--card);border:2px solid var(--pine);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+.terms-h{background:var(--pine);color:#fff;padding:13px 18px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.terms-h b{font-size:16px}
+.terms-h span{font-size:11.5px;color:rgba(255,255,255,.65)}
+.term{padding:16px 18px;border-bottom:1px dashed var(--line);display:flex;flex-direction:column;gap:3px}
+.term:last-of-type{border-bottom:none}
+.term .k{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--faint)}
+.term .v{font-size:22px;font-weight:800;letter-spacing:-.015em;line-height:1.25}
+.term .v small{font-size:15px;font-weight:600;color:var(--muted)}
+.term .note{font-size:14px;color:var(--muted);line-height:1.45}
+.term.gos{background:var(--gold-soft)}
+.term.gos .k{color:var(--gold-ink)}
+.term.gos .v{font-size:19px}
+.term.guar{background:var(--green-soft)}
+.term.guar .k{color:var(--green-ink)}
+.term.guar .v{font-size:18px;line-height:1.35}
+details.full{border-top:1px solid var(--line)}
+details.full summary{padding:13px 18px;font-size:14.5px;font-weight:700;color:var(--green-ink);cursor:pointer;list-style:none}
+details.full summary::-webkit-details-marker{display:none}
+details.full summary::before{content:"▸ "}
+details.full[open] summary::before{content:"▾ "}
+details.full .txt{padding:0 18px 15px;font-size:13.5px;color:var(--muted);line-height:1.55}
+
+/* выгода */
+.gain{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:18px}
+.gain h2{font-size:19px;font-weight:800;letter-spacing:-.015em;margin-bottom:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media (max-width:430px){.row2{grid-template-columns:1fr}}
+.row2>div{border-radius:var(--r-md);padding:13px 14px}
+.row2 .was{background:var(--brick-soft)}
+.row2 .will{background:var(--green-soft)}
+.row2 .t{font-size:11px;font-weight:800;letter-spacing:.09em}
+.row2 .was .t{color:var(--brick-ink)}
+.row2 .will .t{color:var(--green-ink)}
+.row2 .big{font-size:23px;font-weight:800;letter-spacing:-.02em;margin-top:5px}
+.row2 .was .big{color:var(--brick-ink)}
+.row2 .will .big{color:var(--green-ink)}
+.row2 p{font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.gain .free{margin-top:10px;font-size:15.5px;line-height:1.5}
+.gain .free b{color:var(--green-ink)}
+.gain .quiet{margin-top:9px;font-size:13.5px;color:var(--muted);line-height:1.5}
+
+/* ОПЛАТА — одно действие */
+.pay{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:18px}
+.pay h2{font-size:19px;font-weight:800;letter-spacing:-.015em}
+.pay .expl{font-size:15px;color:var(--muted);margin-top:6px;line-height:1.5}
+.pay .expl b{color:var(--ink)}
+.cta{display:block;width:100%;margin-top:14px;background:var(--green);color:#fff;font:inherit;font-size:19px;font-weight:800;border:none;border-radius:14px;padding:17px;cursor:pointer;box-shadow:0 12px 26px -12px rgba(15,107,79,.75);transition:.15s var(--ease);text-align:center}
+.cta:hover{background:var(--green-ink)}
+.cta:active{transform:translateY(1px)}
+.cta small{display:block;font-size:12.5px;font-weight:600;color:rgba(255,255,255,.8);margin-top:3px}
+.accept{margin-top:10px;font-size:12.5px;color:var(--faint);text-align:center;line-height:1.5}
+.accept a{color:var(--green-ink)}
+.alt-sum{margin-top:8px;text-align:center;font-size:14px}
+.alt-sum a{color:var(--green-ink);font-weight:700}
+.then{margin-top:14px;background:var(--card2);border:1px solid var(--line2);border-radius:var(--r-md);padding:12px 14px;font-size:14px;color:var(--muted);line-height:1.55}
+.then b{color:var(--ink)}
+
+.help{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.help a{display:block;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 10px;font-size:14px;font-weight:700;color:var(--green-ink);text-decoration:none;transition:.15s var(--ease)}
+.help a:hover{border-color:#CFC4AC}
+.help a small{display:block;font-size:11.5px;font-weight:400;color:var(--faint);margin-top:2px}
+.valid{margin-top:13px;text-align:center;font-size:13px;color:var(--faint)}
+.foot{margin-top:20px;text-align:center;font-size:11.5px;color:var(--faint);line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="demo"><span>ДЕМО · КЛИЕНТ ВЫМЫШЛЕН · МАКЕТ НА СОГЛАСОВАНИИ</span></div>
+
+  <header class="hero">
+    <div class="brand">
+      <div class="lg">ДН</div>
+      <div><b>ДоНуля</b><small>СПИСАНИЕ ДОЛГА ПО 127-ФЗ</small></div>
+    </div>
+    <h1>Ирина Сергеевна, вот условия — коротко и целиком</h1>
+    <p>Как обсудили с менеджером Дарьей. Здесь <b>все условия договора, ваша выгода и первый платёж</b>.
+      Две минуты — и юристы начинают работу сегодня.</p>
+  </header>
+
+  <section class="terms">
+    <div class="terms-h"><b>Условия договора</b><span>оферта № 482119-Д</span></div>
+    <div class="term">
+      <span class="k">ЧТО ДЕЛАЕМ</span>
+      <span class="v">Списание долга <small>740 000 ₽</small> через суд</span>
+      <span class="note">Под ключ: документы, суд, финансовый управляющий, защита от кредиторов — всё делаем мы.</span>
+    </div>
+    <div class="term">
+      <span class="k">ЦЕНА — ЗАФИКСИРОВАНА В ДОГОВОРЕ</span>
+      <span class="v num">13 500 ₽/мес <small>× 14 = 189 000 ₽</small></span>
+      <span class="note">Больше не попросим ни рубля. Цена не меняется до конца процедуры.</span>
+    </div>
+    <div class="term gos">
+      <span class="k">ГОСПЛАТЕЖИ — ОТДЕЛЬНО И НЕ НАМ</span>
+      <span class="v num">50 000 ₽ по процедуре</span>
+      <span class="note">Суд 25 000 ₽ · оповещение кредиторов 15 000 ₽ · почта 10 000 ₽.
+        Эти платежи есть у любого юриста — говорим о них сразу.</span>
+    </div>
+    <div class="term">
+      <span class="k">СРОК</span>
+      <span class="v">8–12 месяцев</span>
+      <span class="note">Звонки кредиторов прекращаются по закону уже в первые недели после подачи.</span>
+    </div>
+    <div class="term guar">
+      <span class="k">ГАРАНТИЯ — ПУНКТ ДОГОВОРА</span>
+      <span class="v">Юрист проверит ваше дело до подачи. Найдём препятствие — вернём деньги</span>
+      <span class="note">Имущество, залоги и сделки за 3 года проверяем до суда. Берём только те дела, которые проходят.</span>
+    </div>
+    <details class="full">
+      <summary>Полный текст договора-оферты — прочитать здесь</summary>
+      <div class="txt">В бою здесь открывается полный текст оферты (тот же документ, что подписывают в обычном
+        порядке) и кнопка «Скачать PDF». Показ полного текста до оплаты обязателен — это условие акцепта.</div>
+    </details>
+  </section>
+
+  <section class="gain">
+    <h2>В чём ваша выгода</h2>
+    <div class="row2">
+      <div class="was">
+        <span class="t">СЕЙЧАС ВЫ ПЛАТИТЕ</span>
+        <div class="big num">41 000 ₽/мес</div>
+        <p>и 35 000 ₽ из них — проценты. Долг не уменьшается, звонки не прекращаются.</p>
+      </div>
+      <div class="will">
+        <span class="t">ПО ДОГОВОРУ</span>
+        <div class="big num">13 500 ₽/мес</div>
+        <p>14 месяцев — и долг 740 000 ₽ закрыт полностью, решением суда.</p>
+      </div>
+    </div>
+    <p class="free">Каждый месяц у вас остаётся <b class="num">~27 500 ₽</b>, которые сейчас уходят банкам впустую.</p>
+    <p class="quiet">Прожиточный минимум на вас и на сына — защищённые законом деньги, их не тронет никто.
+      Единственное жильё защищено законом.</p>
+  </section>
+
+  <section class="pay">
+    <h2>Одно действие — первый платёж</h2>
+    <p class="expl">Оплата по договору-оферте и есть его подписание: <b>заплатили — договор заключён</b>,
+      цена 13 500 ₽/мес зафиксирована, юристы начинают сегодня. Никаких кодов и бумаг не нужно.</p>
+    <button class="cta" type="button">Внести первый платёж — <span class="num" style="white-space:nowrap">1 000 ₽</span>
+      <small>идёт в зачёт цены · фиксирует условия · запускает работу</small></button>
+    <p class="alt-sum">Удобнее сразу месяц? <a href="#">Оплатить 13 500 ₽</a></p>
+    <p class="accept">Оплачивая, вы принимаете условия договора-оферты (полный текст выше).
+      Чек и договор придут по СМС и на почту.</p>
+    <div class="then"><b>Что будет после оплаты:</b> в течение часа позвонит юрист — сверит данные,
+      ответит на вопросы и запросит документы. Передумали после разговора с ним — вернём платёж.</div>
+  </section>
+
+  <div class="help">
+    <a href="#"><span>📞 Набрать Дарью</span><small>если удобнее голосом</small></a>
+    <a href="#"><span>Полная презентация</span><small>все условия по экранам</small></a>
+  </div>
+
+  <p class="valid">Расчёт действителен <b>3 дня</b>: дальше долг подрастёт на проценты, цифры пересчитаем заново.</p>
+
+  <p class="foot">ООО «ДоНуля» · ИНН · ОГРН · работаем с 2015 года · 127-ФЗ «О несостоятельности (банкротстве)»<br>
+    Макет оферта-страницы. Запуск — после оферта-версии договора от юриста; цифры клиента в бою приходят из движка.</p>
+</div>
+</body>
+</html>
