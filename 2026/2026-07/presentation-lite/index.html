@@ -93,10 +93,15 @@ p{text-wrap:pretty}
 .sim-dl b{color:var(--gold-bright)}
 @media (max-width:430px){.simcard{display:none}}
 
-/* доверие банка: платёж идёт на счёт в Сбере */
-.bank{margin-top:12px;display:flex;gap:12px;align-items:center;background:#F1F7F2;border:1.5px solid #21A038;border-radius:var(--r-md);padding:11px 14px}
+/* блок «Всё официально»: Роспатент · Сбер · юрист */
+.tr{margin-top:10px;display:flex;gap:13px;align-items:center;background:var(--card2);border:1px solid var(--line2);border-radius:var(--r-md);padding:12px 14px}
+.tr p{font-size:13.5px;color:var(--muted);line-height:1.5}
+.tr p b{color:var(--ink)}
+.tr-ic{flex:none;width:40px;height:40px;border-radius:11px;background:var(--pine);color:var(--gold-bright);display:grid;place-items:center;font-size:20px;font-weight:800}
+.tr-ic.law{font-size:17px}
+.tr.ros{background:var(--gold-soft);border:1.5px solid var(--gold)}
+.tr.bank{background:#F1F7F2;border:1.5px solid #21A038}
 .bank-lg{flex:none;height:24px;width:auto}
-.bank p{font-size:13.5px;color:var(--ink);line-height:1.45}
 
 /* условия — ниже, но по-прежнему крупно и целиком */
 .terms{margin-top:14px;background:var(--card);border:2px solid var(--pine);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
@@ -247,24 +252,28 @@ p{text-wrap:pretty}
     <p class="sim-dl">Подарок закрепляется первым платежом <b>до 15:32</b> — потом ссылка работает, а подарок сгорает.</p>
   </section>
 
-  <section class="blk pay">
-    <h2>Одно действие — первый платёж</h2>
-    <p class="expl"><b>Заплатили — договор заключён:</b> закон (ст. 438 ГК) считает оплату подписью.
-      1 000 ₽ — часть общей цены <span class="num" style="white-space:nowrap">189 000 ₽</span>;
-      больше мы не попросим ни рубля.</p>
-    <!-- Сбер-бейдж (решение владельца 30.07): в бою — официальный бейдж из брендбука эквайринга Сбера,
-         ставится ТОЛЬКО при действующем договоре эквайринга. Формулировка честная: банк защищает
-         платёж и данные; «Сбер гарантирует сделку» писать нельзя — чужая гарантия, комплаенс-риск. -->
-    <div class="bank">
-      <img class="bank-lg" src="img/sber-logo.png" alt="Сбер">
-      <p>Платёж — на счёт ООО «ДоНуля» в Сбере: СберPay, СБП или карта. Чек ФНС придёт по СМС.</p>
+  <!-- Блок «Одно действие» убран (решение владельца 30.07: механика «оплата = подпись» уже в шапке).
+       Вместо него — блок защиты. Роспатент: формулировка «под защитой государства» (не «от государства»);
+       в бою подставить реальный № свидетельства о регистрации товарного знака.
+       Сбер-бейдж — только при действующем договоре эквайринга; «Сбер гарантирует» писать нельзя.
+       Сумма единственной плавающей кнопки приходит из Обнулятора (1 000 дефолт / 13 500 если согласован месяц). -->
+  <section class="blk trust">
+    <h2>Всё официально</h2>
+    <div class="tr ros">
+      <span class="tr-ic" aria-hidden="true">®</span>
+      <p><b>Бренд «ДоНуля» зарегистрирован в Роспатенте</b> — товарный знак под защитой государства.
+        Компании-однодневки знаков не регистрируют.</p>
     </div>
-    <!-- вторая кнопка «Оплатить 13 500» убрана (решение владельца 30.07: одно действие).
-         Сумма единственной кнопки приходит из Обнулятора по договорённости звонка:
-         по умолчанию частичка 1 000 ₽; если в консультации согласован месяц — движок ставит 13 500. -->
-    <div class="then"><b>После оплаты</b> в течение часа позвонит юрист <b>Михаил Александрович</b> —
-      сверит данные и запросит документы. Передумали после разговора с ним — вернём платёж.</div>
-    <p class="quiet">Оплачивая, вы принимаете условия договора-оферты (полный текст ниже).
+    <div class="tr bank">
+      <img class="bank-lg" src="img/sber-logo.png" alt="Сбер">
+      <p><b>Платёж — на счёт ООО «ДоНуля» в Сбере:</b> СберPay, СБП или карта. Чек ФНС придёт по СМС.</p>
+    </div>
+    <div class="tr">
+      <span class="tr-ic law" aria-hidden="true">⚖</span>
+      <p><b>После оплаты</b> в течение часа позвонит юрист Михаил Александрович — сверит данные
+        и запросит документы. Передумали после разговора с ним — вернём платёж.</p>
+    </div>
+    <p class="quiet">Оплачивая, вы принимаете условия договора-оферты (полный текст выше).
       Договор и цена действительны <b>3 дня</b>.</p>
   </section>
 
