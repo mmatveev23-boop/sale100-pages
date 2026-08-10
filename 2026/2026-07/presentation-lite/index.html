@@ -107,30 +107,67 @@ p{text-wrap:pretty}
 .bank-lg{flex:none;height:24px;width:auto}
 
 /* условия — ниже, но по-прежнему крупно и целиком */
-.terms{margin-top:14px;background:var(--card);border:2px solid var(--pine);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
-.terms-h{background:var(--pine);color:#fff;padding:13px 18px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.terms-h b{font-size:16px}
-.terms-h span{font-size:11.5px;color:rgba(255,255,255,.65)}
-.term{padding:15px 18px;border-bottom:1px dashed var(--line);display:flex;flex-direction:column;gap:3px}
-.term:last-of-type{border-bottom:none}
-.term .k{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--faint)}
-.term .v{font-size:21px;font-weight:800;letter-spacing:-.015em;line-height:1.25}
-.term .v small{font-size:15px;font-weight:600;color:var(--muted)}
-.term .note{font-size:14px;color:var(--muted);line-height:1.45}
-.term.gos{background:var(--gold-soft)}
-.term.gos .k{color:var(--gold-ink)}
-.term.gos .v{font-size:18.5px}
-.term.guar{background:var(--green-soft)}
-.term.guar .k{color:var(--green-ink)}
-.term.guar .v{font-size:17.5px;line-height:1.35}
+/* витрина договора (стиль карточек владельца: тёмный + золотые рамки) */
+.offer{margin-top:14px;background:linear-gradient(165deg,var(--pine2) 0%,var(--pine) 62%,#082A21 100%);color:#fff;border-radius:var(--r-lg);padding:20px 16px;box-shadow:var(--shadow)}
+.offer h2{font-size:21px;font-weight:800;letter-spacing:-.015em;line-height:1.22;text-wrap:balance}
+.offer h2 em{font-style:normal;color:var(--gold-bright)}
+.offer .osub{margin-top:7px;font-size:13.5px;color:rgba(255,255,255,.72);line-height:1.5}
+.ogrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+@media (max-width:470px){.ogrid{grid-template-columns:1fr}}
+.oc{border:1.5px solid var(--gold);border-radius:var(--r-md);padding:13px 14px;background:rgba(255,255,255,.03)}
+.oc .ot{display:block;font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--gold-bright)}
+.oc b{display:block;font-size:19px;font-weight:800;line-height:1.2;margin-top:6px;letter-spacing:-.015em}
+.oc p{font-size:12.5px;color:rgba(255,255,255,.72);margin-top:6px;line-height:1.45}
+
+/* график платежей */
+.sched .strip{display:flex;gap:4px;margin-top:12px}
+.sched .cell{flex:1;min-width:0;height:44px;border-radius:8px;background:var(--green-soft);border:1px solid #CFE2D5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.sched .cell i{font-style:normal;font-size:11px;font-weight:800;color:var(--green-ink)}
+.sched .cell{font-size:8.5px;color:var(--green-ink);font-weight:700}
+.sched .cell.today{background:var(--gold-soft);border-color:var(--gold);flex:1.6}
+.sched .cell.today i{color:var(--gold-ink)}
+.sched .cell.today{color:var(--gold-ink)}
+.sched .cell.last{background:var(--pine);border-color:var(--pine)}
+.sched .cell.last i{color:var(--gold-bright)}
+.sched .stotal{margin-top:10px;font-size:14.5px;text-align:center}
+.sched .stotal b{color:var(--gold-ink)}
+
 /* договор-PDF: выделенная карточка документа (просьба владельца «напиши или выдели») */
 .doc{display:flex;gap:13px;align-items:center;padding:15px 18px;border-bottom:1px solid var(--line);background:var(--gold-soft);text-decoration:none;color:inherit;transition:background .15s var(--ease)}
 .doc:hover{background:#F3E5C4}
-.doc-ic{flex:none;width:40px;height:48px;background:#fff;border:1.5px solid var(--brick);border-radius:8px;display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--brick);letter-spacing:.04em}
+.doc-ic{flex:none;width:40px;height:48px;background:#fff;border:1.5px solid var(--pine);border-radius:8px;display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--pine);letter-spacing:.04em}
 .doc-tx{flex:1;min-width:0}
 .doc-tx b{display:block;font-size:15px;line-height:1.3}
 .doc-tx i{display:block;font-style:normal;font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
 .doc-btn{flex:none;background:var(--green);color:#fff;font-size:14px;font-weight:700;border-radius:10px;padding:10px 16px}
+@media (max-width:470px){.doc{flex-wrap:wrap}.doc-tx{flex:1 1 60%}.doc-btn{flex:1 1 100%;text-align:center;padding:12px}}
+
+
+/* экран после оплаты (запрос владельца 10.08: скачать офф. приложение — RuStore и App Store).
+   В бою это отдельная thank-you страница, на которую движок редиректит после вебхука оплаты;
+   здесь — состояние макета. Ссылки магазинов — подставить реальные. */
+.paid{display:none;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:26px 18px;text-align:center}
+body.paid-mode .paid{display:block}
+body.paid-mode .wrap>*:not(.demo):not(.paid){display:none}
+body.paid-mode .fab{display:none}
+.pd-check{width:64px;height:64px;margin:0 auto;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-size:32px;font-weight:800}
+.paid h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:14px}
+.pd-sub{margin-top:8px;font-size:15px;color:var(--muted);line-height:1.55;text-align:center}
+.pd-sub b{color:var(--ink)}
+.pd-app{margin-top:18px;background:linear-gradient(165deg,var(--pine2) 0%,var(--pine) 62%,#082A21 100%);color:#fff;border-radius:var(--r-md);padding:18px 16px;text-align:left}
+.pd-app-h{font-size:18px;font-weight:800;letter-spacing:-.015em;line-height:1.25}
+.pd-app-h em{font-style:normal;color:var(--gold-bright)}
+.pd-feats{list-style:none;margin-top:10px;display:grid;gap:6px}
+.pd-feats li{position:relative;padding-left:22px;font-size:13.5px;line-height:1.45;color:rgba(255,255,255,.85)}
+.pd-feats li::before{content:"✓";position:absolute;left:0;top:0;color:var(--gold-bright);font-weight:800}
+.stores{display:flex;gap:9px;margin-top:14px}
+.store{flex:1;display:flex;align-items:center;gap:9px;background:#0D1210;border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:13px;padding:10px 12px;text-decoration:none;min-width:0}
+.store span small{display:block;font-size:10px;opacity:.6;letter-spacing:.02em}
+.store span b{display:block;font-size:15px;line-height:1.15;white-space:nowrap}
+.st-ic{flex:none;display:grid;place-items:center;width:26px}
+.st-ic.ru{width:26px;height:26px;background:#0077FF;border-radius:7px;font-weight:800;font-size:15px;color:#fff}
+.pd-note{margin-top:11px;font-size:12px;color:rgba(255,255,255,.6);line-height:1.5;text-align:left}
+@media (max-width:470px){.stores{flex-direction:column}}
 
 .foot{margin-top:20px;text-align:center;font-size:11.5px;color:var(--faint);line-height:1.6}
 
@@ -195,41 +232,65 @@ p{text-wrap:pretty}
       Единственное жильё (без ипотеки) защищено законом; если есть ипотека — юрист разберёт её на звонке.</p>
   </section>
 
-  <section class="terms">
-    <div class="terms-h"><b>Ваш договор — коротко и целиком</b><span>оферта № 482119-Д</span></div>
-    <a class="doc" href="dogovor-oferta.pdf" target="_blank" rel="noopener">
+  <!-- Витрина договора — как на странице подписания (запрос владельца 10.08 «может так же договор показать»):
+       те же 6 карточек П.6.2/6.3/6.5/5.1 (номера пунктов и «7 дней» — сверить с текстом договора).
+       Отличие оферты: оплата = согласие, поэтому PDF-карточка говорит «оплата подтверждает». -->
+  <section class="offer">
+    <h2>Ирина Сергеевна, вот что вы получаете <em>по этому договору</em></h2>
+    <p class="osub">Коротко и крупно — главные условия. Полный текст со всеми деталями — ниже, PDF.</p>
+    <div class="ogrid">
+      <div class="oc">
+        <span class="ot">ЧТО ДЕЛАЕМ</span>
+        <b>Спишем весь долг:<br>740 000 ₽</b>
+        <p>процедура списания долга по 127-ФЗ, ведём дело от заявления до решения суда</p>
+      </div>
+      <div class="oc">
+        <span class="ot">ВАШ ПЛАТЁЖ</span>
+        <b class="num">13 500 ₽ / месяц</b>
+        <p>рассрочка на 14 месяцев без банка и процентов · услуги целиком 189 000 ₽ · график — Приложение № 1</p>
+      </div>
+      <div class="oc">
+        <span class="ot">ГАРАНТИЯ РЕЗУЛЬТАТА · П. 6.2</span>
+        <b>Не спишем — вернём 100% денег</b>
+        <p>если суд не освободит вас от долгов, возвращаем всё оплаченное по договору</p>
+      </div>
+      <div class="oc">
+        <span class="ot">СКОРОСТЬ ВОЗВРАТА · П. 6.3</span>
+        <b>Возврат за 7 рабочих дней</b>
+        <p>по письменному требованию, без затяжек и уговоров</p>
+      </div>
+      <div class="oc">
+        <span class="ot">ЦЕНА ЗАФИКСИРОВАНА · П. 6.5</span>
+        <b>Стоимость не вырастет</b>
+        <p>мы не вправе поднять цену услуг в одностороннем порядке</p>
+      </div>
+      <div class="oc">
+        <span class="ot">ЧЕСТНО О ГОСПЛАТЕЖАХ · П. 5.1</span>
+        <b class="num">50 000 ₽ — отдельно</b>
+        <p>напрямую государству: депозит суда 25 000 + публикации 15 000 + почтовые 10 000. В цену услуг не входят</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk sched">
+    <h2>График платежей — Приложение № 1</h2>
+    <p class="quiet" style="margin-top:6px">14 платежей по <b class="num">13 500 ₽</b>, раз в месяц.
+      Первый — сегодня: <b>от 1 000 ₽ в зачёт</b>, остаток первого платежа — в согласованную дату.</p>
+    <div class="strip" aria-label="14 платежей">
+      <span class="cell today"><i>1</i>сегодня</span>
+      <span class="cell"><i>2</i></span><span class="cell"><i>3</i></span><span class="cell"><i>4</i></span>
+      <span class="cell"><i>5</i></span><span class="cell"><i>6</i></span><span class="cell"><i>7</i></span>
+      <span class="cell"><i>8</i></span><span class="cell"><i>9</i></span><span class="cell"><i>10</i></span>
+      <span class="cell"><i>11</i></span><span class="cell"><i>12</i></span><span class="cell"><i>13</i></span>
+      <span class="cell last"><i>14</i></span>
+    </div>
+    <p class="stotal">13 500 ₽ × 14 = <b class="num">189 000 ₽ под ключ</b> — и ни рублём больше</p>
+    <a class="doc" href="dogovor-oferta.pdf" target="_blank" rel="noopener" style="border-top:none;border:1px solid var(--line);border-radius:var(--r-md);margin-top:12px">
       <span class="doc-ic" aria-hidden="true">PDF</span>
       <span class="doc-tx"><b>Договор-оферта № 482119-Д — полный текст</b>
-        <i>Откройте и сохраните себе. Оплата подтверждает согласие именно с этим документом.</i></span>
+        <i>Проверьте карточки выше в полном тексте — оплата подтверждает согласие именно с этим документом.</i></span>
       <span class="doc-btn">Открыть</span>
     </a>
-    <div class="term">
-      <span class="k">ЧТО ДЕЛАЕМ</span>
-      <span class="v">Списание долга <small>740 000 ₽</small> через суд</span>
-      <span class="note">Под ключ: документы, суд, финансовый управляющий, защита от кредиторов — всё делаем мы.</span>
-    </div>
-    <div class="term">
-      <span class="k">ЦЕНА — ЗАФИКСИРОВАНА В ДОГОВОРЕ</span>
-      <span class="v num">13 500 ₽/мес <small>× 14 = 189 000 ₽</small></span>
-      <span class="note">Больше не попросим ни рубля. Цена не меняется до конца процедуры.
-        Рассрочка идёт своим графиком 14 месяцев и не привязана к сроку процедуры.</span>
-    </div>
-    <div class="term gos">
-      <span class="k">ГОСПЛАТЕЖИ — ОТДЕЛЬНО И НЕ НАМ</span>
-      <span class="v num">50 000 ₽ по процедуре</span>
-      <span class="note">Суд 25 000 ₽ · оповещение кредиторов 15 000 ₽ · почта 10 000 ₽.
-        Эти платежи есть у любого юриста — говорим о них сразу.</span>
-    </div>
-    <div class="term">
-      <span class="k">СРОК</span>
-      <span class="v">Обычно 8–12 месяцев</span>
-      <span class="note">Звонки кредиторов прекращаются по закону после того, как суд вводит процедуру — обычно это первые недели.</span>
-    </div>
-    <div class="term guar">
-      <span class="k">ГАРАНТИЯ — ПУНКТ ДОГОВОРА</span>
-      <span class="v">Юрист проверит ваше дело до подачи. Найдём препятствие — вернём всё, что вы заплатили нам</span>
-      <span class="note">Имущество, залоги и сделки за 3 года проверяем до суда. Берём только те дела, которые проходят.</span>
-    </div>
   </section>
 
   <!-- SIM-оффер отдельным громким блоком (правка владельца «надо чтобы прям усиливало»):
@@ -283,6 +344,29 @@ p{text-wrap:pretty}
 
   <!-- кнопки «Набрать/Написать/Полная презентация» убраны (решение владельца 30.07:
        страница только закрывает — договор и оплата); контакт Дарьи остаётся в её карточке в шапке -->
+
+  <!-- Экран после оплаты: в бою — thank-you страница по редиректу движка после вебхука.
+       Ссылки магазинов — заглушки, подставить реальные RuStore/App Store. -->
+  <section class="paid" id="paidScreen" aria-live="polite">
+    <div class="pd-check" aria-hidden="true">✓</div>
+    <h2>Оплата получена</h2>
+    <p class="pd-sub">Этот платёж и подписал договор — он вступил в силу. <b>Виктория уже видит оплату</b> и позвонит вам сегодня.</p>
+    <div class="pd-app">
+      <div class="pd-app-h">Дальше — в приложении <em>ДоНуля</em></div>
+      <ul class="pd-feats">
+        <li><b>Статус вашего дела</b> — виден на каждом шаге, от заявления до решения суда</li>
+        <li><b>Договор и документы</b> — всегда под рукой</li>
+        <li><b>Быстрая связь с нами</b> — вопросы решаются в чате, не по звонку</li>
+      </ul>
+      <div class="stores">
+        <a class="store" href="#" rel="noopener"><span class="st-ic ru" aria-hidden="true">R</span><span><small>Скачать из</small><b>RuStore</b></span></a>
+        <a class="store" href="#" rel="noopener"><span class="st-ic" aria-hidden="true"><svg viewBox="0 0 384 512" width="20" height="24" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg></span><span><small>Скачать в</small><b>App Store</b></span></a>
+      </div>
+      <p class="pd-note">Приложение бесплатное. RuStore — для Android, App Store — для iPhone.
+        Ссылки ведут в официальные магазины.</p>
+    </div>
+  </section>
+
   <p class="foot">ООО «ДоНуля» · ИНН · ОГРН · работаем с 2015 года · 127-ФЗ «О несостоятельности (банкротстве)»<br>
     Макет оферта-страницы. Запуск — после оферта-версии договора от юриста.
     В бою страница полностью формируется из Обнулятора: цифры клиента, договор, менеджер и юрист — из пульта сделки.</p>
@@ -301,7 +385,7 @@ p{text-wrap:pretty}
    аудитории читается давлением (бэклог №7, docs/presentation-lite-improvements). */
 (function () {
   var btn = document.getElementById('fabBtn');
-  var terms = document.querySelector('.terms');
+  var terms = document.querySelector('.offer');
   var mode = 'terms';
 
   function setPay() {
@@ -311,12 +395,15 @@ p{text-wrap:pretty}
   }
   function setTerms() {
     mode = 'terms';
-    btn.innerHTML = 'Посмотреть договор ↓<small>цена, гарантия, полный текст PDF</small>';
+    btn.innerHTML = 'Посмотреть договор ↓<small>главные условия, график и полный текст</small>';
   }
 
   btn.addEventListener('click', function () {
-    if (mode === 'terms') terms.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    /* в режиме pay макет ничего не делает — в бою здесь открывается оплата СБП/картой */
+    if (mode === 'terms') { terms.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    /* в бою здесь открывается оплата СБП/картой, а на экран «оплата получена»
+       клиента приводит редирект после вебхука; в макете показываем его сразу */
+    document.body.classList.add('paid-mode');
+    window.scrollTo(0, 0);
   });
 
   /* проверка по скроллу, не IntersectionObserver: IO не стреляет в фоновых вкладках
