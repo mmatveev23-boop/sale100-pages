@@ -316,8 +316,7 @@ body.paid-mode .fab{display:none}
     </div>
     <button class="paybtn num" type="button">Внести первый платёж <span style="white-space:nowrap">13 500 ₽</span>
       <span class="sb"><img src="img/sber-logo.png" alt="Сбер"></span></button>
-    <button class="paybtn2 num" type="button">Начать с 1 000 ₽</button>
-    <p class="note">1 000 ₽ входят в общую стоимость. Оставшиеся 12 500 ₽ — в согласованную дату.</p>
+    <!-- кнопка «Начать с 1 000» убрана (Виктория 10.08): сумму первого платежа выставляет менеджер в Обнуляторе — кнопка одна, сумма приходит из движка -->
     <p class="stamp">Подписан <b id="signStamp">—</b> · <a href="dogovor-oferta.pdf" target="_blank" rel="noopener">скачать подписанный PDF</a></p>
   </section>
 
@@ -486,7 +485,7 @@ body.paid-mode .fab{display:none}
   function setPay() {
     mode = 'pay';
     btn.innerHTML = 'Внести первый платёж <span class="num" style="white-space:nowrap">13 500 ₽</span>' +
-      '<small>или начать с 1 000 ₽ — кнопки наверху · счёт в <span class="sb"><img src="img/sber-logo.png" alt="Сбер"></span></small>';
+      '<small>кнопка наверху · счёт в <span class="sb"><img src="img/sber-logo.png" alt="Сбер"></span></small>';
   }
 
   btn.addEventListener('click', function () {
