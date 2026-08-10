@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Ваш договор готов — осталась оплата · ДоНуля</title>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ═══ ОФЕРТА-СТРАНИЦА · СОКРАЩЁННАЯ ВЕРСИЯ (запрос Виктории 10.08: «сократить, выгоду — в самое начало»).
+   Отличия от боевой presentation-lite: выгода поднята в шапку (was/will прямо в hero), карточка «ВАШ ПЛАТЁЖ»
+   убрана (дублировала график), «Всё официально» сжат до Роспатент+Сбер+одна строка, дубли «оплата = подпись»
+   и «позвонит менеджер» вырезаны. Инварианты не тронуты: полный текст оферты, госплатежи отдельно,
+   гарантия/цена с пунктами, акцепт-строка, «3 дня», SIM-блок целиком. ═══
+   Правка заказчика 30.07: выгода и платёж — НАВЕРХ сразу после шапки, кнопка оплаты ПЛАВАЮЩАЯ
+   (всегда на экране), условия договора — ниже по странице.
+   Юрмодель: публичная оферта, оплата = акцепт (ст. 438 ГК); подписью служит сам платёж.
+   БЛОКЕР ЗАПУСКА: оферта-версия договора + гринлайт юриста (docs/short-close-link-analysis §5).
+   Не вырезается: полный текст оферты до оплаты, госплатежи 50 000 отдельно, цена под ключ,
+   гарантия возврата, реквизиты, микротекст акцепта у кнопки. Цифры клиента в бою — из движка. ═══ */
+:root{
+  --paper:#F6F2E9;--card:#FFFFFF;--card2:#FBF8F1;--line:#E3DCCB;--line2:#EFE9DC;
+  --ink:#16231D;--muted:#4F5A54;--faint:#5C665F; /* #7C857F проваливал WCAG AA на 50+ */
+  --pine:#0B3B2E;--pine2:#0F4A39;--green:#0F6B4F;--green-ink:#0B5540;--green-soft:#E4EFE7;
+  --gold:#C99A33;--gold-bright:#F4C775;--gold-soft:#F7EDD6;--gold-ink:#7E5810;
+  --brick:#A8442E;--brick-soft:#F6E3DC;--brick-ink:#8A3521;
+  --shadow:0 18px 44px -18px rgba(11,59,46,.28);--shadow-sm:0 6px 18px -10px rgba(22,35,29,.16);
+  --r-lg:22px;--r-md:15px;--r-sm:11px;--ease:cubic-bezier(.22,1,.36,1);
+  --z-fab:30;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Golos Text",system-ui,sans-serif;background:var(--paper);color:var(--ink);font-size:18px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  /* запас снизу под плавающую кнопку: панель до ~175px, реквизиты не должны прятаться */
+  padding-bottom:calc(162px + env(safe-area-inset-bottom))}
+.num{font-variant-numeric:tabular-nums}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 24px}
+p{text-wrap:pretty}
+
+.demo{margin-bottom:10px;text-align:center}
+.demo span{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.1em;background:var(--gold-soft);border:1px dashed var(--gold);color:var(--gold-ink);border-radius:999px;padding:5px 13px}
+
+/* шапка — минимум */
+.hero{background:radial-gradient(120% 120% at 88% -20%, #135741 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 58%,#082A21 100%);color:#fff;border-radius:var(--r-lg);padding:20px;box-shadow:var(--shadow)}
+.hero .brand{display:flex;flex-direction:column;align-items:flex-start;gap:7px;margin-bottom:14px}
+.hero .brandlogo{height:30px;width:auto}
+.hero .brand small{font-size:11px;color:rgba(255,255,255,.62);letter-spacing:.13em}
+.hero h1{font-size:24px;line-height:1.16;letter-spacing:-.02em;font-weight:800;text-wrap:balance}
+.hero p{margin-top:8px;font-size:15px;color:rgba(255,255,255,.85)}
+.hero p b{color:#fff}
+.hero .mgr{display:flex;gap:11px;align-items:center;margin-top:14px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-md);padding:11px 13px}
+.hero .mgr .ava{flex:none;width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid rgba(244,199,117,.55)}
+/* в бою вместо силуэта — реальное фото менеджера из движка (решение владельца 30.07: лица ставим) */
+.hero .mgr p{margin-top:0;font-size:13.5px;line-height:1.45;color:rgba(255,255,255,.85)}
+.hero h1 em{font-style:normal;color:var(--gold-bright)}
+.hrow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}
+@media (max-width:430px){.hrow{grid-template-columns:1fr}}
+.hc{border-radius:var(--r-md);padding:12px 13px;border:1.5px solid rgba(255,255,255,.18);background:rgba(255,255,255,.05)}
+.hc span{display:block;font-size:10.5px;font-weight:800;letter-spacing:.09em;color:rgba(255,255,255,.65)}
+.hc b{display:block;font-size:22px;font-weight:800;letter-spacing:-.02em;margin-top:4px;color:#fff}
+.hc i{display:block;font-style:normal;font-size:12.5px;color:rgba(255,255,255,.72);margin-top:4px;line-height:1.4}
+.hc.was{border-color:rgba(214,116,90,.55)}
+.hc.was b{color:#F0A98F}
+.hc.will{border-color:var(--gold-bright);background:rgba(244,199,117,.1)}
+.hc.will b{color:var(--gold-bright)}
+.hfree{margin-top:11px;font-size:14.5px;color:rgba(255,255,255,.85)}
+.hfree b{color:var(--gold-bright);white-space:nowrap}
+.oc.wide{grid-column:1/-1}
+
+/* карточки-блоки */
+.blk{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:18px}
+.blk h2{font-size:19px;font-weight:800;letter-spacing:-.015em}
+
+/* выгода — первый блок */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+@media (max-width:430px){.row2{grid-template-columns:1fr}}
+.row2>div{border-radius:var(--r-md);padding:13px 14px}
+.row2 .was{background:var(--brick-soft)}
+.row2 .will{background:var(--green-soft)}
+.row2 .t{font-size:11px;font-weight:800;letter-spacing:.09em}
+.row2 .was .t{color:var(--brick-ink)}
+.row2 .will .t{color:var(--green-ink)}
+.row2 .big{font-size:23px;font-weight:800;letter-spacing:-.02em;margin-top:5px}
+.row2 .was .big{color:var(--brick-ink)}
+.row2 .will .big{color:var(--green-ink)}
+.row2 p{font-size:13.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.free{margin-top:10px;font-size:15.5px;line-height:1.5}
+.free b{color:var(--green-ink)}
+.quiet{margin-top:9px;font-size:13.5px;color:var(--muted);line-height:1.5}
+
+/* платёж — сразу за выгодой; кнопка живёт в плавающей панели */
+.pay .expl{font-size:15px;color:var(--muted);margin-top:8px;line-height:1.5}
+.pay .expl b{color:var(--ink)}
+.then{margin-top:12px;background:var(--card2);border:1px solid var(--line2);border-radius:var(--r-md);padding:12px 14px;font-size:14px;color:var(--muted);line-height:1.55}
+.then b{color:var(--ink)}
+/* SIM-оффер: тёмный громкий блок между выгодой и оплатой */
+.sim{margin-top:14px;background:radial-gradient(120% 120% at 90% -10%, #1A6248 0%, transparent 55%),linear-gradient(165deg,var(--pine2) 0%,var(--pine) 60%,#082A21 100%);border:2px dashed var(--gold-bright);border-radius:var(--r-lg);padding:20px 18px;color:#fff;box-shadow:var(--shadow)}
+.sim-flex{display:flex;gap:16px;align-items:flex-start}
+.sim-tx{flex:1;min-width:0}
+.sim-tag{display:inline-block;background:var(--gold-bright);color:#4A3608;font-size:11px;font-weight:800;letter-spacing:.08em;border-radius:999px;padding:4px 12px}
+.sim h2{font-size:21.5px;font-weight:800;letter-spacing:-.015em;line-height:1.2;margin-top:11px;color:#fff;text-wrap:balance}
+.sim .lead{margin-top:9px;font-size:14.5px;color:rgba(255,255,255,.88);line-height:1.5}
+.sim .lead b{color:var(--gold-bright)}
+.simcard{flex:none;width:64px;height:86px;background:linear-gradient(160deg,#F4C775 0%,#C99A33 100%);border-radius:10px 22px 10px 10px;position:relative;box-shadow:0 10px 20px -8px rgba(0,0,0,.4);margin-top:6px}
+.simcard i{position:absolute;left:12px;top:26px;width:26px;height:20px;background:#8A6212;border-radius:5px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35)}
+.simcard span{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:9px;font-weight:800;color:#4A3608;letter-spacing:.04em}
+.sim-feats{list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:9px}
+.sim-feats li{position:relative;padding-left:24px;font-size:14px;line-height:1.45;color:rgba(255,255,255,.85)}
+.sim-feats li::before{content:"✓";position:absolute;left:0;top:0;color:var(--gold-bright);font-weight:800}
+.sim-feats li b{color:#fff}
+.sim-dl{margin-top:13px;background:rgba(244,199,117,.14);border:1px solid rgba(244,199,117,.45);border-radius:var(--r-sm);padding:10px 12px;font-size:13.5px;line-height:1.45;color:rgba(255,255,255,.9)}
+.sim-dl b{color:var(--gold-bright)}
+@media (max-width:430px){.simcard{display:none}}
+
+/* блок «Всё официально»: Роспатент · Сбер · юрист */
+.tr{margin-top:10px;display:flex;gap:13px;align-items:center;background:var(--card2);border:1px solid var(--line2);border-radius:var(--r-md);padding:12px 14px}
+.tr p{font-size:13.5px;color:var(--muted);line-height:1.5}
+.tr p b{color:var(--ink)}
+.tr-ic{flex:none;width:40px;height:40px;border-radius:11px;background:var(--pine);color:var(--gold-bright);display:grid;place-items:center;font-size:20px;font-weight:800}
+.tr-ic.law{font-size:17px}
+.tr.ros{background:#F4F7FB;border:1.5px solid #9FB4D0}
+.ros-badge{flex:none;display:flex;flex-direction:column;align-items:center;gap:3px}
+.ros-lg{height:64px;width:auto}
+.ros-badge i{font-style:normal;font-size:9px;font-weight:800;letter-spacing:.1em;color:#1B3F7A}
+.tr.bank{background:#F1F7F2;border:1.5px solid #21A038}
+.bank-lg{flex:none;height:24px;width:auto}
+
+/* условия — ниже, но по-прежнему крупно и целиком */
+/* витрина договора (стиль карточек владельца: тёмный + золотые рамки) */
+.offer{margin-top:14px;background:linear-gradient(165deg,var(--pine2) 0%,var(--pine) 62%,#082A21 100%);color:#fff;border-radius:var(--r-lg);padding:20px 16px;box-shadow:var(--shadow)}
+.offer h2{font-size:21px;font-weight:800;letter-spacing:-.015em;line-height:1.22;text-wrap:balance}
+.offer h2 em{font-style:normal;color:var(--gold-bright)}
+.offer .osub{margin-top:7px;font-size:13.5px;color:rgba(255,255,255,.72);line-height:1.5}
+.ogrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+@media (max-width:470px){.ogrid{grid-template-columns:1fr}}
+.oc{border:1.5px solid var(--gold);border-radius:var(--r-md);padding:13px 14px;background:rgba(255,255,255,.03)}
+.oc .ot{display:block;font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--gold-bright)}
+.oc b{display:block;font-size:19px;font-weight:800;line-height:1.2;margin-top:6px;letter-spacing:-.015em}
+.oc p{font-size:12.5px;color:rgba(255,255,255,.72);margin-top:6px;line-height:1.45}
+
+/* график платежей */
+.sched .strip{display:flex;gap:4px;margin-top:12px}
+.sched .cell{flex:1;min-width:0;height:44px;border-radius:8px;background:var(--green-soft);border:1px solid #CFE2D5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.sched .cell i{font-style:normal;font-size:11px;font-weight:800;color:var(--green-ink)}
+.sched .cell{font-size:8.5px;color:var(--green-ink);font-weight:700}
+.sched .cell.today{background:var(--gold-soft);border-color:var(--gold);flex:1.6}
+.sched .cell.today i{color:var(--gold-ink)}
+.sched .cell.today{color:var(--gold-ink)}
+.sched .cell.last{background:var(--pine);border-color:var(--pine)}
+.sched .cell.last i{color:var(--gold-bright)}
+.sched .stotal{margin-top:10px;font-size:14.5px;text-align:center}
+.sched .stotal b{color:var(--gold-ink)}
+
+/* договор-PDF: выделенная карточка документа (просьба владельца «напиши или выдели») */
+.doc{display:flex;gap:13px;align-items:center;padding:15px 18px;border-bottom:1px solid var(--line);background:var(--gold-soft);text-decoration:none;color:inherit;transition:background .15s var(--ease)}
+.doc:hover{background:#F3E5C4}
+.doc-ic{flex:none;width:40px;height:48px;background:#fff;border:1.5px solid var(--pine);border-radius:8px;display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--pine);letter-spacing:.04em}
+.doc-tx{flex:1;min-width:0}
+.doc-tx b{display:block;font-size:15px;line-height:1.3}
+.doc-tx i{display:block;font-style:normal;font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
+.doc-btn{flex:none;background:var(--green);color:#fff;font-size:14px;font-weight:700;border-radius:10px;padding:10px 16px}
+@media (max-width:470px){.doc{flex-wrap:wrap}.doc-tx{flex:1 1 60%}.doc-btn{flex:1 1 100%;text-align:center;padding:12px}}
+
+
+/* экран после оплаты (запрос владельца 10.08: скачать офф. приложение — RuStore и App Store).
+   В бою это отдельная thank-you страница, на которую движок редиректит после вебхука оплаты;
+   здесь — состояние макета. Ссылки магазинов — подставить реальные. */
+.paid{display:none;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:26px 18px;text-align:center}
+body.paid-mode .paid{display:block}
+body.paid-mode .wrap>*:not(.demo):not(.paid){display:none}
+body.paid-mode .fab{display:none}
+.pd-check{width:64px;height:64px;margin:0 auto;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-size:32px;font-weight:800}
+.paid h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-top:14px}
+.pd-sub{margin-top:8px;font-size:15px;color:var(--muted);line-height:1.55;text-align:center}
+.pd-sub b{color:var(--ink)}
+.pd-app{margin-top:18px;background:linear-gradient(165deg,var(--pine2) 0%,var(--pine) 62%,#082A21 100%);color:#fff;border-radius:var(--r-md);padding:18px 16px;text-align:left}
+.pd-app-h{font-size:18px;font-weight:800;letter-spacing:-.015em;line-height:1.25}
+.pd-app-h em{font-style:normal;color:var(--gold-bright)}
+.pd-feats{list-style:none;margin-top:10px;display:grid;gap:6px}
+.pd-feats li{position:relative;padding-left:22px;font-size:13.5px;line-height:1.45;color:rgba(255,255,255,.85)}
+.pd-feats li::before{content:"✓";position:absolute;left:0;top:0;color:var(--gold-bright);font-weight:800}
+.stores{display:flex;gap:9px;margin-top:14px}
+.store{flex:1;display:flex;align-items:center;gap:9px;background:#0D1210;border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:13px;padding:10px 12px;text-decoration:none;min-width:0}
+.store span small{display:block;font-size:10px;opacity:.6;letter-spacing:.02em}
+.store span b{display:block;font-size:15px;line-height:1.15;white-space:nowrap}
+.st-ic{flex:none;display:grid;place-items:center;width:26px}
+.st-ic.ru{width:26px;height:26px;background:#0077FF;border-radius:7px;font-weight:800;font-size:15px;color:#fff}
+.pd-note{margin-top:11px;font-size:12px;color:rgba(255,255,255,.6);line-height:1.5;text-align:left}
+@media (max-width:470px){.stores{flex-direction:column}}
+
+.foot{margin-top:20px;text-align:center;font-size:11.5px;color:var(--faint);line-height:1.6}
+
+/* ── ПЛАВАЮЩАЯ КНОПКА (объёмная, под ней чисто — решение владельца) ── */
+.fab{position:fixed;left:0;right:0;bottom:0;z-index:var(--z-fab);
+  background:linear-gradient(180deg,rgba(246,242,233,0) 0%,var(--paper) 30%);
+  padding:16px 14px calc(12px + env(safe-area-inset-bottom));
+  pointer-events:none} /* градиент не должен глотать тапы по ссылкам под ним */
+.fab-in{max-width:560px;margin:0 auto;pointer-events:auto}
+.fab .cta{display:block;width:100%;color:#fff;font:inherit;font-size:18.5px;font-weight:800;border:none;border-radius:16px;padding:14px 15px 15px;cursor:pointer;text-align:center;
+  background:linear-gradient(180deg,#149068 0%,var(--green) 42%,var(--green-ink) 100%);
+  box-shadow:0 5px 0 #073D2C, 0 18px 30px -12px rgba(11,59,46,.55), inset 0 1px 0 rgba(255,255,255,.25);
+  transition:transform .12s var(--ease), box-shadow .12s var(--ease)}
+.fab .cta:hover{filter:brightness(1.05)}
+.fab .cta:active{transform:translateY(4px);box-shadow:0 1px 0 #073D2C, 0 10px 18px -10px rgba(11,59,46,.5), inset 0 1px 0 rgba(255,255,255,.25)}
+.fab .cta small{display:block;font-size:13.5px;font-weight:700;color:rgba(255,255,255,.92);margin-top:4px}
+.fab .cta .sb{display:inline-block;background:#fff;border-radius:7px;padding:3px 8px 2px;margin-left:6px;vertical-align:-4px}
+.fab .cta .sb img{height:14px;width:auto;display:block}
+.fab-gift{margin-top:8px;text-align:center;font-size:12.5px;font-weight:700;color:var(--gold-ink);line-height:1.4}
+/* ландшафт / маленькая высота: панель не должна съедать треть экрана */
+@media (max-height:480px){.fab{padding-top:8px}.fab .cta{padding:10px}.fab .cta small{display:none}.fab-gift{display:none}}
+@media print{.fab{position:static;background:none;padding:10px 0}.demo{display:none}body{padding-bottom:0}}
+@media (prefers-reduced-motion:reduce){*{transition-duration:.01ms !important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="demo"><span>ДЕМО · СОКРАЩЁННАЯ ВЕРСИЯ — НА СРАВНЕНИЕ С БОЕВОЙ</span></div>
+
+  <header class="hero">
+    <div class="brand">
+      <img class="brandlogo" src="img/logo-w.svg" alt="ДоНуля — списание долгов">
+    </div>
+    <h1>Ирина Сергеевна, ваш платёж теперь <em class="num">13 500 ₽/мес</em> — вместо 41 000 ₽</h1>
+    <p>Договор готов. Осталась оплата первого платежа — <b>она и подписывает договор</b>.</p>
+    <div class="hrow">
+      <div class="hc was">
+        <span>СЕЙЧАС ВЫ ПЛАТИТЕ</span>
+        <b class="num">41 000 ₽/мес</b>
+        <i>35 000 ₽ из них — проценты: долг не уменьшается</i>
+      </div>
+      <div class="hc will">
+        <span>ПО ДОГОВОРУ</span>
+        <b class="num">13 500 ₽/мес</b>
+        <i>14 месяцев — и долг 740 000 ₽ списан решением суда</i>
+      </div>
+    </div>
+    <p class="hfree">Каждый месяц у вас остаётся <b class="num">~27 500 ₽</b>, которые сейчас уходят банкам впустую.</p>
+    <div class="mgr">
+      <img class="ava" src="img/manager-face.jpg" alt="Виктория, менеджер">
+      <p><b>Виктория, ваш менеджер.</b> В договоре ровно то, что мы обсудили по телефону.
+        Вопросы — позвоните или напишите мне.</p>
+    </div>
+  </header>
+
+  <!-- Витрина договора — как на странице подписания (запрос владельца 10.08 «может так же договор показать»):
+       те же 6 карточек П.6.2/6.3/6.5/5.1 (номера пунктов и «7 дней» — сверить с текстом договора).
+       Отличие оферты: оплата = согласие, поэтому PDF-карточка говорит «оплата подтверждает». -->
+  <section class="offer">
+    <h2>Ирина Сергеевна, вот что вы получаете <em>по этому договору</em></h2>
+    <p class="osub">Главные условия — коротко. Полный текст — в PDF ниже.</p>
+    <div class="ogrid">
+      <div class="oc">
+        <span class="ot">ЧТО ДЕЛАЕМ</span>
+        <b>Спишем весь долг:<br>740 000 ₽</b>
+        <p>процедура списания долга по 127-ФЗ, ведём дело от заявления до решения суда</p>
+      </div>
+      <div class="oc">
+        <span class="ot">ГАРАНТИЯ РЕЗУЛЬТАТА · П. 6.2</span>
+        <b>Не спишем — вернём 100% денег</b>
+        <p>если суд не освободит вас от долгов, возвращаем всё оплаченное по договору</p>
+      </div>
+      <div class="oc">
+        <span class="ot">СКОРОСТЬ ВОЗВРАТА · П. 6.3</span>
+        <b>Возврат за 7 рабочих дней</b>
+        <p>по письменному требованию, без затяжек и уговоров</p>
+      </div>
+      <div class="oc">
+        <span class="ot">ЦЕНА ЗАФИКСИРОВАНА · П. 6.5</span>
+        <b>Стоимость не вырастет</b>
+        <p>мы не вправе поднять цену услуг в одностороннем порядке</p>
+      </div>
+      <div class="oc wide">
+        <span class="ot">ЧЕСТНО О ГОСПЛАТЕЖАХ · П. 5.1</span>
+        <b class="num">50 000 ₽ — отдельно</b>
+        <p>напрямую государству: депозит суда 25 000 + публикации 15 000 + почтовые 10 000. В цену услуг не входят</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="blk sched">
+    <h2>График платежей — Приложение № 1</h2>
+    <p class="quiet" style="margin-top:6px">Первый платёж — сегодня: <b>от 1 000 ₽ в зачёт</b>, остаток — в согласованную дату.</p>
+    <div class="strip" aria-label="14 платежей">
+      <span class="cell today"><i>1</i>сегодня</span>
+      <span class="cell"><i>2</i></span><span class="cell"><i>3</i></span><span class="cell"><i>4</i></span>
+      <span class="cell"><i>5</i></span><span class="cell"><i>6</i></span><span class="cell"><i>7</i></span>
+      <span class="cell"><i>8</i></span><span class="cell"><i>9</i></span><span class="cell"><i>10</i></span>
+      <span class="cell"><i>11</i></span><span class="cell"><i>12</i></span><span class="cell"><i>13</i></span>
+      <span class="cell last"><i>14</i></span>
+    </div>
+    <p class="stotal">13 500 ₽ × 14 = <b class="num">189 000 ₽ под ключ</b> — и ни рублём больше</p>
+    <a class="doc" href="dogovor-oferta.pdf" target="_blank" rel="noopener" style="border-top:none;border:1px solid var(--line);border-radius:var(--r-md);margin-top:12px">
+      <span class="doc-ic" aria-hidden="true">PDF</span>
+      <span class="doc-tx"><b>Договор-оферта № 482119-Д — полный текст</b>
+        <i>Проверьте карточки выше в полном тексте — оплата подтверждает согласие именно с этим документом.</i></span>
+      <span class="doc-btn">Открыть</span>
+    </a>
+  </section>
+
+  <!-- SIM-оффер отдельным громким блоком (правка владельца «надо чтобы прям усиливало»):
+       боль №1 — звонки; по закону они стихают после введения процедуры (недели), SIM даёт тишину СЕГОДНЯ.
+       Канон: подарок ЗА СТАРТ; 3 месяца — число владельца 30.07 (закрыло развилку «год vs 3 мес»);
+       первый платёж = бронь, выдача на Ozon; дедлайн честный от времени отправки, движок подставляет время. -->
+  <section class="sim">
+    <div class="sim-flex">
+      <div class="sim-tx">
+        <span class="sim-tag">🎁 ПОДАРОК ЗА СТАРТ СЕГОДНЯ</span>
+        <h2>Тишина от коллекторов — уже сегодня, а не через месяц</h2>
+        <p class="lead">По закону звонки прекращаются после того, как суд введёт процедуру. Но ждать не нужно:
+          за старт в течение часа дарим <b>SIM-карту ДоНуля</b> — новый чистый номер, которого нет
+          ни в одной базе коллекторов.</p>
+      </div>
+      <div class="simcard" aria-hidden="true"><i></i><span>ДоНуля</span></div>
+    </div>
+    <ul class="sim-feats">
+      <li><b>Телефон замолкает в день переезда на новый номер</b> — близкие и работа с вами, коллекторы в пустоту</li>
+      <li><b>3 месяца связи оплачены</b> — за наш счёт</li>
+      <li><b>Заберёте на Ozon</b> — доставка как обычного заказа</li>
+    </ul>
+    <p class="sim-dl">Подарок закрепляется первым платежом <b>до 15:32</b> — потом ссылка работает, а подарок сгорает.</p>
+  </section>
+
+  <!-- Блок «Одно действие» убран (решение владельца 30.07: механика «оплата = подпись» уже в шапке).
+       Вместо него — блок защиты. Роспатент: формулировка «под защитой государства» (не «от государства»);
+       в бою подставить реальный № свидетельства о регистрации товарного знака.
+       Сбер-бейдж — только при действующем договоре эквайринга; «Сбер гарантирует» писать нельзя.
+       Сумма единственной плавающей кнопки приходит из Обнулятора (1 000 дефолт / 13 500 если согласован месяц). -->
+  <section class="blk trust">
+    <h2>Всё официально</h2>
+    <div class="tr ros">
+      <span class="ros-badge"><img class="ros-lg" src="img/rospatent.png" alt="Роспатент"><i>РОСПАТЕНТ</i></span>
+      <p><b>Бренд «ДоНуля» зарегистрирован в Роспатенте</b> — товарный знак под защитой государства.</p>
+    </div>
+    <div class="tr bank">
+      <img class="bank-lg" src="img/sber-logo.png" alt="Сбер">
+      <p><b>Платёж — на счёт ООО «ДоНуля» в Сбере:</b> СберPay, СБП или карта. Чек ФНС придёт по СМС.</p>
+    </div>
+    <p class="quiet">Прожиточный минимум и единственное жильё (без ипотеки) защищены законом.
+      Передумали — вернём платёж. Оплачивая, вы принимаете условия договора-оферты (полный текст выше);
+      договор и цена действительны <b>3 дня</b>.</p>
+  </section>
+
+
+  <!-- кнопки «Набрать/Написать/Полная презентация» убраны (решение владельца 30.07:
+       страница только закрывает — договор и оплата); контакт Дарьи остаётся в её карточке в шапке -->
+
+  <!-- Экран после оплаты: в бою — thank-you страница по редиректу движка после вебхука.
+       Ссылки магазинов — заглушки, подставить реальные RuStore/App Store. -->
+  <section class="paid" id="paidScreen" aria-live="polite">
+    <div class="pd-check" aria-hidden="true">✓</div>
+    <h2>Оплата получена</h2>
+    <p class="pd-sub">Этот платёж и подписал договор — он вступил в силу. <b>Виктория уже видит оплату</b> и позвонит вам сегодня.</p>
+    <div class="pd-app">
+      <div class="pd-app-h">Дальше — в приложении <em>ДоНуля</em></div>
+      <ul class="pd-feats">
+        <li><b>Статус вашего дела</b> — виден на каждом шаге, от заявления до решения суда</li>
+        <li><b>Договор и документы</b> — всегда под рукой</li>
+        <li><b>Быстрая связь с нами</b> — вопросы решаются в чате, не по звонку</li>
+      </ul>
+      <div class="stores">
+        <a class="store" href="#" rel="noopener"><span class="st-ic ru" aria-hidden="true">R</span><span><small>Скачать из</small><b>RuStore</b></span></a>
+        <a class="store" href="#" rel="noopener"><span class="st-ic" aria-hidden="true"><svg viewBox="0 0 384 512" width="20" height="24" fill="currentColor" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg></span><span><small>Скачать в</small><b>App Store</b></span></a>
+      </div>
+      <p class="pd-note">Приложение бесплатное. RuStore — для Android, App Store — для iPhone.
+        Ссылки ведут в официальные магазины.</p>
+    </div>
+  </section>
+
+  <p class="foot">ООО «ДоНуля» · ИНН · ОГРН · работаем с 2015 года · 127-ФЗ «О несостоятельности (банкротстве)»<br>
+    Макет оферта-страницы. Запуск — после оферта-версии договора от юриста.
+    В бою страница полностью формируется из Обнулятора: цифры клиента, договор, менеджер и юрист — из пульта сделки.</p>
+</div>
+
+<div class="fab">
+  <div class="fab-in">
+    <button class="cta" type="button" id="fabBtn"></button>
+    <p class="fab-gift">🎁 До 15:32 — SIM в подарок: тишина от коллекторов уже сегодня</p>
+  </div>
+</div>
+
+<script>
+/* Кнопка в двух режимах: пока условия договора не показаны — зовёт к ним,
+   после показа — становится платёжной. «Плати» до единого условия у тревожной
+   аудитории читается давлением (бэклог №7, docs/presentation-lite-improvements). */
+(function () {
+  var btn = document.getElementById('fabBtn');
+  var terms = document.querySelector('.offer');
+  var mode = 'terms';
+
+  function setPay() {
+    mode = 'pay';
+    btn.innerHTML = 'Оплатить первый платёж <span class="num" style="white-space:nowrap">1 000 ₽</span>' +
+      '<small>на счёт в <span class="sb"><img src="img/sber-logo.png" alt="Сбер"></span></small>';
+  }
+  function setTerms() {
+    mode = 'terms';
+    btn.innerHTML = 'Посмотреть договор ↓<small>главные условия, график и полный текст</small>';
+  }
+
+  btn.addEventListener('click', function () {
+    if (mode === 'terms') { terms.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    /* в бою здесь открывается оплата СБП/картой, а на экран «оплата получена»
+       клиента приводит редирект после вебхука; в макете показываем его сразу */
+    document.body.classList.add('paid-mode');
+    window.scrollTo(0, 0);
+  });
+
+  /* проверка по скроллу, не IntersectionObserver: IO не стреляет в фоновых вкладках
+     и флакает во встроенных браузерах мессенджеров, где страницу и будут открывать */
+  function check() {
+    if (mode === 'pay') return;
+    if (terms.getBoundingClientRect().top < innerHeight * 0.75) {
+      setPay();
+      window.removeEventListener('scroll', check);
+    }
+  }
+  setTerms();
+  window.addEventListener('scroll', check, { passive: true });
+  window.addEventListener('resize', check, { passive: true });
+  check();
+})();
+</script>
+</body>
+</html>
