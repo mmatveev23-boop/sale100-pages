@@ -65,6 +65,27 @@ p{text-wrap:pretty}
 .hfree{margin-top:11px;font-size:14.5px;color:rgba(255,255,255,.85)}
 .hfree b{color:var(--gold-bright);white-space:nowrap}
 .oc.wide{grid-column:1/-1}
+/* график «сейчас → с нами» — как в РДГ-версии */
+.pillnote{margin-top:8px;display:inline-block;font-size:12px;font-weight:700;color:var(--muted);background:var(--card2);border:1px solid var(--line2);border-radius:999px;padding:5px 11px}
+.chartrow{display:flex;gap:14px;margin-top:14px;align-items:stretch}
+.bars{flex:1;display:flex;gap:18px;align-items:flex-end;justify-content:center;padding:6px 4px 0}
+.barcol{display:flex;flex-direction:column;align-items:center;gap:5px}
+.barcol .blbl{font-size:10px;font-weight:800;letter-spacing:.08em}
+.barcol .bval{font-size:14.5px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.barcol .bar{width:52px;border-radius:8px 8px 4px 4px}
+.barcol.c-was .blbl,.barcol.c-was .bval{color:var(--brick-ink)}
+.barcol.c-was .bar{background:linear-gradient(180deg,#C9573E,var(--brick))}
+.barcol.c-will .blbl,.barcol.c-will .bval{color:var(--green-ink)}
+.barcol.c-will .bar{background:linear-gradient(180deg,#149068,var(--green-ink))}
+.eco{flex:1;background:var(--green-soft);border:1px solid #CFE2D5;border-radius:var(--r-md);padding:13px 14px}
+.eco span{display:block;font-size:10px;font-weight:800;letter-spacing:.09em;color:var(--green-ink)}
+.eco b{display:block;font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--green-ink);margin-top:4px;white-space:nowrap}
+.eco i{display:block;font-style:normal;font-size:12.5px;color:var(--green-ink);margin-top:1px}
+.eco p{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.45;border-top:1px solid #CFE2D5;padding-top:8px}
+.ecoTotal{margin-top:12px;font-size:14px;line-height:1.5;background:var(--gold-soft);border:1px solid var(--gold);border-radius:var(--r-md);padding:11px 13px}
+.ecoTotal b{color:var(--gold-ink);white-space:nowrap}
+.ecoTotal .r{color:var(--brick-ink)}
+@media (max-width:470px){.chartrow{flex-direction:column}.bars{padding-top:2px}}
 
 /* карточки-блоки */
 .blk{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);padding:18px}
@@ -224,23 +245,30 @@ body.paid-mode .fab{display:none}
       <img class="brandlogo" src="img/logo-w.svg" alt="ДоНуля — списание долгов">
     </div>
     <h1>Ирина Сергеевна, ваша выгода — <em class="num">~501 000 ₽</em></h1>
-    <div class="hrow">
-      <div class="hc was">
-        <span>СЕЙЧАС ВЫ ПЛАТИТЕ</span>
-        <b class="num">41 000 ₽/мес</b>
-        <i>35 000 ₽ из них — проценты: долг не уменьшается</i>
-      </div>
-      <div class="hc will">
-        <span>ПО ДОГОВОРУ</span>
-        <b class="num">13 500 ₽/мес</b>
-        <i>14 месяцев — и долг 740 000 ₽ списан решением суда</i>
-      </div>
-    </div>
+    <p>Долг спишется целиком — решением суда по 127-ФЗ.</p>
     <div class="mgr">
       <img class="ava" src="img/manager-face.jpg" alt="Виктория, менеджер">
       <p><b>Виктория, ваш менеджер.</b> В договоре — ровно то, что обсудили по телефону.</p>
     </div>
   </header>
+
+  <section class="blk">
+    <h2>Платёж снизится втрое</h2>
+    <span class="pillnote">✏️ Предварительный расчёт со слов — уточним по кредитной истории</span>
+    <div class="chartrow">
+      <div class="bars" aria-label="Сравнение платежа">
+        <div class="barcol c-was"><span class="blbl">СЕЙЧАС</span><b class="bval num">~41 000 ₽</b><div class="bar" style="height:118px"></div></div>
+        <div class="barcol c-will"><span class="blbl">С НАМИ</span><b class="bval num">13 500 ₽</b><div class="bar" style="height:39px"></div></div>
+      </div>
+      <div class="eco">
+        <span>ВЫ ЭКОНОМИТЕ</span>
+        <b class="num">~27 500 ₽</b>
+        <i>каждый месяц</i>
+        <p>С началом процедуры платежи банкам остановлены (ст. 213.4). «С нами» — рассрочка услуг ДоНуля: 13 500 ₽/мес, 14 месяцев.</p>
+      </div>
+    </div>
+    <p class="ecoTotal">Всего отдадите <b class="num">~239 000 ₽</b> вместо долга <b class="r num">740 000 ₽</b> — выгода <b class="num">~501 000 ₽</b></p>
+  </section>
 
   <!-- Витрина договора — как на странице подписания (запрос владельца 10.08 «может так же договор показать»):
        те же 6 карточек П.6.2/6.3/6.5/5.1 (номера пунктов и «7 дней» — сверить с текстом договора).
